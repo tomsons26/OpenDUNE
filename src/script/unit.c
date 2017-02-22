@@ -1173,7 +1173,7 @@ static void Optimize_Moves(PathType *data)
  * @param directionStart The direction to start looking at.
  * @return True if a route was found.
  */
-static bool Find_Path_Connect(uint16 packedDst, PathType *data, int8 searchDirection, uint8 directionStart)
+static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, uint8 directionStart)
 {
 	uint16 packedNext;
 	uint16 packedCur;
@@ -1292,13 +1292,13 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 				routes[1].score     = 0;
 				routes[1].routeSize = 0;
 				routes[1].buffer    = routesBuffer[0];
-				foundCounterclockwise = Find_Path_Connect(packedNext, &routes[1], -1, direction);
+				foundCounterclockwise = Follow_Edge(packedNext, &routes[1], -1, direction);
 
 				routes[0].packed    = packedCur;
 				routes[0].score     = 0;
 				routes[0].routeSize = 0;
 				routes[0].buffer    = routesBuffer[1];
-				foundClockwise = Find_Path_Connect(packedNext, &routes[0], 1, direction);
+				foundClockwise = Follow_Edge(packedNext, &routes[0], 1, direction);
 
 				if (foundCounterclockwise || foundClockwise) break;
 
