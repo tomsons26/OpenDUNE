@@ -395,12 +395,12 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				break;
 
 			case 1:
-				frameCount = WSA_GetFrameCount(wsa);
+				frameCount = Animate_Frame_Count(wsa);
 				timeLeftForFrame = timeLeft / animation->frameCount;
 				break;
 
 			case 2:
-				frameCount = WSA_GetFrameCount(wsa) - addFrameCount;
+				frameCount = Animate_Frame_Count(wsa) - addFrameCount;
 				timeLeftForFrame = timeLeft / frameCount;
 				timeout -= timeLeftForFrame;
 				break;
