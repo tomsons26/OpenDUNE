@@ -1044,7 +1044,7 @@ A***######   B
  * @param direction The direction we move on this tile.
  * @return 256 if tile is not accessable, or a score for entering otherwise.
  */
-static int16 Script_Unit_Pathfind_GetScore(uint16 packed, uint8 orient8)
+static int16 Passable_Cell(uint16 packed, uint8 orient8)
 {
 	int16 res;
 	Unit *u;
@@ -1119,7 +1119,7 @@ static void Optimize_Moves(PathType *data)
 
 				/* If we go 45 degrees with 90 degree difference, we can also go straight */
 				if (abs(direction) == 1) {
-					if (Script_Unit_Pathfind_GetScore(packed + AdjacentCell[dir], dir) <= 255) {
+					if (Passable_Cell(packed + AdjacentCell[dir], dir) <= 255) {
 						*bufferTo = dir;
 						*bufferFrom = dir;
 					}
@@ -1156,7 +1156,7 @@ static void Optimize_Moves(PathType *data)
 		if (*bufferTo == 0xFE) continue;
 
 		packed += AdjacentCell[*bufferTo];
-		data->score += Script_Unit_Pathfind_GetScore(packed, *bufferTo);
+		data->score += Passable_Cell(packed, *bufferTo);
 		data->routeSize++;
 		*bufferFrom++ = *bufferTo;
 	}
@@ -1202,7 +1202,7 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 
 				/* See if the tile next to us is a valid position */
 				packedNext = packedCur + AdjacentCell[direction];
-				if (Script_Unit_Pathfind_GetScore(packedNext, direction) <= 255) break;
+				if (Passable_Cell(packedNext, direction) <= 255) break;
 			}
 		}
 
@@ -1266,7 +1266,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 		packedNext = packedCur + AdjacentCell[direction];
 
 		/* Check for valid movement towards the tile */
-		score = Script_Unit_Pathfind_GetScore(packedNext, direction);
+		score = Passable_Cell(packedNext, direction);
 		if (score <= 255) {
 			res.buffer[res.routeSize++] = direction;
 			res.score += score;
@@ -1285,7 +1285,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 				/* Find the first valid tile on the (direct) route. */
 				dir = Tile_GetDirectionPacked(packedNext, packedDst) / 32;
 				packedNext += AdjacentCell[dir];
-				if (Script_Unit_Pathfind_GetScore(packedNext, dir) > 255) continue;
+				if (Passable_Cell(packedNext, dir) > 255) continue;
 
 				/* Try to find a connection between our last valid tile and the new valid tile */
 				routes[1].packed    = packedCur;
@@ -1307,7 +1307,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 
 					dir = Tile_GetDirectionPacked(packedNext, packedDst) / 32;
 					packedNext += AdjacentCell[dir];
-				} while (Script_Unit_Pathfind_GetScore(packedNext, dir) <= 255);
+				} while (Passable_Cell(packedNext, dir) <= 255);
 			}
 
 			if (foundCounterclockwise || foundClockwise) {
