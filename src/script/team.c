@@ -209,7 +209,7 @@ uint16 Script_Team_Unknown0543(ScriptEngine *script)
 
 	while (true) {
 		Unit *u;
-		tile32 tile;
+		CellStruct tile;
 		uint16 distanceUnitDest;
 		uint16 distanceUnitTeam;
 		uint16 distanceTeamDest;
@@ -350,7 +350,7 @@ uint16 Script_Team_Load2(ScriptEngine *script)
 uint16 Script_Team_Unknown0788(ScriptEngine *script)
 {
 	Team *t;
-	tile32 tile;
+	CellStruct tile;
 	PoolFindStruct find;
 
 	VARIABLE_NOT_USED(script);

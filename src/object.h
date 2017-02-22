@@ -44,7 +44,7 @@ typedef struct Object {
 	ObjectFlags flags;                                      /*!< General flags of the Structure/Unit. */
 	uint8  houseID;                                         /*!< House of Structure. */
 	uint8  seenByHouses;                                    /*!< Bitmask of which houses have seen this object. */
-	tile32 position;                                        /*!< Position on the map. */
+	CellStruct position;                                        /*!< Position on the map. */
 	uint16 hitpoints;                                       /*!< Current hitpoints left. */
 	ScriptEngine script;                                    /*!< The script engine instance of this Structure. */
 } Object;

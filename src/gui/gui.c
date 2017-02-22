@@ -3181,7 +3181,7 @@ static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 			if (region != 0) {
 				char buffer[81];
 
-				sprintf(key, "%sTXT%d", g_languageSuffixes[g_config.language], region);
+				sprintf(key, "%sTXT%d", g_languageSuffixes[g_config.Language], region);
 
 				if (Ini_GetString(category, key, NULL, buffer, sizeof(buffer), g_fileRegionINI) != NULL) {
 					GUI_StrategicMap_DrawText(buffer);
@@ -3256,7 +3256,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	GUI_Screen_Copy(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
 	GUI_Screen_Copy(x, y, 33, 152, 7, 40, SCREEN_2, SCREEN_2);
 
-	switch (g_config.language) {
+	switch (g_config.Language) {
 		case LANGUAGE_GERMAN:
 			GUI_Screen_Copy(1, 120, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
 			break;
@@ -4322,7 +4322,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 		if (data[i].score == 0) break;
 
-		if (g_config.language == LANGUAGE_FRENCH) {
+		if (g_config.Language == LANGUAGE_FRENCH) {
 			p1 = String_Get_ByIndex(_rankScores[data[i].rank].rankString);
 			p2 = g_table_houseInfo[data[i].houseID].name;
 		} else {

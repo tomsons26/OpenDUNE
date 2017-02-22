@@ -49,7 +49,7 @@ uint16 Script_Unit_RandomSoldier(ScriptEngine *script)
 {
 	Unit *u;
 	Unit *nu;
-	tile32 position;
+	CellStruct position;
 
 	u = g_scriptCurrentUnit;
 
@@ -428,7 +428,7 @@ uint16 Script_Unit_MoveToTarget(ScriptEngine *script)
 {
 	Unit *u;
 	uint16 delay;
-	tile32 tile;
+	CellStruct tile;
 	uint16 distance;
 	int8 orientation;
 	int16 diff;
@@ -729,7 +729,7 @@ uint16 Script_Unit_Rotate(ScriptEngine *script)
 	Unit *u;
 	uint16 index;
 	int8 current;
-	tile32 tile;
+	CellStruct tile;
 	int8 orientation;
 
 	VARIABLE_NOT_USED(script);
@@ -775,7 +775,7 @@ uint16 Script_Unit_GetOrientation(ScriptEngine *script)
 	encoded = STACK_PEEK(1);
 
 	if (Tools_Index_IsValid(encoded)) {
-		tile32 tile;
+		CellStruct tile;
 
 		tile = Tools_Index_GetTile(encoded);
 
@@ -835,7 +835,7 @@ uint16 Script_Unit_SetTarget(ScriptEngine *script)
 {
 	Unit *u;
 	uint16 target;
-	tile32 tile;
+	CellStruct tile;
 	int8 orientation;
 
 	u = g_scriptCurrentUnit;
@@ -1601,7 +1601,7 @@ uint16 Script_Unit_DisplayDestroyedText(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 	ui = &g_table_unitInfo[u->o.type];
 
-	if (g_config.language == LANGUAGE_FRENCH) {
+	if (g_config.Language == LANGUAGE_FRENCH) {
 		GUI_DisplayText(String_Get_ByIndex(STR_S_S_DESTROYED), 0, String_Get_ByIndex(ui->o.stringID_abbrev), g_table_houseInfo[Unit_GetHouseID(u)].name);
 	} else {
 		GUI_DisplayText(String_Get_ByIndex(STR_S_S_DESTROYED), 0, g_table_houseInfo[Unit_GetHouseID(u)].name, String_Get_ByIndex(ui->o.stringID_abbrev));
@@ -1726,7 +1726,7 @@ uint16 Script_Unit_IsValidDestination(ScriptEngine *script)
 uint16 Script_Unit_GetRandomTile(ScriptEngine *script)
 {
 	Unit *u;
-	tile32 tile;
+	CellStruct tile;
 
 	u = g_scriptCurrentUnit;
 

@@ -7,20 +7,20 @@ MSVC_PACKED_BEGIN
 /**
  * This is the layout of decoded dune.cfg.
  */
-typedef struct DuneCfg {
-	/* 0000(1)   */ PACK uint8  graphicDrv;                 /*!< Graphic mode to use. */
-	/* 0001(1)   */ PACK uint8  musicDrv;                   /*!< Index into music drivers array. */
-	/* 0002(1)   */ PACK uint8  soundDrv;                   /*!< Index into sound drivers array. */
-	/* 0003(1)   */ PACK uint8  voiceDrv;                   /*!< Index into digitized sound drivers array. */
-	/* 0004(1)   */ PACK bool   useMouse;                   /*!< Use Mouse. */
-	/* 0005(1)   */ PACK bool   useXMS;                     /*!< Use Extended Memory. */
-	/* 0006(1)   */ PACK uint8  variable_0006;              /*!< ?? */
-	/* 0007(1)   */ PACK uint8  variable_0007;              /*!< ?? */
-	/* 0008(1)   */ PACK uint8  language;                   /*!< @see Language. */
-	/* 0009(1)   */ PACK uint8  checksum;                   /*!< Used to check validity on config data. See Config_Read(). */
-} GCC_PACKED DuneCfg;
+typedef struct ConfigType {
+	/* 0000(1)   */ PACK uint8  VideoMode;                  /*!< Graphic mode to use. */
+	/* 0001(1)   */ PACK uint8  MusicCard;                  /*!< Index into music drivers array. */
+	/* 0002(1)   */ PACK uint8  SoundCard;                  /*!< Index into sound drivers array. */
+	/* 0003(1)   */ PACK uint8  DigitCard;                  /*!< Index into digitized sound drivers array. */
+	/* 0004(1)   */ PACK bool   UseMouse;                   /*!< Use Mouse. */
+	/* 0005(1)   */ PACK bool   UseXMS;                     /*!< Use Extended Memory. */
+	/* 0006(1)   */ PACK uint8  UseHMA;                     /*!< ?? */
+	/* 0007(1)   */ PACK uint8  UseEMS;                     /*!< ?? */
+	/* 0008(1)   */ PACK uint8  Language;                   /*!< @see Language. */
+	/* 0009(1)   */ PACK uint8  CheckSum;                   /*!< Used to check validity on config data. See Config_Read(). */
+} GCC_PACKED ConfigType;
 MSVC_PACKED_END
-assert_compile(sizeof(DuneCfg) == 0xA);
+assert_compile(sizeof(ConfigType) == 0xA);
 
 /**
  * This is the layout of options.cfg.
@@ -34,14 +34,14 @@ typedef struct GameCfg {
 } GameCfg;
 
 extern GameCfg g_gameConfig;
-extern DuneCfg g_config;
+extern ConfigType g_config;
 
 extern bool g_enableSoundMusic;
 extern bool g_enableVoices;
 
-extern bool Config_Read(const char *filename, DuneCfg *config);
-extern bool Config_Write(const char *filename, DuneCfg *config);
-extern bool Config_Default(DuneCfg *config);
+extern bool Config_Read(const char *filename, ConfigType *config);
+extern bool Config_Write(const char *filename, ConfigType *config);
+extern bool Config_Default(ConfigType *config);
 extern bool GameOptions_Load(void);
 extern void GameOptions_Save(void);
 

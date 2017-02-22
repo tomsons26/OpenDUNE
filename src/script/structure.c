@@ -236,7 +236,7 @@ uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
  */
 uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 {
-	tile32 tile;
+	CellStruct tile;
 	Structure *s;
 	Unit *u;
 	uint16 position;
@@ -307,7 +307,7 @@ uint16 Script_Structure_FindTargetUnit(ScriptEngine *script)
 	Unit *u;
 	uint32 distanceCurrent;
 	uint32 targetRange;
-	tile32 position;
+	CellStruct position;
 
 	s = g_scriptCurrentStructure;
 	targetRange = STACK_PEEK(1);
@@ -375,7 +375,7 @@ uint16 Script_Structure_FindTargetUnit(ScriptEngine *script)
 uint16 Script_Structure_RotateTurret(ScriptEngine *script)
 {
 	Structure *s;
-	tile32 lookAt;
+	CellStruct lookAt;
 	Tile *tile;
 	uint16 baseSpriteID;
 	uint16 encoded;
@@ -440,7 +440,7 @@ uint16 Script_Structure_RotateTurret(ScriptEngine *script)
 uint16 Script_Structure_GetDirection(ScriptEngine *script)
 {
 	Structure *s;
-	tile32 tile;
+	CellStruct tile;
 	uint16 encoded;
 
 	s = g_scriptCurrentStructure;
@@ -514,7 +514,7 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
 {
 	Structure *s;
 	Unit *u;
-	tile32 position;
+	CellStruct position;
 	uint16 target;
 	uint16 damage;
 	uint16 fireDelay;
@@ -568,7 +568,7 @@ uint16 Script_Structure_Explode(ScriptEngine *script)
 	position = Tile_PackTile(s->o.position);
 
 	for (i = 0; i < g_table_structure_layoutTileCount[layout]; i++) {
-		tile32 tile;
+		CellStruct tile;
 
 		tile = Tile_UnpackTile(position + g_table_structure_layoutTiles[layout][i]);
 
@@ -602,7 +602,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 	Structure_Remove(s);
 
 	for (i = 0; i < g_table_structure_layoutTileCount[layout]; i++) {
-		tile32 tile;
+		CellStruct tile;
 		Unit *u;
 
 		tile = Tile_UnpackTile(position + g_table_structure_layoutTiles[layout][i]);
@@ -629,7 +629,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 	if (g_debugScenario) return 0;
 	if (s->o.houseID != g_playerHouseID) return 0;
 
-	if (g_config.language == LANGUAGE_FRENCH) {
+	if (g_config.Language == LANGUAGE_FRENCH) {
 		GUI_DisplayText("%s %s %s", 0, String_Get_ByIndex(g_table_structureInfo[s->o.type].o.stringID_full), g_table_houseInfo[s->o.houseID].name, String_Get_ByIndex(STR_IS_DESTROYED));
 	} else {
 		GUI_DisplayText("%s %s %s", 0, g_table_houseInfo[s->o.houseID].name, String_Get_ByIndex(g_table_structureInfo[s->o.type].o.stringID_full), String_Get_ByIndex(STR_IS_DESTROYED));

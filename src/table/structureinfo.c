@@ -1280,7 +1280,7 @@ const uint16 g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX] = {
 };
 
 /** Array with TileDiff of a layout. */
-const tile32 g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX] = {
+const CellStruct g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX] = {
 	{0x0080, 0x0080}, /* STRUCTURE_LAYOUT_1x1 */
 	{0x0100, 0x0080}, /* STRUCTURE_LAYOUT_2x1 */
 	{0x0080, 0x0100}, /* STRUCTURE_LAYOUT_1x2 */

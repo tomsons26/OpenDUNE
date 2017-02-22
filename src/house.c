@@ -157,7 +157,7 @@ void GameLoop_House(void)
 			}
 
 			if (deployed && g_scenario.reinforcement[i].repeat != 0) {
-				tile32 tile;
+				CellStruct tile;
 				tile.x = 0xFFFF;
 				tile.y = 0xFFFF;
 

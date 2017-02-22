@@ -279,7 +279,7 @@ void Explosion_Init(void)
  * @param explosionType Type of Explosion.
  * @param position The position to use for init.
  */
-void Explosion_Start(uint16 explosionType, tile32 position)
+void Explosion_Start(uint16 explosionType, CellStruct position)
 {
 	const ExplosionCommandStruct *commands;
 	uint16 packed;

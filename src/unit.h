@@ -140,7 +140,7 @@ typedef struct dir24 {
  */
 typedef struct Unit {
 	Object o;                                               /*!< Common to Unit and Structures. */
-	tile32 currentDestination;                              /*!< Where the Unit is currently going to. */
+	CellStruct currentDestination;                              /*!< Where the Unit is currently going to. */
 	uint16 originEncoded;                                   /*!< Encoded index, indicating the origin. */
 	uint8  actionID;                                        /*!< Current action. */
 	uint8  nextActionID;                                    /*!< Next action. */
@@ -154,8 +154,8 @@ typedef struct Unit {
 	                                                         */
 	uint8  deviated;                                        /*!< Strength of deviation. Zero if unit is not deviated. */
 	uint8  deviatedHouse;                                   /*!< Which house it is deviated to. Only valid if 'deviated' is non-zero. */
-	tile32 targetLast;                                      /*!< The last position of the Unit. Carry-alls will return the Unit here. */
-	tile32 targetPreLast;                                   /*!< The position before the last position of the Unit. */
+	CellStruct targetLast;                                      /*!< The last position of the Unit. Carry-alls will return the Unit here. */
+	CellStruct targetPreLast;                                   /*!< The position before the last position of the Unit. */
 	dir24  orientation[2];                                  /*!< Orientation of the unit. [0] = base, [1] = top (turret, etc). */
 	uint8  speedPerTick;                                    /*!< Every tick this amount is added; if over 255 Unit is moved. */
 	uint8  speedRemainder;                                  /*!< Remainder of speedPerTick. */
@@ -243,7 +243,7 @@ extern uint8 Unit_GetHouseID(Unit *u);
 extern uint8 Unit_StringToType(const char *name);
 extern uint8 Unit_ActionStringToType(const char *name);
 extern uint8 Unit_MovementStringToType(const char *name);
-extern struct Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, int8 orientation);
+extern struct Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position, int8 orientation);
 extern bool Unit_IsTypeOnMap(uint8 houseID, uint8 typeID);
 extern void Unit_SetAction(Unit *u, ActionType action);
 extern uint16 Unit_AddToTeam(Unit *u, struct Team *t);
@@ -254,7 +254,7 @@ extern Unit *Unit_Get_ByPackedTile(uint16 packed);
 extern uint16 Unit_IsValidMovementIntoStructure(Unit *unit, struct Structure *s);
 extern void Unit_SetDestination(Unit *u, uint16 destination);
 extern uint16 Unit_FindClosestRefinery(Unit *unit);
-extern bool Unit_SetPosition(Unit *u, tile32 position);
+extern bool Unit_SetPosition(Unit *u, CellStruct position);
 extern void Unit_Remove(Unit *u);
 extern bool Unit_StartMovement(Unit *unit);
 extern void Unit_SetTarget(Unit* unit, uint16 encoded);
@@ -270,7 +270,7 @@ extern Unit *Unit_CreateWrapper(uint8 houseID, UnitType type, uint16 location);
 extern uint16 Unit_FindTargetAround(uint16 packed);
 extern bool Unit_IsTileOccupied(Unit *unit);
 extern void Unit_SetSpeed(Unit *unit, uint16 speed);
-extern Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 damage, uint16 target);
+extern Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint16 damage, uint16 target);
 extern void Unit_DisplayStatusText(Unit *unit);
 extern void Unit_Hide(Unit *unit);
 extern Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool createCarryall);

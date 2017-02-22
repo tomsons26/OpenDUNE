@@ -62,7 +62,7 @@ typedef enum StructureFlag {
 } StructureFlag;
 
 /** Available structure layouts. */
-typedef enum StructureLayout {
+typedef enum BSizeType {
 	STRUCTURE_LAYOUT_1x1 = 0,
 	STRUCTURE_LAYOUT_2x1 = 1,
 	STRUCTURE_LAYOUT_1x2 = 2,
@@ -72,16 +72,16 @@ typedef enum StructureLayout {
 	STRUCTURE_LAYOUT_3x3 = 6,
 
 	STRUCTURE_LAYOUT_MAX = 7
-} StructureLayout;
+} BSizeType;
 
 /** States a structure can be in */
-typedef enum StructureState {
+typedef enum BStateType {
 	STRUCTURE_STATE_DETECT    = -2,                        /*!< Used when setting state, meaning to detect which state it has by looking at other properties. */
 	STRUCTURE_STATE_JUSTBUILT = -1,                        /*!< This shows you the building animation etc. */
 	STRUCTURE_STATE_IDLE      = 0,                         /*!< Structure is doing nothing. */
 	STRUCTURE_STATE_BUSY      = 1,                         /*!< Structure is busy (harvester in refinery, unit in repair, .. */
 	STRUCTURE_STATE_READY     = 2                          /*!< Structure is ready and unit will be deployed soon. */
-} StructureState;
+} BStateType;
 
 /**
  * A Structure as stored in the memory.
@@ -95,7 +95,7 @@ typedef struct Structure {
 	uint8  upgradeTimeLeft;                                 /*!< Time left before upgrade is complete, or 0 if no upgrade available. */
 	uint16 countDown;                                       /*!< General countdown for various of functions. */
 	uint16 buildCostRemainder;                              /*!< The remainder of the buildCost for next tick. */
-	 int16 state;                                           /*!< The state of the structure. @see StructureState. */
+	 int16 state;                                           /*!< The state of the structure. @see BStateType. */
 	uint16 hitpointsMax;                                    /*!< Max amount of hitpoints. */
 }  Structure;
 
@@ -127,7 +127,7 @@ extern StructureInfo g_table_structureInfo[STRUCTURE_MAX];
 extern const uint16  g_table_structure_layoutTiles[STRUCTURE_LAYOUT_MAX][9];
 extern const uint16  g_table_structure_layoutEdgeTiles[STRUCTURE_LAYOUT_MAX][8];
 extern const uint16  g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX];
-extern const tile32  g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX];
+extern const CellStruct  g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX];
 extern const XYSize  g_table_structure_layoutSize[STRUCTURE_LAYOUT_MAX];
 extern const int16   g_table_structure_layoutTilesAround[STRUCTURE_LAYOUT_MAX][16];
 

@@ -1,3 +1,20 @@
+---------------------------------------------------------------------------
+
+Purpose of this fork is to map symbol dumps i have gathered that
+Westwood accidentally released publically with various games over the time
+to the actual functions for reference for a currently unreleased project.
+
+I have the Dune 2 exe mapped to what i know, maybe i can only find some
+matching code, depends on how much it was changed in OpenDune.
+
+Too bad there are no references from what part of the exe each function came
+from. Well, we'll see how it goes.
+
+Eventually i might restructure everything i have info on to how it was in
+Westwoods sources with the function and filenames where possible.
+
+---------------------------------------------------------------------------
+
 About
 -----
 OpenDUNE is an open source re-creation of the popular game "Dune II",

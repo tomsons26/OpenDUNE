@@ -13,7 +13,7 @@
 #include "string.h"
 
 GameCfg g_gameConfig = { 1, 1, 2, 1, 0 };
-DuneCfg g_config;
+ConfigType g_config;
 bool g_enableSoundMusic = true;
 bool g_enableVoices = true;
 
@@ -24,7 +24,7 @@ bool g_enableVoices = true;
  * @param config The address where the config will be stored.
  * @return True if loading and decoding is successful.
  */
-bool Config_Read(const char *filename, DuneCfg *config)
+bool Config_Read(const char *filename, ConfigType *config)
 {
 	FILE *f;
 	size_t read;
@@ -35,10 +35,10 @@ bool Config_Read(const char *filename, DuneCfg *config)
 	f = fopendatadir(SEARCHDIR_PERSONAL_DATA_DIR, filename, "rb");
 	if (f == NULL) return false;
 
-	read = fread(config, 1, sizeof(DuneCfg), f);
+	read = fread(config, 1, sizeof(ConfigType), f);
 	fclose(f);
 
-	if (read != sizeof(DuneCfg)) return false;
+	if (read != sizeof(ConfigType)) return false;
 
 	sum = 0;
 
@@ -50,7 +50,7 @@ bool Config_Read(const char *filename, DuneCfg *config)
 
 	sum ^= 0xA5;
 
-	return (sum == config->checksum);
+	return (sum == config->CheckSum);
 }
 
 /**
@@ -60,11 +60,11 @@ bool Config_Read(const char *filename, DuneCfg *config)
  * @param config The address where the config will be read.
  * @return True if successful.
  */
-bool Config_Write(const char * filename, DuneCfg *config)
+bool Config_Write(const char * filename, ConfigType *config)
 {
 	FILE *f;
 	size_t write;
-	uint8 coded[sizeof(DuneCfg)];
+	uint8 coded[sizeof(ConfigType)];
 	uint8 sum;
 	uint8 *c1, *c2;
 	int8 i;
@@ -81,26 +81,26 @@ bool Config_Write(const char * filename, DuneCfg *config)
 	*c2++ = *c1++;
 	sum ^= 0xA5;
 	*c2 = sum;
-	write = fwrite(coded, 1, sizeof(DuneCfg), f);
+	write = fwrite(coded, 1, sizeof(ConfigType), f);
 	fclose(f);
-	return (write == sizeof(DuneCfg));
+	return (write == sizeof(ConfigType));
 }
 
 /**
  * Set a default config
  */
-bool Config_Default(DuneCfg *config)
+bool Config_Default(ConfigType *config)
 {
 	if (config == NULL) return false;
 
-	memset(config, 0, sizeof(DuneCfg));
-	config->graphicDrv = 1;
-	config->musicDrv = 1;
-	config->soundDrv = 1;
-	config->voiceDrv = 1;
-	config->useMouse = 1;
-	config->useXMS = 1;
-	config->language = LANGUAGE_ENGLISH;
+	memset(config, 0, sizeof(ConfigType));
+	config->VideoMode = 1;
+	config->MusicCard = 1;
+	config->SoundCard = 1;
+	config->DigitCard = 1;
+	config->UseMouse = 1;
+	config->UseXMS = 1;
+	config->Language = LANGUAGE_ENGLISH;
 	return true;
 }
 

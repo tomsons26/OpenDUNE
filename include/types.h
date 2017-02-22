@@ -95,10 +95,10 @@ assert_compile(sizeof( int32) == 4);
  * bits 8 to 13 are the position on the map.
  * bits 14 and 15 are never used (or should never be used).
  */
-typedef struct tile32 {
+typedef struct CellStruct {
 	uint16 x;
 	uint16 y;
-} tile32;
+} CellStruct;
 
 #ifdef __ALTIVEC__
 #undef bool

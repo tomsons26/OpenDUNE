@@ -189,7 +189,7 @@ void GameLoop_Unit(void)
 		if (u->o.flags.s.isNotOnMap) continue;
 
 		if (tickUnknown4 && u->targetAttack != 0 && ui->o.flags.hasTurret) {
-			tile32 tile;
+			CellStruct tile;
 
 			tile = Tools_Index_GetTile(u->targetAttack);
 
@@ -201,7 +201,7 @@ void GameLoop_Unit(void)
 
 			if (u->fireDelay != 0) {
 				if (ui->movementType == MOVEMENT_WINGER && !ui->flags.isNormalUnit) {
-					tile32 tile;
+					CellStruct tile;
 
 					tile = u->currentDestination;
 
@@ -388,7 +388,7 @@ uint8 Unit_MovementStringToType(const char *name)
  * @param orientation Orientation of the Unit.
  * @return The new created Unit, or NULL if something failed.
  */
-Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, int8 orientation)
+Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position, int8 orientation)
 {
 	const UnitInfo *ui;
 	Unit *u;
@@ -843,7 +843,7 @@ uint16 Unit_FindClosestRefinery(Unit *unit)
  * @position The position.
  * @return True if and only if the position changed.
  */
-bool Unit_SetPosition(Unit *u, tile32 position)
+bool Unit_SetPosition(Unit *u, CellStruct position)
 {
 	const UnitInfo *ui;
 
@@ -922,7 +922,7 @@ void Unit_Remove(Unit *u)
  */
 Unit *Unit_FindBestTargetUnit(Unit *u, uint16 mode)
 {
-	tile32 position;
+	CellStruct position;
 	uint16 distance;
 	PoolFindStruct find;
 	Unit *best = NULL;
@@ -1062,7 +1062,7 @@ bool Unit_StartMovement(Unit *unit)
 	int8 orientation;
 	uint16 packed;
 	uint16 type;
-	tile32 position;
+	CellStruct position;
 	uint16 speed;
 	int16 score;
 
@@ -1105,7 +1105,7 @@ bool Unit_StartMovement(Unit *unit)
 	Unit_SetSpeed(unit, speed);
 
 	if (ui->movementType != MOVEMENT_SLITHER) {
-		tile32 positionOld;
+		CellStruct positionOld;
 
 		positionOld = unit->o.position;
 		unit->o.position = position;
@@ -1288,9 +1288,9 @@ bool Unit_Move(Unit *unit, uint16 distance)
 	const UnitInfo *ui;
 	uint16 d;
 	uint16 packed;
-	tile32 newPosition;
+	CellStruct newPosition;
 	bool ret;
-	tile32 currentDestination;
+	CellStruct currentDestination;
 	bool isSpiceBloom = false;
 	bool isSpecialBloom = false;
 
@@ -1427,7 +1427,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 						for (i = 0; i < 17; i++) {
 							static const int16 offsetX[17] = { 0, 0, 200, 256, 200, 0, -200, -256, -200, 0, 400, 512, 400, 0, -400, -512, -400 };
 							static const int16 offsetY[17] = { 0, -256, -200, 0, 200, 256, 200, 0, -200, -512, -400, 0, 400, 512, 400, 0, -400 };
-							tile32 p = newPosition;
+							CellStruct p = newPosition;
 							p.y += offsetY[i];
 							p.x += offsetX[i];
 
@@ -1764,7 +1764,7 @@ void Unit_Select(Unit *unit)
  */
 Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
 {
-	tile32 tile;
+	CellStruct tile;
 	House *h;
 	int8 orientation;
 	Unit *unit;
@@ -1775,7 +1775,7 @@ Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
 	h = House_Get_ByIndex(houseID);
 
 	{
-		tile32 t;
+		CellStruct t;
 		t.x = 0x2000;
 		t.y = 0x2000;
 		orientation = Tile_GetDirection(tile, t);
@@ -1955,10 +1955,10 @@ void Unit_SetSpeed(Unit *unit, uint16 speed)
  * @param target The target of the new bullet Unit.
  * @return The new created Unit, or NULL if something failed.
  */
-Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 damage, uint16 target)
+Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint16 damage, uint16 target)
 {
 	const UnitInfo *ui;
-	tile32 tile;
+	CellStruct tile;
 
 	if (!Tools_Index_IsValid(target)) return NULL;
 
@@ -2007,7 +2007,7 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
 		case UNIT_BULLET:
 		case UNIT_SONIC_BLAST: {
 			int8 orientation;
-			tile32 t;
+			CellStruct t;
 			Unit *bullet;
 
 			orientation = Tile_GetDirection(position, tile);
@@ -2055,7 +2055,7 @@ void Unit_DisplayStatusText(Unit *unit)
 		snprintf(buffer, sizeof(buffer), "%s", String_Get_ByIndex(ui->o.stringID_abbrev));
 	} else {
 		const char *houseName = g_table_houseInfo[Unit_GetHouseID(unit)].name;
-		if (g_config.language == LANGUAGE_FRENCH) {
+		if (g_config.Language == LANGUAGE_FRENCH) {
 			snprintf(buffer, sizeof(buffer), "%s %s", String_Get_ByIndex(ui->o.stringID_abbrev), houseName);
 		} else {
 			snprintf(buffer, sizeof(buffer), "%s %s", houseName, String_Get_ByIndex(ui->o.stringID_abbrev));
@@ -2152,7 +2152,7 @@ Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool crea
 	}
 
 	if (createCarryall && unit == NULL && type == UNIT_CARRYALL) {
-		tile32 position;
+		CellStruct position;
 
 		g_validateStrictIfZero++;
 		position.x = 0;
@@ -2280,7 +2280,7 @@ static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 {
 	Structure *best = NULL;
 	uint16 bestPriority = 0;
-	tile32 position;
+	CellStruct position;
 	uint16 distance;
 	PoolFindStruct find;
 
@@ -2295,7 +2295,7 @@ static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 
 	while (true) {
 		Structure *s;
-		tile32 curPosition;
+		CellStruct curPosition;
 		uint16 priority;
 
 		s = Structure_Find(&find);
@@ -2470,7 +2470,7 @@ void Unit_RemovePlayer(Unit *unit)
 void Unit_UpdateMap(uint16 type, Unit *unit)
 {
 	const UnitInfo *ui;
-	tile32 position;
+	CellStruct position;
 	uint16 packed;
 	Tile *t;
 	uint16 radius;
@@ -2584,7 +2584,7 @@ uint16 Unit_GetTargetStructurePriority(Unit *unit, Structure *target)
 
 void Unit_LaunchHouseMissile(uint16 packed)
 {
-	tile32 tile;
+	CellStruct tile;
 	bool isAI;
 	House *h;
 
@@ -2707,7 +2707,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 
 				Sound_Output_Feedback(37);
 
-				if (g_config.language == LANGUAGE_ENGLISH) {
+				if (g_config.Language == LANGUAGE_ENGLISH) {
 					GUI_DisplayHint(STR_WARNING_SANDWORMS_SHAIHULUD_ROAM_DUNE_DEVOURING_ANYTHING_ON_THE_SAND, 105);
 				}
 

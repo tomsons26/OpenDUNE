@@ -155,7 +155,7 @@ void Map_SetSelection(uint16 packed)
  *
  * @param layout The layout to determine selection size from.
  * @return The previous layout.
- * @see StructureLayout
+ * @see BSizeType
  */
 uint16 Map_SetSelectionSize(uint16 layout)
 {
@@ -360,7 +360,7 @@ bool Map_IsPositionUnveiled(uint16 position)
  * @param retY Pointer to Y inside the viewport.
  * @return True if and only if the position is in the viewport.
  */
-bool Map_IsPositionInViewport(tile32 position, uint16 *retX, uint16 *retY)
+bool Map_IsPositionInViewport(CellStruct position, uint16 *retX, uint16 *retY)
 {
 	int16 x, y;
 
@@ -400,7 +400,7 @@ static bool Map_UpdateWall(uint16 packed)
  * @param hitpoints The amount of hitpoints to give people in the neighbourhoud.
  * @param unitOriginEncoded The unit that fired the bullet.
  */
-void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 unitOriginEncoded)
+void Map_MakeExplosion(uint16 type, CellStruct position, uint16 hitpoints, uint16 unitOriginEncoded)
 {
 	uint16 reactionDistance = (type == EXPLOSION_DEATH_HAND) ? 32 : 16;
 	uint16 positionPacked = Tile_PackTile(position);
@@ -639,7 +639,7 @@ void Map_Update(uint16 packed, uint16 type, bool ignoreInvisible)
  * @param radius The radius.
  * @param houseID House controlling the deviator.
  */
-void Map_DeviateArea(uint16 type, tile32 position, uint16 radius, uint8 houseID)
+void Map_DeviateArea(uint16 type, CellStruct position, uint16 radius, uint8 houseID)
 {
 	PoolFindStruct find;
 
@@ -868,7 +868,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			break;
 
 		case 1: {
-			tile32 position = Tile_UnpackTile(packed);
+			CellStruct position = Tile_UnpackTile(packed);
 
 			position = Tile_MoveByRandom(position, 16, true);
 
@@ -878,7 +878,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 		}
 
 		case 2: {
-			tile32 position = Tile_UnpackTile(packed);
+			CellStruct position = Tile_UnpackTile(packed);
 			Unit *u;
 
 			position = Tile_MoveByRandom(position, 16, true);
@@ -891,7 +891,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 		}
 
 		case 3: {
-			tile32 position = Tile_UnpackTile(packed);
+			CellStruct position = Tile_UnpackTile(packed);
 			Unit *u;
 
 			position = Tile_MoveByRandom(position, 16, true);
@@ -1025,7 +1025,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
  * @param unit The unit to update for (can be NULL if function < 2).
  * @param function The function to call.
  */
-void Map_UpdateAround(uint16 radius, tile32 position, Unit *unit, uint8 function)
+void Map_UpdateAround(uint16 radius, CellStruct position, Unit *unit, uint8 function)
 {
 	static const uint16 tileOffsets[] = {
 		0x0080, 0x0088, 0x0090, 0x0098,
@@ -1036,7 +1036,7 @@ void Map_UpdateAround(uint16 radius, tile32 position, Unit *unit, uint8 function
 	};
 
 	int16 i, j;
-	tile32 diff;
+	CellStruct diff;
 	uint16 lastPacked;
 
 	if (radius == 0 || (position.x == 0 && position.y == 0)) return;
@@ -1080,7 +1080,7 @@ void Map_UpdateAround(uint16 radius, tile32 position, Unit *unit, uint8 function
 
 	i = 0;
 	do {
-		tile32 curTile = Tile_AddTileDiff(position, diff);
+		CellStruct curTile = Tile_AddTileDiff(position, diff);
 
 		if (Tile_IsValid(curTile)) {
 			uint16 curPacked = Tile_PackTile(curTile);
@@ -1576,7 +1576,7 @@ void Map_CreateLandscape(uint32 seed)
 	/* Add some spice. */
 	i = Tools_Random_256() & 0x2F;
 	while (i-- != 0) {
-		tile32 tile;
+		CellStruct tile;
 		uint16 packed;
 
 		while (true) {

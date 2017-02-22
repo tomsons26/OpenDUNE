@@ -149,10 +149,10 @@ uint16 Tools_Index_GetPackedTile(uint16 encoded)
  * @param id The encoded index to get the tile of.
  * @return The tile.
  */
-tile32 Tools_Index_GetTile(uint16 encoded)
+CellStruct Tools_Index_GetTile(uint16 encoded)
 {
 	uint16 index;
-	tile32 tile;
+	CellStruct tile;
 
 	index = Tools_Index_Decode(encoded);
 	tile.x = 0;

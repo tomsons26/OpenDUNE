@@ -129,7 +129,7 @@ void Font_Select(Font *f)
 bool Font_Init(void)
 {
 	g_fontIntro = Font_LoadFile("INTRO.FNT");
-	if ((g_config.language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
+	if ((g_config.Language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
 		g_fontNew6p = Font_LoadFile("new6pg.fnt");
 	} else {
 		g_fontNew6p = Font_LoadFile("new6p.fnt");

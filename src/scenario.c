@@ -115,7 +115,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	uint8 houseType, unitType, actionType;
 	int8 orientation;
 	uint16 hitpoints;
-	tile32 position;
+	CellStruct position;
 	Unit *u;
 	char *split;
 
@@ -340,7 +340,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 {
 	uint8 index, houseType, unitType, locationID;
 	uint16 timeBetween;
-	tile32 position;
+	CellStruct position;
 	bool repeat;
 	Unit *u;
 	char *split;

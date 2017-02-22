@@ -831,7 +831,7 @@ void Structure_ActivateSpecial(Structure *s)
 	switch (g_table_houseInfo[s->o.houseID].specialWeapon) {
 		case HOUSE_WEAPON_MISSILE: {
 			Unit *u;
-			tile32 position;
+			CellStruct position;
 
 			position.x = 0xFFFF;
 			position.y = 0xFFFF;
@@ -889,7 +889,7 @@ void Structure_ActivateSpecial(Structure *s)
 
 			for (i = 0; i < 5; i++) {
 				Unit *u;
-				tile32 position;
+				CellStruct position;
 				uint16 orientation;
 				uint16 unitType;
 
@@ -953,7 +953,7 @@ void Structure_ActivateSpecial(Structure *s)
 void Structure_RemoveFog(Structure *s)
 {
 	const StructureInfo *si;
-	tile32 position;
+	CellStruct position;
 
 	if (s == NULL || s->o.houseID != g_playerHouseID) return;
 
@@ -1612,7 +1612,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 					g_validateStrictIfZero++;
 					{
-						tile32 tile;
+						CellStruct tile;
 						tile.x = 0xFFFF;
 						tile.y = 0xFFFF;
 						u = Unit_Create(UNIT_INDEX_INVALID, (uint8)objectType, s->o.houseID, tile, 0);
@@ -1652,7 +1652,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 	if (s->o.linkedID != 0xFF || objectType == 0xFFFF) return false;
 
 	if (s->o.type != STRUCTURE_CONSTRUCTION_YARD) {
-		tile32 tile;
+		CellStruct tile;
 		tile.x = 0xFFFF;
 		tile.y = 0xFFFF;
 

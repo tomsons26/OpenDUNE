@@ -58,9 +58,9 @@ const char *String_GenerateFilename(const char *name)
 {
 	static char filename[14];
 
-	assert(g_config.language < lengthof(g_languageSuffixes));
+	assert(g_config.Language < lengthof(g_languageSuffixes));
 
-	snprintf(filename, sizeof(filename), "%s.%s", name, g_languageSuffixes[g_config.language]);
+	snprintf(filename, sizeof(filename), "%s.%s", name, g_languageSuffixes[g_config.Language]);
 	return filename;
 }
 

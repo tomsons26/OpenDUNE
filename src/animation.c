@@ -26,7 +26,7 @@ typedef struct Animation {
 	uint8 current;                          /*!< At which command we currently are in the Animation. */
 	uint8 iconGroup;                        /*!< Which iconGroup the sprites of the Animation belongs. */
 	const AnimationCommandStruct *commands; /*!< List of commands for this Animation. */
-	tile32 tile;                            /*!< Top-left tile of Animation. */
+	CellStruct tile;                            /*!< Top-left tile of Animation. */
 } Animation;
 
 static Animation g_animations[ANIMATION_MAX];
@@ -216,7 +216,7 @@ void Animation_Init(void)
  * @param houseID The house of the item being Animation.
  * @param iconGroup In which IconGroup the sprites of the Animation belongs.
  */
-void Animation_Start(const AnimationCommandStruct *commands, tile32 tile, uint16 tileLayout, uint8 houseID, uint8 iconGroup)
+void Animation_Start(const AnimationCommandStruct *commands, CellStruct tile, uint16 tileLayout, uint8 houseID, uint8 iconGroup)
 {
 	Animation *animation = g_animations;
 	uint16 packed = Tile_PackTile(tile);

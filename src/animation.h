@@ -33,7 +33,7 @@ extern const AnimationCommandStruct g_table_animation_map[16][8];
 extern const AnimationCommandStruct g_table_animation_structure[29][16];
 
 extern void Animation_Init(void);
-extern void Animation_Start(const AnimationCommandStruct *commands, tile32 tile, uint16 tileLayout, uint8 houseID, uint8 iconGroup);
+extern void Animation_Start(const AnimationCommandStruct *commands, CellStruct tile, uint16 tileLayout, uint8 houseID, uint8 iconGroup);
 extern void Animation_Stop_ByTile(uint16 packed);
 extern void Animation_Tick(void);
 

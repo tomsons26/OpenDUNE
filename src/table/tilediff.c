@@ -6,7 +6,7 @@ const int16 g_table_mapDiff[4] = {
 	-64, 1, 64, -1
 };
 
-const tile32 g_table_tilediff[34][8] = {
+const CellStruct g_table_tilediff[34][8] = {
 	{ /* 0 */
 		{ /* 0 */ 0, 0 },
 		{ /* 1 */ 0, (uint16)-1 },

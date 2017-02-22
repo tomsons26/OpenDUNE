@@ -16,24 +16,24 @@
 /**
  * Check whether a tile is valid.
  *
- * @param tile The tile32 to check for validity.
+ * @param tile The CellStruct to check for validity.
  * @return True if valid, false if not.
  */
-bool Tile_IsValid(tile32 tile)
+bool Tile_IsValid(CellStruct tile)
 {
 	return (tile.x & 0xc000) == 0 && (tile.y & 0xc000) == 0;
 }
 
 /**
- * Make a tile32 from an X- and Y-position.
+ * Make a CellStruct from an X- and Y-position.
  *
  * @param x The X-position.
  * @param y The Y-position.
- * @return A tile32 at the top-left corner of the X- and Y-position.
+ * @return A CellStruct at the top-left corner of the X- and Y-position.
  */
-tile32 Tile_MakeXY(uint16 x, uint16 y)
+CellStruct Tile_MakeXY(uint16 x, uint16 y)
 {
-	tile32 tile;
+	CellStruct tile;
 
 	tile.x = x << 8;
 	tile.y = y << 8;
@@ -44,10 +44,10 @@ tile32 Tile_MakeXY(uint16 x, uint16 y)
 /**
  * Returns the X-position of the tile.
  *
- * @param tile The tile32 to get the X-position from.
+ * @param tile The CellStruct to get the X-position from.
  * @return The X-position of the tile.
  */
-uint8 Tile_GetPosX(tile32 tile)
+uint8 Tile_GetPosX(CellStruct tile)
 {
 	return (tile.x >> 8) & 0x3f;
 }
@@ -55,10 +55,10 @@ uint8 Tile_GetPosX(tile32 tile)
 /**
  * Returns the Y-position of the tile.
  *
- * @param tile The tile32 to get the Y-position from.
+ * @param tile The CellStruct to get the Y-position from.
  * @return The Y-position of the tile.
  */
-uint8 Tile_GetPosY(tile32 tile)
+uint8 Tile_GetPosY(CellStruct tile)
 {
 	return (tile.y >> 8) & 0x3f;
 }
@@ -66,10 +66,10 @@ uint8 Tile_GetPosY(tile32 tile)
 /**
  * Returns the tile as an uint32 value.
  *
- * @param tile The tile32 to retrieve the data from.
- * @return The uint32 representation of the tile32.
+ * @param tile The CellStruct to retrieve the data from.
+ * @return The uint32 representation of the CellStruct.
  */
-uint32 Tile_GetXY(tile32 tile)
+uint32 Tile_GetXY(CellStruct tile)
 {
 	return ((uint32)tile.x | ((uint32)tile.y << 16));
 }
@@ -77,10 +77,10 @@ uint32 Tile_GetXY(tile32 tile)
 /**
  * Returns the X-position of the tile.
  *
- * @param tile The tile32 to get the X-position from.
+ * @param tile The CellStruct to get the X-position from.
  * @return The X-position of the tile.
  */
-uint16 Tile_GetX(tile32 tile)
+uint16 Tile_GetX(CellStruct tile)
 {
 	return tile.x;
 }
@@ -88,10 +88,10 @@ uint16 Tile_GetX(tile32 tile)
 /**
  * Returns the Y-position of the tile.
  *
- * @param tile The tile32 to get the Y-position from.
+ * @param tile The CellStruct to get the Y-position from.
  * @return The Y-position of the tile.
  */
-uint16 Tile_GetY(tile32 tile)
+uint16 Tile_GetY(CellStruct tile)
 {
 	return tile.y;
 }
@@ -99,10 +99,10 @@ uint16 Tile_GetY(tile32 tile)
 /**
  * Packs a 32 bits tile struct into a 12 bits packed tile.
  *
- * @param tile The tile32 to get it's Y-position from.
+ * @param tile The CellStruct to get it's Y-position from.
  * @return The tile packed into 12 bits.
  */
-uint16 Tile_PackTile(tile32 tile)
+uint16 Tile_PackTile(CellStruct tile)
 {
 	return (Tile_GetPosY(tile) << 6) | Tile_GetPosX(tile);
 }
@@ -125,9 +125,9 @@ uint16 Tile_PackXY(uint16 x, uint16 y)
  * @param packed The uint16 containing the 12 bits packed tile information.
  * @return The unpacked tile.
  */
-tile32 Tile_UnpackTile(uint16 packed)
+CellStruct Tile_UnpackTile(uint16 packed)
 {
-	tile32 tile;
+	CellStruct tile;
 
 	tile.x = (((packed >> 0) & 0x3F) << 8) | 0x80;
 	tile.y = (((packed >> 6) & 0x3F) << 8) | 0x80;
@@ -174,7 +174,7 @@ bool Tile_IsOutOfMap(uint16 packed)
  * @param to The destination.
  * @return The longest distance between the X or Y coordinates, plus half the shortest.
  */
-uint16 Tile_GetDistance(tile32 from, tile32 to)
+uint16 Tile_GetDistance(CellStruct from, CellStruct to)
 {
 	uint16 distance_x = abs(from.x - to.x);
 	uint16 distance_y = abs(from.y - to.y);
@@ -190,9 +190,9 @@ uint16 Tile_GetDistance(tile32 from, tile32 to)
  * @param diff The difference.
  * @return The new coordinates.
  */
-tile32 Tile_AddTileDiff(tile32 from, tile32 diff)
+CellStruct Tile_AddTileDiff(CellStruct from, CellStruct diff)
 {
-	tile32 result;
+	CellStruct result;
 
 	result.x = from.x + diff.x;
 	result.y = from.y + diff.y;
@@ -205,9 +205,9 @@ tile32 Tile_AddTileDiff(tile32 from, tile32 diff)
  *
  * @param tile The tile to center.
  */
-tile32 Tile_Center(tile32 tile)
+CellStruct Tile_Center(CellStruct tile)
 {
-	tile32 result;
+	CellStruct result;
 
 	result = tile;
 	result.x = (result.x & 0xff00) | 0x80;
@@ -225,8 +225,8 @@ tile32 Tile_Center(tile32 tile)
  */
 uint16 Tile_GetDistancePacked(uint16 packed_from, uint16 packed_to)
 {
-	tile32 from = Tile_UnpackTile(packed_from);
-	tile32 to = Tile_UnpackTile(packed_to);
+	CellStruct from = Tile_UnpackTile(packed_from);
+	CellStruct to = Tile_UnpackTile(packed_to);
 
 	return Tile_GetDistance(from, to) >> 8;
 }
@@ -238,7 +238,7 @@ uint16 Tile_GetDistancePacked(uint16 packed_from, uint16 packed_to)
  * @param to The destination.
  * @return The longest distance between the X or Y coordinates, plus half the shortest.
  */
-uint16 Tile_GetDistanceRoundedUp(tile32 from, tile32 to)
+uint16 Tile_GetDistanceRoundedUp(CellStruct from, CellStruct to)
 {
 	return (Tile_GetDistance(from, to) + 0x80) >> 8;
 }
@@ -249,7 +249,7 @@ uint16 Tile_GetDistanceRoundedUp(tile32 from, tile32 to)
  * @param tile The tile to remove fog around.
  * @param radius The radius to remove fog around.
  */
-void Tile_RemoveFogInRadius(tile32 tile, uint16 radius)
+void Tile_RemoveFogInRadius(CellStruct tile, uint16 radius)
 {
 	uint16 packed;
 	uint16 x, y;
@@ -265,7 +265,7 @@ void Tile_RemoveFogInRadius(tile32 tile, uint16 radius)
 
 	for (i = -radius; i <= radius; i++) {
 		for (j = -radius; j <= radius; j++) {
-			tile32 t;
+			CellStruct t;
 
 			if ((x + i) < 0 || (x + i) >= 64) continue;
 			if ((y + j) < 0 || (y + j) >= 64) continue;
@@ -301,7 +301,7 @@ uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to)
 
 	while (true) {
 		int16 dir;
-		tile32 position;
+		CellStruct position;
 		uint16 packed;
 
 		dir = 31 + (Tools_Random_256() & 0x3F);
@@ -408,7 +408,7 @@ static const int8 _stepY[256] = {
  * @param distance The distance.
  * @return The tile.
  */
-tile32 Tile_MoveByDirection(tile32 tile, int16 orientation, uint16 distance)
+CellStruct Tile_MoveByDirection(CellStruct tile, int16 orientation, uint16 distance)
 {
 	int diffX, diffY;
 	int roundingOffsetX, roundingOffsetY;
@@ -438,11 +438,11 @@ tile32 Tile_MoveByDirection(tile32 tile, int16 orientation, uint16 distance)
  * @param center Wether to center the offset of the tile.
  * @return The tile.
  */
-tile32 Tile_MoveByRandom(tile32 tile, uint16 distance, bool center)
+CellStruct Tile_MoveByRandom(CellStruct tile, uint16 distance, bool center)
 {
 	uint16 x;
 	uint16 y;
-	tile32 ret;
+	CellStruct ret;
 	uint8 orientation;
 	uint16 newDistance;
 
@@ -474,7 +474,7 @@ tile32 Tile_MoveByRandom(tile32 tile, uint16 distance, bool center)
  * @param to The destination.
  * @return The direction.
  */
-int8 Tile_GetDirection(tile32 from, tile32 to)
+int8 Tile_GetDirection(CellStruct from, CellStruct to)
 {
 	static const uint16 orientationOffsets[] = {0x40, 0x80, 0x0, 0xC0};
 	static const int32 directions[] = {
@@ -537,7 +537,7 @@ int8 Tile_GetDirection(tile32 from, tile32 to)
  * @param orientation The orientation to move in.
  * @return The new position, or the old in case of out-of-bounds.
  */
-tile32 Tile_MoveByOrientation(tile32 position, uint8 orientation)
+CellStruct Tile_MoveByOrientation(CellStruct position, uint8 orientation)
 {
 	uint16 xOffsets[8] = {0, 256, 256, 256, 0, -256, -256, -256};
 	uint16 yOffsets[8] = {-256, -256, 0, 256, 256, 256, 0, -256};

@@ -305,7 +305,7 @@ uint16 Script_General_GetLinkedUnitType(ScriptEngine *script)
  */
 uint16 Script_General_VoicePlay(ScriptEngine *script)
 {
-	tile32 position;
+	CellStruct position;
 
 	position = g_scriptCurrentObject->position;
 
@@ -324,7 +324,7 @@ uint16 Script_General_VoicePlay(ScriptEngine *script)
  */
 uint16 Script_General_SearchSpice(ScriptEngine *script)
 {
-	tile32 position;
+	CellStruct position;
 	uint16 packedSpicePos;
 
 	position = g_scriptCurrentObject->position;

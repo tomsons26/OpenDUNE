@@ -41,7 +41,7 @@ typedef struct Team {
 	uint16 action;                                          /*!< Current TeamActionType of Team. */
 	uint16 actionStart;                                     /*!< The TeamActionType Team starts with. */
 	uint8  houseID;                                         /*!< House of Team. */
-	tile32 position;                                        /*!< Position on the map. */
+	CellStruct position;                                        /*!< Position on the map. */
 	uint16 targetTile;                                      /*!< Current target tile around the target. Only used as a bool, so either set or not. */
 	uint16 target;                                          /*!< Current target of team (encoded index). */
 	ScriptEngine script;                                    /*!< The script engine instance of this Team. */

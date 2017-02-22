@@ -88,7 +88,7 @@ typedef struct House {
 	uint16 powerUsage;                                      /*!< Amount of power the House requires. */
 	uint16 windtrapCount;                                   /*!< Amount of windtraps the House currently has. */
 	uint16 creditsQuota;                                    /*!< Quota house has to reach to win the mission. */
-	tile32 palacePosition;                                  /*!< Position of the Palace. */
+	CellStruct palacePosition;                                  /*!< Position of the Palace. */
 	uint16 timerUnitAttack;                                 /*!< Timer to count down when next 'unit approaching' message can be showed again. */
 	uint16 timerSandwormAttack;                             /*!< Timer to count down when next 'sandworm approaching' message can be showed again. */
 	uint16 timerStructureAttack;                            /*!< Timer to count down when next 'base is under attack' message can be showed again. */

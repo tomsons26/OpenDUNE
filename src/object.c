@@ -114,7 +114,7 @@ Object *Object_GetByPackedTile(uint16 packed)
 uint16 Object_GetDistanceToEncoded(Object *o, uint16 encoded)
 {
 	Structure *s;
-	tile32 position;
+	CellStruct position;
 
 	s = Tools_Index_GetStructure(encoded);
 
