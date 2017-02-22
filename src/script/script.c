@@ -645,7 +645,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 			scriptInfo->text = calloc(1, length);
 		}
 
-		ChunkFile_Read(index, HTOBE32(CC_TEXT), scriptInfo->text, length);
+		Read_Iff_Chunk(index, HTOBE32(CC_TEXT), scriptInfo->text, length);
 	}
 
 	length = ChunkFile_Seek(index, HTOBE32(CC_ORDR));
@@ -653,7 +653,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 
 	if (length == 0) {
 		Script_ClearInfo(scriptInfo);
-		ChunkFile_Close(index);
+		Close_Iff_File(index);
 		return 0;
 	}
 
@@ -665,7 +665,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 	}
 
 	scriptInfo->offsetsCount = (length >> 1) & 0xFFFF;
-	ChunkFile_Read(index, HTOBE32(CC_ORDR), scriptInfo->offsets, length);
+	Read_Iff_Chunk(index, HTOBE32(CC_ORDR), scriptInfo->offsets, length);
 
 	for(i = 0; i < (int16)((length >> 1) & 0xFFFF); i++) {
 		scriptInfo->offsets[i] = BETOH16(scriptInfo->offsets[i]);
@@ -676,7 +676,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 
 	if (length == 0) {
 		Script_ClearInfo(scriptInfo);
-		ChunkFile_Close(index);
+		Close_Iff_File(index);
 		return 0;
 	}
 
@@ -688,9 +688,9 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 	}
 
 	scriptInfo->startCount = (length >> 1) & 0xFFFF;
-	ChunkFile_Read(index, HTOBE32(CC_DATA), scriptInfo->start, length);
+	Read_Iff_Chunk(index, HTOBE32(CC_DATA), scriptInfo->start, length);
 
-	ChunkFile_Close(index);
+	Close_Iff_File(index);
 
 	return total & 0xFFFF;
 }

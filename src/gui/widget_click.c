@@ -833,8 +833,8 @@ static void FillSavegameDesc(bool save)
 
 		fileId = ChunkFile_Open_Personal(filename);
 		if (fileId == FILE_INVALID) continue;
-		ChunkFile_Read(fileId, HTOBE32(CC_NAME), desc, 50);
-		ChunkFile_Close(fileId);
+		Read_Iff_Chunk(fileId, HTOBE32(CC_NAME), desc, 50);
+		Close_Iff_File(fileId);
 		continue;
 	}
 }

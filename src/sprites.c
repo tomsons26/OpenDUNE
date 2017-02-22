@@ -205,27 +205,27 @@ static void Sprites_LoadICNFile(const char *filename)
 	paletteLength    = ChunkFile_Seek(fileIndex, HTOBE32(CC_RPAL));
 
 	/* Read the header information */
-	ChunkFile_Read(fileIndex, HTOBE32(CC_SINF), info, 4);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SINF), info, 4);
 	GFX_Init_SpriteInfo(info[0], info[1]);
 
 	/* Get the SpritePixels chunk */
 	free(g_spritePixels);
 	g_spritePixels = calloc(1, spriteDataLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_SSET), g_spritePixels, spriteDataLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SSET), g_spritePixels, spriteDataLength);
 	spriteDataLength = Sprites_Decode(g_spritePixels, g_spritePixels);
 	/*g_spritePixels = realloc(g_spritePixels, spriteDataLength);*/
 
 	/* Get the Table chunk */
 	free(g_iconRTBL);
 	g_iconRTBL = calloc(1, tableLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_RTBL), g_iconRTBL, tableLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_RTBL), g_iconRTBL, tableLength);
 
 	/* Get the Palette chunk */
 	free(g_iconRPAL);
 	g_iconRPAL = calloc(1, paletteLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_RPAL), g_iconRPAL, paletteLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_RPAL), g_iconRPAL, paletteLength);
 
-	ChunkFile_Close(fileIndex);
+	Close_Iff_File(fileIndex);
 }
 
 /**
@@ -290,7 +290,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	if (palette != NULL && paletteSize != 0) {
 		File_Read(index, palette, paletteSize);
 	} else {
-		File_Seek(index, paletteSize, 1);
+		Seek_File(index, paletteSize, 1);
 	}
 
 	buffer[6] = 0;	/* dont read palette next time */

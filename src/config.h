@@ -17,7 +17,7 @@ typedef struct ConfigType {
 	/* 0006(1)   */ PACK uint8  UseHMA;                     /*!< ?? */
 	/* 0007(1)   */ PACK uint8  UseEMS;                     /*!< ?? */
 	/* 0008(1)   */ PACK uint8  Language;                   /*!< @see Language. */
-	/* 0009(1)   */ PACK uint8  CheckSum;                   /*!< Used to check validity on config data. See Config_Read(). */
+	/* 0009(1)   */ PACK uint8  CheckSum;                   /*!< Used to check validity on config data. See Decode_Config_Struct(). */
 } GCC_PACKED ConfigType;
 MSVC_PACKED_END
 assert_compile(sizeof(ConfigType) == 0xA);
@@ -39,8 +39,8 @@ extern ConfigType g_config;
 extern bool g_enableSoundMusic;
 extern bool g_enableVoices;
 
-extern bool Config_Read(const char *filename, ConfigType *config);
-extern bool Config_Write(const char *filename, ConfigType *config);
+extern bool Decode_Config_Struct(const char *filename, ConfigType *config);
+extern bool Encode_Config_Struct(const char *filename, ConfigType *config);
 extern bool Config_Default(ConfigType *config);
 extern bool GameOptions_Load(void);
 extern void GameOptions_Save(void);

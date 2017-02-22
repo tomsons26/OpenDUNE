@@ -210,8 +210,8 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 	}
 
 	fileID = ChunkFile_Open(s_mentatFilename);
-	length = ChunkFile_Read(fileID, HTOBE32(CC_NAME), helpDataList, GFX_Screen_GetSize_ByIndex(SCREEN_1));
-	ChunkFile_Close(fileID);
+	length = Read_Iff_Chunk(fileID, HTOBE32(CC_NAME), helpDataList, GFX_Screen_GetSize_ByIndex(SCREEN_1));
+	Close_Iff_File(fileID);
 
 	s_numberHelpSubjects = 0;
 	helpSubjects = helpDataList;
@@ -927,8 +927,8 @@ static void GUI_Mentat_ShowHelp(void)
 	offset = HTOBE32(*(uint32 *)(subject + 1));
 
 	fileID = ChunkFile_Open(s_mentatFilename);
-	ChunkFile_Read(fileID, HTOBE32(CC_INFO), &info, 12);
-	ChunkFile_Close(fileID);
+	Read_Iff_Chunk(fileID, HTOBE32(CC_INFO), &info, 12);
+	Close_Iff_File(fileID);
 
 	info.length = HTOBE32(info.length);
 
@@ -936,7 +936,7 @@ static void GUI_Mentat_ShowHelp(void)
 	compressedText = GFX_Screen_Get_ByIndex(SCREEN_1);
 
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
-	File_Seek(fileID, offset, 0);
+	Seek_File(fileID, offset, 0);
 	File_Read(fileID, compressedText, info.length);
 	String_Decompress(compressedText, text);
 	String_TranslateSpecial(text, text);

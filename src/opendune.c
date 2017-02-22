@@ -1250,7 +1250,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Loading config from dune.cfg */
-	if (!Config_Read("dune.cfg", &g_config)) {
+	if (!Decode_Config_Struct("dune.cfg", &g_config)) {
 		Config_Default(&g_config);
 		commit_dune_cfg = true;
 	}
@@ -1258,7 +1258,7 @@ int main(int argc, char **argv)
 	SetLanguage_From_IniFile(&g_config);
 
 	/* Writing config to dune.cfg */
-	if (commit_dune_cfg && !Config_Write("dune.cfg", &g_config)) {
+	if (commit_dune_cfg && !Encode_Config_Struct("dune.cfg", &g_config)) {
 		Error("Error writing to dune.cfg file.\n");
 		exit(1);
 	}

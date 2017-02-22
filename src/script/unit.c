@@ -28,14 +28,14 @@
 #include "../string.h"
 #include "../unit.h"
 
-typedef struct Pathfinder_Data {
+typedef struct PathType {
 	uint16 packed;                                          /*!< From where we are pathfinding. */
 	 int16 score;                                           /*!< The total score for this route. */
 	uint16 routeSize;                                       /*!< The size of this route. */
 	uint8 *buffer;                                          /*!< A buffer to store the route. */
-} Pathfinder_Data;
+} PathType;
 
-static const int16 s_mapDirection[8] = {-64, -63, 1, 65, 64, 63, -1, -65}; /*!< Tile index change when moving in a direction. */
+static const int16 AdjacentCell[8] = {-64, -63, 1, 65, 64, 63, -1, -65}; /*!< Tile index change when moving in a direction. */
 
 /**
  * Create a new soldier unit.
@@ -978,6 +978,65 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 	}
 }
 
+
+
+
+//Path finding in D2 to RA is built on Crash and Turn path finding algorithm.
+//In C&C it recieved various updates.
+/*
+Copy from info on it on http://web.archive.org/web/19991006064545/http://perplexed.com/GPMega/advanced/crashnturn.htm
+
+
+This is probably the easiest one to implement and was the first one I implemented in my Prisoner of War project. This is an algorithm that evaluates the way one step at a time. Trying to move in a straight line to the endpoint direction and adjusting the rules as it goes. As most of you already know, this is not a good way of solving it. The unit will behave odd, choosing silly path's. Sometimes it will get locked up in a loop. Anyway, here is how I implemented it:
+
+Try to move in a straight line to the endpoint. Always remember the previous tile coordinates. (One brain-cell).
+If it collides with an obstacle (landscape or other unit) try the RIGHT_HAND rule. Rotating right until a free passage is found and then move to that tile.
+Repeat 1-2 until the goal is reached or a collision with the previous tile occurs.
+If we collided with our previous position (trying to go back to the last tile we came from) try changing to a LEFT_HAND rule instead. Then follow the same procedure above (using a LEFT_HAND rule instead of RIGHT_HAND).
+The last point can be changed to say it should not be able to go back into it's previous tracks. This way it will continue using the RIGHT_HAND rule all the way.
+
+The algorithm is not very good and gets easily locked up. Especially in the U-formed obstacle example.
+
+The crash'n turn algorithm can be further enhanced to make the unit behave a bit more intelligent. I.e. look at the below example:
+
+
+  ########
+###########  A
+###########
+###########
+###########
+ #######
+
+B
+
+Our unit wants to go from A to B. We can easily see the best way will be to use a LEFT_HAND rule to reach the goal. Our initial algorithm will always use a RIGHT_HAND rule first. This will look silly, as it will take the other way around the obstacle.
+
+By modifying the algorithm a bit we can decide which rule we should start using. Imagine yourself wanting to go past the obstacle. You would probably think something like: Lets follow the edge until we reach the corner and then move towards the endpoint B. Okay, you naturally chose a LEFT_HAND rule.
+
+This is what we do: Alternate between RIGHT_HAND and LEFT_HAND scanning on the first obstacle you meet. The first one that gives a free path tells you which rule to use. This way the routine will probably choose a smarter rule to start with based on it's angle to the destination point. It will of course fail on difficult terrain and the same loop problems are quite evident in this implementation also.
+
+Here is another example, it will choose the LEFT_HAND rule because it saw that the left edge was free. It will choose the same path from B to A also:
+
+
+   ***********
+A**###########**B
+   ###########
+   ###########
+   ###########
+
+On the example below it will fail to behave intelligently because the scanning found the right to be the first free path:
+
+
+    ######
+A***######   B
+   *######   *
+  **######   *
+ *###########*
+ *###########*
+ **#######**
+   *******  
+*/
+
 /**
  * Get the score to enter this tile from a direction.
  *
@@ -1009,9 +1068,9 @@ static int16 Script_Unit_Pathfind_GetScore(uint16 packed, uint8 orient8)
  * Smoothen the route found by the pathfinder.
  * @param data The found route to smoothen.
  */
-static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
+static void Optimize_Moves(PathType *data)
 {
-	static const int8 directionOffset[8] = {0, 0, 1, 2, 3, -2, -1, 0};
+	static const int8 _trans[8] = {0, 0, 1, 2, 3, -2, -1, 0};
 
 	uint16 packed;
 	uint8 *bufferFrom;
@@ -1037,7 +1096,7 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
 			}
 
 			direction = (*bufferTo - *bufferFrom) & 0x7;
-			direction = directionOffset[direction];
+			direction = _trans[direction];
 
 			/* The directions are opposite of each other, so they can both be removed */
 			if (direction == 3) {
@@ -1050,7 +1109,7 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
 
 			/* The directions are close to each other, so follow */
 			if (direction == 0) {
-				packed += s_mapDirection[*bufferFrom];
+				packed += AdjacentCell[*bufferFrom];
 				bufferTo++;
 				continue;
 			}
@@ -1060,11 +1119,11 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
 
 				/* If we go 45 degrees with 90 degree difference, we can also go straight */
 				if (abs(direction) == 1) {
-					if (Script_Unit_Pathfind_GetScore(packed + s_mapDirection[dir], dir) <= 255) {
+					if (Script_Unit_Pathfind_GetScore(packed + AdjacentCell[dir], dir) <= 255) {
 						*bufferTo = dir;
 						*bufferFrom = dir;
 					}
-					packed += s_mapDirection[*bufferFrom];
+					packed += AdjacentCell[*bufferFrom];
 					bufferTo++;
 					continue;
 				}
@@ -1079,7 +1138,7 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
 			/* Walk back one tile */
 			while (*bufferFrom == 0xFE && data->buffer != bufferFrom) bufferFrom--;
 			if (*bufferFrom != 0xFE) {
-				packed += s_mapDirection[(*bufferFrom + 4) & 0x7];
+				packed += AdjacentCell[(*bufferFrom + 4) & 0x7];
 			} else {
 				packed = data->packed;
 			}
@@ -1096,7 +1155,7 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
 	for (; *bufferTo != 0xFF; bufferTo++) {
 		if (*bufferTo == 0xFE) continue;
 
-		packed += s_mapDirection[*bufferTo];
+		packed += AdjacentCell[*bufferTo];
 		data->score += Script_Unit_Pathfind_GetScore(packed, *bufferTo);
 		data->routeSize++;
 		*bufferFrom++ = *bufferTo;
@@ -1114,7 +1173,7 @@ static void Script_Unit_Pathfinder_Smoothen(Pathfinder_Data *data)
  * @param directionStart The direction to start looking at.
  * @return True if a route was found.
  */
-static bool Script_Unit_Pathfinder_Connect(uint16 packedDst, Pathfinder_Data *data, int8 searchDirection, uint8 directionStart)
+static bool Find_Path_Connect(uint16 packedDst, PathType *data, int8 searchDirection, uint8 directionStart)
 {
 	uint16 packedNext;
 	uint16 packedCur;
@@ -1133,16 +1192,16 @@ static bool Script_Unit_Pathfinder_Connect(uint16 packedDst, Pathfinder_Data *da
 			direction = (direction + searchDirection) & 0x7;
 
 			/* In case we are directly looking at our destination tile, we are pretty much done */
-			if ((direction & 0x1) != 0 && (packedCur + s_mapDirection[(direction + searchDirection) & 0x7]) == packedDst) {
+			if ((direction & 0x1) != 0 && (packedCur + AdjacentCell[(direction + searchDirection) & 0x7]) == packedDst) {
 				direction = (direction + searchDirection) & 0x7;
-				packedNext = packedCur + s_mapDirection[direction];
+				packedNext = packedCur + AdjacentCell[direction];
 				break;
 			} else {
 				/* If we are back to our start direction, we didn't find a route */
 				if (direction == directionStart) return false;
 
 				/* See if the tile next to us is a valid position */
-				packedNext = packedCur + s_mapDirection[direction];
+				packedNext = packedCur + AdjacentCell[direction];
 				if (Script_Unit_Pathfind_GetScore(packedNext, direction) <= 255) break;
 			}
 		}
@@ -1154,7 +1213,7 @@ static bool Script_Unit_Pathfinder_Connect(uint16 packedDst, Pathfinder_Data *da
 		if (packedNext == packedDst) {
 			*buffer = 0xFF;
 			data->routeSize = bufferSize;
-			Script_Unit_Pathfinder_Smoothen(data);
+			Optimize_Moves(data);
 			data->routeSize--;
 			return true;
 		}
@@ -1180,10 +1239,10 @@ static bool Script_Unit_Pathfinder_Connect(uint16 packedDst, Pathfinder_Data *da
  * @param bufferSize The size of the buffer.
  * @return A struct with information about the found route.
  */
-static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst, void *buffer, int16 bufferSize)
+static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int16 bufferSize)
 {
 	uint16 packedCur;
-	Pathfinder_Data res;
+	PathType res;
 
 	res.packed    = packedSrc;
 	res.score     = 0;
@@ -1204,7 +1263,7 @@ static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst
 
 		/* Try going directly to the destination tile */
 		direction = Tile_GetDirectionPacked(packedCur, packedDst) / 32;
-		packedNext = packedCur + s_mapDirection[direction];
+		packedNext = packedCur + AdjacentCell[direction];
 
 		/* Check for valid movement towards the tile */
 		score = Script_Unit_Pathfind_GetScore(packedNext, direction);
@@ -1216,16 +1275,16 @@ static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst
 			bool foundCounterclockwise = false;
 			bool foundClockwise = false;
 			int16 routeSize;
-			Pathfinder_Data routes[2];
+			PathType routes[2];
 			uint8 routesBuffer[2][102];
-			Pathfinder_Data *bestRoute;
+			PathType *bestRoute;
 
 			while (true) {
 				if (packedNext == packedDst) break;
 
 				/* Find the first valid tile on the (direct) route. */
 				dir = Tile_GetDirectionPacked(packedNext, packedDst) / 32;
-				packedNext += s_mapDirection[dir];
+				packedNext += AdjacentCell[dir];
 				if (Script_Unit_Pathfind_GetScore(packedNext, dir) > 255) continue;
 
 				/* Try to find a connection between our last valid tile and the new valid tile */
@@ -1233,13 +1292,13 @@ static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst
 				routes[1].score     = 0;
 				routes[1].routeSize = 0;
 				routes[1].buffer    = routesBuffer[0];
-				foundCounterclockwise = Script_Unit_Pathfinder_Connect(packedNext, &routes[1], -1, direction);
+				foundCounterclockwise = Find_Path_Connect(packedNext, &routes[1], -1, direction);
 
 				routes[0].packed    = packedCur;
 				routes[0].score     = 0;
 				routes[0].routeSize = 0;
 				routes[0].buffer    = routesBuffer[1];
-				foundClockwise = Script_Unit_Pathfinder_Connect(packedNext, &routes[0], 1, direction);
+				foundClockwise = Find_Path_Connect(packedNext, &routes[0], 1, direction);
 
 				if (foundCounterclockwise || foundClockwise) break;
 
@@ -1247,7 +1306,7 @@ static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst
 					if (packedNext == packedDst) break;
 
 					dir = Tile_GetDirectionPacked(packedNext, packedDst) / 32;
-					packedNext += s_mapDirection[dir];
+					packedNext += AdjacentCell[dir];
 				} while (Script_Unit_Pathfind_GetScore(packedNext, dir) <= 255);
 			}
 
@@ -1280,7 +1339,7 @@ static Pathfinder_Data Script_Unit_Pathfinder(uint16 packedSrc, uint16 packedDst
 
 	if (res.routeSize < bufferSize) res.buffer[res.routeSize++] = 0xFF;
 
-	Script_Unit_Pathfinder_Smoothen(&res);
+	Optimize_Moves(&res);
 
 	return res;
 }
@@ -1315,10 +1374,10 @@ uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
 	}
 
 	if (u->route[0] == 0xFF) {
-		Pathfinder_Data res;
+		PathType res;
 		uint8 buffer[42];
 
-		res = Script_Unit_Pathfinder(packedSrc, packedDst, buffer, 40);
+		res = Find_Path(packedSrc, packedDst, buffer, 40);
 
 		memcpy(u->route, res.buffer, min(res.routeSize, 14));
 

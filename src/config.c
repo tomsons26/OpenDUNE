@@ -24,7 +24,7 @@ bool g_enableVoices = true;
  * @param config The address where the config will be stored.
  * @return True if loading and decoding is successful.
  */
-bool Config_Read(const char *filename, ConfigType *config)
+bool Decode_Config_Struct(const char *filename, ConfigType *config)
 {
 	FILE *f;
 	size_t read;
@@ -60,7 +60,7 @@ bool Config_Read(const char *filename, ConfigType *config)
  * @param config The address where the config will be read.
  * @return True if successful.
  */
-bool Config_Write(const char * filename, ConfigType *config)
+bool Encode_Config_Struct(const char * filename, ConfigType *config)
 {
 	FILE *f;
 	size_t write;

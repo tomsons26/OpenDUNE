@@ -77,7 +77,7 @@ uint16 Animate_Frame_Count(void *handle)
  * @param frame The frame of animation.
  * @return The offset for the animation from the beginning of the fileContent.
  */
-static uint32 WSA_GetFrameOffset_FromMemory(SysAnimHeaderType *header, uint16 frame)
+static uint32 Get_Resident_Frame_Offset(SysAnimHeaderType *header, uint16 frame)
 {
 	uint16 lengthAnimation = 0;
 	uint32 animationFrame;
@@ -102,11 +102,11 @@ static uint32 WSA_GetFrameOffset_FromMemory(SysAnimHeaderType *header, uint16 fr
  * @param frame The frame of animation.
  * @return The offset for the animation from the beginning of the file.
  */
-static uint32 WSA_GetFrameOffset_FromDisk(uint8 fileno, uint16 frame)
+static uint32 Get_File_Frame_Offset(uint8 fileno, uint16 frame)
 {
 	uint32 offset;
 
-	File_Seek(fileno, frame * 4 + 10, 0);
+	Seek_File(fileno, frame * 4 + 10, 0);
 	offset = File_Read_LE32(fileno);
 
 	return offset;
@@ -136,8 +136,8 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 		uint32 length;
 		uint8 *positionFrame;
 
-		positionStart = WSA_GetFrameOffset_FromMemory(header, frame);
-		positionEnd = WSA_GetFrameOffset_FromMemory(header, frame + 1);
+		positionStart = Get_Resident_Frame_Offset(header, frame);
+		positionEnd = Get_Resident_Frame_Offset(header, frame + 1);
 		length = positionEnd - positionStart;
 
 		positionFrame = header->fileContent + positionStart;
@@ -153,8 +153,8 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 
 		fileno = File_Open(header->filename, FILE_MODE_READ);
 
-		positionStart = WSA_GetFrameOffset_FromDisk(fileno, frame);
-		positionEnd = WSA_GetFrameOffset_FromDisk(fileno, frame + 1);
+		positionStart = Get_File_Frame_Offset(fileno, frame);
+		positionEnd = Get_File_Frame_Offset(fileno, frame + 1);
 		length = positionEnd - positionStart;
 
 		if (positionStart == 0 || positionEnd == 0 || length == 0) {
