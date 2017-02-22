@@ -164,7 +164,7 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 
 		buffer += header->bufferLength - length;
 
-		File_Seek(fileno, positionStart + lengthSpecial, 0);
+		Seek_File(fileno, positionStart + lengthSpecial, 0);
 		res = File_Read(fileno, buffer, length);
 		File_Close(fileno);
 
@@ -223,7 +223,7 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 		lengthSpecial = 0x300;
 	}
 
-	lengthFileContent = File_Seek(fileno, 0, 2);
+	lengthFileContent = Seek_File(fileno, 0, 2);
 
 	lengthAnimation = 0;
 	if (fileheader.animationOffsetStart != 0) {
@@ -296,23 +296,23 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 	if (wsaSize >= bufferSizeOptimal) {
 		header->fileContent = buffer + header->bufferLength;
 
-		File_Seek(fileno, 10, 0);
+		Seek_File(fileno, 10, 0);
 		File_Read(fileno, header->fileContent, lengthHeader);
-		File_Seek(fileno, lengthAnimation + lengthSpecial, 1);
+		Seek_File(fileno, lengthAnimation + lengthSpecial, 1);
 		File_Read(fileno, header->fileContent + lengthHeader, lengthFileContent - lengthHeader);
 
 		header->flags.dataInMemory = true;
-		if (WSA_GetFrameOffset_FromMemory(header, header->frames + 1) == 0) header->flags.noAnimation = true;
+		if (Get_Resident_Frame_Offset(header, header->frames + 1) == 0) header->flags.noAnimation = true;
 	} else {
 		header->flags.dataOnDisk = true;
-		if (WSA_GetFrameOffset_FromDisk(fileno, header->frames + 1) == 0) header->flags.noAnimation = true;
+		if (Get_File_Frame_Offset(fileno, header->frames + 1) == 0) header->flags.noAnimation = true;
 	}
 
 	{
 		uint8 *b;
 		b = buffer + header->bufferLength - lengthAnimation;
 
-		File_Seek(fileno, lengthHeader + lengthSpecial + 10, 0);
+		Seek_File(fileno, lengthHeader + lengthSpecial + 10, 0);
 		File_Read(fileno, b, lengthAnimation);
 		File_Close(fileno);
 
