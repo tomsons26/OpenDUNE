@@ -5,6 +5,11 @@
 
 #include "format80.h"
 
+///LCW (Lempel-Castle-Welch) is an LZ style compression written 
+//by Louis Castle in the very early days of Westwood. It is
+//used in many of Westwoods games in various file formats.
+//It is also incorrectly known as Format80.
+
 /**
  * Decode a memory fragment which is encoded with 'format80'.
  * @param dest The place the decoded fragment will be loaded.
@@ -12,7 +17,7 @@
  * @param destLength The length of the destination buffer.
  * @return The length of decoded data.
  */
-uint16 Format80_Decode(uint8 *dest, const uint8 *source, uint16 destLength)
+uint16 LCW_Uncomp(uint8 *dest, const uint8 *source, uint16 destLength)
 {
 	uint8 *start = dest;
 	uint8 *end = dest + destLength;

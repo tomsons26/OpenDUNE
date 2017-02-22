@@ -1035,7 +1035,7 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 	}
 
 	if ((spriteFlags & 0x2) == 0) {
-		Format80_Decode(g_spriteBuffer, sprite, spriteDecodedLength);
+		LCW_Uncomp(g_spriteBuffer, sprite, spriteDecodedLength);
 
 		sprite = g_spriteBuffer;
 	}

@@ -172,7 +172,7 @@ static uint32 Sprites_Decode(uint8 *source, uint8 *dest)
 			source += 6;
 			source += READ_LE_UINT16(source);
 			source += 2;
-			size = Format80_Decode(dest, source, 0xFFFF);
+			size = LCW_Uncomp(dest, source, 0xFFFF);
 			break;
 
 		default: break;
@@ -387,7 +387,7 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
 			sprite += 16;
 		}
 
-		Format80_Decode(buf, sprite, size);
+		LCW_Uncomp(buf, sprite, size);
 
 		memcpy(dst, buf, size);
 	}

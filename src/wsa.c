@@ -33,7 +33,7 @@ typedef struct WSAFlags {
 /**
  * The header of a WSA file that is being read.
  */
-typedef struct WSAHeader {
+typedef struct SysAnimHeaderType {
 	uint16 frameCurrent;                                    /*!< Current frame displaying. */
 	uint16 frames;                                          /*!< Total frames in WSA. */
 	uint16 width;                                           /*!< Width of WSA. */
@@ -43,31 +43,31 @@ typedef struct WSAHeader {
 	uint8 *fileContent;                                     /*!< The content of the file. */
 	char   filename[13];                                    /*!< Filename of WSA. */
 	WSAFlags flags;                                         /*!< Flags of WSA. */
-} WSAHeader;
+} SysAnimHeaderType;
 
 MSVC_PACKED_BEGIN
 /**
  * The header of a WSA file as on the disk.
  */
-typedef struct WSAFileHeader {
+typedef struct WSA_FileHeaderType {
 	/* 0000(2)   */ uint16 frames;                     /*!< Amount of animation frames in this WSA. */
 	/* 0002(2)   */ uint16 width;                      /*!< Width of WSA. */
 	/* 0004(2)   */ uint16 height;                     /*!< Height of WSA. */
 	/* 0006(2)   */ uint16 requiredBufferSize;         /*!< The size the buffer has to be at least to process this WSA. */
-	/* 0008(2)   */ uint16 isSpecial;                  /*!< Indicates if the WSA has a special buffer. */
+	/* 0008(2)   */ uint16 flags;                      /*!< Indicates if the WSA has a special buffer. */
 	/* 000A(4)   */ uint32 animationOffsetStart;       /*!< Offset where animation starts. */
 	/* 000E(4)   */ uint32 animationOffsetEnd;         /*!< Offset where animation ends. */
-} WSAFileHeader;
+} WSA_FileHeaderType;
 
 /**
  * Get the amount of frames a WSA has.
  */
-uint16 WSA_GetFrameCount(void *wsa)
+uint16 Animate_Frame_Count(void *handle)
 {
-	WSAHeader *header = (WSAHeader *)wsa;
+	SysAnimHeaderType *sys_header = (SysAnimHeaderType *)handle;
 
-	if (header == NULL) return 0;
-	return header->frames;
+	if (sys_header == NULL) return 0;
+	return sys_header->frames;
 }
 
 /**
@@ -77,7 +77,7 @@ uint16 WSA_GetFrameCount(void *wsa)
  * @param frame The frame of animation.
  * @return The offset for the animation from the beginning of the fileContent.
  */
-static uint32 WSA_GetFrameOffset_FromMemory(WSAHeader *header, uint16 frame)
+static uint32 WSA_GetFrameOffset_FromMemory(SysAnimHeaderType *header, uint16 frame)
 {
 	uint16 lengthAnimation = 0;
 	uint32 animationFrame;
@@ -121,7 +121,7 @@ static uint32 WSA_GetFrameOffset_FromDisk(uint8 fileno, uint16 frame)
  */
 static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 {
-	WSAHeader *header = (WSAHeader *)wsa;
+	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 	uint16 lengthSpecial;
 	uint8 *buffer;
 
@@ -171,7 +171,7 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 		if (res != length) return 0;
 	}
 
-	Format80_Decode(header->buffer, buffer, header->bufferLength);
+	LCW_Uncomp(header->buffer, buffer, header->bufferLength);
 
 	if (header->flags.displayInBuffer) {
 		Format40_Decode(dst, header->buffer);
@@ -193,8 +193,8 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserveDisplayFrame)
 {
 	WSAFlags flags;
-	WSAFileHeader fileheader;
-	WSAHeader *header;
+	WSA_FileHeaderType fileheader;
+	SysAnimHeaderType *header;
 	uint32 bufferSizeMinimal;
 	uint32 bufferSizeOptimal;
 	uint16 lengthHeader;
@@ -212,12 +212,12 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 	fileheader.width = File_Read_LE16(fileno);
 	fileheader.height = File_Read_LE16(fileno);
 	fileheader.requiredBufferSize = File_Read_LE16(fileno);
-	fileheader.isSpecial = File_Read_LE16(fileno);
+	fileheader.flags = File_Read_LE16(fileno);
 	fileheader.animationOffsetStart = File_Read_LE32(fileno);
 	fileheader.animationOffsetEnd = File_Read_LE32(fileno);
 
 	lengthSpecial = 0;
-	if (fileheader.isSpecial) {
+	if (fileheader.flags) {
 		flags.isSpecial = true;
 
 		lengthSpecial = 0x300;
@@ -240,7 +240,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 		displaySize = fileheader.width * fileheader.height;
 	}
 
-	bufferSizeMinimal = displaySize + fileheader.requiredBufferSize - 33 + sizeof(WSAHeader);
+	bufferSizeMinimal = displaySize + fileheader.requiredBufferSize - 33 + sizeof(SysAnimHeaderType);
 	bufferSizeOptimal = bufferSizeMinimal + lengthFileContent;
 
 	if (wsaSize > 1 && wsaSize < bufferSizeMinimal) {
@@ -268,8 +268,8 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 		flags.notmalloced = true;
 	}
 
-	header = (WSAHeader *)wsa;
-	buffer = (uint8 *)wsa + sizeof(WSAHeader);
+	header = (SysAnimHeaderType *)wsa;
+	buffer = (uint8 *)wsa + sizeof(SysAnimHeaderType);
 
 	header->flags = flags;
 
@@ -287,7 +287,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 	header->frames       = fileheader.frames;
 	header->width        = fileheader.width;
 	header->height       = fileheader.height;
-	header->bufferLength = fileheader.requiredBufferSize + 33 - sizeof(WSAHeader);
+	header->bufferLength = fileheader.requiredBufferSize + 33 - sizeof(SysAnimHeaderType);
 	header->buffer       = buffer;
 	strncpy(header->filename, filename, sizeof(header->filename));
 
@@ -316,7 +316,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 		File_Read(fileno, b, lengthAnimation);
 		File_Close(fileno);
 
-		Format80_Decode(buffer, b, header->bufferLength);
+		LCW_Uncomp(buffer, b, header->bufferLength);
 	}
 	return wsa;
 }
@@ -327,7 +327,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
  */
 void WSA_Unload(void *wsa)
 {
-	WSAHeader *header = (WSAHeader *)wsa;
+	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 
 	if (wsa == NULL) return;
 	if (!header->flags.malloced) return;
@@ -407,7 +407,7 @@ static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 wi
  */
 bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen screenID)
 {
-	WSAHeader *header = (WSAHeader *)wsa;
+	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 	uint8 *dst;
 
 	int16 frameDiff;
@@ -418,7 +418,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 	if (frameNext >= header->frames) return false;
 
 	if (header->flags.displayInBuffer) {
-		dst = (uint8 *)wsa + sizeof(WSAHeader);
+		dst = (uint8 *)wsa + sizeof(SysAnimHeaderType);
 	} else {
 		dst = GFX_Screen_Get_ByIndex(screenID);
 		dst += posX + posY * SCREEN_WIDTH;
