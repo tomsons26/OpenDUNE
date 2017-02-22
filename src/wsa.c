@@ -190,7 +190,7 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
  * @param reserveDisplayFrame True if we need to reserve the display frame.
  * @return Address of loaded WSA file, or NULL.
  */
-void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserveDisplayFrame)
+void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reserveDisplayFrame)
 {
 	WSAFlags flags;
 	WSA_FileHeaderType fileheader;
@@ -325,7 +325,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
  * Unload the WSA.
  * @param wsa The pointer to the WSA.
  */
-void WSA_Unload(void *wsa)
+void Close_Animation(void *wsa)
 {
 	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 

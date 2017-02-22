@@ -218,7 +218,7 @@ const MusicData g_table_musics[] = {
 };
 
 /**
- * Mapping soundID -> voice.
+ * Mapping VocType -> voice.
  */
 const uint16 g_table_voiceMapping[] = {
 	0xFFFF, /*   0 */

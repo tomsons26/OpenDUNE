@@ -12,9 +12,9 @@
 #include "../file.h"
 #include "../string.h"
 
-Font *g_fontIntro = NULL;
-Font *g_fontNew6p = NULL;
-Font *g_fontNew8p = NULL;
+Font *IntroFontPtr = NULL;
+Font *FontNew6Ptr = NULL;
+Font *FontNew8Ptr = NULL;
 
 int8 g_fontCharOffset = -1;
 
@@ -126,17 +126,17 @@ void Font_Select(Font *f)
 	g_fontCurrent = f;
 }
 
-bool Font_Init(void)
+bool Init_Fonts(void)
 {
-	g_fontIntro = Font_LoadFile("INTRO.FNT");
+	IntroFontPtr = Font_LoadFile("INTRO.FNT");
 	if ((g_config.Language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
-		g_fontNew6p = Font_LoadFile("new6pg.fnt");
+		FontNew6Ptr = Font_LoadFile("new6pg.fnt");
 	} else {
-		g_fontNew6p = Font_LoadFile("new6p.fnt");
+		FontNew6Ptr = Font_LoadFile("new6p.fnt");
 	}
-	g_fontNew8p = Font_LoadFile("new8p.fnt");
+	FontNew8Ptr = Font_LoadFile("new8p.fnt");
 
-	return g_fontNew8p != NULL;
+	return FontNew8Ptr != NULL;
 }
 
 static void Font_Unload(Font *f) {
@@ -149,7 +149,7 @@ static void Font_Unload(Font *f) {
 
 void Font_Uninit(void)
 {
-	Font_Unload(g_fontIntro); g_fontIntro = NULL;
-	Font_Unload(g_fontNew6p); g_fontNew6p = NULL;
-	Font_Unload(g_fontNew8p); g_fontNew8p = NULL;
+	Font_Unload(IntroFontPtr); IntroFontPtr = NULL;
+	Font_Unload(FontNew6Ptr); FontNew6Ptr = NULL;
+	Font_Unload(FontNew8Ptr); FontNew8Ptr = NULL;
 }

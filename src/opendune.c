@@ -1143,7 +1143,7 @@ static void GameLoop_Main(void)
  */
 static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int frame_rate)
 {
-	if (!Font_Init()) {
+	if (!Init_Fonts()) {
 		Error(
 			"--------------------------\n"
 			"ERROR LOADING DATA FILE\n"
@@ -1170,7 +1170,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	GFX_Init();
 	GFX_ClearScreen(SCREEN_ACTIVE);
 
-	Font_Select(g_fontNew8p);
+	Font_Select(FontNew8Ptr);
 
 	g_palette_998A = calloc(256 * 3, sizeof(uint8));
 

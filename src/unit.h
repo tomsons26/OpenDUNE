@@ -217,7 +217,7 @@ typedef struct ActionInfo {
 	const char *name;                                       /*!< Name of Action. */
 	uint16 switchType;                                      /*!< When going to new mode, how do we handle it? 0: queue if needed, 1: change immediately, 2: run via subroutine. */
 	uint16 selectionType;                                   /*!< Selection type attached to this action. */
-	uint16 soundID;                                         /*!< The sound played when unit is a Foot unit. */
+	uint16 VocType;                                         /*!< The sound played when unit is a Foot unit. */
 } ActionInfo;
 
 struct Team;

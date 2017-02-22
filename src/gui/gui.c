@@ -526,9 +526,9 @@ void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgCol
 
 	if ((arg12low != displayedarg12low && arg12low != 0) || string == NULL) {
 		switch (arg12low) {
-			case 1:  Font_Select(g_fontNew6p); break;
-			case 2:  Font_Select(g_fontNew8p); break;
-			default: Font_Select(g_fontNew8p); break;
+			case 1:  Font_Select(FontNew6Ptr); break;
+			case 2:  Font_Select(FontNew8Ptr); break;
+			default: Font_Select(FontNew8Ptr); break;
 		}
 
 		displayedarg12low = arg12low;
@@ -2726,9 +2726,9 @@ static void GUI_FactoryWindow_Init(void)
 
 	oi = g_factoryWindowItems[0].objectInfo;
 
-	wsa = WSA_LoadFile(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
+	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
 	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
-	WSA_Unload(wsa);
+	Close_Animation(wsa);
 
 	GUI_Mouse_Hide_Safe();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -3400,9 +3400,9 @@ void GUI_FactoryWindow_DrawDetails(void)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	wsa = WSA_LoadFile(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
+	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
 	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
-	WSA_Unload(wsa);
+	Close_Animation(wsa);
 
 	if (g_factoryWindowConstructionYard) {
 		const StructureInfo *si;

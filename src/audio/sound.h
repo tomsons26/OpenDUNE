@@ -24,7 +24,7 @@ typedef struct MusicData {
 typedef struct Feedback {
 	uint16 voiceId[NUM_SPEECH_PARTS]; /*!< English spoken text. */
 	uint16 messageId;                 /*!< Message to display in the viewport when audio is disabled. */
-	uint16 soundId;                   /*!< Sound. */
+	uint16 VocType;                   /*!< Sound. */
 } Feedback;
 
 /** Number of voices in the game. */

@@ -83,7 +83,7 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 
 	memcpy(g_palette_998A, g_palette1, 256 * 3);
 
-	Font_Select(g_fontIntro);
+	Font_Select(IntroFontPtr);
 
 	GFX_Screen_SetActive(SCREEN_0);
 
@@ -246,7 +246,7 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 	GUI_InitColors(colors, 0, 15);
 
-	Font_Select(g_fontIntro);
+	Font_Select(IntroFontPtr);
 }
 
 /**
@@ -348,7 +348,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			}
 
 			snprintf(filenameBuffer, sizeof(filenameBuffer), "%s.WSA", animation->string);
-			wsa = WSA_LoadFile(filenameBuffer, wsa, wsaSize, wsaReservedDisplayFrame);
+			wsa = Open_Animation(filenameBuffer, wsa, wsaSize, wsaReservedDisplayFrame);
 		}
 
 		addFrameCount = 0;
@@ -430,7 +430,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			}
 
 			if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) {
-				WSA_Unload(wsa);
+				Close_Animation(wsa);
 				return;
 			}
 
@@ -466,7 +466,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			GUI_SetPaletteAnimated(g_palette_998A, 45);
 		}
 
-		WSA_Unload(wsa);
+		Close_Animation(wsa);
 
 		animationMode++;
 		animation++;
@@ -650,11 +650,11 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 			switch(*text) {
 			case 1:
 				text++;
-				Font_Select(g_fontNew6p);
+				Font_Select(FontNew6Ptr);
 				break;
 			case 2:
 				text++;
-				Font_Select(g_fontNew8p);
+				Font_Select(FontNew8Ptr);
 				break;
 			case 3:
 			case 4:
@@ -740,9 +740,9 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 			if ((int16)strings[i].y < g_curWidgetHeight) {
 				GFX_Screen_SetActive(backScreenID);
 
-				Font_Select(g_fontNew8p);
+				Font_Select(FontNew8Ptr);
 
-				if (strings[i].charHeight != g_fontCurrent->height) Font_Select(g_fontNew6p);
+				if (strings[i].charHeight != g_fontCurrent->height) Font_Select(FontNew6Ptr);
 
 				GUI_DrawText(strings[i].text, strings[i].x, strings[i].y + g_curWidgetYBase, 255, 0);
 
@@ -950,7 +950,7 @@ static void Gameloop_Logos(void)
 	File_ReadBlockFile("WESTWOOD.PAL", g_palette_998A, 256 * 3);
 
 	frame = 0;
-	wsa = WSA_LoadFile("WESTWOOD.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
+	wsa = Open_Animation("WESTWOOD.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
 	WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0);
 
 	GUI_SetPaletteAnimated(g_palette_998A, 60);
@@ -961,7 +961,7 @@ static void Gameloop_Logos(void)
 
 	while (WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
 	
-	WSA_Unload(wsa);
+	Close_Animation(wsa);
 
 	if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
 	Voice_LoadVoices(0xFFFF);

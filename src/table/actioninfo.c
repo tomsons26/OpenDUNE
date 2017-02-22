@@ -13,7 +13,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Attack",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_TARGET,
-		/* soundID       */ 21
+		/* VocType       */ 21
 	},
 
 	{ /* 1 */
@@ -21,7 +21,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Move",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_TARGET,
-		/* soundID       */ 22
+		/* VocType       */ 22
 	},
 
 	{ /* 2 */
@@ -29,7 +29,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Retreat",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 21
+		/* VocType       */ 21
 	},
 
 	{ /* 3 */
@@ -37,7 +37,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Guard",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 21
+		/* VocType       */ 21
 	},
 
 	{ /* 4 */
@@ -45,7 +45,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Area Guard",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 5 */
@@ -53,7 +53,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Harvest",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_TARGET,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 6 */
@@ -61,7 +61,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Return",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 21
+		/* VocType       */ 21
 	},
 
 	{ /* 7 */
@@ -69,7 +69,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Stop",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 21
+		/* VocType       */ 21
 	},
 
 	{ /* 8 */
@@ -77,7 +77,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Ambush",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 9 */
@@ -85,7 +85,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Sabotage",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 10 */
@@ -93,7 +93,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Die",
 		/* switchType    */ 1,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 0xFFFF
+		/* VocType       */ 0xFFFF
 	},
 
 	{ /* 11 */
@@ -101,7 +101,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Hunt",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 12 */
@@ -109,7 +109,7 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Deploy",
 		/* switchType    */ 0,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	},
 
 	{ /* 13 */
@@ -117,6 +117,6 @@ const ActionInfo g_table_actionInfo[ACTION_MAX] = {
 		/* name          */ "Destruct",
 		/* switchType    */ 1,
 		/* selectionType */ SELECTIONTYPE_UNIT,
-		/* soundID       */ 20
+		/* VocType       */ 20
 	}
 };

@@ -373,7 +373,7 @@ void Sound_Output_Feedback(uint16 index)
 	}
 
 	if (g_enableVoices == 0 || g_gameConfig.sounds == 0) {
-		Driver_Sound_Play(g_feedback[index].soundId, 0xFF);
+		Driver_Sound_Play(g_feedback[index].VocType, 0xFF);
 
 		g_viewportMessageText = String_Get_ByIndex(g_feedback[index].messageId);
 

@@ -413,9 +413,9 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
 		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		Close_Animation(wsa);
 	}
 
 	GUI_DrawSprite(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
@@ -533,9 +533,9 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
 		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		Close_Animation(wsa);
 	}
 
 	GUI_DrawSprite(SCREEN_1, g_sprites[397 + houseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
@@ -1085,7 +1085,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	wsa = NULL;
 
 	if (wsaFilename != NULL) {
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
 	}
 
 	step = 0;
@@ -1240,7 +1240,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 					if (loopAnimation) {
 						frame = 0;
 					} else {
-						WSA_Unload(wsa);
+						Close_Animation(wsa);
 						wsa = NULL;
 					}
 				}
@@ -1259,7 +1259,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		dirty = false;
 	}
 
-	if (wsa != NULL) WSA_Unload(wsa);
+	if (wsa != NULL) Close_Animation(wsa);
 
 	GFX_Screen_SetActive(SCREEN_2);
 	GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);

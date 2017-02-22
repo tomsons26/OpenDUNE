@@ -17,15 +17,15 @@ typedef struct Font {
 	FontChar *chars;
 } Font;
 
-extern Font *g_fontIntro;
-extern Font *g_fontNew6p;
-extern Font *g_fontNew8p;
+extern Font *IntroFontPtr;
+extern Font *FontNew6Ptr;
+extern Font *FontNew8Ptr;
 
 extern int8 g_fontCharOffset;
 
 extern Font *g_fontCurrent;
 
-extern bool Font_Init(void);
+extern bool Init_Fonts(void);
 extern void Font_Uninit(void);
 extern uint16 Font_GetCharWidth(unsigned char c);
 extern uint16 Font_GetStringWidth(const char *string);
