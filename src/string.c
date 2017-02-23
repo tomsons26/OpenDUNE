@@ -18,7 +18,7 @@
 static char **s_strings = NULL;
 static uint16 s_stringsCount = 0;
 
-const char * const g_languageSuffixes[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "ITA", "SPA" };
+const char * const LanguageString[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "ITA", "SPA" };
 static const char * const Dipthong = " etainosrlhcdupmtasio wb rnsdalmh ieorasnrtlc synstcloer dtgesionr ufmsw tep.icae oiadur laeiyodeia otruetoakhlr eiu,.oansrctlaileoiratpeaoip bm";
 
 //This is "Dipthong"
@@ -61,9 +61,9 @@ const char *String_GenerateFilename(const char *name)
 {
 	static char filename[14];
 
-	assert(g_config.Language < lengthof(g_languageSuffixes));
+	assert(g_config.Language < lengthof(LanguageString));
 
-	snprintf(filename, sizeof(filename), "%s.%s", name, g_languageSuffixes[g_config.Language]);
+	snprintf(filename, sizeof(filename), "%s.%s", name, LanguageString[g_config.Language]);
 	return filename;
 }
 

@@ -17,7 +17,7 @@ typedef enum Language {
 	LANGUAGE_INVALID     = 0xFF
 } Language;
 
-extern const char * const g_languageSuffixes[LANGUAGE_MAX];
+extern const char * const LanguageString[LANGUAGE_MAX];
 
 extern uint16 String_Decompress(const char *source, char *dest);
 extern const char *String_GenerateFilename(const char *name);

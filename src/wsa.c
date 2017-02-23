@@ -345,6 +345,8 @@ void Close_Animation(void *wsa)
  * @param screenID the screen to write to
  * @param src The source for the frame.
  */
+
+//This was in BUFF.ASM, nothing to do with WSA but that it's only called by WSA code by Dune 2
 static void Buffer_Bitblit_To_LogicPage(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
 {
 	int16 left;

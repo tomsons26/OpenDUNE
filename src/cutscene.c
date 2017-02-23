@@ -706,7 +706,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 			case 2:	/* 2 : display new picture */
 				if (spriteID == 525) spriteID = 514;
 
-				GUI_DrawSprite(spriteScreenID, g_sprites[spriteID], positions[spritePos].x, positions[spritePos].y, windowID, 0x4000);
+				Draw_Shape(spriteScreenID, g_sprites[spriteID], positions[spritePos].x, positions[spritePos].y, windowID, 0x4000);
 
 				counter = 8;
 				stage++;

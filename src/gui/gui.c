@@ -800,7 +800,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 	GUI_Widget_DrawBorder(1, 1, 1);
 
 	if (spriteID != 0xFFFF) {
-		GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], 7, 8, 1, 0x4000);
+		Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], 7, 8, 1, 0x4000);
 		GUI_Widget_SetProperties(1, g_curWidgetXBase + 5, g_curWidgetYBase + 8, g_curWidgetWidth - 7, g_curWidgetHeight - 16);
 	} else {
 		GUI_Widget_SetProperties(1, g_curWidgetXBase + 1, g_curWidgetYBase + 8, g_curWidgetWidth - 2, g_curWidgetHeight - 16);
@@ -918,12 +918,12 @@ uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter)
  * 0A: [16 bytes] = house colors (if flags & 0x01)
  * [1]A: xx bytes = data (row or Format80 encoded if flags & 0x02)
  */
-void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...)
+void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...)
 {
 	static const uint16 PredTable[8] = {1, 3, 2, 5, 4, 3, 2, 1};
-	static uint16 s_variable_5E     = 0;
-	static uint16 s_variable_70     = 1;
-	static uint16 s_variable_72     = 0x8B55;
+	static uint16 PredCount     = 0;
+	static uint16 PredValue     = 1;
+	static uint16 PartialPred     = 0x8B55;
 	static uint16 s_variable_74     = 0x51EC;
 
 	va_list ap;
@@ -968,13 +968,22 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 	}
 
 	if ((flags & 0x200) != 0) {
-		s_variable_5E = (s_variable_5E + 1) % 8;
-		s_variable_70 = PredTable[s_variable_5E];
-		s_variable_74 = 0x0;
-		s_variable_72 = 0x100;
+		PredCount = (PredCount + 1) % 8;
+		PredValue = PredTable[PredCount];
+		s_variable_74 = 0x0; // this is PredCount too.....
+		/*
+		++PredCount;
+        PredCount &= 7u;
+        v8 = PredCount;
+        LOBYTE(v8) = PredTable[PredCount];
+        PredValue = v8;
+        PartialCount = 0;
+        PartialPred = 0x100;
+		*/
+		PartialPred = 0x100;
 	}
 
-	if ((flags & 0x1000) != 0) s_variable_72 = (uint16)va_arg(ap, int);
+	if ((flags & 0x1000) != 0) PartialPred = (uint16)va_arg(ap, int);
 
 	if ((flags & 0x4) != 0) {
 		zoomRatioX = (uint16)va_arg(ap, int);
@@ -1220,13 +1229,13 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 						}
 
 						case 2:	/* blur ? */
-							s_variable_74 += s_variable_72;
+							s_variable_74 += PartialPred;
 
 							if ((s_variable_74 & 0xFF00) == 0) {
 								*buf = v;
 							} else {
 								s_variable_74 &= 0xFF;
-								*buf = buf[s_variable_70];
+								*buf = buf[PredValue];
 							}
 							break;
 
@@ -1259,13 +1268,13 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 						}
 
 						case 6:	/* blur ? + sprite has house colors */
-							s_variable_74 += s_variable_72;
+							s_variable_74 += PartialPred;
 
 							if ((s_variable_74 & 0xFF00) == 0) {
 								*buf = houseColors[v];
 							} else {
 								s_variable_74 &= 0xFF;
-								*buf = buf[s_variable_70];
+								*buf = buf[PredValue];
 							}
 							break;
 					}
@@ -1961,7 +1970,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	g_viewport_forceRedraw = true;
 
 	Sprites_LoadImage("SCREEN.CPS", SCREEN_1, NULL);
-	GUI_DrawSprite(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
+	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
 
@@ -2100,7 +2109,7 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 		creditsNew += 1;
 	}
 
-	GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[12], 0, 0, 4, 0x4000);
+	Draw_Shape(SCREEN_ACTIVE, g_sprites[12], 0, 0, 4, 0x4000);
 
 	g_playerCredits = creditsOld;
 
@@ -2114,14 +2123,14 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 		spriteID = (charCreditsOld[i] == ' ') ? 13 : charCreditsOld[i] - 34;
 
 		if (charCreditsOld[i] != charCreditsNew[i]) {
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, offset - creditsAnimationOffset, 4, 0x4000);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, offset - creditsAnimationOffset, 4, 0x4000);
 			if (creditsAnimationOffset == 0) continue;
 
 			spriteID = (charCreditsNew[i] == ' ') ? 13 : charCreditsNew[i] - 34;
 
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, offset + 8 - creditsAnimationOffset, 4, 0x4000);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, offset + 8 - creditsAnimationOffset, 4, 0x4000);
 		} else {
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, 1, 4, 0x4000);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, 1, 4, 0x4000);
 		}
 	}
 
@@ -2695,7 +2704,7 @@ static void GUI_FactoryWindow_Init(void)
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
 	Sprites_LoadImage("CHOAM.CPS", SCREEN_1, NULL);
-	GUI_DrawSprite(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
+	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
 
@@ -2715,9 +2724,9 @@ static void GUI_FactoryWindow_Init(void)
 
 		oi = item->objectInfo;
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0x100, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0x100, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0);
 		}
 	}
 
@@ -2900,14 +2909,14 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 
 	GFX_Screen_Copy2(16, 16, 176, 16, width, height, SCREEN_1, SCREEN_1, false);
 
-	GUI_DrawSprite(SCREEN_1, sprite, 16, 16, 0, 0x100, g_remap, 1);
+	Draw_Shape(SCREEN_1, sprite, 16, 16, 0, 0x100, g_remap, 1);
 
 	for (i = 0; i < 20; i++) {
 		GUI_StrategicMap_AnimateArrows();
 
 		if (data[i].index != selected) continue;
 
-		GUI_DrawSprite(SCREEN_1, g_sprites[505 + data[i].arrow], data[i].offsetX + 16 - x, data[i].offsetY + 16 - y, 0, 0x100, g_remap, 1);
+		Draw_Shape(SCREEN_1, g_sprites[505 + data[i].arrow], data[i].offsetX + 16 - x, data[i].offsetY + 16 - y, 0, 0x100, g_remap, 1);
 	}
 
 	for (i = 0; i < 4; i++) {
@@ -3032,7 +3041,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 
 		GFX_Screen_Copy2(data[i].offsetX, data[i].offsetY, i * 16, 152, 16, 16, SCREEN_1, SCREEN_1, false);
 		GFX_Screen_Copy2(data[i].offsetX, data[i].offsetY, i * 16, 0, 16, 16, SCREEN_1, SCREEN_1, false);
-		GUI_DrawSprite(SCREEN_1, g_sprites[505 + data[i].arrow], i * 16, 152, 0, 0x100, g_remap, 1);
+		Draw_Shape(SCREEN_1, g_sprites[505 + data[i].arrow], i * 16, 152, 0, 0x100, g_remap, 1);
 	}
 
 	count = i;
@@ -3132,7 +3141,7 @@ static void GUI_StrategicMap_DrawRegion(uint8 houseId, uint16 region, bool progr
 
 	sprite = g_sprites[477 + region];
 
-	GUI_DrawSprite(SCREEN_1, sprite, x + 8, y + 24, 0, 0x100, g_remap, 1);
+	Draw_Shape(SCREEN_1, sprite, x + 8, y + 24, 0, 0x100, g_remap, 1);
 
 	if (!progressive) return;
 
@@ -3181,7 +3190,7 @@ static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 			if (region != 0) {
 				char buffer[81];
 
-				sprintf(key, "%sTXT%d", g_languageSuffixes[g_config.Language], region);
+				sprintf(key, "%sTXT%d", LanguageString[g_config.Language], region);
 
 				if (Ini_GetString(category, key, NULL, buffer, sizeof(buffer), g_fileRegionINI) != NULL) {
 					GUI_StrategicMap_DrawText(buffer);
@@ -3413,7 +3422,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 		uint16 i;
 		uint16 j;
 
-		GUI_DrawSprite(SCREEN_1, g_sprites[64], x, y, 0, 0);
+		Draw_Shape(SCREEN_1, g_sprites[64], x, y, 0, 0);
 		x++;
 		y++;
 
@@ -3423,7 +3432,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 
 		for (j = 0; j < g_table_structure_layoutSize[si->layout].height; j++) {
 			for (i = 0; i < g_table_structure_layoutSize[si->layout].width; i++) {
-				GUI_DrawSprite(SCREEN_1, sprite, x + i * width, y + j * width, 0, 0);
+				Draw_Shape(SCREEN_1, sprite, x + i * width, y + j * width, 0, 0);
 			}
 		}
 	}
@@ -3657,9 +3666,9 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 		ObjectInfo *oi = item->objectInfo;
 
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0x100, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0x100, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0);
 		}
 	} else {
 		GUI_Screen_Copy(9, 32, 9, 24, 4, 8, SCREEN_1, SCREEN_1);
@@ -3671,9 +3680,9 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 		ObjectInfo *oi = item->objectInfo;
 
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0x100, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0x100, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0);
 		}
 	} else {
 		GUI_Screen_Copy(9, 0, 9, 168, 4, 8, SCREEN_1, SCREEN_1);
@@ -3790,7 +3799,7 @@ void GUI_Mouse_Show(void)
 		GFX_CopyToBuffer(s_mouseSpriteLeft * 8, s_mouseSpriteTop, s_mouseSpriteWidth * 8, s_mouseSpriteHeight, g_mouseSpriteBuffer);
 	}
 
-	GUI_DrawSprite(SCREEN_0, g_mouseSprite, left, top, 0, 0);
+	Draw_Shape(SCREEN_0, g_mouseSprite, left, top, 0, 0);
 }
 
 /**

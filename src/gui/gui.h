@@ -109,7 +109,7 @@ extern bool g_var_37B8;
 
 #define GUI_ClearScreen(screenID) GFX_ClearScreen(screenID)
 extern void GUI_DrawScreen(Screen screenID);
-extern void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...);
+extern void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...);
 extern void GUI_DrawInterfaceAndRadar(Screen screenID);
 extern void GUI_Palette_RemapScreen(uint16 left, uint16 top, uint16 width, uint16 height, Screen screenID, const uint8 *remap);
 extern void GUI_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
