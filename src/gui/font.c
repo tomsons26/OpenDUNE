@@ -68,7 +68,7 @@ static Font *Font_LoadFile(const char *filename)
 
 	if (!File_Exists(filename)) return NULL;
 
-	buf = (uint8 *)File_ReadWholeFile(filename);
+	buf = (uint8 *)Read_FileWholeFile(filename);
 
 	if (buf[2] != 0x00 || buf[3] != 0x05) {
 		free(buf);

@@ -305,7 +305,7 @@ static void GameLoop_LevelEnd(void)
 			GameLoop_LevelEndAnimation();
 			GUI_Mouse_Show_Safe();
 
-			File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
+			Load_Data("IBM.PAL", g_palette1, 256 * 3);
 
 			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, true);
 
@@ -555,7 +555,7 @@ static void ReadProfileIni(const char *filename)
 	source = Get_Page(SCREEN_1);
 
 	memset(source, 0, 32000);
-	File_ReadBlockFile(filename, source, Get_Buff(SCREEN_1));
+	Load_Data(filename, source, Get_Buff(SCREEN_1));
 
 	keys = source + strlen(source) + 5000;
 	*keys = '\0';
@@ -702,7 +702,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 			Sound_Output_Feedback(0xFFFE);
 
-			File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
+			Load_Data("IBM.PAL", g_palette1, 256 * 3);
 
 			if (!g_canSkipIntro) {
 				File_Create_Personal("ONETIME.DAT");
@@ -790,7 +790,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		g_widgetProperties[13].yBase  = 160 - ((g_widgetProperties[21].height * g_fontCurrent->height) >> 1);
 		g_widgetProperties[13].height = (g_widgetProperties[21].height * g_fontCurrent->height) + 11;
 
-		Sprites_LoadImage(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
+		Load_Picture(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
 
 		GUI_Mouse_Hide_Safe();
 
@@ -938,7 +938,7 @@ static void GameLoop_Main(void)
 
 	free(g_readBuffer); g_readBuffer = NULL;
 
-	File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
+	Load_Data("IBM.PAL", g_palette1, 256 * 3);
 
 	GUI_ClearScreen(SCREEN_0);
 
@@ -1172,11 +1172,11 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 
 	Font_Select(FontNew8Ptr);
 
-	g_palette_998A = calloc(256 * 3, sizeof(uint8));
+	Palette = calloc(256 * 3, sizeof(uint8));
 
-	memset(&g_palette_998A[45], 63, 3);	/* Set color 15 to WHITE */
+	memset(&Palette[45], 63, 3);	/* Set color 15 to WHITE */
 
-	GFX_SetPalette(g_palette_998A);
+	GFX_SetPalette(Palette);
 
 	Tools_RandomLCG_Seed((unsigned)time(NULL));
 
@@ -1494,7 +1494,7 @@ void Game_LoadScenario(uint8 houseID, uint16 scenarioID)
  */
 void PrepareEnd(void)
 {
-	free(g_palette_998A); g_palette_998A = NULL;
+	free(Palette); Palette = NULL;
 
 	GameLoop_Uninit();
 

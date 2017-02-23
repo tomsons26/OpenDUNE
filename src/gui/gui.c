@@ -91,7 +91,7 @@ static const RankScore _rankScores[] = {
 
 static uint8 g_colours[16];
 static ClippingArea g_clipping = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
-uint8 *g_palette_998A = NULL;
+uint8 *Palette = NULL;
 uint8 g_remap[256];
 FactoryWindowItem g_factoryWindowItems[25];
 uint16 g_factoryWindowOrdered = 0;
@@ -1430,7 +1430,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	Sprites_LoadImage("FAME.CPS", SCREEN_1, g_palette_998A);
+	Load_Picture("FAME.CPS", SCREEN_1, Palette);
 
 	xSrc = 1;
 	if (g_playerHouseID <= HOUSE_ORDOS) {
@@ -1699,7 +1699,7 @@ uint8 GUI_PickHouse(void)
 			w = GUI_Widget_Link(w, w2);
 		}
 
-		Sprites_LoadImage(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
+		Load_Picture(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
 
 		GUI_Mouse_Hide_Safe();
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -1753,7 +1753,7 @@ uint8 GUI_PickHouse(void)
 		strncpy(g_readBuffer, String_Get_ByIndex(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
-		Sprites_LoadImage(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
+		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
 
 		GUI_Mouse_Hide_Safe();
 
@@ -1969,7 +1969,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 
 	g_viewport_forceRedraw = true;
 
-	Sprites_LoadImage("SCREEN.CPS", SCREEN_1, NULL);
+	Load_Picture("SCREEN.CPS", SCREEN_1, NULL);
 	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
@@ -2606,8 +2606,8 @@ static uint32 GUI_FactoryWindow_LoadGraymapTbl(void)
 	uint8 fileID;
 
 	fileID = File_Open("GRAYRMAP.TBL", FILE_MODE_READ);
-	File_Read(fileID, s_factoryWindowGraymapTbl, 256);
-	File_Close(fileID);
+	Read_File(fileID, s_factoryWindowGraymapTbl, 256);
+	Close_File(fileID);
 
 	return 256;
 }
@@ -2703,7 +2703,7 @@ static void GUI_FactoryWindow_Init(void)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	Sprites_LoadImage("CHOAM.CPS", SCREEN_1, NULL);
+	Load_Picture("CHOAM.CPS", SCREEN_1, NULL);
 	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
@@ -3234,7 +3234,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	GUI_Mouse_SetPosition(160, 84);
 
-	Sprites_LoadImage("MAPMACH.CPS", SCREEN_2, g_palette_998A);
+	Load_Picture("MAPMACH.CPS", SCREEN_2, Palette);
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_2, g_remap);
 
@@ -3287,7 +3287,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	s_strategicMapFastForward = false;
 
 	if (win && campaignID == 1) {
-		Sprites_LoadImage("PLANET.CPS", SCREEN_1, g_palette_998A);
+		Load_Picture("PLANET.CPS", SCREEN_1, Palette);
 
 		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_THREE_HOUSES_HAVE_COME_TO_DUNE));
 
@@ -3301,7 +3301,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 			if (GUI_StrategicMap_FastForwardToggleWithESC()) break;
 		}
 
-		Sprites_LoadImage("DUNEMAP.CPS", SCREEN_1 , g_palette_998A);
+		Load_Picture("DUNEMAP.CPS", SCREEN_1 , Palette);
 
 		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_TO_TAKE_CONTROL_OF_THE_LAND));
 
@@ -3316,7 +3316,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 		Sprites_CPS_LoadRegionClick();
 	}
 
-	Sprites_LoadImage("DUNERGN.CPS", SCREEN_1, g_palette_998A);
+	Load_Picture("DUNERGN.CPS", SCREEN_1, Palette);
 
 	GFX_Screen_SetActive(SCREEN_1);
 
@@ -4211,12 +4211,12 @@ void GUI_HallOfFame_Show(uint16 score)
 
 		fileID = File_Open_Personal("SAVEFAME.DAT", FILE_MODE_WRITE);
 		written = File_Write(fileID, data, 128);
-		File_Close(fileID);
+		Close_File(fileID);
 
 		if (written != 128) return;
 	}
 
-	File_ReadBlockFile_Personal("SAVEFAME.DAT", data, 128);
+	Load_Data_Personal("SAVEFAME.DAT", data, 128);
 
 	GUI_HallOfFame_Decode(data);
 
@@ -4274,7 +4274,7 @@ void GUI_HallOfFame_Show(uint16 score)
 
 		fileID = File_Open_Personal("SAVEFAME.DAT", FILE_MODE_WRITE);
 		File_Write(fileID, data, 128);
-		File_Close(fileID);
+		Close_File(fileID);
 	}
 
 	GUI_Mouse_Show_Safe();

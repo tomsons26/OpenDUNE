@@ -624,8 +624,8 @@ bool File_Exists_Ex(enum SearchDirectory dir, const char *filename, uint32 *file
 		index = _File_Open(dir, filename, FILE_MODE_READ);
 		if (index != FILE_INVALID) {
 			exists = true;
-			if (fileSize != NULL) *fileSize = File_GetSize(index);
-			File_Close(index);
+			if (fileSize != NULL) *fileSize = File_Size(index);
+			Close_File(index);
 		}
 	}
 
@@ -666,7 +666,7 @@ uint8 File_Open_Ex(enum SearchDirectory dir, const char *filename, uint8 mode)
  *
  * @param index The index given by File_Open() of the file.
  */
-void File_Close(uint8 index)
+void Close_File(uint8 index)
 {
 	if (index >= FILE_MAX) return;
 	if (FileHandleTable[index].fp == NULL) return;
@@ -687,7 +687,7 @@ void File_Close(uint8 index)
  * @param length The amount of bytes to read.
  * @return The amount of bytes truly read, or 0 if there was a failure.
  */
-uint32 File_Read(uint8 index, void *buffer, uint32 length)
+uint32 Read_File(uint8 index, void *buffer, uint32 length)
 {
 	if (index >= FILE_MAX) return 0;
 	if (FileHandleTable[index].fp == NULL) return 0;
@@ -699,7 +699,7 @@ uint32 File_Read(uint8 index, void *buffer, uint32 length)
 	g_fileOperation++;
 	if (fread(buffer, length, 1, FileHandleTable[index].fp) != 1) {
 		Error("Read error\n");
-		File_Close(index);
+		Close_File(index);
 
 		length = 0;
 	}
@@ -715,10 +715,10 @@ uint32 File_Read(uint8 index, void *buffer, uint32 length)
  * @param index The index given by File_Open() of the file.
  * @return The integer read.
  */
-uint16 File_Read_LE16(uint8 index)
+uint16 Read_File_LE16(uint8 index)
 {
 	uint8 buffer[2];
-	File_Read(index, buffer, sizeof(buffer));
+	Read_File(index, buffer, sizeof(buffer));
 	return READ_LE_UINT16(buffer);
 }
 
@@ -728,10 +728,10 @@ uint16 File_Read_LE16(uint8 index)
  * @param index The index given by File_Open() of the file.
  * @return The integer read.
  */
-uint32 File_Read_LE32(uint8 index)
+uint32 Read_File_LE32(uint8 index)
 {
 	uint8 buffer[4];
-	File_Read(index, buffer, sizeof(buffer));
+	Read_File(index, buffer, sizeof(buffer));
 	return READ_LE_UINT32(buffer);
 }
 
@@ -751,7 +751,7 @@ uint32 File_Write(uint8 index, void *buffer, uint32 length)
 	g_fileOperation++;
 	if (fwrite(buffer, length, 1, FileHandleTable[index].fp) != 1) {
 		Error("Write error\n");
-		File_Close(index);
+		Close_File(index);
 
 		length = 0;
 	}
@@ -788,7 +788,7 @@ uint32 Seek_File(uint8 index, uint32 position, uint8 mode)
 {
 	if (index >= FILE_MAX) return 0;
 	if (FileHandleTable[index].fp == NULL) return 0;
-	if (mode > 2) { File_Close(index); return 0; }
+	if (mode > 2) { Close_File(index); return 0; }
 
 	g_fileOperation++;
 	switch (mode) {
@@ -816,7 +816,7 @@ uint32 Seek_File(uint8 index, uint32 position, uint8 mode)
  * @param index The index given by File_Open() of the file.
  * @return The size of the file.
  */
-uint32 File_GetSize(uint8 index)
+uint32 File_Size(uint8 index)
 {
 	if (index >= FILE_MAX) return 0;
 	if (FileHandleTable[index].fp == NULL) return 0;
@@ -860,7 +860,7 @@ void File_Create_Personal(const char *filename)
 		g_fileOperation--;
 		return;
 	}
-	File_Close(index);
+	Close_File(index);
 
 	g_fileOperation--;
 }
@@ -873,14 +873,14 @@ void File_Create_Personal(const char *filename)
  * @param length The amount of bytes to read.
  * @return The amount of bytes truly read, or 0 if there was a failure.
  */
-uint32 File_ReadBlockFile_Ex(enum SearchDirectory dir, const char *filename, void *buffer, uint32 length)
+uint32 Load_Data_Ex(enum SearchDirectory dir, const char *filename, void *buffer, uint32 length)
 {
 	uint8 index;
 
 	index = File_Open_Ex(dir, filename, FILE_MODE_READ);
 	if (index == FILE_INVALID) return 0;
-	length = File_Read(index, buffer, length);
-	File_Close(index);
+	length = Read_File(index, buffer, length);
+	Close_File(index);
 	return length;
 }
 
@@ -891,7 +891,7 @@ uint32 File_ReadBlockFile_Ex(enum SearchDirectory dir, const char *filename, voi
  * @param mallocFlags The type of memory to allocate.
  * @return The pointer to allocated memory where the file has been read.
  */
-void *File_ReadWholeFile(const char *filename)
+void *Read_FileWholeFile(const char *filename)
 {
 	uint8 index;
 	uint32 length;
@@ -899,15 +899,15 @@ void *File_ReadWholeFile(const char *filename)
 
 	index = File_Open(filename, FILE_MODE_READ);
 	if (index == FILE_INVALID) return NULL;
-	length = File_GetSize(index);
+	length = File_Size(index);
 
 	buffer = malloc(length + 1);
-	File_Read(index, buffer, length);
+	Read_File(index, buffer, length);
 
 	/* In case of text-files it can be very important to have a \0 at the end */
 	((char *)buffer)[length] = '\0';
 
-	File_Close(index);
+	Close_File(index);
 
 	return buffer;
 }
@@ -920,7 +920,7 @@ void *File_ReadWholeFile(const char *filename)
  * @param mallocFlags The type of memory to allocate.
  * @return The pointer to allocated memory where the file has been read.
  */
-uint16 *File_ReadWholeFileLE16(const char *filename)
+uint16 *Read_FileWholeFileLE16(const char *filename)
 {
 	uint8 index;
 	uint32 count;
@@ -930,15 +930,15 @@ uint16 *File_ReadWholeFileLE16(const char *filename)
 #endif
 
 	index = File_Open(filename, FILE_MODE_READ);
-	count = File_GetSize(index) / sizeof(uint16);
+	count = File_Size(index) / sizeof(uint16);
 
 	buffer = malloc(count * sizeof(uint16));
-	if (File_Read(index, buffer, count * sizeof(uint16)) != count * sizeof(uint16)) {
+	if (Read_File(index, buffer, count * sizeof(uint16)) != count * sizeof(uint16)) {
 		free(buffer);
 		return NULL;
 	}
 
-	File_Close(index);
+	Close_File(index);
 
 #if __BYTE_ORDER == __BIG_ENDIAN
 	for(i = 0; i < count; i++) {
@@ -956,7 +956,7 @@ uint16 *File_ReadWholeFileLE16(const char *filename)
  * @param buf The buffer to read into.
  * @return The length of the file.
  */
-uint32 File_ReadFile(const char *filename, void *buf)
+uint32 Read_FileFile(const char *filename, void *buf)
 {
 	uint8 index;
 	uint32 length;
@@ -964,8 +964,8 @@ uint32 File_ReadFile(const char *filename, void *buf)
 	index = File_Open(filename, FILE_MODE_READ);
 	length = Seek_File(index, 0, 2);
 	Seek_File(index, 0, 0);
-	File_Read(index, buf, length);
-	File_Close(index);
+	Read_File(index, buf, length);
+	Close_File(index);
 
 	return length;
 }
@@ -985,10 +985,10 @@ uint8 Open_Iff_File(enum SearchDirectory dir, const char *filename)
 
 	if(index == FILE_INVALID) return index;
 
-	File_Read(index, &header, 4);
+	Read_File(index, &header, 4);
 
 	if (header != HTOBE32(CC_FORM)) {
-		File_Close(index);
+		Close_File(index);
 		return FILE_INVALID;
 	}
 
@@ -1006,7 +1006,7 @@ void Close_Iff_File(uint8 index)
 {
 	if (index == FILE_INVALID) return;
 
-	File_Close(index);
+	Close_File(index);
 }
 
 /**
@@ -1023,11 +1023,11 @@ uint32 ChunkFile_Seek(uint8 index, uint32 chunk)
 	bool first = true;
 
 	while (true) {
-		if (File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (value == 0 && File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (value == 0 && Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (File_Read(index, &length, 4) != 4 && !first) return 0;
+		if (Read_File(index, &length, 4) != 4 && !first) return 0;
 
 		length = HTOBE32(length);
 
@@ -1064,18 +1064,18 @@ uint32 Read_Iff_Chunk(uint8 index, uint32 chunk, void *buffer, uint32 buflen)
 	bool first = true;
 
 	while (true) {
-		if (File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (value == 0 && File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (value == 0 && Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (File_Read(index, &length, 4) != 4 && !first) return 0;
+		if (Read_File(index, &length, 4) != 4 && !first) return 0;
 
 		length = HTOBE32(length);
 
 		if (value == chunk) {
 			buflen = min(buflen, length);
 
-			File_Read(index, buffer, buflen);
+			Read_File(index, buffer, buflen);
 
 			length += 1;
 			length &= 0xFFFFFFFE;

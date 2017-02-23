@@ -41,20 +41,20 @@ extern bool File_Init(void);
 extern void File_Uninit(void);
 extern bool File_Exists_Ex(enum SearchDirectory dir, const char *filename, uint32 *fileSize);
 extern uint8 File_Open_Ex(enum SearchDirectory dir, const char *filename, uint8 mode);
-extern void File_Close(uint8 index);
-extern uint32 File_Read(uint8 index, void *buffer, uint32 length);
-extern uint16 File_Read_LE16(uint8 index);
-extern uint32 File_Read_LE32(uint8 index);
+extern void Close_File(uint8 index);
+extern uint32 Read_File(uint8 index, void *buffer, uint32 length);
+extern uint16 Read_File_LE16(uint8 index);
+extern uint32 Read_File_LE32(uint8 index);
 extern uint32 File_Write(uint8 index, void *buffer, uint32 length);
 extern bool File_Write_LE16(uint8 index, uint16 value);
 extern uint32 Seek_File(uint8 index, uint32 position, uint8 mode);
-extern uint32 File_GetSize(uint8 index);
+extern uint32 File_Size(uint8 index);
 extern void File_Delete_Personal(const char *filename);
 extern void File_Create_Personal(const char *filename);
-extern uint32 File_ReadBlockFile_Ex(enum SearchDirectory dir, const char *filename, void *buffer, uint32 length);
-extern void *File_ReadWholeFile(const char *filename);
-extern uint16 *File_ReadWholeFileLE16(const char *filename);
-extern uint32 File_ReadFile(const char *filename, void *buf);
+extern uint32 Load_Data_Ex(enum SearchDirectory dir, const char *filename, void *buffer, uint32 length);
+extern void *Read_FileWholeFile(const char *filename);
+extern uint16 *Read_FileWholeFileLE16(const char *filename);
+extern uint32 Read_FileFile(const char *filename, void *buf);
 extern uint8 Open_Iff_File(enum SearchDirectory dir, const char *filename);
 extern void Close_Iff_File(uint8 index);
 extern uint32 ChunkFile_Seek(uint8 index, uint32 header);
@@ -65,8 +65,8 @@ extern uint32 Read_Iff_Chunk(uint8 index, uint32 header, void *buffer, uint32 bu
 #define File_Exists_Personal(FILENAME)      File_Exists_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, NULL)
 #define File_Open(FILENAME,MODE)            File_Open_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, MODE)
 #define File_Open_Personal(FILENAME,MODE)   File_Open_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, MODE)
-#define File_ReadBlockFile(FILENAME,BUFFER,LENGTH)          File_ReadBlockFile_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, BUFFER, LENGTH)
-#define File_ReadBlockFile_Personal(FILENAME,BUFFER,LENGTH) File_ReadBlockFile_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, BUFFER, LENGTH)
+#define Load_Data(FILENAME,BUFFER,LENGTH)          Load_Data_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, BUFFER, LENGTH)
+#define Load_Data_Personal(FILENAME,BUFFER,LENGTH) Load_Data_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, BUFFER, LENGTH)
 #define ChunkFile_Open(FILENAME)            Open_Iff_File(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME)
 #define ChunkFile_Open_Personal(FILENAME)   Open_Iff_File(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME)
 

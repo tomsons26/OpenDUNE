@@ -122,7 +122,7 @@ static uint32 Get_File_Frame_Offset(uint8 fileno, uint16 frame)
 	uint32 offset;
 
 	Seek_File(fileno, frame * 4 + 10, 0);
-	offset = File_Read_LE32(fileno);
+	offset = Read_File_LE32(fileno);
 
 	return offset;
 }
@@ -173,15 +173,15 @@ static uint16 Apply_Delta(void *wsa, uint16 frame, uint8 *dst)
 		length = positionEnd - positionStart;
 
 		if (positionStart == 0 || positionEnd == 0 || length == 0) {
-			File_Close(fileno);
+			Close_File(fileno);
 			return 0;
 		}
 
 		buffer += header->bufferLength - length;
 
 		Seek_File(fileno, positionStart + lengthSpecial, 0);
-		res = File_Read(fileno, buffer, length);
-		File_Close(fileno);
+		res = Read_File(fileno, buffer, length);
+		Close_File(fileno);
 
 		if (res != length) return 0;
 	}
@@ -223,13 +223,13 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 	memset(&flags, 0, sizeof(flags));
 
 	fileno = File_Open(filename, FILE_MODE_READ);
-	fileheader.frames = File_Read_LE16(fileno);
-	fileheader.width = File_Read_LE16(fileno);
-	fileheader.height = File_Read_LE16(fileno);
-	fileheader.requiredBufferSize = File_Read_LE16(fileno);
-	fileheader.flags = File_Read_LE16(fileno);
-	fileheader.animationOffsetStart = File_Read_LE32(fileno);
-	fileheader.animationOffsetEnd = File_Read_LE32(fileno);
+	fileheader.frames = Read_File_LE16(fileno);
+	fileheader.width = Read_File_LE16(fileno);
+	fileheader.height = Read_File_LE16(fileno);
+	fileheader.requiredBufferSize = Read_File_LE16(fileno);
+	fileheader.flags = Read_File_LE16(fileno);
+	fileheader.animationOffsetStart = Read_File_LE32(fileno);
+	fileheader.animationOffsetEnd = Read_File_LE32(fileno);
 
 	lengthSpecial = 0;
 	if (fileheader.flags) {
@@ -259,7 +259,7 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 	bufferSizeOptimal = bufferSizeMinimal + lengthFileContent;
 
 	if (wsaSize > 1 && wsaSize < bufferSizeMinimal) {
-		File_Close(fileno);
+		Close_File(fileno);
 
 		return NULL;
 	}
@@ -312,9 +312,9 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 		header->fileContent = buffer + header->bufferLength;
 
 		Seek_File(fileno, 10, 0);
-		File_Read(fileno, header->fileContent, lengthHeader);
+		Read_File(fileno, header->fileContent, lengthHeader);
 		Seek_File(fileno, lengthAnimation + lengthSpecial, 1);
-		File_Read(fileno, header->fileContent + lengthHeader, lengthFileContent - lengthHeader);
+		Read_File(fileno, header->fileContent + lengthHeader, lengthFileContent - lengthHeader);
 
 		header->flags.dataInMemory = true;
 		if (Get_Resident_Frame_Offset(header, header->frames + 1) == 0) header->flags.noAnimation = true;
@@ -328,8 +328,8 @@ void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reser
 		b = buffer + header->bufferLength - lengthAnimation;
 
 		Seek_File(fileno, lengthHeader + lengthSpecial + 10, 0);
-		File_Read(fileno, b, lengthAnimation);
-		File_Close(fileno);
+		Read_File(fileno, b, lengthAnimation);
+		Close_File(fileno);
 
 		LCW_Uncomp(buffer, b, header->bufferLength);
 	}

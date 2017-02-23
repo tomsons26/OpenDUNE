@@ -247,7 +247,7 @@ void Driver_Voice_LoadFile(const char *filename, void *buffer, uint32 length)
 	if (filename == NULL) return;
 	if (g_driverVoice->index == 0xFFFF) return;
 
-	File_ReadBlockFile(filename, buffer, length);
+	Load_Data(filename, buffer, length);
 }
 
 void Driver_Voice_Play(const uint8 *data, int16 priority)
@@ -431,7 +431,7 @@ void Driver_LoadFile(const char *musicName, Driver *driver)
 	assert(len <= sizeof(driver->filename));
 	memcpy(driver->filename, filename, len);
 
-	driver->content = File_ReadWholeFile(filename);
+	driver->content = Read_FileWholeFile(filename);
 	driver->contentMalloced = true;
 	Debug("Driver_LoadFile(%s, %p): %s loaded\n", musicName, driver, filename);
 }

@@ -156,7 +156,7 @@ void Mouse_SetMouseMode(uint8 mouseMode, const char *filename)
 			g_mouseMode = mouseMode;
 			if (g_mouseFileID != 0xFF) {
 				Input_Flags_ClearBits(INPUT_FLAG_KEY_RELEASE);
-				File_Close(g_mouseFileID);
+				Close_File(g_mouseFileID);
 			}
 			g_mouseFileID = 0xFF;
 			g_mouseNoRecordedValue = true;
@@ -190,13 +190,13 @@ void Mouse_SetMouseMode(uint8 mouseMode, const char *filename)
 
 			g_mouseNoRecordedValue = true;
 
-			File_Read(g_mouseFileID, &g_mouseInputValue, 2);
-			if (File_Read(g_mouseFileID, &g_mouseRecordedTimer, 2) != 2) break;;
+			Read_File(g_mouseFileID, &g_mouseInputValue, 2);
+			if (Read_File(g_mouseFileID, &g_mouseRecordedTimer, 2) != 2) break;;
 
 			if ((g_mouseInputValue >= 0x41 && g_mouseInputValue <= 0x44) || g_mouseInputValue == 0x2D) {
 				/* 0x2D == '-' 0x41 == 'A' [...] 0x44 == 'D' */
-				File_Read(g_mouseFileID, &g_mouseRecordedX, 2);
-				if (File_Read(g_mouseFileID, &g_mouseRecordedY, 2) == 2) {
+				Read_File(g_mouseFileID, &g_mouseRecordedX, 2);
+				if (Read_File(g_mouseFileID, &g_mouseRecordedY, 2) == 2) {
 					g_mouseX = g_mouseRecordedX;
 					g_mouseY = g_mouseRecordedY;
 					g_prevButtonState = 0;

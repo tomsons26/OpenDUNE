@@ -79,13 +79,15 @@ static const uint8 *Sprites_GetSprite(const uint8 *buffer, uint16 index)
  * @param index The index of the list of sprite files to load.
  * @param sprites The array where to store CSIP for each loaded sprite.
  */
+
+//uh wut....
 static void Sprites_Load(const char *filename)
 {
 	uint8 *buffer;
 	uint16 count;
 	uint16 i;
 
-	buffer = File_ReadWholeFile(filename);
+	buffer = Read_FileWholeFile(filename);
 
 	count = READ_LE_UINT16(buffer);
 
@@ -154,7 +156,10 @@ uint16 Sprites_GetType(uint8 *sprite)
  * @param dest The place the decoded image will be.
  * @return The size of the decoded image.
  */
-static uint32 Sprites_Decode(uint8 *source, uint8 *dest)
+
+//This decided what compression to use, nothing to do directly with Shapes
+//Other compression options in this function were LZW12 and LZW14, RLE and CMV
+static uint32 Uncompress_Data(uint8 *source, uint8 *dest)
 {
 	uint32 size = 0;
 
@@ -212,7 +217,7 @@ static void Load_Icon_Set(const char *filename)
 	free(g_spritePixels);
 	g_spritePixels = calloc(1, spriteDataLength);
 	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SSET), g_spritePixels, spriteDataLength);
-	spriteDataLength = Sprites_Decode(g_spritePixels, g_spritePixels);
+	spriteDataLength = Uncompress_Data(g_spritePixels, g_spritePixels);
 	/*g_spritePixels = realloc(g_spritePixels, spriteDataLength);*/
 
 	/* Get the Table chunk */
@@ -240,7 +245,7 @@ void Sprites_LoadTiles(void)
 	Load_Icon_Set("ICON.ICN");
 
 	free(g_iconMap);
-	g_iconMap = File_ReadWholeFileLE16("ICON.MAP");
+	g_iconMap = Read_FileWholeFileLE16("ICON.MAP");
 
 	g_veiledSpriteID    = g_iconMap[g_iconMap[ICM_ICONGROUP_FOG_OF_WAR] + 16];
 	g_bloomSpriteID     = g_iconMap[g_iconMap[ICM_ICONGROUP_SPICE_BLOOM]];
@@ -267,7 +272,7 @@ void Free_Icon_Set(void)
  * @param palette Where to store the palette, if any.
  * @return The size of the loaded image.
  */
-static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *palette)
+static uint32 Load_Uncompress(const char *filename, Screen screenID, uint8 *palette)
 {
 	uint8 index;
 	uint16 size;
@@ -279,16 +284,16 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 
 	index = File_Open(filename, FILE_MODE_READ);
 
-	size = File_Read_LE16(index);
+	size = Read_File_LE16(index);
 
-	File_Read(index, buffer, 8);
+	Read_File(index, buffer, 8);
 
 	size -= 8;
 
 	paletteSize = READ_LE_UINT16(buffer + 6);
 
 	if (palette != NULL && paletteSize != 0) {
-		File_Read(index, palette, paletteSize);
+		Read_File(index, palette, paletteSize);
 	} else {
 		Seek_File(index, paletteSize, 1);
 	}
@@ -301,11 +306,11 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	buffer2 += Get_Buff(screenID) - size - 8;
 
 	memmove(buffer2, buffer, 8);
-	File_Read(index, buffer2 + 8, size);
+	Read_File(index, buffer2 + 8, size);
 
-	File_Close(index);
+	Close_File(index);
 
-	return Sprites_Decode(buffer2, buffer);
+	return Uncompress_Data(buffer2, buffer);
 }
 
 /**
@@ -317,7 +322,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
  * @param palette Where to store the palette, if any.
  * @return The size of the loaded image.
  */
-uint16 Sprites_LoadImage(const char *filename, Screen screenID, uint8 *palette)
+uint16 Load_Picture(const char *filename, Screen screenID, uint8 *palette)
 {
 #if 0
 	uint8 index;
@@ -326,10 +331,10 @@ uint16 Sprites_LoadImage(const char *filename, Screen screenID, uint8 *palette)
 	index = File_Open(filename, FILE_MODE_READ);
 	if (index == FILE_INVALID) return 0;
 
-	File_Read(index, &header, 4);
-	File_Close(index);
+	Read_File(index, &header, 4);
+	Close_File(index);
 #endif
-	return Sprites_LoadCPSFile(filename, screenID, palette) / 8000;
+	return Load_Uncompress(filename, screenID, palette) / 8000;
 }
 
 void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
@@ -426,13 +431,13 @@ void Sprites_CPS_LoadRegionClick(void)
 	buf = Get_Page(SCREEN_2);
 
 	g_fileRgnclkCPS = buf;
-	Sprites_LoadCPSFile("RGNCLK.CPS", SCREEN_2, NULL);
+	Load_Uncompress("RGNCLK.CPS", SCREEN_2, NULL);
 	for (i = 0; i < 120; i++) memcpy(buf + (i * 304), buf + 7688 + (i * 320), 304);
 	buf += 120 * 304;
 
 	g_fileRegionINI = buf;
 	snprintf(filename, sizeof(filename), "REGION%c.INI", g_table_houseInfo[g_playerHouseID].name[0]);
-	buf += File_ReadFile(filename, buf);
+	buf += Read_FileFile(filename, buf);
 
 	g_regions = (uint16 *)buf;
 

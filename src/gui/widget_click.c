@@ -633,17 +633,17 @@ static void ShadeScreen(void)
 {
 	uint16 i;
 
-	memmove(g_palette_998A, g_palette1, 256 * 3);
+	memmove(Palette, g_palette1, 256 * 3);
 
 	for (i = 0; i < 231 * 3; i++) g_palette1[i] = g_palette1[i] / 2;
 	for (i = 239 * 3; i < 256 * 3; i++) g_palette1[i] = g_palette1[i] / 2;
 
-	GFX_SetPalette(g_palette_998A);
+	GFX_SetPalette(Palette);
 }
 
 static void UnshadeScreen(void)
 {
-	memmove(g_palette1, g_palette_998A, 256 * 3);
+	memmove(g_palette1, Palette, 256 * 3);
 
 	GFX_SetPalette(g_palette1);
 }
@@ -697,7 +697,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 
 	Free_Icon_Set();
 
-	memmove(g_palette_998A, g_paletteActive, 256 * 3);
+	memmove(Palette, g_paletteActive, 256 * 3);
 
 	Driver_Voice_Play(NULL, 0xFF);
 

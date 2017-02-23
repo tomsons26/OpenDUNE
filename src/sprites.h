@@ -75,7 +75,7 @@ extern uint8 Sprite_GetHeight(uint8 *sprite);
 extern uint16 Sprites_GetType(uint8 *sprite);
 extern void Sprites_LoadTiles(void);
 extern void Free_Icon_Set(void);
-extern uint16 Sprites_LoadImage(const char *filename, Screen screenID, uint8 *palette);
+extern uint16 Load_Picture(const char *filename, Screen screenID, uint8 *palette);
 extern void Sprites_SetMouseSprite(uint16 x, uint16 y, uint8 *sprite);
 extern void Sprites_CPS_LoadRegionClick(void);
 extern bool Sprite_IsUnveiled(uint16 spriteID);

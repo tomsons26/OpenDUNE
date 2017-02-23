@@ -167,6 +167,6 @@ bool SaveGame_LoadFile(char *filename)
 void Load_Palette_Mercenaries(void)
 {
 	if (g_playerHouseID == HOUSE_MERCENARY) {
-		File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
+		Load_Data("IBM.PAL", g_palette1, 256 * 3);
 	}
 }

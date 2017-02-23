@@ -488,12 +488,12 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	int i;
 
 	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_houseInfo[houseID].name[0]);
-	Sprites_LoadImage(textBuffer, SCREEN_1, g_palette_998A);
+	Load_Picture(textBuffer, SCREEN_1, Palette);
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
 	if (houseID == HOUSE_MERCENARY) {
-		File_ReadBlockFile("BENE.PAL", g_palette1, 256 * 3);
+		Load_Data("BENE.PAL", g_palette1, 256 * 3);
 	}
 
 	memset(s_mentatSprites, 0, sizeof(s_mentatSprites));
@@ -937,10 +937,10 @@ static void GUI_Mentat_ShowHelp(void)
 
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
 	Seek_File(fileID, offset, 0);
-	File_Read(fileID, compressedText, info.length);
+	Read_File(fileID, compressedText, info.length);
 	String_Decompress(compressedText, text);
 	String_TranslateSpecial(text, text);
-	File_Close(fileID);
+	Close_File(fileID);
 
 	/* skip WSA file name (or string index) */
 	while (*text != '*' && *text != '?') text++;

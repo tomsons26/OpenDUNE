@@ -237,7 +237,7 @@ static void Input_ReadInputFromFile(void)
 
 	if (g_mouseMode == INPUT_MOUSE_MODE_NORMAL || g_mouseMode != INPUT_MOUSE_MODE_PLAY) return;
 
-	File_Read(g_mouseFileID, mouseBuffer, 4); /* Read failure not translated. */
+	Read_File(g_mouseFileID, mouseBuffer, 4); /* Read failure not translated. */
 
 	g_mouseRecordedTimer = mouseBuffer[1];
 	value = g_mouseInputValue = mouseBuffer[0];
@@ -263,7 +263,7 @@ static void Input_ReadInputFromFile(void)
 		}
 	}
 
-	File_Read(g_mouseFileID, mouseBuffer, 4); /* Read failure not translated. */
+	Read_File(g_mouseFileID, mouseBuffer, 4); /* Read failure not translated. */
 
 	g_mouseX = g_mouseRecordedX = mouseBuffer[0];
 	value = g_mouseY = g_mouseRecordedY = mouseBuffer[1];

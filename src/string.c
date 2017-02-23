@@ -104,7 +104,7 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 	uint16 count;
 	uint16 i;
 
-	buf = File_ReadWholeFile(String_GenerateFilename(filename));
+	buf = Read_FileWholeFile(String_GenerateFilename(filename));
 	count = READ_LE_UINT16(buf) / 2;
 
 	if (end < 0) end = start + count - 1;

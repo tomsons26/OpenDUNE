@@ -117,13 +117,13 @@ bool GameOptions_Load(void)
 
 	if (index == FILE_INVALID) return false;
 
-	g_gameConfig.music = File_Read_LE16(index);
-	g_gameConfig.sounds = File_Read_LE16(index);
-	g_gameConfig.gameSpeed = File_Read_LE16(index);
-	g_gameConfig.hints = File_Read_LE16(index);
-	g_gameConfig.autoScroll = File_Read_LE16(index);
+	g_gameConfig.music = Read_File_LE16(index);
+	g_gameConfig.sounds = Read_File_LE16(index);
+	g_gameConfig.gameSpeed = Read_File_LE16(index);
+	g_gameConfig.hints = Read_File_LE16(index);
+	g_gameConfig.autoScroll = Read_File_LE16(index);
 
-	File_Close(index);
+	Close_File(index);
 
 	return true;
 }
@@ -145,7 +145,7 @@ void GameOptions_Save(void)
 	File_Write_LE16(index, g_gameConfig.hints);
 	File_Write_LE16(index, g_gameConfig.autoScroll);
 
-	File_Close(index);
+	Close_File(index);
 
 	if (g_gameConfig.music == 0) Music_Play(0);
 }
