@@ -268,7 +268,7 @@ void GameLoop_House(void)
 		}
 
 		if (tickPowerMaintenance) {
-			uint16 powerMaintenanceCost = (h->powerUsage / 32) + 1;
+			uint16 powerMaintenanceCost = (h->Drain / 32) + 1;
 			h->credits -= min(h->credits, powerMaintenanceCost);
 		}
 	}
@@ -383,10 +383,10 @@ bool House_UpdateRadarState(House *h)
 
 	if (h->flags.radarActivated) {
 		/* Deactivate radar */
-		if ((h->structuresBuilt & (1 << STRUCTURE_OUTPOST)) == 0 || h->powerProduction < h->powerUsage) activate = false;
+		if ((h->Bldngs & (1 << STRUCTURE_OUTPOST)) == 0 || h->Power < h->Drain) activate = false;
 	} else {
 		/* Activate radar */
-		if ((h->structuresBuilt & (1 << STRUCTURE_OUTPOST)) != 0 && h->powerProduction >= h->powerUsage) activate = true;
+		if ((h->Bldngs & (1 << STRUCTURE_OUTPOST)) != 0 && h->Power >= h->Drain) activate = true;
 	}
 
 	if (h->flags.radarActivated == activate) return false;
@@ -473,8 +473,8 @@ void House_CalculatePowerAndCredit(House *h)
 
 	if (h == NULL) return;
 
-	h->powerUsage      = 0;
-	h->powerProduction = 0;
+	h->Drain      = 0;
+	h->Power = 0;
 	h->creditsStorage  = 0;
 
 	find.houseID = h->index;
@@ -495,33 +495,33 @@ void House_CalculatePowerAndCredit(House *h)
 		h->creditsStorage += si->creditsStorage;
 
 		/* Positive values means usage */
-		if (si->powerUsage >= 0) {
-			h->powerUsage += si->powerUsage;
+		if (si->Drain >= 0) {
+			h->Drain += si->Drain;
 			continue;
 		}
 
 		/* Negative value and full health means everything goes to production */
 		if (s->o.hitpoints >= si->o.hitpoints) {
-			h->powerProduction += -si->powerUsage;
+			h->Power += -si->Drain;
 			continue;
 		}
 
 		/* Negative value and partial health, calculate how much should go to production (capped at 50%) */
 		/* ENHANCEMENT -- The 50% cap of Dune2 is silly and disagress with the GUI. If your hp is 10%, so should the production. */
 		if (!g_dune2_enhanced && s->o.hitpoints <= si->o.hitpoints / 2) {
-			h->powerProduction += (-si->powerUsage) / 2;
+			h->Power += (-si->Drain) / 2;
 			continue;
 		}
-		h->powerProduction += (-si->powerUsage) * s->o.hitpoints / si->o.hitpoints;
+		h->Power += (-si->Drain) * s->o.hitpoints / si->o.hitpoints;
 	}
 
 	/* Check if we are low on power */
-	if (h->index == g_playerHouseID && h->powerUsage > h->powerProduction) {
+	if (h->index == g_playerHouseID && h->Drain > h->Power) {
 		GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
 	}
 
 	/* If there are no buildings left, you lose your right on 'credits without storage' */
-	if (h->index == g_playerHouseID && h->structuresBuilt == 0 && g_validateStrictIfZero == 0) {
+	if (h->index == g_playerHouseID && h->Bldngs == 0 && g_validateStrictIfZero == 0) {
 		g_playerCreditsNoSilo = 0;
 	}
 }

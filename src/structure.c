@@ -608,7 +608,7 @@ bool Structure_Place(Structure *s, uint16 position)
 	{
 		House *h;
 		h = House_Get_ByIndex(s->o.houseID);
-		h->structuresBuilt = Structure_GetStructuresBuilt(h);
+		h->Bldngs = Structure_GetBldngs(h);
 	}
 
 	return true;
@@ -628,10 +628,10 @@ void Structure_CalculateHitpointsMax(House *h)
 
 	if (h->index == g_playerHouseID) House_UpdateRadarState(h);
 
-	if (h->powerUsage == 0) {
+	if (h->Drain == 0) {
 		power = 256;
 	} else {
-		power = min(h->powerProduction * 256 / h->powerUsage, 256);
+		power = min(h->Power * 256 / h->Drain, 256);
 	}
 
 	find.houseID = h->index;
@@ -693,7 +693,7 @@ Structure *Structure_Get_ByPackedTile(uint16 packed)
  * @param h The house to get built structures for.
  * @return The bitmask.
  */
-uint32 Structure_GetStructuresBuilt(House *h)
+uint32 Structure_GetBldngs(House *h)
 {
 	PoolFindStruct find;
 	uint32 result;
@@ -1116,7 +1116,7 @@ bool Structure_IsUpgradable(Structure *s)
 		if (s->upgradeLevel != 1) return true;
 
 		h = House_Get_ByIndex(s->o.houseID);
-		if ((h->structuresBuilt & g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) == g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) return true;
+		if ((h->Bldngs & g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) == g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) return true;
 
 		return false;
 	}
@@ -1344,7 +1344,7 @@ void Structure_Remove(Structure *s)
 	Structure_Free(s);
 	Structure_UntargetMe(s);
 
-	h->structuresBuilt = Structure_GetStructuresBuilt(h);
+	h->Bldngs = Structure_GetBldngs(h);
 
 	House_UpdateCreditsStorage(s->o.houseID);
 
@@ -1842,7 +1842,7 @@ void Structure_UpdateMap(Structure *s)
 uint32 Structure_GetBuildable(Structure *s)
 {
 	const StructureInfo *si;
-	uint32 structuresBuilt;
+	uint32 Bldngs;
 	uint32 ret = 0;
 	int i;
 
@@ -1850,7 +1850,7 @@ uint32 Structure_GetBuildable(Structure *s)
 
 	si = &g_table_structureInfo[s->o.type];
 
-	structuresBuilt = House_Get_ByIndex(s->o.houseID)->structuresBuilt;
+	Bldngs = House_Get_ByIndex(s->o.houseID)->Bldngs;
 
 	switch (s->o.type) {
 		case STRUCTURE_LIGHT_VEHICLE:
@@ -1876,7 +1876,7 @@ uint32 Structure_GetBuildable(Structure *s)
 
 				if (unitType == UNIT_SIEGE_TANK && s->creatorHouseID == HOUSE_ORDOS) upgradeLevelRequired--;
 
-				if ((structuresBuilt & ui->o.structuresRequired) != ui->o.structuresRequired) continue;
+				if ((Bldngs & ui->o.structuresRequired) != ui->o.structuresRequired) continue;
 				if ((ui->o.availableHouse & (1 << s->creatorHouseID)) == 0) continue;
 
 				if (s->upgradeLevel >= upgradeLevelRequired) {
@@ -1908,7 +1908,7 @@ uint32 Structure_GetBuildable(Structure *s)
 					availableCampaign = 2;
 				}
 
-				if ((structuresBuilt & structuresRequired) == structuresRequired || s->o.houseID != g_playerHouseID) {
+				if ((Bldngs & structuresRequired) == structuresRequired || s->o.houseID != g_playerHouseID) {
 					if (s->o.houseID != HOUSE_HARKONNEN && i == STRUCTURE_LIGHT_VEHICLE) {
 						availableCampaign = 2;
 					}

@@ -45,7 +45,7 @@ static const SaveLoadDesc s_saveUnit[] = {
 	SLD_ENTRY (Unit, SLDT_UINT8,  blinkCounter),
 	SLD_ENTRY (Unit, SLDT_UINT8,  team),
 	SLD_ENTRY (Unit, SLDT_UINT16, timer),
-	SLD_ARRAY (Unit, SLDT_UINT8,  route, 14),
+	SLD_ARRAY (Unit, SLDT_UINT8,  Path, 14),
 	SLD_END
 };
 

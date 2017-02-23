@@ -166,7 +166,7 @@ typedef struct Unit {
 	uint8  blinkCounter;                                    /*!< If non-zero, it indicates how many more ticks this unit is blinking. */
 	uint8  team;                                            /*!< If non-zero, unit is part of team. Value 1 means team 0, etc. */
 	uint16 timer;                                           /*!< Timer used in animation, to count down when to do the next step. */
-	uint8  route[14];                                       /*!< The current route the Unit is following. */
+	uint8  Path[14];                                       /*!< The current Path the Unit is following. */
 } Unit;
 
 /**

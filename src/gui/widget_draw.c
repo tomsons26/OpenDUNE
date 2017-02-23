@@ -831,8 +831,8 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 						} break;
 
 						case STRUCTURE_WINDTRAP: {
-							uint16 powerOutput = o->hitpoints * -si->powerUsage / oi->hitpoints;
-							uint16 powerAverage = (h->windtrapCount == 0) ? 0 : h->powerUsage / h->windtrapCount;
+							uint16 powerOutput = o->hitpoints * -si->Drain / oi->hitpoints;
+							uint16 powerAverage = (h->windtrapCount == 0) ? 0 : h->Drain / h->windtrapCount;
 
 							GUI_DrawLine(261, 95, 312, 95, 16);
 							Text_Print_Wrapper(String_Get_ByIndex(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);

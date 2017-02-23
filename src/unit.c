@@ -412,7 +412,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position
 	u->currentDestination.x = 0;
 	u->currentDestination.y = 0;
 	u->originEncoded    = 0x0000;
-	u->route[0]         = 0xFF;
+	u->Path[0]         = 0xFF;
 
 	if (position.x != 0xFFFF || position.y != 0xFFFF) {
 		u->originEncoded = Unit_FindClosestRefinery(u);
@@ -729,7 +729,7 @@ void Unit_SetDestination(Unit *u, uint16 destination)
 	}
 
 	u->targetMove = destination;
-	u->route[0]   = 0xFF;
+	u->Path[0]   = 0xFF;
 }
 
 /**
@@ -1051,7 +1051,7 @@ Unit *Unit_Sandworm_FindBestTarget(Unit *unit)
 }
 
 /**
- * Initiate the first movement of a Unit when the pathfinder has found a route.
+ * Initiate the first movement of a Unit when the pathfinder has found a Path.
  *
  * @param unit The Unit to operate on.
  * @return True if movement was initiated (not blocked etc).
@@ -1160,7 +1160,7 @@ void Unit_SetTarget(Unit *unit, uint16 encoded)
 
 	if (!g_table_unitInfo[unit->o.type].o.flags.hasTurret) {
 		unit->targetMove = encoded;
-		unit->route[0] = 0xFF;
+		unit->Path[0] = 0xFF;
 	}
 }
 
@@ -2239,13 +2239,13 @@ void Unit_EnterStructure(Unit *unit, Structure *s)
 
 		h = House_Get_ByIndex(s->o.houseID);
 		s->o.houseID = Unit_GetHouseID(unit);
-		h->structuresBuilt = Structure_GetStructuresBuilt(h);
+		h->Bldngs = Structure_GetBldngs(h);
 
 		/* ENHANCEMENT -- recalculate the power and credits for the house losing the structure. */
 		if (g_dune2_enhanced) House_CalculatePowerAndCredit(h);
 
 		h = House_Get_ByIndex(s->o.houseID);
-		h->structuresBuilt = Structure_GetStructuresBuilt(h);
+		h->Bldngs = Structure_GetBldngs(h);
 
 		if (s->o.linkedID != 0xFF) {
 			Unit *u = Unit_Get_ByIndex(s->o.linkedID);
@@ -2603,7 +2603,7 @@ void Unit_LaunchHouseMissile(uint16 packed)
 
 	Sound_Output_Feedback(0xFFFE);
 
-	Unit_CreateBullet(h->palacePosition, g_unitHouseMissile->o.type, g_unitHouseMissile->o.houseID, 0x1F4, Tools_Index_Encode(packed, IT_TILE));
+	Unit_CreateBullet(h->Special, g_unitHouseMissile->o.type, g_unitHouseMissile->o.houseID, 0x1F4, Tools_Index_Encode(packed, IT_TILE));
 
 	g_houseMissileCountdown = 0;
 	g_unitHouseMissile = NULL;

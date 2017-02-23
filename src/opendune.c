@@ -158,7 +158,7 @@ static bool GameLoop_IsLevelFinished(void)
 
 	/* Check for reaching spice quota */
 	if ((g_scenario.winFlags & 0x4) != 0 && g_playerCredits != 0xFFFF) {
-		if (g_playerCredits >= g_playerHouse->creditsQuota) {
+		if (g_playerCredits >= g_playerHouse->SolMin) {
 			finish = true;
 		}
 	}
@@ -226,7 +226,7 @@ static bool GameLoop_IsLevelWon(void)
 
 	/* Check for reaching spice quota */
 	if (!win && (g_scenario.loseFlags & 0x4) != 0 && g_playerCredits != 0xFFFF) {
-		win = (g_playerCredits >= g_playerHouse->creditsQuota);
+		win = (g_playerCredits >= g_playerHouse->SolMin);
 	}
 
 	/* Check for reaching timeout */
@@ -1373,11 +1373,11 @@ void Game_Prepare(void)
 		Script_Load(&s->o.script, s->o.type);
 
 		if (s->o.type == STRUCTURE_PALACE) {
-			House_Get_ByIndex(s->o.houseID)->palacePosition = s->o.position;
+			House_Get_ByIndex(s->o.houseID)->Special = s->o.position;
 		}
 
-		if ((House_Get_ByIndex(s->o.houseID)->palacePosition.x != 0) || (House_Get_ByIndex(s->o.houseID)->palacePosition.y != 0)) continue;
-		House_Get_ByIndex(s->o.houseID)->palacePosition = s->o.position;
+		if ((House_Get_ByIndex(s->o.houseID)->Special.x != 0) || (House_Get_ByIndex(s->o.houseID)->Special.y != 0)) continue;
+		House_Get_ByIndex(s->o.houseID)->Special = s->o.position;
 	}
 
 	find.houseID = HOUSE_INVALID;
@@ -1390,7 +1390,7 @@ void Game_Prepare(void)
 		h = House_Find(&find);
 		if (h == NULL) break;
 
-		h->structuresBuilt = Structure_GetStructuresBuilt(h);
+		h->Bldngs = Structure_GetBldngs(h);
 		House_UpdateCreditsStorage((uint8)h->index);
 		House_CalculatePowerAndCredit(h);
 	}

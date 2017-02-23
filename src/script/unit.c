@@ -30,9 +30,9 @@
 
 typedef struct PathType {
 	uint16 packed;                                          /*!< From where we are pathfinding. */
-	 int16 score;                                           /*!< The total score for this route. */
-	uint16 routeSize;                                       /*!< The size of this route. */
-	uint8 *buffer;                                          /*!< A buffer to store the route. */
+	 int16 score;                                           /*!< The total score for this Path. */
+	uint16 PathSize;                                       /*!< The size of this Path. */
+	uint8 *buffer;                                          /*!< A buffer to store the Path. */
 } PathType;
 
 static const int16 AdjacentCell[8] = {-64, -63, 1, 65, 64, 63, -1, -65}; /*!< Tile index change when moving in a direction. */
@@ -812,7 +812,7 @@ uint16 Script_Unit_SetDestination(ScriptEngine *script)
 		s = Tools_Index_GetStructure(encoded);
 		if (s == NULL) {
 			u->targetMove = encoded;
-			u->route[0] = 0xFF;
+			u->Path[0] = 0xFF;
 			return 0;
 		}
 
@@ -1065,8 +1065,8 @@ static int16 Passable_Cell(uint16 packed, uint8 orient8)
 }
 
 /**
- * Smoothen the route found by the pathfinder.
- * @param data The found route to smoothen.
+ * Smoothen the Path found by the pathfinder.
+ * @param data The found Path to smoothen.
  */
 static void Optimize_Moves(PathType *data)
 {
@@ -1076,10 +1076,10 @@ static void Optimize_Moves(PathType *data)
 	uint8 *bufferFrom;
 	uint8 *bufferTo;
 
-	data->buffer[data->routeSize] = 0xFF;
+	data->buffer[data->PathSize] = 0xFF;
 	packed = data->packed;
 
-	if (data->routeSize > 1) {
+	if (data->PathSize > 1) {
 		bufferTo = data->buffer + 1;
 
 		while (*bufferTo != 0xFF) {
@@ -1149,29 +1149,29 @@ static void Optimize_Moves(PathType *data)
 	bufferTo   = data->buffer;
 	packed     = data->packed;
 	data->score     = 0;
-	data->routeSize = 0;
+	data->PathSize = 0;
 
-	/* Build the new improved route, without gaps */
+	/* Build the new improved Path, without gaps */
 	for (; *bufferTo != 0xFF; bufferTo++) {
 		if (*bufferTo == 0xFE) continue;
 
 		packed += AdjacentCell[*bufferTo];
 		data->score += Passable_Cell(packed, *bufferTo);
-		data->routeSize++;
+		data->PathSize++;
 		*bufferFrom++ = *bufferTo;
 	}
 
-	data->routeSize++;
+	data->PathSize++;
 	*bufferFrom = 0xFF;
 }
 
 /**
  * Try to connect two tiles (packedDst and data->packed) via a simplistic algorithm.
  * @param packedDst The tile to try to get to.
- * @param data Information about the found route, and the start point.
+ * @param data Information about the found Path, and the start point.
  * @param searchDirection The search direction (1 for clockwise, -1 for counterclockwise).
  * @param directionStart The direction to start looking at.
- * @return True if a route was found.
+ * @return True if a Path was found.
  */
 static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, uint8 directionStart)
 {
@@ -1197,7 +1197,7 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 				packedNext = packedCur + AdjacentCell[direction];
 				break;
 			} else {
-				/* If we are back to our start direction, we didn't find a route */
+				/* If we are back to our start direction, we didn't find a Path */
 				if (direction == directionStart) return false;
 
 				/* See if the tile next to us is a valid position */
@@ -1209,16 +1209,16 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 		*buffer++ = direction;
 		bufferSize++;
 
-		/* If we found the destination, smooth the route and we are done */
+		/* If we found the destination, smooth the Path and we are done */
 		if (packedNext == packedDst) {
 			*buffer = 0xFF;
-			data->routeSize = bufferSize;
+			data->PathSize = bufferSize;
 			Optimize_Moves(data);
-			data->routeSize--;
+			data->PathSize--;
 			return true;
 		}
 
-		/* If we return to our start tile, we didn't find a route */
+		/* If we return to our start tile, we didn't find a Path */
 		if (data->packed == packedNext) return false;
 
 		/* Now look at the next tile, starting 3 directions back */
@@ -1226,7 +1226,7 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 		packedCur = packedNext;
 	}
 
-	/* We ran out of search space and didn't find a route */
+	/* We ran out of search space and didn't find a Path */
 	return false;
 }
 
@@ -1235,9 +1235,9 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
  *
  * @param packedSrc The start point.
  * @param packedDst The end point.
- * @param buffer The buffer to store the route in.
+ * @param buffer The buffer to store the Path in.
  * @param bufferSize The size of the buffer.
- * @return A struct with information about the found route.
+ * @return A struct with information about the found Path.
  */
 static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int16 bufferSize)
 {
@@ -1246,7 +1246,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 
 	res.packed    = packedSrc;
 	res.score     = 0;
-	res.routeSize = 0;
+	res.PathSize = 0;
 	res.buffer    = buffer;
 
 	res.buffer[0] = 0xFF;
@@ -1254,7 +1254,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 	bufferSize--;
 
 	packedCur = packedSrc;
-	while (res.routeSize < bufferSize) {
+	while (res.PathSize < bufferSize) {
 		uint8  direction;
 		uint16 packedNext;
 		int16  score;
@@ -1268,37 +1268,37 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 		/* Check for valid movement towards the tile */
 		score = Passable_Cell(packedNext, direction);
 		if (score <= 255) {
-			res.buffer[res.routeSize++] = direction;
+			res.buffer[res.PathSize++] = direction;
 			res.score += score;
 		} else {
 			uint8 dir;
 			bool foundCounterclockwise = false;
 			bool foundClockwise = false;
-			int16 routeSize;
-			PathType routes[2];
-			uint8 routesBuffer[2][102];
-			PathType *bestRoute;
+			int16 PathSize;
+			PathType Paths[2];
+			uint8 PathsBuffer[2][102];
+			PathType *bestPath;
 
 			while (true) {
 				if (packedNext == packedDst) break;
 
-				/* Find the first valid tile on the (direct) route. */
+				/* Find the first valid tile on the (direct) Path. */
 				dir = Tile_GetDirectionPacked(packedNext, packedDst) / 32;
 				packedNext += AdjacentCell[dir];
 				if (Passable_Cell(packedNext, dir) > 255) continue;
 
 				/* Try to find a connection between our last valid tile and the new valid tile */
-				routes[1].packed    = packedCur;
-				routes[1].score     = 0;
-				routes[1].routeSize = 0;
-				routes[1].buffer    = routesBuffer[0];
-				foundCounterclockwise = Follow_Edge(packedNext, &routes[1], -1, direction);
+				Paths[1].packed    = packedCur;
+				Paths[1].score     = 0;
+				Paths[1].PathSize = 0;
+				Paths[1].buffer    = PathsBuffer[0];
+				foundCounterclockwise = Follow_Edge(packedNext, &Paths[1], -1, direction);
 
-				routes[0].packed    = packedCur;
-				routes[0].score     = 0;
-				routes[0].routeSize = 0;
-				routes[0].buffer    = routesBuffer[1];
-				foundClockwise = Follow_Edge(packedNext, &routes[0], 1, direction);
+				Paths[0].packed    = packedCur;
+				Paths[0].score     = 0;
+				Paths[0].PathSize = 0;
+				Paths[0].buffer    = PathsBuffer[1];
+				foundClockwise = Follow_Edge(packedNext, &Paths[0], 1, direction);
 
 				if (foundCounterclockwise || foundClockwise) break;
 
@@ -1311,25 +1311,25 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 			}
 
 			if (foundCounterclockwise || foundClockwise) {
-				/* Find the best (partial) route */
+				/* Find the best (partial) Path */
 				if (!foundClockwise) {
-					bestRoute = &routes[1];
+					bestPath = &Paths[1];
 				} else if (!foundCounterclockwise) {
-					bestRoute = &routes[0];
+					bestPath = &Paths[0];
 				} else {
-					bestRoute = &routes[routes[1].score < routes[0].score ? 1 : 0];
+					bestPath = &Paths[Paths[1].score < Paths[0].score ? 1 : 0];
 				}
 
 				/* Calculate how much more we can copy into our own buffer */
-				routeSize = min(bufferSize - res.routeSize, bestRoute->routeSize);
-				if (routeSize <= 0) break;
+				PathSize = min(bufferSize - res.PathSize, bestPath->PathSize);
+				if (PathSize <= 0) break;
 
 				/* Copy the rest into our own buffer */
-				memcpy(&res.buffer[res.routeSize], bestRoute->buffer, routeSize);
-				res.routeSize += routeSize;
-				res.score     += bestRoute->score;
+				memcpy(&res.buffer[res.PathSize], bestPath->buffer, PathSize);
+				res.PathSize += PathSize;
+				res.score     += bestPath->score;
 			} else {
-				/* Means we didn't find a route. packedNext is now equal to packedDst */
+				/* Means we didn't find a Path. packedNext is now equal to packedDst */
 				break;
 			}
 		}
@@ -1337,7 +1337,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 		packedCur = packedNext;
 	}
 
-	if (res.routeSize < bufferSize) res.buffer[res.routeSize++] = 0xFF;
+	if (res.PathSize < bufferSize) res.buffer[res.PathSize++] = 0xFF;
 
 	Optimize_Moves(&res);
 
@@ -1345,14 +1345,14 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 }
 
 /**
- * Calculate the route to a tile.
+ * Calculate the Path to a tile.
  *
- * Stack: 1 - An encoded tile to calculate the route to.
+ * Stack: 1 - An encoded tile to calculate the Path to.
  *
  * @param script The script engine to operate on.
  * @return 0 if we arrived on location, 1 otherwise.
  */
-uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
+uint16 Script_Unit_CalculatePath(ScriptEngine *script)
 {
 	Unit *u;
 	uint16 encoded;
@@ -1368,20 +1368,20 @@ uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
 	packedDst = Tools_Index_GetPackedTile(encoded);
 
 	if (packedDst == packedSrc) {
-		u->route[0] = 0xFF;
+		u->Path[0] = 0xFF;
 		u->targetMove = 0;
 		return 0;
 	}
 
-	if (u->route[0] == 0xFF) {
+	if (u->Path[0] == 0xFF) {
 		PathType res;
 		uint8 buffer[42];
 
 		res = Find_Path(packedSrc, packedDst, buffer, 40);
 
-		memcpy(u->route, res.buffer, min(res.routeSize, 14));
+		memcpy(u->Path, res.buffer, min(res.PathSize, 14));
 
-		if (u->route[0] == 0xFF) {
+		if (u->Path[0] == 0xFF) {
 			u->targetMove = 0;
 			if (u->o.type == UNIT_SANDWORM) {
 				script->delay = 720;
@@ -1391,23 +1391,23 @@ uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
 		uint16 distance;
 
 		distance = Tile_GetDistancePacked(packedDst, packedSrc);
-		if (distance < 14) u->route[distance] = 0xFF;
+		if (distance < 14) u->Path[distance] = 0xFF;
 	}
 
-	if (u->route[0] == 0xFF) return 1;
+	if (u->Path[0] == 0xFF) return 1;
 
-	if (u->orientation[0].current != (int8)(u->route[0] * 32)) {
-		Unit_SetOrientation(u, (int8)(u->route[0] * 32), false, 0);
+	if (u->orientation[0].current != (int8)(u->Path[0] * 32)) {
+		Unit_SetOrientation(u, (int8)(u->Path[0] * 32), false, 0);
 		return 1;
 	}
 
 	if (!Unit_StartMovement(u)) {
-		u->route[0] = 0xFF;
+		u->Path[0] = 0xFF;
 		return 0;
 	}
 
-	memmove(&u->route[0], &u->route[1], 13);
-	u->route[13] = 0xFF;
+	memmove(&u->Path[0], &u->Path[1], 13);
+	u->Path[13] = 0xFF;
 	return 1;
 }
 

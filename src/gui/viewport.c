@@ -157,7 +157,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		Object_Script_Variable4_Clear(&u->o);
 		u->targetAttack   = 0;
 		u->targetMove     = 0;
-		u->route[0] = 0xFF;
+		u->Path[0] = 0xFF;
 
 		if (action != ACTION_MOVE && action != ACTION_HARVEST) {
 			encoded = Tools_Index_Encode(Unit_FindTargetAround(packed), IT_TILE);
@@ -206,7 +206,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		if (Structure_Place(s, g_selectionPosition)) {
 			Voice_Play(20);
 
-			if (s->o.type == STRUCTURE_PALACE) House_Get_ByIndex(s->o.houseID)->palacePosition = s->o.position;
+			if (s->o.type == STRUCTURE_PALACE) House_Get_ByIndex(s->o.houseID)->Special = s->o.position;
 
 			if (g_structureActiveType == STRUCTURE_REFINERY && g_validateStrictIfZero == 0) {
 				Unit *u;
@@ -237,8 +237,8 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 
 			House_UpdateRadarState(h);
 
-			if (h->powerProduction < h->powerUsage) {
-				if ((h->structuresBuilt & (1 << STRUCTURE_OUTPOST)) != 0) {
+			if (h->Power < h->Drain) {
+				if ((h->Bldngs & (1 << STRUCTURE_OUTPOST)) != 0) {
 					GUI_DisplayText(String_Get_ByIndex(STR_NOT_ENOUGH_POWER_FOR_RADAR_BUILD_WINDTRAPS), 3);
 				}
 			}

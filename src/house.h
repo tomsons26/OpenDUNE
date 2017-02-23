@@ -81,14 +81,14 @@ typedef struct House {
 	uint16 unitCountMax;                                    /*!< Maximum amount of units this House is allowed to have. */
 	uint16 unitCountEnemy;                                  /*!< Amount of units owned by enemy. */
 	uint16 unitCountAllied;                                 /*!< Amount of units owned by allies. */
-	uint32 structuresBuilt;                                 /*!< The Nth bit active means the Nth structure type is built (one or more). */
+	uint32 Bldngs;                                 /*!< The Nth bit active means the Nth structure type is built (one or more). */
 	uint16 credits;                                         /*!< Amount of credits the House currently has. */
 	uint16 creditsStorage;                                  /*!< Amount of credits the House can store. */
-	uint16 powerProduction;                                 /*!< Amount of power the House produces. */
-	uint16 powerUsage;                                      /*!< Amount of power the House requires. */
+	uint16 Power;                                 /*!< Amount of power the House produces. */
+	uint16 Drain;                                      /*!< Amount of power the House requires. */
 	uint16 windtrapCount;                                   /*!< Amount of windtraps the House currently has. */
-	uint16 creditsQuota;                                    /*!< Quota house has to reach to win the mission. */
-	CellStruct palacePosition;                                  /*!< Position of the Palace. */
+	uint16 SolMin;                                    /*!< Quota house has to reach to win the mission. */
+	CellStruct Special;                                  /*!< Position of the Palace. */
 	uint16 timerUnitAttack;                                 /*!< Timer to count down when next 'unit approaching' message can be showed again. */
 	uint16 timerSandwormAttack;                             /*!< Timer to count down when next 'sandworm approaching' message can be showed again. */
 	uint16 timerStructureAttack;                            /*!< Timer to count down when next 'base is under attack' message can be showed again. */

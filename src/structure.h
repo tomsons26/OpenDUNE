@@ -106,7 +106,7 @@ typedef struct StructureInfo {
 	ObjectInfo o;                                           /*!< Common to UnitInfo and StructureInfo. */
 	uint32 enterFilter;                                     /*!< Bitfield determining which unit is allowed to enter the structure. If bit n is set, then units of type n may enter */
 	uint16 creditsStorage;                                  /*!< How many credits this Structure can store. */
-	 int16 powerUsage;                                      /*!< How much power this Structure uses (positive value) or produces (negative value). */
+	 int16 Drain;                                      /*!< How much power this Structure uses (positive value) or produces (negative value). */
 	uint16 layout;                                          /*!< Layout type of Structure. */
 	uint16 iconGroup;                                       /*!< In which IconGroup the sprites of the Structure belongs. */
 	uint8  animationIndex[3];                               /*!< The index inside g_table_animation_structure for the Animation of the Structure. */
@@ -144,7 +144,7 @@ extern bool Structure_Place(Structure *s, uint16 position);
 extern void Structure_CalculateHitpointsMax(struct House *h);
 extern void Structure_SetState(Structure *s, int16 animation);
 extern Structure *Structure_Get_ByPackedTile(uint16 packed);
-extern uint32 Structure_GetStructuresBuilt(struct House *h);
+extern uint32 Structure_GetBldngs(struct House *h);
 extern int16 Structure_IsValidBuildLocation(uint16 position, StructureType type);
 extern bool Structure_Save(FILE *fp);
 extern bool Structure_Load(FILE *fp, uint32 length);
