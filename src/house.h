@@ -35,13 +35,13 @@ typedef enum HouseFlag {
 /**
  * Types of special %House Weapons available in the game.
  */
-typedef enum HouseWeapon {
+typedef enum SpecialWeaponType {
 	HOUSE_WEAPON_MISSILE  = 1,
 	HOUSE_WEAPON_FREMEN   = 2,
 	HOUSE_WEAPON_SABOTEUR = 3,
 
 	HOUSE_WEAPON_INVALID = 0xFF
-} HouseWeapon;
+} SpecialWeaponType;
 
 typedef enum HouseAnimationType {
 	HOUSEANIMATION_INTRO            = 0,
@@ -109,7 +109,7 @@ typedef struct HouseInfo {
 	uint16 specialCountDown;                                /*!< Time between activation of Special Weapon. */
 	uint16 starportDeliveryTime;                            /*!< Time it takes for a starport delivery. */
 	uint16 prefixChar;                                      /*!< Char used as prefix for some filenames. */
-	uint16 specialWeapon;                                   /*!< Which Special Weapon this House has. @see HouseWeapon. */
+	uint16 specialWeapon;                                   /*!< Which Special Weapon this House has. @see SpecialWeaponType. */
 	uint16 musicWin;                                        /*!< Music played when you won a mission. */
 	uint16 musicLose;                                       /*!< Music played when you lose a mission. */
 	uint16 musicBriefing;                                   /*!< Music played during initial briefing of mission. */
