@@ -749,7 +749,7 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 
 		curPos = position + layoutTile[i];
 
-		lst = Map_GetLandscapeType(curPos);
+		lst = Map_GetLandType(curPos);
 
 		if (g_debugScenario) {
 			if (!g_table_landscapeInfo[lst].isValidForStructure2) {
@@ -799,7 +799,7 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 				break;
 			}
 
-			lst = Map_GetLandscapeType(curPos);
+			lst = Map_GetLandType(curPos);
 			if (lst != LST_CONCRETE_SLAB && lst != LST_WALL) continue;
 			if (g_map[curPos].houseID != g_playerHouseID) continue;
 
@@ -1159,16 +1159,16 @@ bool Structure_ConnectWall(uint16 position, bool recurse)
 	uint8 i;
 	Tile *tile;
 
-	isDestroyedWall = Map_GetLandscapeType(position) == LST_DESTROYED_WALL;
+	isDestroyedWall = Map_GetLandType(position) == LST_DESTROYED_WALL;
 
 	for (i = 0; i < 4; i++) {
 		const uint16 curPos = position + g_table_mapDiff[i];
 
-		if (recurse && Map_GetLandscapeType(curPos) == LST_WALL) Structure_ConnectWall(curPos, false);
+		if (recurse && Map_GetLandType(curPos) == LST_WALL) Structure_ConnectWall(curPos, false);
 
 		if (isDestroyedWall) continue;
 
-		switch (Map_GetLandscapeType(curPos)) {
+		switch (Map_GetLandType(curPos)) {
 			case LST_DESTROYED_WALL: bits |= (1 << (i + 4));
 				/* FALL-THROUGH */
 			case LST_WALL: bits |= (1 << i);
@@ -1280,7 +1280,7 @@ uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice)
 		curPacked = packed + offset;
 		if (!Map_IsValidPosition(curPacked)) continue;
 
-		type = Map_GetLandscapeType(curPacked);
+		type = Map_GetLandType(curPacked);
 		if (type == LST_WALL || type == LST_ENTIRELY_MOUNTAIN || type == LST_PARTIAL_MOUNTAIN) continue;
 
 		t = &g_map[curPacked];
@@ -1391,7 +1391,7 @@ static bool Structure_CheckAvailableConcrete(uint16 structureType, uint8 houseID
 			uint16 packed = i + g_table_structure_layoutTiles[si->layout][j];
 			/* XXX -- This can overflow, and we should check for that */
 
-			if (Map_GetLandscapeType(packed) == LST_CONCRETE_SLAB && g_map[packed].houseID == houseID) continue;
+			if (Map_GetLandType(packed) == LST_CONCRETE_SLAB && g_map[packed].houseID == houseID) continue;
 
 			stop = false;
 			break;

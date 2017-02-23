@@ -377,7 +377,7 @@ static bool Map_UpdateWall(uint16 packed)
 {
 	Tile *t;
 
-	if (Map_GetLandscapeType(packed) != LST_WALL) return false;
+	if (Map_GetLandType(packed) != LST_WALL) return false;
 
 	t = &g_map[packed];
 
@@ -502,7 +502,7 @@ void Map_MakeExplosion(uint16 type, CellStruct position, uint16 hitpoints, uint1
 		}
 	}
 
-	if (Map_GetLandscapeType(positionPacked) == LST_WALL && hitpoints != 0) {
+	if (Map_GetLandType(positionPacked) == LST_WALL && hitpoints != 0) {
 		if ((g_table_structureInfo[STRUCTURE_WALL].o.hitpoints <= hitpoints) ||
 		    (Tools_Random_256() <= (hitpoints * 256 / g_table_structureInfo[STRUCTURE_WALL].o.hitpoints))) {
 			Map_UpdateWall(positionPacked);
@@ -518,7 +518,7 @@ void Map_MakeExplosion(uint16 type, CellStruct position, uint16 hitpoints, uint1
  * 0=normal sand, 1=partial rock, 5=mostly rock, 4=entirely rock,
  * 3=partial sand dunes, 2=entirely sand dunes, 7=partial mountain,
  * 6=entirely mountain, 8=spice, 9=thick spice
- * @see Map_GetLandscapeType
+ * @see Map_GetLandType
  */
 static const uint16 _landscapeSpriteMap[81] = {
 	0, 1, 1, 1, 5, 1, 5, 5, 5, 5, /* Sprites 127-136 */
@@ -538,7 +538,7 @@ static const uint16 _landscapeSpriteMap[81] = {
  * @param packed The packed tile to examine.
  * @return The type of landscape at the tile.
  */
-uint16 Map_GetLandscapeType(uint16 packed)
+uint16 Map_GetLandType(uint16 packed)
 {
 	Tile *t;
 	int16 spriteOffset;
@@ -705,7 +705,7 @@ void Map_FillCircleWithSpice(uint16 packed, uint16 radius)
 
 			if (distance == radius && (Tools_Random_256() & 1) == 0) continue;
 
-			if (Map_GetLandscapeType(curPacked) == LST_SPICE) continue;
+			if (Map_GetLandType(curPacked) == LST_SPICE) continue;
 
 			Map_ChangeSpiceAmount(curPacked, 1);
 
@@ -728,7 +728,7 @@ static void Map_FixupSpiceEdges(uint16 packed)
 	uint16 spriteID;
 
 	packed &= 0xFFF;
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 	spriteID = 0;
 
 	if (type == LST_SPICE || type == LST_THICK_SPICE) {
@@ -743,7 +743,7 @@ static void Map_FixupSpiceEdges(uint16 packed)
 				continue;
 			}
 
-			curType = Map_GetLandscapeType(curPacked);
+			curType = Map_GetLandType(curPacked);
 
 			if (type == LST_SPICE) {
 				if (curType == LST_SPICE || curType == LST_THICK_SPICE) spriteID |= (1 << i);
@@ -775,7 +775,7 @@ void Map_ChangeSpiceAmount(uint16 packed, int16 dir)
 
 	if (dir == 0) return;
 
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 
 	if (type == LST_THICK_SPICE && dir > 0) return;
 	if (type != LST_SPICE && type != LST_THICK_SPICE && dir < 0) return;
@@ -1151,7 +1151,7 @@ uint16 Map_SearchSpice(uint16 packed, uint16 radius)
 			if (g_map[curPacked].hasStructure) continue;
 			if (Unit_Get_ByPackedTile(curPacked) != NULL) continue;
 
-			type = Map_GetLandscapeType(curPacked);
+			type = Map_GetLandType(curPacked);
 			distance = Tile_GetDistancePacked(curPacked, packed);
 
 			if (type == LST_THICK_SPICE && distance < 4) {

@@ -534,7 +534,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			GUI_DrawSprite(SCREEN_ACTIVE, GUI_Widget_Viewport_Draw_GetSprite(index, (u->deviated != 0) ? u->deviatedHouse : Unit_GetHouseID(u)), x, y, 2, spriteFlags | 0xE000, s_paletteHouse, g_paletteMapping2, 1);
 
 			if (u->o.type == UNIT_HARVESTER && u->actionID == ACTION_HARVEST && u->spriteOffset >= 0 && (u->actionID == ACTION_HARVEST || u->actionID == ACTION_MOVE)) {
-				uint16 type = Map_GetLandscapeType(packed);
+				uint16 type = Map_GetLandType(packed);
 				if (type == LST_SPICE || type == LST_THICK_SPICE) {
 					static const int16 values_334E[8][2] = {
 						{0, 7},  {-7,  6}, {-14, 1}, {-9, -6},
@@ -855,7 +855,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 	t = &g_map[packed];
 
 	if ((t->isUnveiled && g_playerHouse->flags.radarActivated) || g_debugScenario) {
-		uint16 type = Map_GetLandscapeType(packed);
+		uint16 type = Map_GetLandType(packed);
 		Unit *u;
 
 		if (mapScale > 1) {

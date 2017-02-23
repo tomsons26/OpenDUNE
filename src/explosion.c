@@ -63,7 +63,7 @@ static void Explosion_Func_TileDamage(Explosion *e, uint16 parameter)
 
 	if (!Map_IsPositionUnveiled(packed)) return;
 
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 
 	if (type == LST_STRUCTURE || type == LST_DESTROYED_WALL) return;
 
@@ -181,7 +181,7 @@ static void Explosion_Func_SetAnimation(Explosion *e, uint16 animationMapID)
 	if (Structure_Get_ByPackedTile(packed) != NULL) return;
 
 	animationMapID += Tools_Random_256() & 0x1;
-	animationMapID += g_table_landscapeInfo[Map_GetLandscapeType(packed)].isSand ? 0 : 2;
+	animationMapID += g_table_landscapeInfo[Map_GetLandType(packed)].isSand ? 0 : 2;
 
 	assert(animationMapID < 16);
 	Animation_Start(g_table_animation_map[animationMapID], e->position, 0, e->houseID, 3);

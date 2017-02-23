@@ -1532,7 +1532,7 @@ uint16 Script_Unit_StartAnimation(ScriptEngine *script)
 	position = Tile_PackTile(Tile_Center(u->o.position));
 	Animation_Stop_ByTile(position);
 
-	animationUnitID = g_table_landscapeInfo[Map_GetLandscapeType(Tile_PackTile(u->o.position))].isSand ? 0 : 1;
+	animationUnitID = g_table_landscapeInfo[Map_GetLandType(Tile_PackTile(u->o.position))].isSand ? 0 : 1;
 	if (u->o.script.variables[1] == 1) animationUnitID += 2;
 
 	g_map[position].houseID = Unit_GetHouseID(u);
@@ -1711,7 +1711,7 @@ uint16 Script_Unit_Harvest(ScriptEngine *script)
 
 	packed = Tile_PackTile(u->o.position);
 
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 	if (type != LST_SPICE && type != LST_THICK_SPICE) return 0;
 
 	u->amount += Tools_Random_256() & 1;

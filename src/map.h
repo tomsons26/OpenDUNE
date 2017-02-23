@@ -4,7 +4,7 @@
 #define MAP_H
 
 /** Types of available landscapes. */
-typedef enum LandscapeType {
+typedef enum LandType {
 	LST_NORMAL_SAND       =  0,                             /*<! Flat sand. */
 	LST_PARTIAL_ROCK      =  1,                             /*!< Edge of a rocky area (mostly sand). */
 	LST_ENTIRELY_DUNE     =  2,                             /*!< Entirely sand dunes. */
@@ -22,7 +22,7 @@ typedef enum LandscapeType {
 	LST_BLOOM_FIELD       = 14,                             /*!< Bloom field. */
 
 	LST_MAX               = 15
-} LandscapeType;
+} LandType;
 
 MSVC_PACKED_BEGIN
 /**
@@ -51,18 +51,18 @@ typedef struct MapInfo {
 } MapInfo;
 
 /**
- * Information about LandscapeType.
+ * Information about LandType.
  */
 typedef struct LandscapeInfo {
-	uint8  movementSpeed[6];                                /*!< Per MovementType the speed a Unit has on this LandscapeType. */
-	bool   letUnitWobble;                                   /*!< True if a Unit on this LandscapeType should wobble around while moving on it. */
-	bool   isValidForStructure;                             /*!< True if a Structure with notOnConcrete false can be build on this LandscapeType. */
-	bool   isSand;                                          /*!< True if the LandscapeType is a sand tile (sand, dune, spice, thickspice, bloom). */
-	bool   isValidForStructure2;                            /*!< True if a Structure with notOnConcrete true can be build on this LandscapeType. */
-	bool   canBecomeSpice;                                  /*!< True if the LandscapeType can become a spice tile. */
+	uint8  movementSpeed[6];                                /*!< Per MovementType the speed a Unit has on this LandType. */
+	bool   letUnitWobble;                                   /*!< True if a Unit on this LandType should wobble around while moving on it. */
+	bool   isValidForStructure;                             /*!< True if a Structure with notOnConcrete false can be build on this LandType. */
+	bool   isSand;                                          /*!< True if the LandType is a sand tile (sand, dune, spice, thickspice, bloom). */
+	bool   isValidForStructure2;                            /*!< True if a Structure with notOnConcrete true can be build on this LandType. */
+	bool   canBecomeSpice;                                  /*!< True if the LandType can become a spice tile. */
 	uint8  craterType;                                      /*!< Type of crater on tile; 0 for none, 1 for sand, 2 for concrete. */
-	uint16 radarColour;                                     /*!< Colour used on radar for this LandscapeType. */
-	uint16 spriteID;                                        /*!< Sprite used on map for this LandscapeType. */
+	uint16 radarColour;                                     /*!< Colour used on radar for this LandType. */
+	uint16 spriteID;                                        /*!< Sprite used on map for this LandType. */
 } LandscapeInfo;
 
 struct Unit;
@@ -98,7 +98,7 @@ extern bool Map_IsValidPosition(uint16 position);
 extern bool Map_IsPositionUnveiled(uint16 position);
 extern bool Map_IsPositionInViewport(CellStruct position, uint16 *retX, uint16 *retY);
 extern void Map_MakeExplosion(uint16 type, CellStruct position, uint16 hitpoints, uint16 unitOriginEncoded);
-extern uint16 Map_GetLandscapeType(uint16 packed);
+extern uint16 Map_GetLandType(uint16 packed);
 extern void Map_Update(uint16 packed, uint16 type, bool ignoreInvisible);
 extern void Map_DeviateArea(uint16 type, CellStruct position, uint16 radius, uint8 houseID);
 extern void Map_Bloom_ExplodeSpice(uint16 packed, uint8 houseID);

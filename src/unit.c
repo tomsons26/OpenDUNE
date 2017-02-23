@@ -991,7 +991,7 @@ static uint16 Unit_Sandworm_GetTargetPriority(Unit *unit, Unit *target)
 
 	if (unit == NULL || target == NULL) return 0;
 	if (!Map_IsPositionUnveiled(Tile_PackTile(target->o.position))) return 0;
-	if (!g_table_landscapeInfo[Map_GetLandscapeType(Tile_PackTile(target->o.position))].isSand) return 0;
+	if (!g_table_landscapeInfo[Map_GetLandType(Tile_PackTile(target->o.position))].isSand) return 0;
 
 	switch(g_table_unitInfo[target->o.type].movementType) {
 		case MOVEMENT_FOOT:      res = 0x64;   break;
@@ -1085,7 +1085,7 @@ bool Unit_StartMovement(Unit *unit)
 
 	if (score > 255 || score == -1) return false;
 
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 	if (type == LST_STRUCTURE) type = LST_CONCRETE_SLAB;
 
 	speed = g_table_landscapeInfo[type].movementSpeed[ui->movementType];
@@ -1337,7 +1337,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 			u->o.script.variables[1] = 1;
 			Unit_SetAction(u, ACTION_DIE);
 		} else {
-			uint16 type = Map_GetLandscapeType(packed);
+			uint16 type = Map_GetLandType(packed);
 			/* Produce tracks in the sand */
 			if ((type == LST_NORMAL_SAND || type == LST_ENTIRELY_DUNE) && g_map[packed].overlaySpriteID == 0) {
 				uint8 animationID = Orientation_Orientation256ToOrientation8(unit->orientation[0].current);
@@ -1384,7 +1384,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 				Structure_Damage(s, damage, 0);
 			} else {
-				if (Map_GetLandscapeType(packed) == LST_WALL && g_table_structureInfo[STRUCTURE_WALL].o.hitpoints > damage) Tools_Random_256();
+				if (Map_GetLandType(packed) == LST_WALL && g_table_structureInfo[STRUCTURE_WALL].o.hitpoints > damage) Tools_Random_256();
 			}
 		}
 
@@ -1397,7 +1397,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 		}
 	} else {
 		if (unit->o.type == UNIT_BULLET) {
-			uint16 type = Map_GetLandscapeType(Tile_PackTile(newPosition));
+			uint16 type = Map_GetLandType(Tile_PackTile(newPosition));
 			if (type == LST_WALL || type == LST_STRUCTURE) {
 				if (Tools_Index_GetType(unit->originEncoded) == IT_STRUCTURE) {
 					if (g_map[Tile_PackTile(newPosition)].houseID == unit->o.houseID) {
@@ -1436,7 +1436,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 							}
 						}
 					} else if (ui->explosionType != 0xFFFF) {
-						if (ui->flags.impactOnSand && g_map[Tile_PackTile(unit->o.position)].index == 0 && Map_GetLandscapeType(Tile_PackTile(unit->o.position)) == LST_NORMAL_SAND) {
+						if (ui->flags.impactOnSand && g_map[Tile_PackTile(unit->o.position)].index == 0 && Map_GetLandType(Tile_PackTile(unit->o.position)) == LST_NORMAL_SAND) {
 							Map_MakeExplosion(EXPLOSION_SAND_BURST, newPosition, unit->o.hitpoints, unit->originEncoded);
 						} else if (unit->o.type == UNIT_MISSILE_DEVIATOR) {
 							Map_DeviateArea(ui->explosionType, newPosition, 32, unit->o.houseID);
@@ -1460,7 +1460,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 				}
 
 				if (unit->o.type == UNIT_SABOTEUR) {
-					bool detonate = (Map_GetLandscapeType(Tile_PackTile(newPosition)) == LST_WALL);
+					bool detonate = (Map_GetLandType(Tile_PackTile(newPosition)) == LST_WALL);
 
 					if (!detonate) {
 						/* ENHANCEMENT -- Saboteurs tend to forget their goal, depending on terrain and game speed: to blow up on reaching their destination. */
@@ -1850,7 +1850,7 @@ uint16 Unit_FindTargetAround(uint16 packed)
 
 	if (Structure_Get_ByPackedTile(packed) != NULL) return packed;
 
-	if (Map_GetLandscapeType(packed) == LST_BLOOM_FIELD) return packed;
+	if (Map_GetLandType(packed) == LST_BLOOM_FIELD) return packed;
 
 	for (i = 0; i < lengthof(around); i++) {
 		Unit *u;
@@ -1882,7 +1882,7 @@ bool Unit_IsTileOccupied(Unit *unit)
 	ui = &g_table_unitInfo[unit->o.type];
 	packed = Tile_PackTile(unit->o.position);
 
-	speed = g_table_landscapeInfo[Map_GetLandscapeType(packed)].movementSpeed[ui->movementType];
+	speed = g_table_landscapeInfo[Map_GetLandType(packed)].movementSpeed[ui->movementType];
 	if (speed == 0) return true;
 
 	if (unit->o.type == UNIT_SANDWORM || ui->movementType == MOVEMENT_WINGER) return false;
@@ -2068,7 +2068,7 @@ void Unit_DisplayStatusText(Unit *unit)
 		stringID = STR_IS_D_PERCENT_FULL;
 
 		if (unit->actionID == ACTION_HARVEST && unit->amount < 100) {
-			uint16 type = Map_GetLandscapeType(Tile_PackTile(unit->o.position));
+			uint16 type = Map_GetLandType(Tile_PackTile(unit->o.position));
 
 			if (type == LST_SPICE || type == LST_THICK_SPICE) stringID = STR_IS_D_PERCENT_FULL_AND_HARVESTING;
 		}
@@ -2365,7 +2365,7 @@ int16 Unit_GetTileEnterScore(Unit *unit, uint16 packed, uint16 orient8)
 		return -res;
 	}
 
-	type = Map_GetLandscapeType(packed);
+	type = Map_GetLandType(packed);
 
 	if (g_dune2_enhanced) {
 		res = g_table_landscapeInfo[type].movementSpeed[ui->movementType] * ui->movingSpeedFactor / 256;
