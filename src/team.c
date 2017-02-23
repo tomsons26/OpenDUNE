@@ -99,7 +99,7 @@ Team *Team_Create(uint8 houseID, uint8 teamActionType, uint8 movementType, uint1
  * Convert the name of a team action to the type value of that team action, or
  *  TEAM_ACTION_INVALID if not found.
  */
-uint8 Team_ActionStringToType(const char *name)
+uint8 TActionType_From_Name(const char *name)
 {
 	uint8 type;
 	if (name == NULL) return TEAM_ACTION_INVALID;

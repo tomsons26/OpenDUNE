@@ -223,7 +223,7 @@ typedef struct ActionInfo {
 struct Team;
 struct Structure;
 
-extern const char * const g_table_movementTypeName[MOVEMENT_MAX];
+extern const char * const MoveType[MOVEMENT_MAX];
 
 extern const uint16 g_table_actionsAI[4];
 extern const ActionInfo g_table_actionInfo[ACTION_MAX];
@@ -240,9 +240,9 @@ extern uint16 g_dirtyAirUnitCount;
 
 extern void GameLoop_Unit(void);
 extern uint8 Unit_GetHouseID(Unit *u);
-extern uint8 Unit_StringToType(const char *name);
+extern uint8 UnitType_From_Name(const char *name);
 extern uint8 Unit_ActionStringToType(const char *name);
-extern uint8 Unit_MovementStringToType(const char *name);
+extern uint8 MoveType_From_Name(const char *name);
 extern struct Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position, int8 orientation);
 extern bool Unit_IsTypeOnMap(uint8 houseID, uint8 typeID);
 extern void Unit_SetAction(Unit *u, ActionType action);

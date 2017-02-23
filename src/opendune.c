@@ -575,11 +575,11 @@ static void ReadProfileIni(const char *filename)
 		uint16 priorityTarget;
 		uint16 hitpoints;
 
-		type = Unit_StringToType(key);
+		type = UnitType_From_Name(key);
 		if (type != UNIT_INVALID) {
 			oi = &g_table_unitInfo[type].o;
 		} else {
-			type = Structure_StringToType(key);
+			type = BuildingType_From_Name(key);
 			if (type != STRUCTURE_INVALID) oi = &g_table_structureInfo[type].o;
 		}
 

@@ -165,7 +165,7 @@ extern uint16 g_playerCredits;
 extern uint32 g_tickHousePowerMaintenance;
 
 extern void GameLoop_House(void);
-extern uint8 House_StringToType(const char *name);
+extern uint8 HouseType_From_Name(const char *name);
 extern bool House_AreAllied(uint8 houseID1, uint8 houseID2);
 extern bool House_UpdateRadarState(House *h);
 extern void House_UpdateCreditsStorage(uint8 houseID);

@@ -334,7 +334,7 @@ uint8 Unit_GetHouseID(Unit *u)
  * Convert the name of a unit to the type value of that unit, or
  *  UNIT_INVALID if not found.
  */
-uint8 Unit_StringToType(const char *name)
+uint8 UnitType_From_Name(const char *name)
 {
 	uint8 type;
 	if (name == NULL) return UNIT_INVALID;
@@ -366,13 +366,13 @@ uint8 Unit_ActionStringToType(const char *name)
  * Convert the name of a movement to the type value of that movement, or
  *  MOVEMENT_INVALID if not found.
  */
-uint8 Unit_MovementStringToType(const char *name)
+uint8 MoveType_From_Name(const char *name)
 {
 	uint8 type;
 	if (name == NULL) return MOVEMENT_INVALID;
 
 	for (type = 0; type < MOVEMENT_MAX; type++) {
-		if (strcasecmp(g_table_movementTypeName[type], name) == 0) return type;
+		if (strcasecmp(MoveType[type], name) == 0) return type;
 	}
 
 	return MOVEMENT_INVALID;

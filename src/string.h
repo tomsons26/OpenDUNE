@@ -19,7 +19,7 @@ typedef enum Language {
 
 extern const char * const LanguageString[LANGUAGE_MAX];
 
-extern uint16 String_Decompress(const char *source, char *dest);
+extern uint16 UnDip_Text(const char *source, char *dest);
 extern const char *String_GenerateFilename(const char *name);
 extern char *String_Get_ByIndex(uint16 stringID);
 extern void String_TranslateSpecial(char *source, char *dest);

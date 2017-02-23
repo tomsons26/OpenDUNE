@@ -5,7 +5,7 @@
 
 #include "../unit.h"
 
-const char * const g_table_movementTypeName[MOVEMENT_MAX] = {
+const char * const MoveType[MOVEMENT_MAX] = {
 	"Foot",
 	"Tracked",
 	"Harvester",

@@ -31,7 +31,7 @@ static const char * const Dipthong = " etainosrlhcdupmtasio wb rnsdalmh ieorasnr
  * @param dest The decompressed string.
  * @return The length of decompressed string.
  */
-uint16 String_Decompress(const char *source, char *dest)
+uint16 UnDip_Text(const char *source, char *dest)
 {
 	uint16 count;
 	const char *s;
@@ -118,7 +118,7 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 
 		if (compressed) {
 			dst = (char *)calloc(strlen(src) * 2 + 1, sizeof(char));
-			String_Decompress(src, dst);
+			UnDip_Text(src, dst);
 			String_TranslateSpecial(dst, dst);
 		} else {
 			dst = strdup(src);

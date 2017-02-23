@@ -127,7 +127,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HouseType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -137,7 +137,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	*split = '\0';
 
 	/* Second value is the Unit type */
-	unitType = Unit_StringToType(settings);
+	unitType = UnitType_From_Name(settings);
 	if (unitType == UNIT_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -217,12 +217,12 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 		if (split == NULL) return;
 		*split = '\0';
 		/* First value is the House type */
-		houseType = House_StringToType(settings);
+		houseType = HouseType_From_Name(settings);
 		if (houseType == HOUSE_INVALID) return;
 
 		/* Second value is the Structure type */
 		settings = split + 1;
-		structureType = Structure_StringToType(settings);
+		structureType = BuildingType_From_Name(settings);
 		if (structureType == STRUCTURE_INVALID) return;
 
 		Structure_Create(STRUCTURE_INDEX_INVALID, structureType, houseType, position);
@@ -238,7 +238,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HouseType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -248,7 +248,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	*split = '\0';
 
 	/* Second value is the Structure type */
-	structureType = Structure_StringToType(settings);
+	structureType = BuildingType_From_Name(settings);
 	if (structureType == STRUCTURE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -353,7 +353,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HouseType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -363,7 +363,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	*split = '\0';
 
 	/* Second value is the Unit type */
-	unitType = Unit_StringToType(settings);
+	unitType = UnitType_From_Name(settings);
 	if (unitType == UNIT_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -373,6 +373,9 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	*split = '\0';
 
 	/* Third value is the location of the reinforcement */
+	
+	//... this was a seperate function called Source_From_Name
+	
 	     if (strcasecmp(settings, "NORTH")     == 0) locationID = 0;
 	else if (strcasecmp(settings, "EAST")      == 0) locationID = 1;
 	else if (strcasecmp(settings, "SOUTH")     == 0) locationID = 2;
@@ -416,7 +419,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HouseType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -426,7 +429,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	*split = '\0';
 
 	/* Second value is the teamAction type */
-	teamActionType = Team_ActionStringToType(settings);
+	teamActionType = TActionType_From_Name(settings);
 	if (teamActionType == TEAM_ACTION_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -436,7 +439,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	*split = '\0';
 
 	/* Third value is the movement type */
-	movementType = Unit_MovementStringToType(settings);
+	movementType = MoveType_From_Name(settings);
 	if (movementType == MOVEMENT_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -469,7 +472,7 @@ static void Scenario_Load_Choam(const char *key, char *settings)
 {
 	uint8 unitType;
 
-	unitType = Unit_StringToType(key);
+	unitType = UnitType_From_Name(key);
 	if (unitType == UNIT_INVALID) return;
 
 	g_starportAvailable[unitType] = atoi(settings);

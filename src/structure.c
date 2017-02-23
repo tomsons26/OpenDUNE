@@ -348,7 +348,7 @@ void GameLoop_Structure(void)
  * Convert the name of a structure to the type value of that structure, or
  *  STRUCTURE_INVALID if not found.
  */
-uint8 Structure_StringToType(const char *name)
+uint8 BuildingType_From_Name(const char *name)
 {
 	uint8 type;
 	if (name == NULL) return STRUCTURE_INVALID;

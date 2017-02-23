@@ -278,7 +278,7 @@ void GameLoop_House(void)
  * Convert the name of a house to the type value of that house, or
  *  HOUSE_INVALID if not found.
  */
-uint8 House_StringToType(const char *name)
+uint8 HouseType_From_Name(const char *name)
 {
 	uint8 index;
 	if (name == NULL) return HOUSE_INVALID;
