@@ -54,7 +54,7 @@ static void Driver_Music_LoadFile(const char *musicName)
 	Driver *music = g_driverMusic;
 	Driver *sound = g_driverSound;
 
-	Driver_Music_Stop();
+	Stop_Score();
 
 	if (music->index == 0xFFFF) return;
 
@@ -66,7 +66,7 @@ static void Driver_Music_LoadFile(const char *musicName)
 		Driver_UnloadFile(music);
 	}
 
-	if (sound->filename[0] != '\0' && musicName != NULL && strcasecmp(Drivers_GenerateFilename(musicName, music), sound->filename) == 0) {
+	if (sound->filename[0] != '\0' && musicName != NULL && strcasecmp(Data_File_Name(musicName, music), sound->filename) == 0) {
 		g_driverMusic->content         = g_driverSound->content;
 		memcpy(g_driverMusic->filename, g_driverSound->filename, sizeof(g_driverMusic->filename));
 		g_driverMusic->contentMalloced = g_driverSound->contentMalloced;
@@ -92,7 +92,7 @@ void Music_Play(uint16 musicID)
 	if (g_table_musics[musicID].string != s_currentMusic) {
 		s_currentMusic = g_table_musics[musicID].string;
 
-		Driver_Music_Stop();
+		Stop_Score();
 		Driver_Voice_Play(NULL, 0xFF);
 		Driver_Music_LoadFile(NULL);
 		Driver_Sound_LoadFile(NULL);
@@ -115,13 +115,13 @@ void Music_InitMT32(void)
 
 	Driver_Music_Play(0, 0xFF);
 
-	GUI_DrawText(String_Get_ByIndex(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
+	Text_Print(String_Get_ByIndex(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
 
 	while (Driver_Music_IsPlaying()) {
 		Timer_Sleep(60);
 
 		left += 6;
-		GUI_DrawText(".", left, 10, 15, 12);
+		Text_Print(".", left, 10, 15, 12);
 	}
 }
 

@@ -104,8 +104,8 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 
 static void GameLoop_FinishAnimation(void)
 {
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x1);
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x2);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x1);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x2);
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
 
@@ -146,11 +146,11 @@ static void GameLoop_DrawText(char *string, uint16 top)
 		s = NULL;
 	}
 
-	GUI_DrawText_Wrapper(string, 160, top, 215, 0, 0x100);
+	Text_Print_Wrapper(string, 160, top, 215, 0, 0x100);
 
 	if (s == NULL) return;
 
-	GUI_DrawText_Wrapper(s, 160, top + 18, 215, 0, 0x100);
+	Text_Print_Wrapper(s, 160, top + 18, 215, 0, 0x100);
 
 	s[-1] = 0xD;
 }
@@ -235,9 +235,9 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 	if (g_playerHouseID != HOUSE_INVALID || s_houseAnimation_currentSubtitle != 2) return;
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x21);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x21);
 
-	GUI_DrawText_Wrapper("Copyright (c) 1992 Westwood Studios, Inc.", 160, 189, 215, 0, 0x112);
+	Text_Print_Wrapper("Copyright (c) 1992 Westwood Studios, Inc.", 160, 189, 215, 0, 0x112);
 
 	g_fontCharOffset = 0;
 
@@ -289,7 +289,7 @@ static uint16 GameLoop_PalettePart_Update(bool finishNow)
 
 	memcpy(&Palette[215 * 3], s_palettePartCurrent, 18);
 
-	GFX_SetPalette(Palette);
+	Set_Palette(Palette);
 
 	return s_palettePartDirection;
 }
@@ -715,7 +715,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 				break;
 
 			case 3:	/* 3 : fade from black */
-				if (counter < 8) GFX_SetPalette(g_palette1 + 256 * 3 * counter);
+				if (counter < 8) Set_Palette(g_palette1 + 256 * 3 * counter);
 
 				if (counter-- == 0) {
 					stage++;
@@ -724,7 +724,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 				break;
 
 			case 5:	/* 5 : fade to black */
-				if (counter > 0) GFX_SetPalette(g_palette1 + 256 * 3 * counter);
+				if (counter > 0) Set_Palette(g_palette1 + 256 * 3 * counter);
 
 				if (counter++ >= 8) stage = 0;
 				break;
@@ -744,7 +744,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 
 				if (strings[i].charHeight != g_fontCurrent->height) Font_Select(FontNew6Ptr);
 
-				GUI_DrawText(strings[i].text, strings[i].x, strings[i].y + g_curWidgetYBase, 255, 0);
+				Text_Print(strings[i].text, strings[i].x, strings[i].y + g_curWidgetYBase, 255, 0);
 
 				GFX_Screen_SetActive(SCREEN_0);
 			}
@@ -865,7 +865,7 @@ static void GameLoop_GameCredits(void)
 
 	g_fontCharOffset = -1;
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	for (;; sleepIdle()) {
 		Load_Data(String_GenerateFilename("CREDITS"), credits_buffer, Get_Buff(SCREEN_3));
@@ -944,7 +944,7 @@ static void Gameloop_Logos(void)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
-	GFX_SetPalette(g_palette2);
+	Set_Palette(g_palette2);
 	GFX_ClearScreen(SCREEN_0);
 
 	Load_Data("WESTWOOD.PAL", Palette, 256 * 3);

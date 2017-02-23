@@ -40,7 +40,7 @@ static void GUI_Security_DrawText(char *text)
 
 	GUI_Mentat_SplitText(text, 304);
 
-	GUI_DrawText_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+	Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
 	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
@@ -155,7 +155,7 @@ bool GUI_Security_Show(void)
 
 		buffer[0] = 0;
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 		Debug("Answer : %s\n", String_Get_ByIndex(questionIndex + 2));
 		GUI_EditBox(buffer, sizeof(buffer) - 1, 9, NULL, &GUI_Mentat_Tick, false);

@@ -261,8 +261,8 @@ static void GUI_Mentat_Draw(bool force)
 
 	Draw_Shape(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-	GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x11);
+	Text_Print_Wrapper(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x11);
 
 	line = GUI_Widget_Get_ByIndex(w, 3);
 	for (i = 0; i < 11; i++) {
@@ -1046,7 +1046,7 @@ static bool GUI_Mentat_DrawInfo(char *text, uint16 left, uint16 top, uint16 heig
 	while (skip-- != 0) text += strlen(text) + 1;
 
 	while (lines-- != 0) {
-		if (*text != '\0') GUI_DrawText_Wrapper(text, left, top, g_curWidgetFGColourBlink, 0, flags);
+		if (*text != '\0') Text_Print_Wrapper(text, left, top, g_curWidgetFGColourBlink, 0, flags);
 		top += height;
 		text += strlen(text) + 1;
 	}
@@ -1094,11 +1094,11 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		step = 1;
 	}
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x31);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x31);
 
 	descLines = GUI_SplitText(pictureDetails, (g_curWidgetWidth << 3) + 10, '\0');
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x32);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x32);
 
 	textLines = GUI_Mentat_SplitText(text, 304);
 
@@ -1188,7 +1188,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 					if (textLines-- != 0) {
 						GFX_Screen_SetActive(SCREEN_2);
-						GUI_DrawText_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+						Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 						mentatSpeakingMode = 1;
 						textDelay = (uint32)strlen(text) * 4;
 						textTick = g_timerGUI + textDelay;

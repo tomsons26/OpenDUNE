@@ -161,7 +161,7 @@ static void Drivers_Reset(void)
 	memset(s_driverLoaded, 0, sizeof(s_driverLoaded));
 }
 
-void Drivers_All_Init(void)
+void Sound_Init(void)
 {
 	Drivers_Reset();
 
@@ -210,7 +210,7 @@ void Driver_Sound_Play(int16 index, int16 volume)
 	s_bufferSoundIndex = (s_bufferSoundIndex + 1) % 4;
 }
 
-void Driver_Music_Stop(void)
+void Stop_Score(void)
 {
 	Driver *music = g_driverMusic;
 	MSBuffer *musicBuffer = g_bufferMusic;
@@ -223,7 +223,7 @@ void Driver_Music_Stop(void)
 	musicBuffer->index = 0xFFFF;
 }
 
-void Driver_Sound_Stop(void)
+void Stop_Sound(void)
 {
 	Driver *sound = g_driverSound;
 	uint8 i;
@@ -298,7 +298,7 @@ void Driver_Sound_LoadFile(const char *musicName)
 	Driver *sound = g_driverSound;
 	Driver *music = g_driverMusic;
 
-	Driver_Sound_Stop();
+	Stop_Sound();
 
 	if (sound->index == 0xFFFF) return;
 
@@ -313,7 +313,7 @@ void Driver_Sound_LoadFile(const char *musicName)
 	if (music->filename[0] != '\0') {
 		char *filename;
 
-		filename = Drivers_GenerateFilename(musicName, sound);
+		filename = Data_File_Name(musicName, sound);
 
 		if (filename != NULL && strcasecmp(filename, music->filename) == 0) {
 			sound->content         = music->content;
@@ -326,7 +326,7 @@ void Driver_Sound_LoadFile(const char *musicName)
 	Driver_LoadFile(musicName, sound);
 }
 
-char *Drivers_GenerateFilename(const char *name, Driver *driver)
+char *Data_File_Name(const char *name, Driver *driver)
 {
 	char basefilename[14];
 	static char filename[14];
@@ -420,7 +420,7 @@ void Driver_LoadFile(const char *musicName, Driver *driver)
 	char *filename;
 	size_t len;
 
-	filename = Drivers_GenerateFilename(musicName, driver);
+	filename = Data_File_Name(musicName, driver);
 
 	if (filename == NULL) return;
 

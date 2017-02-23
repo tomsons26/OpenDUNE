@@ -302,8 +302,8 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 
 			GUI_DrawFilledRectangle(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
 
-			GUI_DrawText_Wrapper(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
-			GUI_DrawText_Wrapper(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
+			Text_Print_Wrapper(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
+			Text_Print_Wrapper(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
 
 			g_textDisplayNeedsUpdate = false;
 
@@ -389,7 +389,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
  * @param x The most left position where to draw the string.
  * @param y The most top position where to draw the string.
  */
-static void GUI_DrawChar(unsigned char c, uint16 x, uint16 y)
+static void Draw_Char(unsigned char c, uint16 x, uint16 y)
 {
 	uint8 *screen = GFX_Screen_GetActive();
 
@@ -448,7 +448,7 @@ static void GUI_DrawChar(unsigned char c, uint16 x, uint16 y)
  * @param fgColour The foreground colour of the text.
  * @param bgColour The background colour of the text.
  */
-void GUI_DrawText(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour)
+void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour)
 {
 	uint8 colours[2];
 	uint16 x;
@@ -488,7 +488,7 @@ void GUI_DrawText(const char *string, int16 left, int16 top, uint8 fgColour, uin
 		}
 		if (y > SCREEN_HEIGHT) break;
 
-		GUI_DrawChar(*s, x, y);
+		Draw_Char(*s, x, y);
 
 		x += width;
 		s++;
@@ -515,7 +515,7 @@ void GUI_DrawText(const char *string, int16 left, int16 top, uint8 fgColour, uin
  * 0x0100 : align center
  * 0x0200 : align right
  */
-void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...)
+void Text_Print_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...)
 {
 	char textBuffer[240];
 	static uint16 displayedarg12low = -1;
@@ -593,7 +593,7 @@ void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgCol
 			break;
 	}
 
-	GUI_DrawText(textBuffer, left, top, fgColour, bgColour);
+	Text_Print(textBuffer, left, top, fgColour, bgColour);
 }
 
 /**
@@ -696,7 +696,7 @@ void GUI_PaletteAnimate(void)
 		timerToggle = g_timerGUI + 5;
 	}
 
-	if (shouldSetPalette) GFX_SetPalette(g_palette1);
+	if (shouldSetPalette) Set_Palette(g_palette1);
 
 	Sound_StartSpeech();
 }
@@ -783,7 +783,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 	oldWidgetId = Widget_SetCurrentWidget(1);
 
@@ -808,9 +808,9 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	g_curWidgetFGColourNormal = 0;
 
-	GUI_DrawText(textBuffer, g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal);
+	Text_Print(textBuffer, g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	GUI_Mouse_Show_Safe();
 
@@ -1389,16 +1389,16 @@ static uint16 Update_Score(int16 score, uint16 *harvestedAllied, uint16 *harvest
  * @param string The string to draw.
  * @param top The most top position where to draw the string.
  */
-static void GUI_DrawTextOnFilledRectangle(const char *string, uint16 top)
+static void Text_PrintOnFilledRectangle(const char *string, uint16 top)
 {
 	uint16 halfWidth;
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x121);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x121);
 
 	halfWidth = (Font_GetStringWidth(string) / 2) + 4;
 
 	GUI_DrawFilledRectangle(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
-	GUI_DrawText_Wrapper(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
+	Text_Print_Wrapper(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
 }
 
 static uint16 GUI_HallOfFame_GetRank(uint16 score)
@@ -1414,7 +1414,7 @@ static uint16 GUI_HallOfFame_GetRank(uint16 score)
 
 static void GUI_HallOfFame_DrawRank(uint16 score, bool fadeIn)
 {
-	GUI_DrawText_Wrapper(String_Get_ByIndex(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
+	Text_Print_Wrapper(String_Get_ByIndex(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
 
 	if (!fadeIn) return;
 
@@ -1465,13 +1465,13 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		}
 
 		/* "Score: %d" */
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
-		GUI_DrawText_Wrapper(buffer, 248, 15, 15, 0, 0x222);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
+		Text_Print_Wrapper(buffer, 248, 15, 15, 0, 0x222);
 		/* "You have attained the rank of" */
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
 	} else {
 		/* "Hall of Fame" */
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
 	}
 
 	switch (g_playerHouseID) {
@@ -1542,16 +1542,16 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_HallOfFame_DrawBackground(score, false);
 
-	GUI_DrawTextOnFilledRectangle(String_Get_ByIndex(STR_SPICE_HARVESTED_BY), 83);
-	GUI_DrawTextOnFilledRectangle(String_Get_ByIndex(STR_UNITS_DESTROYED_BY), 119);
-	if (g_scenarioID != 1) GUI_DrawTextOnFilledRectangle(String_Get_ByIndex(STR_BUILDINGS_DESTROYED_BY), 155);
+	Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_SPICE_HARVESTED_BY), 83);
+	Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_UNITS_DESTROYED_BY), 119);
+	if (g_scenarioID != 1) Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_BUILDINGS_DESTROYED_BY), 155);
 
 	textLeft = 19 + max(Font_GetStringWidth(String_Get_ByIndex(STR_YOU)), Font_GetStringWidth(String_Get_ByIndex(STR_ENEMY)));
 	statsBarWidth = 261 - textLeft;
 
 	for (i = 0; i < statsBoxCount; i++) {
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
 	}
 
 	Music_Play(17 + Tools_RandomLCG_Range(0, 5));
@@ -1604,7 +1604,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 			for (score = 0; score < scores[i][j].value; score += scores[i][j].increment) {
 				GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-				GUI_DrawText_Wrapper("%u", 287, posY - 1, 0x14, 0, 0x121, score);
+				Text_Print_Wrapper("%u", 287, posY - 1, 0x14, 0, 0x121, score);
 
 				GUI_HallOfFame_Tick();
 
@@ -1624,7 +1624,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 			}
 
 			GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-			GUI_DrawText_Wrapper("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
+			Text_Print_Wrapper("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
 
 			GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
 
@@ -2803,7 +2803,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 	memcpy(g_palette1 + 255 * 3, backup, 3);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	/* Visible credits have to be reset, as it might not be the real value */
 	g_playerCredits = 0xFFFF;
@@ -2865,7 +2865,7 @@ static void GUI_StrategicMap_AnimateArrows(void)
 
 	memcpy(g_palette1 + 251 * 3, s_strategicMapArrowColors + s_arrowAnimationState * 3, 4 * 3);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 }
 
 static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *data)
@@ -2993,7 +2993,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 
 	GUI_DrawFilledRectangle(64, 172, 255, 185, GFX_GetPixel(64, 186));
 
-	GUI_DrawText_Wrapper(string, 64, 175, 12, 0, 0x12);
+	Text_Print_Wrapper(string, 64, 175, 12, 0, 0x12);
 
 	while (g_timerGUI + 90 < l_timerNext) sleepIdle();
 
@@ -3358,7 +3358,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	GUI_ClearScreen(SCREEN_0);
 	GUI_Mouse_Show_Safe();
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	return scenarioID;
 }
@@ -3373,13 +3373,13 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
  * @param bgColour The background colour of the text.
  * @param charWidth The width of a char.
  */
-void GUI_DrawText_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour, uint8 bgColour, uint16 charWidth)
+void Text_Print_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour, uint8 bgColour, uint16 charWidth)
 {
 	char s[2] = " ";
 
 	while (*string != '\0') {
 		*s = *string++;
-		GUI_DrawText(s, left, top, fgColour, bgColour);
+		Text_Print(s, left, top, fgColour, bgColour);
 		left += charWidth;
 	}
 }
@@ -3441,21 +3441,21 @@ void GUI_FactoryWindow_DrawDetails(void)
 		GUI_Palette_RemapScreen(128, 48, 184, 112, SCREEN_1, s_factoryWindowGraymapTbl);
 
 		if (g_factoryWindowStarport) {
-			GUI_DrawText_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
+			Text_Print_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
 		} else {
-			GUI_DrawText_Wrapper(String_Get_ByIndex(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
+			Text_Print_Wrapper(String_Get_ByIndex(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
 
 			if (g_factoryWindowUpgradeCost != 0) {
-				GUI_DrawText_Wrapper(String_Get_ByIndex(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
+				Text_Print_Wrapper(String_Get_ByIndex(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
 			} else {
-				GUI_DrawText_Wrapper(String_Get_ByIndex(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
+				Text_Print_Wrapper(String_Get_ByIndex(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
 			}
 		}
 	} else {
 		if (g_factoryWindowStarport) {
 			GUI_Screen_Copy(16, 99, 16, 160, 23, 9, SCREEN_1, SCREEN_1);
 			GUI_Screen_Copy(16, 99, 16, 169, 23, 9, SCREEN_1, SCREEN_1);
-			GUI_DrawText_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
+			Text_Print_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
 
 			GUI_FactoryWindow_UpdateDetails();
 		}
@@ -3479,20 +3479,20 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 	GUI_DrawFilledRectangle(128, 21, 310, 35, 116);
 
 	if (caption != NULL && *caption != '\0') {
-		GUI_DrawText_Wrapper(caption, 128, 23, 12, 0, 0x12);
+		Text_Print_Wrapper(caption, 128, 23, 12, 0, 0x12);
 	} else {
 		FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
 		ObjectInfo *oi = item->objectInfo;
 		uint16 width;
 
-		GUI_DrawText_Wrapper(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
+		Text_Print_Wrapper(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
 
 		width = Font_GetStringWidth(String_Get_ByIndex(STR_COST_999));
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
+		Text_Print_Wrapper(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
 
 		if (g_factoryWindowStarport) {
 			width += Font_GetStringWidth(String_Get_ByIndex(STR_QTY_99)) + 2;
-			GUI_DrawText_Wrapper(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
+			Text_Print_Wrapper(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
 		}
 	}
 
@@ -3534,8 +3534,8 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 
 		memset(g_palette1 + 255 * 3, 0x3F, 3);
 
-		/* calling GFX_SetPalette() now is useless as it will be done at the end of the function */
-		/*GFX_SetPalette(g_palette1);*/
+		/* calling Set_Palette() now is useless as it will be done at the end of the function */
+		/*Set_Palette(g_palette1);*/
 
 		paletteChangeTimer = 0;
 		paletteColour = 0;
@@ -3578,7 +3578,7 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 		default: break;
 	}
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 }
 
 /**
@@ -3780,7 +3780,7 @@ void GUI_Mouse_Show(void)
 {
 	int left, top;
 
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 	if (g_mouseHiddenDepth == 0 || --g_mouseHiddenDepth != 0) return;
 
 	left = g_mouseX - g_mouseSpriteHotspotX;
@@ -3808,7 +3808,7 @@ void GUI_Mouse_Show(void)
  */
 void GUI_Mouse_Hide(void)
 {
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 
 	if (g_mouseHiddenDepth == 0 && s_mouseSpriteWidth != 0) {
 		if (g_mouseSpriteBuffer != NULL) {
@@ -3828,7 +3828,7 @@ void GUI_Mouse_Hide(void)
 void GUI_Mouse_Hide_Safe(void)
 {
 	while (g_mouseLock != 0) sleepIdle();
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 	g_mouseLock++;
 
 	GUI_Mouse_Hide();
@@ -3843,7 +3843,7 @@ void GUI_Mouse_Hide_Safe(void)
 void GUI_Mouse_Show_Safe(void)
 {
 	while (g_mouseLock != 0) sleepIdle();
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 	g_mouseLock++;
 
 	GUI_Mouse_Show();
@@ -4082,7 +4082,7 @@ uint16 GUI_HallOfFame_Tick(void)
 
 	*s_palette1_houseColour += colouringDirection;
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	return 0;
 }
@@ -4247,7 +4247,7 @@ void GUI_HallOfFame_Show(uint16 score)
 		g_widgetProperties[19].fgColourBlink = 6;
 		g_widgetProperties[19].fgColourNormal = 116;
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 		while (*name == '\0') {
 			char *nameEnd;
@@ -4311,7 +4311,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 	GUI_DrawFilledRectangle(8, 80, 311, 178, 116);
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 	battleString = String_Get_ByIndex(STR_BATTLE);
 	scoreString = String_Get_ByIndex(STR_SCORE);
@@ -4320,9 +4320,9 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	battleX = scoreX - Font_GetStringWidth(scoreString) / 2 - 8 - Font_GetStringWidth(battleString) / 2;
 	offsetY = 80;
 
-	GUI_DrawText_Wrapper(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
-	GUI_DrawText_Wrapper(battleString, battleX, offsetY, 8, 0, 0x122);
-	GUI_DrawText_Wrapper(scoreString, scoreX, offsetY, 8, 0, 0x122);
+	Text_Print_Wrapper(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
+	Text_Print_Wrapper(battleString, battleX, offsetY, 8, 0, 0x122);
+	Text_Print_Wrapper(scoreString, scoreX, offsetY, 8, 0, 0x122);
 
 	offsetY = 90;
 	for (i = 0; i < 8; i++, offsetY += 11) {
@@ -4343,12 +4343,12 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		if (*data[i].name == '\0') {
 			width = battleX - 36 - Font_GetStringWidth(buffer);
 		} else {
-			GUI_DrawText_Wrapper(buffer, 32, offsetY, 15, 0, 0x22);
+			Text_Print_Wrapper(buffer, 32, offsetY, 15, 0, 0x22);
 		}
 
-		GUI_DrawText_Wrapper("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
-		GUI_DrawText_Wrapper("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
-		GUI_DrawText_Wrapper("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
+		Text_Print_Wrapper("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
+		Text_Print_Wrapper("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
+		Text_Print_Wrapper("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
 	}
 
 	if (show) {
@@ -4597,7 +4597,7 @@ void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation)
 		/* if no color was changed, the target palette has been reached */
 		if (!progress) break;
 
-		GFX_SetPalette(data);
+		Set_Palette(data);
 
 		while (g_timerSleep < timerCurrent) sleepIdle();
 	}

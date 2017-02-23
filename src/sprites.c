@@ -341,7 +341,7 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
 {
 	uint16 size;
 
-	if (sprite == NULL || g_mouseDisabled != 0) return;
+	if (sprite == NULL || MDisabled != 0) return;
 
 	while (g_mouseLock != 0) sleepIdle();
 

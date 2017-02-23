@@ -105,7 +105,7 @@ void GFX_Init(void)
 	uint32 totalSize = 0;
 	int i;
 
-	/* init g_paletteActive with invalid values so first GFX_SetPalette() will be ok */
+	/* init g_paletteActive with invalid values so first Set_Palette() will be ok */
 	memset(g_paletteActive, 0xff, 3*256);
 
 	for (i = 0; i < GFX_SCREEN_BUFFER_COUNT; i++) {
@@ -378,7 +378,7 @@ void GFX_ClearBlock(Screen index)
  * Set a new palette for the screen.
  * @param palette The palette in RGB order.
  */
-void GFX_SetPalette(uint8 *palette)
+void Set_Palette(uint8 *palette)
 {
 	int from, to;
 
@@ -388,7 +388,7 @@ void GFX_SetPalette(uint8 *palette)
 		   palette[from*3+2] != g_paletteActive[from*3+2]) break;
 	}
 	if (from >= 256) {
-		Warning("Useless GFX_SetPalette() call\n");
+		Warning("Useless Set_Palette() call\n");
 		return;
 	}
 	for (to = 255; to > from; to--) {

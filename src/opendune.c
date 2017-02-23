@@ -357,9 +357,9 @@ static void GameLoop_DrawMenu(const char **strings)
 		uint16 pos = top + g_fontCurrent->height * i;
 
 		if (i == props->fgColourBlink) {
-			GUI_DrawText_Wrapper(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
+			Text_Print_Wrapper(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
 		} else {
-			GUI_DrawText_Wrapper(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
+			Text_Print_Wrapper(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
 		}
 	}
 
@@ -375,10 +375,10 @@ static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint
 	for (i = 0; i < 3; i++) {
 		GUI_Mouse_Hide_Safe();
 
-		GUI_DrawText_Wrapper(string, left, top, fgColourSelected, bgColour, 0x22);
+		Text_Print_Wrapper(string, left, top, fgColourSelected, bgColour, 0x22);
 		Timer_Sleep(2);
 
-		GUI_DrawText_Wrapper(string, left, top, fgColourNormal, bgColour, 0x22);
+		Text_Print_Wrapper(string, left, top, fgColourNormal, bgColour, 0x22);
 		GUI_Mouse_Show_Safe();
 		Timer_Sleep(2);
 	}
@@ -433,7 +433,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 		key = Input_Wait() & 0x8FF;
 	}
 
-	if (g_mouseDisabled == 0) {
+	if (MDisabled == 0) {
 		uint16 y = g_mouseY;
 
 		if (GameLoop_IsInRange(g_mouseX, y, minX, minY, maxX, maxY)) {
@@ -495,8 +495,8 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 
 	if (current != old) {
 		GUI_Mouse_Hide_Safe();
-		GUI_DrawText_Wrapper(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
-		GUI_DrawText_Wrapper(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
+		Text_Print_Wrapper(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
+		Text_Print_Wrapper(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
 		GUI_Mouse_Show_Safe();
 	}
 
@@ -729,7 +729,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		case STR_HALL_OF_FAME:
 			GUI_HallOfFame_Show(0xFFFF);
 
-			GFX_SetPalette(g_palette2);
+			Set_Palette(g_palette2);
 
 			hasFame = File_Exists_Personal("SAVEFAME.DAT");
 			drawMenu = true;
@@ -741,14 +741,14 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			GUI_ClearScreen(SCREEN_0);
 			GUI_Mouse_Show_Safe();
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
 			if (GUI_Widget_SaveLoad_Click(false)) {
 				loadGame = true;
 				if (g_gameMode == GM_RESTART) break;
 				g_gameMode = GM_NORMAL;
 			} else {
-				GFX_SetPalette(g_palette2);
+				Set_Palette(g_palette2);
 
 				drawMenu = true;
 			}
@@ -773,7 +773,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			strings[i] = String_Get_ByIndex(mainMenuStrings[index][i]);
 		}
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 		maxWidth = 0;
 
@@ -800,8 +800,8 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		GUI_SetPaletteAnimated(g_palette1, 30);
 
-		GUI_DrawText_Wrapper("V1.07", 319, 192, 133, 0, 0x231, 0x39);
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Text_Print_Wrapper("V1.07", 319, 192, 133, 0, 0x231, 0x39);
+		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
 		Widget_SetCurrentWidget(13);
 
@@ -944,8 +944,8 @@ static void GameLoop_Main(void)
 
 	Video_SetPalette(g_palette1, 0, 256);
 
-	GFX_SetPalette(g_palette1);
-	GFX_SetPalette(g_palette2);
+	Set_Palette(g_palette1);
+	Set_Palette(g_palette2);
 
 	g_paletteMapping1 = malloc(256);
 	g_paletteMapping2 = malloc(256);
@@ -1008,7 +1008,7 @@ static void GameLoop_Main(void)
 
 			if (s_enableLog != 0) Mouse_SetMouseMode((uint8)s_enableLog, "DUNE.LOG");
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
 			GUI_Mouse_Show_Safe();
 		}
@@ -1165,7 +1165,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	Timer_Add(Timer_Tick, 1000000 / 60, false);
 	Timer_Add(Video_Tick, 1000000 / frame_rate, true);
 
-	g_mouseDisabled = -1;
+	MDisabled = -1;
 
 	GFX_Init();
 	GFX_ClearScreen(SCREEN_ACTIVE);
@@ -1176,7 +1176,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 
 	memset(&Palette[45], 63, 3);	/* Set color 15 to WHITE */
 
-	GFX_SetPalette(Palette);
+	Set_Palette(Palette);
 
 	Tools_RandomLCG_Seed((unsigned)time(NULL));
 
@@ -1265,7 +1265,7 @@ int main(int argc, char **argv)
 
 	Input_Init();
 
-	Drivers_All_Init();
+	Sound_Init();
 
 	scaling_factor = IniFile_GetInteger("scalefactor", 2);
 	if (IniFile_GetString("scalefilter", NULL, filter_text, sizeof(filter_text)) != NULL) {
@@ -1284,7 +1284,7 @@ int main(int argc, char **argv)
 
 	if (!OpenDune_Init(scaling_factor, scale_filter, frame_rate)) exit(1);
 
-	g_mouseDisabled = 0;
+	MDisabled = 0;
 
 	GameLoop_Main();
 

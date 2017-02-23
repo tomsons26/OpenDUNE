@@ -204,7 +204,7 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_TEXT: {
-			GUI_DrawText(drawParam.text, positionLeft, positionTop, fgColour, bgColour);
+			Text_Print(drawParam.text, positionLeft, positionTop, fgColour, bgColour);
 		} break;
 
 		case DRAW_MODE_UNKNOWN3: {
@@ -282,7 +282,7 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 	mouseY = g_mouseY;
 
 	buttonState = 0;
-	if (g_mouseDisabled == 0) {
+	if (MDisabled == 0) {
 		uint16 buttonStateChange = 0;
 
 		/* See if the key was a mouse button action */
