@@ -124,7 +124,7 @@ bool GUI_Security_Show(void)
 		Widget_SetCurrentWidget(8);
 
 		wsa = Open_Animation(String_Get_ByIndex(questionIndex + 1), GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
+		Animate_Frame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
 		Close_Animation(wsa);
 
 		GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);

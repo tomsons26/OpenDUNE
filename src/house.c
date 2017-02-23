@@ -407,7 +407,7 @@ bool House_UpdateRadarState(House *h)
 	frameCount = Animate_Frame_Count(wsa);
 
 	for (frame = 0; frame < frameCount; frame++) {
-		WSA_DisplayFrame(wsa, activate ? frameCount - frame : frame, 256, 136, SCREEN_0);
+		Animate_Frame(wsa, activate ? frameCount - frame : frame, 256, 136, SCREEN_0);
 		GUI_PaletteAnimate();
 
 		Timer_Sleep(3);

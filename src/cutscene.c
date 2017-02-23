@@ -362,7 +362,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 		if ((animation->flags & 0x4) != 0) {
 			GameLoop_PlaySubtitle(animationMode);
-			WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+			Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 			GameLoop_PalettePart_Update(true);
 
 			memcpy(&g_palette1[215 * 3], s_palettePartCurrent, 18);
@@ -373,7 +373,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 		} else {
 			if ((animation->flags & 0x480) != 0) {
 				GameLoop_PlaySubtitle(animationMode);
-				WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_1);
+				Animate_Frame(wsa, frame++, posX, posY, SCREEN_1);
 				addFrameCount++;
 
 				if ((animation->flags & 0x480) == 0x80) {
@@ -421,7 +421,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			g_timerTimeout = timeLeftForFrame;
 
 			GameLoop_PlaySubtitle(animationMode);
-			WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+			Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 
 			if (mode == 1 && frame == frameCount) {
 				frame = 0;
@@ -444,7 +444,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			bool displayed;
 			do {
 				GameLoop_PlaySubtitle(animationMode);
-				displayed = WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+				displayed = Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 			} while (displayed);
 		}
 
@@ -951,7 +951,7 @@ static void Gameloop_Logos(void)
 
 	frame = 0;
 	wsa = Open_Animation("WESTWOOD.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
-	WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0);
+	Animate_Frame(wsa, frame++, 0, 0, SCREEN_0);
 
 	GUI_SetPaletteAnimated(g_palette_998A, 60);
 
@@ -959,7 +959,7 @@ static void Gameloop_Logos(void)
 
 	g_timerTimeout = 360;
 
-	while (WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
+	while (Animate_Frame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
 	
 	Close_Animation(wsa);
 

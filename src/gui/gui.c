@@ -2727,7 +2727,7 @@ static void GUI_FactoryWindow_Init(void)
 	oi = g_factoryWindowItems[0].objectInfo;
 
 	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
-	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
+	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
 	Close_Animation(wsa);
 
 	GUI_Mouse_Hide_Safe();
@@ -3401,7 +3401,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
 	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
-	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
+	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
 	Close_Animation(wsa);
 
 	if (g_factoryWindowConstructionYard) {

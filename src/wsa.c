@@ -345,7 +345,7 @@ void Close_Animation(void *wsa)
  * @param screenID the screen to write to
  * @param src The source for the frame.
  */
-static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
+static void Buffer_Bitblit_To_LogicPage(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
 {
 	int16 left;
 	int16 right;
@@ -405,7 +405,7 @@ static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 wi
  * @param screenID The screenID to draw on.
  * @return False on failure, true on success.
  */
-bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen screenID)
+bool Animate_Frame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen screenID)
 {
 	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 	uint8 *dst;
@@ -484,7 +484,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 	header->frameCurrent = frameNext;
 
 	if (header->flags.displayInBuffer) {
-		WSA_DrawFrame(posX, posY, header->width, header->height, 0, dst, screenID);
+		Buffer_Bitblit_To_LogicPage(posX, posY, header->width, header->height, 0, dst, screenID);
 	}
 
 	return true;

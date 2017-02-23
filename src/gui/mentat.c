@@ -414,7 +414,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 		void *wsa;
 
 		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
+		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
 		Close_Animation(wsa);
 	}
 
@@ -534,7 +534,7 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 		void *wsa;
 
 		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
+		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
 		Close_Animation(wsa);
 	}
 
@@ -1234,7 +1234,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 			do {
 				if (step == 0 && frame > 4) step = 1;
 
-				if (!WSA_DisplayFrame(wsa, frame++, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2)) {
+				if (!Animate_Frame(wsa, frame++, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2)) {
 					if (step == 0) step = 1;
 
 					if (loopAnimation) {
