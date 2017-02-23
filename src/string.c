@@ -19,7 +19,7 @@ static char **s_strings = NULL;
 static uint16 s_stringsCount = 0;
 
 const char * const g_languageSuffixes[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "ITA", "SPA" };
-static const char * const s_stringDecompress = " etainosrlhcdupmtasio wb rnsdalmh ieorasnrtlc synstcloer dtgesionr ufmsw tep.icae oiadur laeiyodeia otruetoakhlr eiu,.oansrctlaileoiratpeaoip bm";
+static const char * const Dipthong = " etainosrlhcdupmtasio wb rnsdalmh ieorasnrtlc synstcloer dtgesionr ufmsw tep.icae oiadur laeiyodeia otruetoakhlr eiu,.oansrctlaileoiratpeaoip bm";
 
 /**
  * Decompress a string.
@@ -39,8 +39,8 @@ uint16 String_Decompress(const char *source, char *dest)
 		uint8 c = *s;
 		if ((c & 0x80) != 0) {
 			c &= 0x7F;
-			dest[count++] = s_stringDecompress[c >> 3];
-			c = s_stringDecompress[c + 16];
+			dest[count++] = Dipthong[c >> 3];
+			c = Dipthong[c + 16];
 		}
 		dest[count++] = c;
 	}

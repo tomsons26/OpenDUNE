@@ -309,7 +309,7 @@ uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to)
 		if ((Tools_Random_256() & 1) != 0) dir = -dir;
 
 		position = Tile_UnpackTile(packed_to);
-		position = Tile_MoveByDirection(position, direction + dir, min(distance, 20) << 8);
+		position = Move_Point(position, direction + dir, min(distance, 20) << 8);
 		packed = Tile_PackTile(position);
 
 		if (Map_IsValidPosition(packed)) return packed;
@@ -362,7 +362,7 @@ uint8 Tile_GetDirectionPacked(uint16 packed_from, uint16 packed_to)
 	return returnValues[index];
 }
 
-static const int8 _stepX[256] = {
+static const int8 Move_Point_CosTable[256] = {
 	   0,    3,    6,    9,   12,   15,   18,   21,   24,   27,   30,   33,   36,   39,   42,   45,
 	  48,   51,   54,   57,   59,   62,   65,   67,   70,   73,   75,   78,   80,   82,   85,   87,
 	  89,   91,   94,   96,   98,  100,  101,  103,  105,  107,  108,  110,  111,  113,  114,  116,
@@ -381,7 +381,7 @@ static const int8 _stepX[256] = {
 	 -48,  -45,  -42,  -39,  -36,  -33,  -30,  -27,  -24,  -21,  -18,  -15,  -12,   -9,   -6,   -3
 };
 
-static const int8 _stepY[256] = {
+static const int8 Move_Point_SinTable[256] = {
 	 127,  126,  126,  126,  126,  126,  125,  125,  124,  123,  123,  122,  121,  120,  119,  118,
 	 117,  116,  114,  113,  112,  110,  108,  107,  105,  103,  102,  100,   98,   96,   94,   91,
 	  89,   87,   85,   82,   80,   78,   75,   73,   70,   67,   65,   62,   59,   57,   54,   51,
@@ -408,7 +408,7 @@ static const int8 _stepY[256] = {
  * @param distance The distance.
  * @return The tile.
  */
-CellStruct Tile_MoveByDirection(CellStruct tile, int16 orientation, uint16 distance)
+CellStruct Move_Point(CellStruct tile, int16 orientation, uint16 distance)
 {
 	int diffX, diffY;
 	int roundingOffsetX, roundingOffsetY;
@@ -417,8 +417,8 @@ CellStruct Tile_MoveByDirection(CellStruct tile, int16 orientation, uint16 dista
 
 	if (distance == 0) return tile;
 
-	diffX = _stepX[orientation & 0xFF];
-	diffY = _stepY[orientation & 0xFF];
+	diffX = Move_Point_CosTable[orientation & 0xFF];
+	diffY = Move_Point_SinTable[orientation & 0xFF];
 
 	/* Always round away from zero */
 	roundingOffsetX = diffX < 0 ? -64 : 64;
@@ -456,8 +456,8 @@ CellStruct Tile_MoveByRandom(CellStruct tile, uint16 distance, bool center)
 	distance = newDistance;
 
 	orientation = Tools_Random_256();
-	x += ((_stepX[orientation] * distance) / 128) * 16;
-	y -= ((_stepY[orientation] * distance) / 128) * 16;
+	x += ((Move_Point_CosTable[orientation] * distance) / 128) * 16;
+	y -= ((Move_Point_SinTable[orientation] * distance) / 128) * 16;
 
 	if (x > 16384 || y > 16384) return tile;
 

@@ -1298,7 +1298,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 	ui = &g_table_unitInfo[unit->o.type];
 
-	newPosition = Tile_MoveByDirection(unit->o.position, unit->orientation[0].current, distance);
+	newPosition = Move_Point(unit->o.position, unit->orientation[0].current, distance);
 
 	if ((newPosition.x == unit->o.position.x) && (newPosition.y == unit->o.position.y)) return false;
 
@@ -2012,7 +2012,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 
 			orientation = Tile_GetDirection(position, tile);
 
-			t = Tile_MoveByDirection(Tile_MoveByDirection(position, 0, 32), orientation, 128);
+			t = Move_Point(Move_Point(position, 0, 32), orientation, 128);
 
 			bullet = Unit_Create(UNIT_INDEX_INVALID, type, houseID, t, orientation);
 			if (bullet == NULL) return NULL;

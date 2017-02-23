@@ -389,7 +389,7 @@ uint16 Script_Team_Unknown0788(ScriptEngine *script)
 		orientation = (Tile_GetDirection(tile, u->o.position) & 0xC0) + Tools_RandomLCG_Range(0, 127);
 		if (orientation < 0) orientation += 256;
 
-		packed = Tile_PackTile(Tile_MoveByDirection(tile, orientation, distance));
+		packed = Tile_PackTile(Move_Point(tile, orientation, distance));
 
 		if (Object_GetByPackedTile(packed) == NULL) {
 			Unit_SetDestination(u, Tools_Index_Encode(packed, IT_TILE));

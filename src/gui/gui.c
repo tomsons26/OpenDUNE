@@ -920,7 +920,7 @@ uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter)
  */
 void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...)
 {
-	static const uint16 s_variable_60[8] = {1, 3, 2, 5, 4, 3, 2, 1};
+	static const uint16 PredTable[8] = {1, 3, 2, 5, 4, 3, 2, 1};
 	static uint16 s_variable_5E     = 0;
 	static uint16 s_variable_70     = 1;
 	static uint16 s_variable_72     = 0x8B55;
@@ -969,7 +969,7 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 
 	if ((flags & 0x200) != 0) {
 		s_variable_5E = (s_variable_5E + 1) % 8;
-		s_variable_70 = s_variable_60[s_variable_5E];
+		s_variable_70 = PredTable[s_variable_5E];
 		s_variable_74 = 0x0;
 		s_variable_72 = 0x100;
 	}

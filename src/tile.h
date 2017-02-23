@@ -24,7 +24,7 @@ extern CellStruct Tile_Center(CellStruct tile);
 extern void Tile_RemoveFogInRadius(CellStruct tile, uint16 radius);
 extern uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to);
 extern uint8 Tile_GetDirectionPacked(uint16 packed_from, uint16 packed_to);
-extern CellStruct Tile_MoveByDirection(CellStruct tile, int16 orientation, uint16 distance);
+extern CellStruct Move_Point(CellStruct tile, int16 orientation, uint16 distance);
 extern CellStruct Tile_MoveByRandom(CellStruct tile, uint16 distance, bool center);
 extern int8 Tile_GetDirection(CellStruct from, CellStruct to);
 extern CellStruct Tile_MoveByOrientation(CellStruct position, uint8 orientation);
