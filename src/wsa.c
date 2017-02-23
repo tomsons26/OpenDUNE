@@ -176,7 +176,7 @@ static uint16 Apply_Delta(void *wsa, uint16 frame, uint8 *dst)
 	if (header->flags.displayInBuffer) {
 		Apply_XOR_Delta(dst, header->buffer);
 	} else {
-		Format40_Decode_XorToScreen(dst, header->buffer, header->width);
+		Apply_XOR_Delta_On_Page(dst, header->buffer, header->width);
 	}
 
 	return 1;

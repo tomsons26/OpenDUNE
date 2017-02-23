@@ -66,7 +66,9 @@ void Apply_XOR_Delta(uint8 *dst, uint8 *src)
  * @param src Data source.
  * @param width Width of the rectangle.
  */
-void Format40_Decode_XorToScreen(uint8 *dst, uint8 *src, uint16 width)
+
+//Original called Copy_Delta_Buffer or XOR_Delta_Buffer depending on the variable it recieved, looks like both are merged into one here
+void Apply_XOR_Delta_On_Page(uint8 *dst, uint8 *src, uint16 width)
 {
 	uint16 length;
 	uint16 cmd;
