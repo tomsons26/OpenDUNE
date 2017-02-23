@@ -6,6 +6,7 @@
 /**
  * Types of encoded Index.
  */
+//RTTIType?
 typedef enum IndexType {
 	IT_NONE      = 0,
 	IT_TILE      = 1,

@@ -695,7 +695,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 
 	Sprites_SetMouseSprite(0, 0, g_sprites[0]);
 
-	Sprites_UnloadTiles();
+	Free_Icon_Set();
 
 	memmove(g_palette_998A, g_paletteActive, 256 * 3);
 

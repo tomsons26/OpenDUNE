@@ -21,6 +21,9 @@ static uint16 s_stringsCount = 0;
 const char * const g_languageSuffixes[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "ITA", "SPA" };
 static const char * const Dipthong = " etainosrlhcdupmtasio wb rnsdalmh ieorasnrtlc synstcloer dtgesionr ufmsw tep.icae oiadur laeiyodeia otruetoakhlr eiu,.oansrctlaileoiratpeaoip bm";
 
+//This is "Dipthong"
+
+
 /**
  * Decompress a string.
  *

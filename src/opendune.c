@@ -285,7 +285,7 @@ static void GameLoop_LevelEnd(void)
 
 			GUI_Mentat_ShowWin();
 
-			Sprites_UnloadTiles();
+			Free_Icon_Set();
 
 			g_campaignID++;
 
@@ -324,7 +324,7 @@ static void GameLoop_LevelEnd(void)
 
 			GUI_Mentat_ShowLose();
 
-			Sprites_UnloadTiles();
+			Free_Icon_Set();
 
 			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, false);
 		}

@@ -1557,7 +1557,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 		if (objectType == 0xFFFF) {
 			FactoryResult res;
 
-			Sprites_UnloadTiles();
+			Free_Icon_Set();
 
 			memmove(g_palette1, g_paletteActive, 256 * 3);
 

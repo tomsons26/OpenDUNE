@@ -370,7 +370,7 @@ bool GUI_Widget_Mentat_Click(Widget *w)
 
 	Music_Play(g_table_houseInfo[g_playerHouseID].musicBriefing);
 
-	Sprites_UnloadTiles();
+	Free_Icon_Set();
 
 	Timer_SetTimer(TIMER_GAME, false);
 
@@ -402,7 +402,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 {
 	uint16 ret;
 
-	Sprites_UnloadTiles();
+	Free_Icon_Set();
 
 	GUI_Mentat_Display(wsaFilename, g_playerHouseID);
 

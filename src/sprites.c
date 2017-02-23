@@ -188,7 +188,7 @@ static uint32 Sprites_Decode(uint8 *source, uint8 *dest)
  * @param filename The name of the file to load.
  * @param screenID The index of a memory block where to store loaded sprites.
  */
-static void Sprites_LoadICNFile(const char *filename)
+static void Load_Icon_Set(const char *filename)
 {
 	uint8  fileIndex;
 
@@ -237,7 +237,7 @@ void Sprites_LoadTiles(void)
 
 	s_iconLoaded = true;
 
-	Sprites_LoadICNFile("ICON.ICN");
+	Load_Icon_Set("ICON.ICN");
 
 	free(g_iconMap);
 	g_iconMap = File_ReadWholeFileLE16("ICON.MAP");
@@ -254,7 +254,7 @@ void Sprites_LoadTiles(void)
 /**
  * Unloads the sprites for tiles.
  */
-void Sprites_UnloadTiles(void)
+void Free_Icon_Set(void)
 {
 	s_iconLoaded = false;
 }
