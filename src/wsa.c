@@ -119,7 +119,7 @@ static uint32 Get_File_Frame_Offset(uint8 fileno, uint16 frame)
  * @param dst Destination buffer to write the animation to.
  * @return 1 on success, 0 on failure.
  */
-static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
+static uint16 Apply_Delta(void *wsa, uint16 frame, uint8 *dst)
 {
 	SysAnimHeaderType *header = (SysAnimHeaderType *)wsa;
 	uint16 lengthSpecial;
@@ -174,7 +174,7 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 	LCW_Uncomp(header->buffer, buffer, header->bufferLength);
 
 	if (header->flags.displayInBuffer) {
-		Format40_Decode(dst, header->buffer);
+		Apply_XOR_Delta(dst, header->buffer);
 	} else {
 		Format40_Decode_XorToScreen(dst, header->buffer, header->width);
 	}
@@ -429,7 +429,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 			if (!header->flags.displayInBuffer) {
 				Format40_Decode_ToScreen(dst, header->buffer, header->width);
 			} else {
-				Format40_Decode(dst, header->buffer);
+				Apply_XOR_Delta(dst, header->buffer);
 			}
 		}
 
@@ -464,7 +464,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 		for (i = 0; i < frameCount; i++) {
 			frame += direction;
 
-			WSA_GotoNextFrame(wsa, frame, dst);
+			Apply_Delta(wsa, frame, dst);
 
 			if (frame == header->frames) frame = 0;
 		}
@@ -475,7 +475,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 		for (i = 0; i < frameCount; i++) {
 			if (frame == 0) frame = header->frames;
 
-			WSA_GotoNextFrame(wsa, frame, dst);
+			Apply_Delta(wsa, frame, dst);
 
 			frame += direction;
 		}

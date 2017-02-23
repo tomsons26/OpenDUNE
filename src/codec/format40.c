@@ -11,7 +11,7 @@
  * @param dst The place the decoded fragment will be loaded.
  * @param src The encoded fragment.
  */
-void Format40_Decode(uint8 *dst, uint8 *src)
+void Apply_XOR_Delta(uint8 *dst, uint8 *src)
 {
 	uint16 cmd;
 	uint16 count;
