@@ -56,7 +56,7 @@ uint16 Font_GetStringWidth(const char *string)
  * @param filename The name of the font file.
  * @return The pointer of the allocated memory where the file has been read.
  */
-static Font *Font_LoadFile(const char *filename)
+static Font *Load_Font(const char *filename)
 {
 	uint8 *buf;
 	Font *f;
@@ -128,13 +128,13 @@ void Font_Select(Font *f)
 
 bool Init_Fonts(void)
 {
-	IntroFontPtr = Font_LoadFile("INTRO.FNT");
+	IntroFontPtr = Load_Font("INTRO.FNT");
 	if ((g_config.Language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
-		FontNew6Ptr = Font_LoadFile("new6pg.fnt");
+		FontNew6Ptr = Load_Font("new6pg.fnt");
 	} else {
-		FontNew6Ptr = Font_LoadFile("new6p.fnt");
+		FontNew6Ptr = Load_Font("new6p.fnt");
 	}
-	FontNew8Ptr = Font_LoadFile("new8p.fnt");
+	FontNew8Ptr = Load_Font("new8p.fnt");
 
 	return FontNew8Ptr != NULL;
 }
