@@ -552,10 +552,10 @@ static void ReadProfileIni(const char *filename)
 	if (filename == NULL) return;
 	if (!File_Exists(filename)) return;
 
-	source = GFX_Screen_Get_ByIndex(SCREEN_1);
+	source = Get_Page(SCREEN_1);
 
 	memset(source, 0, 32000);
-	File_ReadBlockFile(filename, source, GFX_Screen_GetSize_ByIndex(SCREEN_1));
+	File_ReadBlockFile(filename, source, Get_Buff(SCREEN_1));
 
 	keys = source + strlen(source) + 5000;
 	*keys = '\0';

@@ -302,7 +302,7 @@ void Video_Uninit(void)
 
 static void Video_DrawScreen_Scale2x(void)
 {
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Page(SCREEN_0);
 	data += (s_screenOffset << 2);
 	scale(s_screen_magnification, s_gfx_surface->pixels, s_screen_magnification * SCREEN_WIDTH, data, SCREEN_WIDTH, 1, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
@@ -311,7 +311,7 @@ static void Video_DrawScreen_Hqx(void)
 {
 	uint8 *p;
 
-	p = GFX_Screen_Get_ByIndex(SCREEN_0);
+	p = Get_Page(SCREEN_0);
 	p += (s_screenOffset << 2);
 
 	switch(s_screen_magnification) {
@@ -332,7 +332,7 @@ static void Video_DrawScreen_Hqx(void)
 
 static void Video_DrawScreen_Nearest_Neighbor(void)
 {
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Page(SCREEN_0);
 	uint8 *gfx1 = s_gfx_surface->pixels;
 	uint8 *gfx2;
 	uint8 *gfx3;
@@ -486,7 +486,7 @@ void Video_Tick(void)
 	s_video_lock = true;
 
 	if (s_showFPS) {
-		Video_ShowFPS(GFX_Screen_Get_ByIndex(SCREEN_0));
+		Video_ShowFPS(Get_Page(SCREEN_0));
 	}
 
 	while (SDL_PollEvent(&event)) {
@@ -566,11 +566,11 @@ void Video_Tick(void)
 	}
 
 	/* Do a quick compare to see if the screen changed at all */
-	if (!s_screen_needrepaint && memcmp(GFX_Screen_Get_ByIndex(SCREEN_0), s_gfx_screen8, SCREEN_WIDTH * SCREEN_HEIGHT) == 0) {
+	if (!s_screen_needrepaint && memcmp(Get_Page(SCREEN_0), s_gfx_screen8, SCREEN_WIDTH * SCREEN_HEIGHT) == 0) {
 		s_video_lock = false;
 		return;
 	}
-	memcpy(s_gfx_screen8, GFX_Screen_Get_ByIndex(SCREEN_0), SCREEN_WIDTH * SCREEN_HEIGHT);
+	memcpy(s_gfx_screen8, Get_Page(SCREEN_0), SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	Video_DrawScreen();
 

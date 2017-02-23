@@ -337,14 +337,14 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			if ((animation->flags & 0x480) != 0) {
 				GUI_ClearScreen(SCREEN_1);
 
-				wsa = GFX_Screen_Get_ByIndex(SCREEN_2);
+				wsa = Get_Page(SCREEN_2);
 
-				wsaSize = GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3);
+				wsaSize = Get_Buff(SCREEN_2) + Get_Buff(SCREEN_3);
 				wsaReservedDisplayFrame = false;
 			} else {
-				wsa = GFX_Screen_Get_ByIndex(SCREEN_1);
+				wsa = Get_Page(SCREEN_1);
 
-				wsaSize = GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3);
+				wsaSize = Get_Buff(SCREEN_1) + Get_Buff(SCREEN_2) + Get_Buff(SCREEN_3);
 			}
 
 			snprintf(filenameBuffer, sizeof(filenameBuffer), "%s.WSA", animation->string);
@@ -547,9 +547,9 @@ void GameLoop_LevelEndAnimation(void)
 
 static void GameCredits_SwapScreen(uint16 top, uint16 height, Screen srcScreenID, Screen dstScreenID)
 {
-	uint16 *b = (uint16 *)GFX_Screen_Get_ByIndex(dstScreenID);	/* destination */
-	const uint16 *screen1 = (uint16 *)GFX_Screen_Get_ByIndex(srcScreenID) + top * SCREEN_WIDTH / 2;	/* source */
-	uint16 *screen2 = (uint16 *)GFX_Screen_Get_ByIndex(SCREEN_0) + top * SCREEN_WIDTH / 2;	/* secondary destination : Video RAM*/
+	uint16 *b = (uint16 *)Get_Page(dstScreenID);	/* destination */
+	const uint16 *screen1 = (uint16 *)Get_Page(srcScreenID) + top * SCREEN_WIDTH / 2;	/* source */
+	uint16 *screen2 = (uint16 *)Get_Page(SCREEN_0) + top * SCREEN_WIDTH / 2;	/* secondary destination : Video RAM*/
 	uint16 count;
 
 	for (count = height * SCREEN_WIDTH / 2; count > 0; count--) {
@@ -831,7 +831,7 @@ static void GameLoop_GameCredits(void)
 
 	Music_Play(33);
 
-	/*memory = GFX_Screen_Get_ByIndex(SCREEN_2);*/
+	/*memory = Get_Page(SCREEN_2);*/
 
 	for (i = 0; i < 256; i++) {
 		uint8 high, low;	/* high / low nibble */
@@ -856,7 +856,7 @@ static void GameLoop_GameCredits(void)
 
 	GameCredits_LoadPalette();
 
-	credits_buffer = (char *)GFX_Screen_Get_ByIndex(SCREEN_3) + SCREEN_WIDTH * g_curWidgetHeight;
+	credits_buffer = (char *)Get_Page(SCREEN_3) + SCREEN_WIDTH * g_curWidgetHeight;
 	Debug("GameLoop_GameCredits() credit buffer is %d lines in SCREEN_3 buffer\n", g_curWidgetHeight);
 
 	GUI_Mouse_Hide_Safe();
@@ -868,7 +868,7 @@ static void GameLoop_GameCredits(void)
 	GFX_SetPalette(g_palette1);
 
 	for (;; sleepIdle()) {
-		File_ReadBlockFile(String_GenerateFilename("CREDITS"), credits_buffer, GFX_Screen_GetSize_ByIndex(SCREEN_3));
+		File_ReadBlockFile(String_GenerateFilename("CREDITS"), credits_buffer, Get_Buff(SCREEN_3));
 
 		GameCredits_Play(credits_buffer, 20, SCREEN_1, SCREEN_2, 6);
 
@@ -950,7 +950,7 @@ static void Gameloop_Logos(void)
 	File_ReadBlockFile("WESTWOOD.PAL", g_palette_998A, 256 * 3);
 
 	frame = 0;
-	wsa = Open_Animation("WESTWOOD.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
+	wsa = Open_Animation("WESTWOOD.WSA", Get_Page(SCREEN_1), Get_Buff(SCREEN_1) + Get_Buff(SCREEN_2) + Get_Buff(SCREEN_3), true);
 	Animate_Frame(wsa, frame++, 0, 0, SCREEN_0);
 
 	GUI_SetPaletteAnimated(g_palette_998A, 60);

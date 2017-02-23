@@ -123,7 +123,7 @@ bool GUI_Security_Show(void)
 
 		Widget_SetCurrentWidget(8);
 
-		wsa = Open_Animation(String_Get_ByIndex(questionIndex + 1), GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(String_Get_ByIndex(questionIndex + 1), Get_Page(SCREEN_1), Get_Buff(SCREEN_1), false);
 		Animate_Frame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
 		Close_Animation(wsa);
 

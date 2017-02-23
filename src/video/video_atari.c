@@ -197,7 +197,7 @@ void Video_SwitchFPSDisplay(uint8 key)
 void Video_Tick(void)
 {
 	uint8 *screen = Physbase();
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Page(SCREEN_0);
 
 	/* send mouse event */
 	if(s_mouse_state_changed) {

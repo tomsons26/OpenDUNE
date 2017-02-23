@@ -660,7 +660,7 @@ void Video_Tick(void)
 		DispatchMessage(&msg);
 	}
 
-	screen0 = GFX_Screen_Get_ByIndex(SCREEN_0);
+	screen0 = Get_Page(SCREEN_0);
 	screen0 += (s_screenOffset << 2);
 	/* Do a quick compare to see if the screen changed at all */
 	if (memcmp(screen0, s_screen, SCREEN_WIDTH * SCREEN_HEIGHT) != 0) {

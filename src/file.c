@@ -177,7 +177,7 @@ typedef struct File {
 	uint32 position;
 } File;
 
-static File s_file[FILE_MAX];
+static File FileHandleTable[FILE_MAX];
 
 /**
  * Information about files in data/ directory
@@ -189,7 +189,7 @@ typedef struct FileInfoLinkedElem {
 	char filenamebuffer[1];
 } FileInfoLinkedElem;
 
-static FileInfoLinkedElem *s_files_in_root = NULL;
+static FileInfoLinkedElem *FileHandleTables_in_root = NULL;
 
 typedef struct PakFileInfoLinkedElem {
 	struct PakFileInfoLinkedElem *next;
@@ -198,7 +198,7 @@ typedef struct PakFileInfoLinkedElem {
 	char filenamebuffer[1];
 } PakFileInfoLinkedElem;
 
-static PakFileInfoLinkedElem *s_files_in_pak = NULL;
+static PakFileInfoLinkedElem *FileHandleTables_in_pak = NULL;
 
 uint16 g_fileOperation = 0; /*!< If non-zero, input (keyboard + mouse), video is not updated, .. Basically, any operation that might trigger a free() in the signal handler, which can collide with malloc() of file operations. */
 
@@ -212,7 +212,7 @@ static FileInfo *FileInfo_Find_ByName(const char *filename, FileInfo **pakInfo)
 {
 	{
 		FileInfoLinkedElem *e;
-		for (e = s_files_in_root; e != NULL; e = e->next) {
+		for (e = FileHandleTables_in_root; e != NULL; e = e->next) {
 			if (!strcasecmp(e->info.filename, filename)) {
 				if (pakInfo) *pakInfo = NULL;
 				return &e->info;
@@ -221,7 +221,7 @@ static FileInfo *FileInfo_Find_ByName(const char *filename, FileInfo **pakInfo)
 	}
 	{
 		PakFileInfoLinkedElem *e;
-		for (e = s_files_in_pak; e != NULL; e = e->next) {
+		for (e = FileHandleTables_in_pak; e != NULL; e = e->next) {
 			if (!strcasecmp(e->info.filename, filename)) {
 				if (pakInfo) *pakInfo = e->pak;
 				return &e->info;
@@ -248,7 +248,7 @@ static uint8 _File_Open(enum SearchDirectory dir, const char *filename, uint8 mo
 
 	/* Find a free spot in our limited array */
 	for (fileIndex = 0; fileIndex < FILE_MAX; fileIndex++) {
-		if (s_file[fileIndex].fp == NULL) break;
+		if (FileHandleTable[fileIndex].fp == NULL) break;
 	}
 	if (fileIndex >= FILE_MAX) {
 		Warning("Limit of %d open files reached.\n", FILE_MAX);
@@ -261,41 +261,41 @@ static uint8 _File_Open(enum SearchDirectory dir, const char *filename, uint8 mo
 		if (fileInfo == NULL) return FILE_INVALID;
 		if (pakInfo == NULL) {
 			/* Check if we can find the file outside any PAK file */
-			s_file[fileIndex].fp = fopendatadir(dir, filename, "rb");
-			if (s_file[fileIndex].fp == NULL) return FILE_INVALID;
+			FileHandleTable[fileIndex].fp = fopendatadir(dir, filename, "rb");
+			if (FileHandleTable[fileIndex].fp == NULL) return FILE_INVALID;
 
-			s_file[fileIndex].start    = 0;
-			s_file[fileIndex].position = 0;
-			fseek(s_file[fileIndex].fp, 0, SEEK_END);
-			s_file[fileIndex].size = ftell(s_file[fileIndex].fp);
-			fseek(s_file[fileIndex].fp, 0, SEEK_SET);
+			FileHandleTable[fileIndex].start    = 0;
+			FileHandleTable[fileIndex].position = 0;
+			fseek(FileHandleTable[fileIndex].fp, 0, SEEK_END);
+			FileHandleTable[fileIndex].size = ftell(FileHandleTable[fileIndex].fp);
+			fseek(FileHandleTable[fileIndex].fp, 0, SEEK_SET);
 		} else {
 			/* file is found in PAK */
-			s_file[fileIndex].fp = fopendatadir(dir, pakInfo->filename, "rb");
-			if (s_file[fileIndex].fp == NULL) return FILE_INVALID;
+			FileHandleTable[fileIndex].fp = fopendatadir(dir, pakInfo->filename, "rb");
+			if (FileHandleTable[fileIndex].fp == NULL) return FILE_INVALID;
 
-			s_file[fileIndex].start    = fileInfo->filePosition;
-			s_file[fileIndex].position = 0;
-			s_file[fileIndex].size     = fileInfo->fileSize;
+			FileHandleTable[fileIndex].start    = fileInfo->filePosition;
+			FileHandleTable[fileIndex].position = 0;
+			FileHandleTable[fileIndex].size     = fileInfo->fileSize;
 
 			/* Go to the start of the file now */
-			fseek(s_file[fileIndex].fp, s_file[fileIndex].start, SEEK_SET);
+			fseek(FileHandleTable[fileIndex].fp, FileHandleTable[fileIndex].start, SEEK_SET);
 		}
 		return fileIndex;
 	}
 
 	/* Check if we can find the file outside any PAK file */
-	s_file[fileIndex].fp = fopendatadir(dir, filename, (mode == FILE_MODE_WRITE) ? "wb" : ((mode == FILE_MODE_READ_WRITE) ? "wb+" : "rb"));
-	if (s_file[fileIndex].fp != NULL) {
-		s_file[fileIndex].start    = 0;
-		s_file[fileIndex].position = 0;
-		s_file[fileIndex].size     = 0;
+	FileHandleTable[fileIndex].fp = fopendatadir(dir, filename, (mode == FILE_MODE_WRITE) ? "wb" : ((mode == FILE_MODE_READ_WRITE) ? "wb+" : "rb"));
+	if (FileHandleTable[fileIndex].fp != NULL) {
+		FileHandleTable[fileIndex].start    = 0;
+		FileHandleTable[fileIndex].position = 0;
+		FileHandleTable[fileIndex].size     = 0;
 
 		/* We can only check the size of the file if we are reading (or appending) */
 		if ((mode & FILE_MODE_READ) != 0) {
-			fseek(s_file[fileIndex].fp, 0, SEEK_END);
-			s_file[fileIndex].size = ftell(s_file[fileIndex].fp);
-			fseek(s_file[fileIndex].fp, 0, SEEK_SET);
+			fseek(FileHandleTable[fileIndex].fp, 0, SEEK_END);
+			FileHandleTable[fileIndex].size = ftell(FileHandleTable[fileIndex].fp);
+			fseek(FileHandleTable[fileIndex].fp, 0, SEEK_SET);
 		}
 
 		return fileIndex;
@@ -320,13 +320,13 @@ static FileInfo *_File_Init_AddFileInRootDir(const char *filename, uint32 filesi
 		Error("cannot allocate %u bytes of memory\n", size);
 		return NULL;
 	}
-	new->next = s_files_in_root;
+	new->next = FileHandleTables_in_root;
 	memset(&new->info, 0, sizeof(FileInfo));
 	memcpy(new->filenamebuffer, filename, strlen(filename) + 1);
 	new->info.filename = new->filenamebuffer;
 	new->info.fileSize = filesize;
 	new->info.filePosition = 0;
-	s_files_in_root = new;
+	FileHandleTables_in_root = new;
 	return &new->info;
 }
 
@@ -349,7 +349,7 @@ static FileInfo *_File_Init_AddFileInPak(const char *filename, uint32 filesize, 
 		Error("cannot allocate %u bytes of memory\n", size);
 		return NULL;
 	}
-	new->next = s_files_in_pak;
+	new->next = FileHandleTables_in_pak;
 	new->pak = pakInfo;
 	memset(&new->info, 0, sizeof(FileInfo));
 	memcpy(new->filenamebuffer, filename, strlen(filename) + 1);
@@ -357,7 +357,7 @@ static FileInfo *_File_Init_AddFileInPak(const char *filename, uint32 filesize, 
 	new->info.fileSize = filesize;
 	new->info.filePosition = position;
 	new->info.flags.inPAKFile = true;
-	s_files_in_pak = new;
+	FileHandleTables_in_pak = new;
 	return &new->info;
 }
 
@@ -585,15 +585,15 @@ bool File_Init(void)
  */
 void File_Uninit(void)
 {
-	while (s_files_in_root != NULL) {
-		FileInfoLinkedElem *e = s_files_in_root;
-		s_files_in_root = e->next;
+	while (FileHandleTables_in_root != NULL) {
+		FileInfoLinkedElem *e = FileHandleTables_in_root;
+		FileHandleTables_in_root = e->next;
 		free(e);
 	}
 
-	while (s_files_in_pak != NULL) {
-		PakFileInfoLinkedElem *e = s_files_in_pak;
-		s_files_in_pak = e->next;
+	while (FileHandleTables_in_pak != NULL) {
+		PakFileInfoLinkedElem *e = FileHandleTables_in_pak;
+		FileHandleTables_in_pak = e->next;
 		free(e);
 	}
 }
@@ -669,12 +669,12 @@ uint8 File_Open_Ex(enum SearchDirectory dir, const char *filename, uint8 mode)
 void File_Close(uint8 index)
 {
 	if (index >= FILE_MAX) return;
-	if (s_file[index].fp == NULL) return;
+	if (FileHandleTable[index].fp == NULL) return;
 
 	g_fileOperation++;
 
-	fclose(s_file[index].fp);
-	s_file[index].fp = NULL;
+	fclose(FileHandleTable[index].fp);
+	FileHandleTable[index].fp = NULL;
 
 	g_fileOperation--;
 }
@@ -690,14 +690,14 @@ void File_Close(uint8 index)
 uint32 File_Read(uint8 index, void *buffer, uint32 length)
 {
 	if (index >= FILE_MAX) return 0;
-	if (s_file[index].fp == NULL) return 0;
-	if (s_file[index].position >= s_file[index].size) return 0;
+	if (FileHandleTable[index].fp == NULL) return 0;
+	if (FileHandleTable[index].position >= FileHandleTable[index].size) return 0;
 	if (length == 0) return 0;
 
-	if (length > s_file[index].size - s_file[index].position) length = s_file[index].size - s_file[index].position;
+	if (length > FileHandleTable[index].size - FileHandleTable[index].position) length = FileHandleTable[index].size - FileHandleTable[index].position;
 
 	g_fileOperation++;
-	if (fread(buffer, length, 1, s_file[index].fp) != 1) {
+	if (fread(buffer, length, 1, FileHandleTable[index].fp) != 1) {
 		Error("Read error\n");
 		File_Close(index);
 
@@ -705,7 +705,7 @@ uint32 File_Read(uint8 index, void *buffer, uint32 length)
 	}
 	g_fileOperation--;
 
-	s_file[index].position += length;
+	FileHandleTable[index].position += length;
 	return length;
 }
 
@@ -746,10 +746,10 @@ uint32 File_Read_LE32(uint8 index)
 uint32 File_Write(uint8 index, void *buffer, uint32 length)
 {
 	if (index >= FILE_MAX) return 0;
-	if (s_file[index].fp == NULL) return 0;
+	if (FileHandleTable[index].fp == NULL) return 0;
 
 	g_fileOperation++;
-	if (fwrite(buffer, length, 1, s_file[index].fp) != 1) {
+	if (fwrite(buffer, length, 1, FileHandleTable[index].fp) != 1) {
 		Error("Write error\n");
 		File_Close(index);
 
@@ -757,8 +757,8 @@ uint32 File_Write(uint8 index, void *buffer, uint32 length)
 	}
 	g_fileOperation--;
 
-	s_file[index].position += length;
-	if (s_file[index].position > s_file[index].size) s_file[index].size = s_file[index].position;
+	FileHandleTable[index].position += length;
+	if (FileHandleTable[index].position > FileHandleTable[index].size) FileHandleTable[index].size = FileHandleTable[index].position;
 	return length;
 }
 
@@ -787,27 +787,27 @@ bool File_Write_LE16(uint8 index, uint16 value)
 uint32 Seek_File(uint8 index, uint32 position, uint8 mode)
 {
 	if (index >= FILE_MAX) return 0;
-	if (s_file[index].fp == NULL) return 0;
+	if (FileHandleTable[index].fp == NULL) return 0;
 	if (mode > 2) { File_Close(index); return 0; }
 
 	g_fileOperation++;
 	switch (mode) {
 		case 0:
-			fseek(s_file[index].fp, s_file[index].start + position, SEEK_SET);
-			s_file[index].position = position;
+			fseek(FileHandleTable[index].fp, FileHandleTable[index].start + position, SEEK_SET);
+			FileHandleTable[index].position = position;
 			break;
 		case 1:
-			fseek(s_file[index].fp, (int32)position, SEEK_CUR);
-			s_file[index].position += (int32)position;
+			fseek(FileHandleTable[index].fp, (int32)position, SEEK_CUR);
+			FileHandleTable[index].position += (int32)position;
 			break;
 		case 2:
-			fseek(s_file[index].fp, s_file[index].start + s_file[index].size - position, SEEK_SET);
-			s_file[index].position = s_file[index].size - position;
+			fseek(FileHandleTable[index].fp, FileHandleTable[index].start + FileHandleTable[index].size - position, SEEK_SET);
+			FileHandleTable[index].position = FileHandleTable[index].size - position;
 			break;
 	}
 	g_fileOperation--;
 
-	return s_file[index].position;
+	return FileHandleTable[index].position;
 }
 
 /**
@@ -819,9 +819,9 @@ uint32 Seek_File(uint8 index, uint32 position, uint8 mode)
 uint32 File_GetSize(uint8 index)
 {
 	if (index >= FILE_MAX) return 0;
-	if (s_file[index].fp == NULL) return 0;
+	if (FileHandleTable[index].fp == NULL) return 0;
 
-	return s_file[index].size;
+	return FileHandleTable[index].size;
 }
 
 /**

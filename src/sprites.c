@@ -248,7 +248,7 @@ void Sprites_LoadTiles(void)
 	g_landscapeSpriteID = g_iconMap[g_iconMap[ICM_ICONGROUP_LANDSCAPE]];
 	g_wallSpriteID      = g_iconMap[g_iconMap[ICM_ICONGROUP_WALLS]];
 
-	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, GFX_Screen_Get_ByIndex(SCREEN_2));
+	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, Get_Page(SCREEN_2));
 }
 
 /**
@@ -275,7 +275,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	uint8 *buffer2;
 	uint16 paletteSize;
 
-	buffer = GFX_Screen_Get_ByIndex(screenID);
+	buffer = Get_Page(screenID);
 
 	index = File_Open(filename, FILE_MODE_READ);
 
@@ -297,8 +297,8 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	buffer[7] = 0;
 	size -= paletteSize;
 
-	buffer2 = GFX_Screen_Get_ByIndex(screenID);
-	buffer2 += GFX_Screen_GetSize_ByIndex(screenID) - size - 8;
+	buffer2 = Get_Page(screenID);
+	buffer2 += Get_Buff(screenID) - size - 8;
 
 	memmove(buffer2, buffer, 8);
 	File_Read(index, buffer2 + 8, size);
@@ -423,7 +423,7 @@ void Sprites_CPS_LoadRegionClick(void)
 	uint8 i;
 	char filename[16];
 
-	buf = GFX_Screen_Get_ByIndex(SCREEN_2);
+	buf = Get_Page(SCREEN_2);
 
 	g_fileRgnclkCPS = buf;
 	Sprites_LoadCPSFile("RGNCLK.CPS", SCREEN_2, NULL);

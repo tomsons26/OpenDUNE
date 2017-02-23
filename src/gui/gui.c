@@ -992,7 +992,7 @@ void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, ui
 
 	va_end(ap);
 
-	buf = GFX_Screen_Get_ByIndex(screenID);
+	buf = Get_Page(screenID);
 	buf += g_widgetProperties[windowID].xBase << 3;
 
 	width = g_widgetProperties[windowID].width << 3;
@@ -4053,7 +4053,7 @@ void GUI_Mouse_SetPosition(uint16 x, uint16 y)
  */
 void GUI_Palette_RemapScreen(uint16 left, uint16 top, uint16 width, uint16 height, Screen screenID, const uint8 *remap)
 {
-	uint8 *screen = GFX_Screen_Get_ByIndex(screenID);
+	uint8 *screen = Get_Page(screenID);
 
 	screen += top * SCREEN_WIDTH + left;
 	for (; height > 0; height--) {
@@ -4200,7 +4200,7 @@ void GUI_HallOfFame_Show(uint16 score)
 		s_ticksPlayed = 0;
 	}
 
-	data = (HallOfFameStruct *)GFX_Screen_Get_ByIndex(SCREEN_2);
+	data = (HallOfFameStruct *)Get_Page(SCREEN_2);
 
 	if (!File_Exists_Personal("SAVEFAME.DAT")) {
 		uint16 written;

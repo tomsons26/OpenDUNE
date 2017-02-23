@@ -19,6 +19,21 @@
 /**
  * The flags of a WSA Header.
  */
+
+/*
+[767] WSAOpenType          typedef enum
+[769] WSA_OPEN_FROM_MEM      Value = 0h
+[76a] WSA_OPEN_TO_BUFFER     Value = 0h
+[76b] WSA_OPEN_FROM_DISK     Value = 1h
+[76c] WSA_OPEN_TO_PAGE       Value = 2h
+
+[768] WSAType              typedef enum
+[776] WSA_NORMAL             Value = 0h
+[777] WSA_GHOST              Value = 1000h
+[778] WSA_PRIORITY2          Value = 2000h
+[779] WSA_TRANS              Value = 4000h
+[77a] WSA_PRIORITY           Value = 8000h
+*/
 typedef struct WSAFlags {
 	BIT_U8 notmalloced:1;                                   /*!< If the WSA is in memory of the caller. */
 	BIT_U8 malloced:1;                                      /*!< If the WSA is malloc'd by us. */
@@ -357,7 +372,7 @@ static void Buffer_Bitblit_To_LogicPage(int16 x, int16 y, int16 width, int16 hei
 	int16 skipAfter;
 	uint8 *dst;
 
-	dst = GFX_Screen_Get_ByIndex(screenID);
+	dst = Get_Page(screenID);
 
 	left   = g_widgetProperties[windowID].xBase << 3;
 	right  = left + (g_widgetProperties[windowID].width << 3);
@@ -422,7 +437,7 @@ bool Animate_Frame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen
 	if (header->flags.displayInBuffer) {
 		dst = (uint8 *)wsa + sizeof(SysAnimHeaderType);
 	} else {
-		dst = GFX_Screen_Get_ByIndex(screenID);
+		dst = Get_Page(screenID);
 		dst += posX + posY * SCREEN_WIDTH;
 	}
 

@@ -200,7 +200,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 	uint16 i;
 
 	if (init) {
-		helpDataList = GFX_Screen_Get_ByIndex(SCREEN_1);
+		helpDataList = Get_Page(SCREEN_1);
 
 		s_topHelpList = 0;
 		s_selectedHelpSubject = 0;
@@ -210,7 +210,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 	}
 
 	fileID = ChunkFile_Open(s_mentatFilename);
-	length = Read_Iff_Chunk(fileID, HTOBE32(CC_NAME), helpDataList, GFX_Screen_GetSize_ByIndex(SCREEN_1));
+	length = Read_Iff_Chunk(fileID, HTOBE32(CC_NAME), helpDataList, Get_Buff(SCREEN_1));
 	Close_Iff_File(fileID);
 
 	s_numberHelpSubjects = 0;
@@ -413,7 +413,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		wsa = Open_Animation(wsaFilename, Get_Page(SCREEN_2), Get_Buff(SCREEN_2), false);
 		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
 		Close_Animation(wsa);
 	}
@@ -533,7 +533,7 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		wsa = Open_Animation(wsaFilename, Get_Page(SCREEN_2), Get_Buff(SCREEN_2), false);
 		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
 		Close_Animation(wsa);
 	}
@@ -841,7 +841,7 @@ void GUI_Mentat_Create_HelpScreen_Widgets(void)
 	g_widgetMentatTail = NULL;
 	ypos = 8;
 
-	w = (Widget *)GFX_Screen_Get_ByIndex(SCREEN_2);
+	w = (Widget *)Get_Page(SCREEN_2);
 
 	memset(w, 0, 13 * sizeof(Widget));
 
@@ -933,7 +933,7 @@ static void GUI_Mentat_ShowHelp(void)
 	info.length = HTOBE32(info.length);
 
 	text = g_readBuffer;
-	compressedText = GFX_Screen_Get_ByIndex(SCREEN_1);
+	compressedText = Get_Page(SCREEN_1);
 
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
 	Seek_File(fileID, offset, 0);
@@ -1085,7 +1085,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	wsa = NULL;
 
 	if (wsaFilename != NULL) {
-		wsa = Open_Animation(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(wsaFilename, Get_Page(SCREEN_1), Get_Buff(SCREEN_1), false);
 	}
 
 	step = 0;
