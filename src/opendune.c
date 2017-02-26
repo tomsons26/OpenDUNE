@@ -820,7 +820,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 	if (stringID != 0xFFFF) stringID = mainMenuStrings[index][stringID];
 
-	GUI_PaletteAnimate();
+	Color_Cycle();
 
 	if (stringID == STR_PLAY_A_GAME) g_gameMode = GM_PICKHOUSE;
 }
@@ -1041,7 +1041,7 @@ static void GameLoop_Main(void)
 			GUI_ChangeSelectionType(g_selectionTypeNew);
 		}
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 
 		if (g_gameMode == GM_RESTART) {
 			GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);

@@ -606,6 +606,8 @@ void File_Uninit(void)
  * @param fileSize Filled with the file size if the file exists
  * @return True if and only if the file can be found.
  */
+
+//Seems to be Find_File
 bool File_Exists_Ex(enum SearchDirectory dir, const char *filename, uint32 *fileSize)
 {
 	bool exists = false;

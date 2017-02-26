@@ -434,7 +434,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 			GUI_Widget_DrawAll(w);
 			ret = GUI_Widget_HandleEvents(w);
 
-			GUI_PaletteAnimate();
+			Color_Cycle();
 			GUI_Mentat_Animation(0);
 
 			sleepIdle();
@@ -1119,7 +1119,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 		key = GUI_Widget_HandleEvents(w);
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 
 		if (key != 0) {
 			if ((key & 0x800) == 0) {

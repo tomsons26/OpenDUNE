@@ -629,7 +629,7 @@ static bool GUI_Palette_ShiftColour(uint8 *palette, uint16 colour, uint16 refere
 /**
  * Animate the palette. Only works for some colours or something
  */
-void GUI_PaletteAnimate(void)
+void Color_Cycle(void)
 {
 	static uint32 timerAnimation = 0;
 	static uint32 timerSelection = 0;
@@ -815,13 +815,13 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 	Show_Mouse();
 
 	for (g_timerTimeout = 30; g_timerTimeout != 0; sleepIdle()) {
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	Input_History_Clear();
 
 	do {
-		GUI_PaletteAnimate();
+		Color_Cycle();
 
 		ret = Input_WaitForValidInput();
 		sleepIdle();
@@ -1709,7 +1709,7 @@ uint8 GUI_PickHouse(void)
 		for (houseID = HOUSE_INVALID; houseID == HOUSE_INVALID; sleepIdle()) {
 			uint16 key = GUI_Widget_HandleEvents(w);
 
-			GUI_PaletteAnimate();
+			Color_Cycle();
 
 			if ((key & 0x800) != 0) key = 0;
 
@@ -2792,7 +2792,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 		if (event == 0x6E) GUI_Production_ResumeGame_Click(NULL);
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	GUI_DrawCredits(g_playerHouseID, 1);

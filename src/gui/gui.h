@@ -129,7 +129,7 @@ extern void GUI_DrawXorFilledRectangle(int16 left, int16 top, int16 right, int16
 extern void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colors, uint8 reference, uint8 intensity);
 extern void GUI_Palette_CreateRemap(uint8 houseID);
 extern void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation);
-extern void GUI_PaletteAnimate(void);
+extern void Color_Cycle(void);
 
 extern void GUI_DisplayText(const char *str, int16 importance, ...);
 extern void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour);

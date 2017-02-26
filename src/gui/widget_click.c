@@ -622,7 +622,7 @@ static void GUI_Widget_GameControls_Click(Widget *w)
 			GUI_Widget_Draw(w);
 		}
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	GUI_Window_RestoreScreen(desc);
@@ -672,7 +672,7 @@ static bool GUI_YesNo(uint16 stringID)
 			loop = false;
 		}
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	GUI_Window_RestoreScreen(desc);
@@ -774,7 +774,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 			}
 		}
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	g_textDisplayNeedsUpdate = true;
@@ -1018,7 +1018,7 @@ bool GUI_Widget_SaveLoad_Click(bool save)
 			GUI_Widget_MakeNormal(w2, false);
 		}
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	GUI_Window_RestoreScreen(desc);
@@ -1335,7 +1335,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 		GUI_FactoryWindow_UpdateSelection(false);
 
-		GUI_PaletteAnimate();
+		Color_Cycle();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
