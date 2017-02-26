@@ -289,6 +289,8 @@ static int16 Tools_RandomLCG(void)
  * @param max The maximum value.
  * @return The random value.
  */
+ 
+//Random_4E420 in LoL 32-bit exe
 uint16 Tools_RandomLCG_Range(uint16 min, uint16 max)
 {
 	uint16 ret;
