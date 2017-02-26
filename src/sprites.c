@@ -337,17 +337,17 @@ uint16 Load_Picture(const char *filename, Screen screenID, uint8 *palette)
 	return Load_Uncompress(filename, screenID, palette) / 8000;
 }
 
-void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
+void Set_Mouse_Cursor(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
 {
 	uint16 size;
 
 	if (sprite == NULL || MDisabled != 0) return;
 
-	while (g_mouseLock != 0) sleepIdle();
+	while (MouseUpdate != 0) sleepIdle();
 
-	g_mouseLock++;
+	MouseUpdate++;
 
-	GUI_Mouse_Hide();
+	Low_Hide_Mouse();
 
 	size = GFX_GetSize(READ_LE_UINT16(sprite + 3) + 16, sprite[5]);
 
@@ -404,9 +404,9 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, uint8 *sprite)
 	g_mouseHeight = sprite[5];
 	g_mouseWidth = (READ_LE_UINT16(sprite + 3) >> 3) + 2;
 
-	GUI_Mouse_Show();
+	Low_Show_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 static void InitRegions(void)

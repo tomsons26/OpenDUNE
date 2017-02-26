@@ -358,7 +358,7 @@ bool GUI_Widget_Cancel_Click(Widget *w)
 	g_activeAction = 0xFFFF;
 	g_cursorSpriteID = 0;
 
-	Sprites_SetMouseSprite(0, 0, g_sprites[0]);
+	Set_Mouse_Cursor(0, 0, g_sprites[0]);
 
 	GUI_ChangeSelectionType(SELECTIONTYPE_UNIT);
 
@@ -424,13 +424,13 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 	height = w->height;
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(offsetX, offsetY, offsetX + width, offsetY + height);
+		Low_Hide_Mouse_InRegion(offsetX, offsetY, offsetX + width, offsetY + height);
 	}
 
 	GUI_DrawFilledRectangle(offsetX, offsetY, offsetX + width, offsetY + height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Low_Show_Mouse_InRegion();
 	}
 }
 
@@ -537,13 +537,13 @@ static void GUI_Window_Create(WindowDesc *desc)
 		g_widgetLinkedListTail = GUI_Widget_Link(g_widgetLinkedListTail, w);
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	Widget_SetCurrentWidget(desc->index);
 
 	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_SetActive(SCREEN_0);
 }
@@ -552,18 +552,18 @@ static void GUI_Window_BackupScreen(WindowDesc *desc)
 {
 	Widget_SetCurrentWidget(desc->index);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_CopyToBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Page(SCREEN_2));
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 static void GUI_Window_RestoreScreen(WindowDesc *desc)
 {
 	Widget_SetCurrentWidget(desc->index);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Page(SCREEN_2));
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 /**
@@ -693,7 +693,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 
 	g_cursorSpriteID = 0;
 
-	Sprites_SetMouseSprite(0, 0, g_sprites[0]);
+	Set_Mouse_Cursor(0, 0, g_sprites[0]);
 
 	Free_Icon_Set();
 
@@ -795,7 +795,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 
 	g_cursorSpriteID = cursor;
 
-	Sprites_SetMouseSprite(0, 0, g_sprites[cursor]);
+	Set_Mouse_Cursor(0, 0, g_sprites[cursor]);
 
 	return false;
 }
@@ -869,9 +869,9 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 
 	Widget_SetCurrentWidget(15);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_DrawBorder((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	for (loop = true; loop; sleepIdle()) {
 		uint16 eventKey;
@@ -1135,14 +1135,14 @@ static void GUI_FactoryWindow_ScrollList(int16 step)
 
 	GUI_FactoryWindow_B495_0F30();
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	for (i = 0; i < 32; i++) {
 		y += step;
 		GFX_Screen_Copy2(72, y, 72, 16, 32, 136, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_FactoryWindow_PrepareScrollList();
 
@@ -1156,7 +1156,7 @@ static void GUI_FactoryWindow_FailScrollList(int16 step)
 
 	GUI_FactoryWindow_B495_0F30();
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	GUI_FactoryWindow_B495_0F30();
 
@@ -1170,7 +1170,7 @@ static void GUI_FactoryWindow_FailScrollList(int16 step)
 		GFX_Screen_Copy2(72, y, 72, 16, 32, 136, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_FactoryWindow_UpdateSelection(true);
 }
@@ -1320,9 +1320,9 @@ static void GUI_Purchase_ShowInvoice(void)
 	Text_Print_Wrapper(GUI_String_Get_ByIndex(STR_TOTAL_COST_), x - 3, 152, 11, 0, 0x211);
 	Text_Print_Monospace(textBuffer, x, 152, 11, 0, 6);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_SetActive(SCREEN_0);
 

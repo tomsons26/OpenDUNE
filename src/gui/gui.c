@@ -310,7 +310,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 			GFX_Screen_SetActive(oldScreenID);
 		}
 
-		GUI_Mouse_Hide_InWidget(7);
+		Low_Hide_Mouse_InWidget(7);
 
 		if (textOffset + g_curWidgetHeight > 24) {
 			height = 24 - textOffset;
@@ -319,7 +319,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 		}
 
 		GUI_Screen_Copy(g_curWidgetXBase, textOffset, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, height, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_InWidget();
+		Low_Show_Mouse_InWidget();
 
 		Widget_SetCurrentWidget(oldWidgetId);
 
@@ -779,7 +779,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 	vsnprintf(textBuffer, sizeof(textBuffer), str, ap);
 	va_end(ap);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
@@ -812,7 +812,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	Set_Palette(g_palette1);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	for (g_timerTimeout = 30; g_timerTimeout != 0; sleepIdle()) {
 		GUI_PaletteAnimate();
@@ -829,7 +829,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	Input_HandleInput(0x841);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (spriteID != 0xFFFF) {
 		GUI_Widget_SetProperties(1, g_curWidgetXBase - 5, g_curWidgetYBase - 8, g_curWidgetWidth + 7, g_curWidgetHeight + 16);
@@ -851,7 +851,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	GFX_Screen_SetActive(oldScreenID);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	return ret;
 }
@@ -1534,7 +1534,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	/* 1st scenario doesn't have the "Building destroyed" stats */
 	statsBoxCount = (g_scenarioID == 1) ? 2 : 3;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
@@ -1636,7 +1636,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 		GUI_EndStats_Sleep(60);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	Input_History_Clear();
 
@@ -1701,10 +1701,10 @@ uint8 GUI_PickHouse(void)
 
 		Load_Picture(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 		GUI_SetPaletteAnimated(g_palette1, 15);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		for (houseID = HOUSE_INVALID; houseID == HOUSE_INVALID; sleepIdle()) {
 			uint16 key = GUI_Widget_HandleEvents(w);
@@ -1721,7 +1721,7 @@ uint8 GUI_PickHouse(void)
 			}
 		}
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		if (g_enableVoices != 0) {
 			Sound_Output_Feedback(houseID + 62);
@@ -1748,14 +1748,14 @@ uint8 GUI_PickHouse(void)
 
 		oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		strncpy(g_readBuffer, String_Get_ByIndex(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
 		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		GUI_Screen_Copy(0, 0, 0, 0, 26, 24, SCREEN_1, SCREEN_0);
 
@@ -1763,7 +1763,7 @@ uint8 GUI_PickHouse(void)
 
 		GUI_Widget_DrawAll(w);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		for (;; sleepIdle()) {
 			yes_no = GUI_Mentat_Loop(House_GetWSAHouseFilename(houseID), NULL, NULL, true, w);
@@ -1801,7 +1801,7 @@ uint8 GUI_PickHouse(void)
 
 	Input_History_Clear();
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_SetPaletteAnimated(palette, 15);
 
@@ -2019,13 +2019,13 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	if (screenID == SCREEN_0) {
 		GFX_Screen_SetActive(SCREEN_0);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 		GUI_DrawCredits(g_playerHouseID, (g_playerCredits == 0xFFFF) ? 2 : 1);
 		GUI_SetPaletteAnimated(g_palette1, 15);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
@@ -2135,9 +2135,9 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 	}
 
 	if (!GFX_Screen_IsActive(oldScreenID)) {
-		GUI_Mouse_Hide_InWidget(5);
+		Low_Hide_Mouse_InWidget(5);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase - 40, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, oldScreenID);
-		GUI_Mouse_Show_InWidget();
+		Low_Show_Mouse_InWidget();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
@@ -2235,7 +2235,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 				if (oldSelectionType != SELECTIONTYPE_INTRO) {
 					g_cursorSpriteID = 0;
 
-					Sprites_SetMouseSprite(0, 0, g_sprites[0]);
+					Set_Mouse_Cursor(0, 0, g_sprites[0]);
 				}
 
 				Widget_SetCurrentWidget(g_table_selectionType[selectionType].defaultWidget);
@@ -2739,9 +2739,9 @@ static void GUI_FactoryWindow_Init(void)
 	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
 	Close_Animation(wsa);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_DrawFilledRectangle(64, 0, 112, SCREEN_HEIGHT - 1, GFX_GetPixel(72, 23));
 
@@ -2886,9 +2886,9 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 
 		if (data[i].index == 0 || data[i].index == selected) continue;
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GFX_Screen_Copy2(i * 16, 0, data[i].offsetX, data[i].offsetY, 16, 16, SCREEN_1, SCREEN_0, false);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	sprintf(key, "%d", selected);
@@ -2903,9 +2903,9 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 	x += 8;
 	y += 24;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_Screen_Copy2(x, y, 16, 16, width, height, SCREEN_0, SCREEN_1, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_Copy2(16, 16, 176, 16, width, height, SCREEN_1, SCREEN_1, false);
 
@@ -2920,9 +2920,9 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 	}
 
 	for (i = 0; i < 4; i++) {
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GFX_Screen_Copy2((i % 2 == 0) ? 16 : 176, 16, x, y, width, height, SCREEN_1, SCREEN_0, false);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		for (g_timerTimeout = 20; g_timerTimeout != 0; sleepIdle()) {
 			GUI_StrategicMap_AnimateArrows();
@@ -3058,7 +3058,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	for (i = 0; i < count; i++) {
 		if (data[i].index == 0) continue;
@@ -3066,7 +3066,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 		GFX_Screen_Copy2(i * 16, 152, data[i].offsetX, data[i].offsetY, 16, 16, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 	Input_History_Clear();
 
 	for (loop = true; loop; sleepIdle()) {
@@ -3279,10 +3279,10 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	GUI_DrawFilledRectangle(8, 24, 311, 143, 12);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
 	GUI_SetPaletteAnimated(g_palette1, 15);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	s_strategicMapFastForward = false;
 
@@ -3332,7 +3332,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	if (campaignID != previousCampaignID) GUI_StrategicMap_ShowProgression(campaignID);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	if (*g_regions >= campaignID) {
 		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_SELECT_YOUR_NEXT_REGION));
@@ -3354,9 +3354,9 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	GUI_SetPaletteAnimated(palette, 15);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_ClearScreen(SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	Set_Palette(g_palette1);
 
@@ -3386,9 +3386,9 @@ void Text_Print_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour,
 
 void GUI_FactoryWindow_B495_0F30(void)
 {
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_Screen_Copy2(69, ((g_factoryWindowSelected + 1) * 32) + 5, 69, (g_factoryWindowSelected * 32) + 21, 38, 30, SCREEN_1, SCREEN_0, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 FactoryWindowItem *GUI_FactoryWindow_GetItem(int16 offset)
@@ -3461,9 +3461,9 @@ void GUI_FactoryWindow_DrawDetails(void)
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, oldScreenID);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_SetActive(oldScreenID);
 
@@ -3496,9 +3496,9 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	if (oldScreenID == SCREEN_0) GFX_Screen_Copy2(128, 21, 128, 21, 182, 14, SCREEN_1, oldScreenID, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_SetActive(oldScreenID);
 }
@@ -3510,9 +3510,9 @@ void GUI_FactoryWindow_UpdateDetails(void)
 
 	if (oi->available == -1) return;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(16, (oi->available == item->amount) ? 169 : 160, 16, 99, 23, 9, SCREEN_1, SCREEN_ACTIVE);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 /**
@@ -3543,10 +3543,10 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 
 		y = g_factoryWindowSelected * 32 + 24;
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_DrawWiredRectangle(71, y - 1, 104, y + 24, 255);
 		GUI_DrawWiredRectangle(72, y, 103, y + 23, 255);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	} else {
 		if (paletteChangeTimer > g_timerGUI) return;
 	}
@@ -3599,7 +3599,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	int x, y;
 
 	if (screenDst == SCREEN_0) {
-		GUI_Mouse_Hide_InRegion(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
+		Low_Hide_Mouse_InRegion(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
 	}
 
 	height /= 2;
@@ -3648,7 +3648,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	}
 
 	if (screenDst == SCREEN_0) {
-		GUI_Mouse_Show_InRegion();
+		Low_Show_Mouse_InRegion();
 	}
 }
 
@@ -3656,9 +3656,9 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 {
 	FactoryWindowItem *item;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(9, 24, 9, 40, 4, 128, SCREEN_0, SCREEN_1);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	item = GUI_FactoryWindow_GetItem(-1);
 
@@ -3713,7 +3713,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	assert(height <= SCREEN_HEIGHT);
 
 	if (screenDst == 0) {
-		GUI_Mouse_Hide_InRegion(x, y, x + width, y + height);
+		Low_Hide_Mouse_InRegion(x, y, x + width, y + height);
 	}
 
 	for (i = 0; i < width; i++)  columns[i] = i;
@@ -3766,7 +3766,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	}
 
 	if (screenDst == 0) {
-		GUI_Mouse_Show_InRegion();
+		Low_Show_Mouse_InRegion();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
@@ -3776,7 +3776,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
  * Show the mouse on the screen. Copy the screen behind the mouse in a safe
  *  buffer.
  */
-void GUI_Mouse_Show(void)
+void Low_Show_Mouse(void)
 {
 	int left, top;
 
@@ -3806,7 +3806,7 @@ void GUI_Mouse_Show(void)
  * Hide the mouse from the screen. Do this by copying the mouse buffer back to
  *  the screen.
  */
-void GUI_Mouse_Hide(void)
+void Low_Hide_Mouse(void)
 {
 	if (MDisabled == 1) return;
 
@@ -3822,67 +3822,67 @@ void GUI_Mouse_Hide(void)
 }
 
 /**
- * The safe version of GUI_Mouse_Hide(). It waits for a mouselock before doing
+ * The safe version of Low_Hide_Mouse(). It waits for a mouselock before doing
  *  anything.
  */
-void GUI_Mouse_Hide_Safe(void)
+void Hide_Mouse(void)
 {
-	while (g_mouseLock != 0) sleepIdle();
+	while (MouseUpdate != 0) sleepIdle();
 	if (MDisabled == 1) return;
-	g_mouseLock++;
+	MouseUpdate++;
 
-	GUI_Mouse_Hide();
+	Low_Hide_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
- * The safe version of GUI_Mouse_Show(). It waits for a mouselock before doing
+ * The safe version of Low_Show_Mouse(). It waits for a mouselock before doing
  *  anything.
  */
-void GUI_Mouse_Show_Safe(void)
+void Show_Mouse(void)
 {
-	while (g_mouseLock != 0) sleepIdle();
+	while (MouseUpdate != 0) sleepIdle();
 	if (MDisabled == 1) return;
-	g_mouseLock++;
+	MouseUpdate++;
 
-	GUI_Mouse_Show();
+	Low_Show_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
  * Show the mouse if needed. Should be used in combination with
- *  #GUI_Mouse_Hide_InRegion().
+ *  #Low_Hide_Mouse_InRegion().
  */
-void GUI_Mouse_Show_InRegion(void)
+void Low_Show_Mouse_InRegion(void)
 {
 	uint8 counter;
 
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
 	counter = g_regionFlags & 0xFF;
 	if (counter == 0 || --counter != 0) {
 		g_regionFlags = (g_regionFlags & 0xFF00) | (counter & 0xFF);
-		g_mouseLock--;
+		MouseUpdate--;
 		return;
 	}
 
 	if ((g_regionFlags & 0x4000) != 0) {
-		GUI_Mouse_Show();
+		Low_Show_Mouse();
 	}
 
 	g_regionFlags = 0;
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
  * Hide the mouse when it is inside the specified region. Works with
- *  #GUI_Mouse_Show_InRegion(), which only calls #GUI_Mouse_Show() when
+ *  #Low_Show_Mouse_InRegion(), which only calls #Low_Show_Mouse() when
  *  mouse was really hidden.
  */
-void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom)
+void Low_Hide_Mouse_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom)
 {
 	int minx, miny;
 	int maxx, maxy;
@@ -3899,8 +3899,8 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
 	maxy = bottom + g_mouseSpriteHotspotY;
 	if (maxy > SCREEN_HEIGHT - 1) maxy = SCREEN_HEIGHT - 1;
 
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
 	if (g_regionFlags == 0) {
 		g_regionMinX = minx;
@@ -3919,7 +3919,7 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
 	     g_mouseX <= g_regionMaxX &&
 	     g_mouseY >= g_regionMinY &&
 	     g_mouseY <= g_regionMaxY) {
-		GUI_Mouse_Hide();
+		Low_Hide_Mouse();
 
 		g_regionFlags |= 0x4000;
 	}
@@ -3927,25 +3927,25 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
 	g_regionFlags |= 0x8000;
 	g_regionFlags = (g_regionFlags & 0xFF00) | (((g_regionFlags & 0x00FF) + 1) & 0xFF);
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
  * Show the mouse if needed. Should be used in combination with
- *  GUI_Mouse_Hide_InWidget().
+ *  Low_Hide_Mouse_InWidget().
  */
-void GUI_Mouse_Show_InWidget(void)
+void Low_Show_Mouse_InWidget(void)
 {
-	GUI_Mouse_Show_InRegion();
+	Low_Show_Mouse_InRegion();
 }
 
 /**
  * Hide the mouse when it is inside the specified widget. Works with
- *  #GUI_Mouse_Show_InWidget(), which only calls #GUI_Mouse_Show() when
+ *  #Low_Show_Mouse_InWidget(), which only calls #Low_Show_Mouse() when
  *  mouse was really hidden.
  * @param widgetIndex The index of the widget to check on.
  */
-void GUI_Mouse_Hide_InWidget(uint16 widgetIndex)
+void Low_Hide_Mouse_InWidget(uint16 widgetIndex)
 {
 	uint16 left, top;
 	uint16 width, height;
@@ -3955,7 +3955,7 @@ void GUI_Mouse_Hide_InWidget(uint16 widgetIndex)
 	width  = g_widgetProperties[widgetIndex].width << 3;
 	height = g_widgetProperties[widgetIndex].height;
 
-	GUI_Mouse_Hide_InRegion(left, top, left + width - 1, top + height - 1);
+	Low_Hide_Mouse_InRegion(left, top, left + width - 1, top + height - 1);
 }
 
 /**
@@ -4021,8 +4021,8 @@ void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, 
  */
 void GUI_Mouse_SetPosition(uint16 x, uint16 y)
 {
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
 	if (x < g_mouseRegionLeft)   x = g_mouseRegionLeft;
 	if (x > g_mouseRegionRight)  x = g_mouseRegionRight;
@@ -4035,11 +4035,11 @@ void GUI_Mouse_SetPosition(uint16 x, uint16 y)
 	Video_Mouse_SetPosition(x, y);
 
 	if (g_mouseX != g_mousePrevX || g_mouseY != g_mousePrevY) {
-		GUI_Mouse_Hide();
-		GUI_Mouse_Show();
+		Low_Hide_Mouse();
+		Low_Show_Mouse();
 	}
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
@@ -4190,11 +4190,11 @@ void GUI_HallOfFame_Show(uint16 score)
 	uint8 fileID;
 	HallOfFameStruct *data;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (score == 0xFFFF) {
 		if (!File_Exists_Personal("SAVEFAME.DAT")) {
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 			return;
 		}
 		s_ticksPlayed = 0;
@@ -4277,7 +4277,7 @@ void GUI_HallOfFame_Show(uint16 score)
 		Close_File(fileID);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	w = GUI_HallOfFame_CreateButtons(data);
 
@@ -4352,9 +4352,9 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	}
 
 	if (show) {
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_Screen_Copy(1, 80, 1, 80, 38, 100, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
@@ -4471,7 +4471,7 @@ void GUI_DrawScreen(Screen screenID)
 			Map_SetSelectionObjectPosition(0xFFFF);
 			hasScrolled = true;
 
-			GUI_Mouse_Hide_InWidget(2);
+			Low_Hide_Mouse_InWidget(2);
 
 			GUI_Screen_Copy(max(-xOffset << 1, 0), 40 + max(-yOffset << 4, 0), max(0, xOffset << 1), 40 + max(0, yOffset << 4), xOverlap << 1, yOverlap << 4, SCREEN_0, SCREEN_1);
 		} else {
@@ -4526,7 +4526,7 @@ void GUI_DrawScreen(Screen screenID)
 	Map_SetSelectionObjectPosition(g_selectionRectanglePosition);
 	Map_UpdateMinimapPosition(g_minimapPosition, false);
 
-	GUI_Mouse_Show_InWidget();
+	Low_Show_Mouse_InWidget();
 }
 
 /**

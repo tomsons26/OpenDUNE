@@ -301,9 +301,9 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	}
 
 	if (cleared && oldScreenID == SCREEN_0) {
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_Screen_Copy(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);

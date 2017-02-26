@@ -98,7 +98,7 @@ Widget *GUI_Widget_Get_ByIndex(Widget *w, uint16 index)
 static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 {
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
+		Low_Hide_Mouse_InRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
 	}
 
 	Draw_Shape(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
@@ -106,7 +106,7 @@ static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 	GUI_DrawBlockedRectangle(w->offsetX, w->offsetY, w->width, w->height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Low_Show_Mouse_InRegion();
 	}
 }
 
@@ -193,7 +193,7 @@ void GUI_Widget_Draw(Widget *w)
 
 	assert(drawMode < DRAW_MODE_MAX);
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(positionLeft, positionTop, positionRight, positionBottom);
+		Low_Hide_Mouse_InRegion(positionLeft, positionTop, positionRight, positionBottom);
 	}
 
 	switch (drawMode) {
@@ -226,7 +226,7 @@ void GUI_Widget_Draw(Widget *w)
 	}
 
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Low_Show_Mouse_InRegion();
 	}
 }
 

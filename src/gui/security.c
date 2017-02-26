@@ -32,9 +32,9 @@ static void GUI_Security_DrawText(char *text)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-	GUI_Mouse_Show_InRegion();
+	Low_Show_Mouse_InRegion();
 
 	GUI_Screen_Copy(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
 
@@ -42,18 +42,18 @@ static void GUI_Security_DrawText(char *text)
 
 	Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	GUI_Mouse_Show_InRegion();
+	Low_Show_Mouse_InRegion();
 
 	GFX_Screen_SetActive(oldScreenID);
 }
 
 static void GUI_Security_UndrawText(void)
 {
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 static void GUI_Security_NormaliseText(char *str)
@@ -98,9 +98,9 @@ bool GUI_Security_Show(void)
 
 	GUI_Mentat_Display(wsaHouseFilename, g_playerHouseID);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_SetPaletteAnimated(g_palette1, 15);
 
@@ -129,9 +129,9 @@ bool GUI_Security_Show(void)
 
 		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-		GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+		Low_Hide_Mouse_InWidget(g_curWidgetIndex);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
-		GUI_Mouse_Show_InWidget();
+		Low_Show_Mouse_InWidget();
 
 		strncpy(g_readBuffer, String_Get_ByIndex(questionIndex), g_readBufferSize);
 		GUI_Security_DrawText(g_readBuffer);
@@ -140,16 +140,16 @@ bool GUI_Security_Show(void)
 
 		Widget_SetCurrentWidget(9);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_Screen_Copy(g_curWidgetXBase - 1, g_curWidgetYBase - 8, 0, 0, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_0, SCREEN_2);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		GFX_Screen_SetActive(SCREEN_0);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_DrawBorder((g_curWidgetXBase << 3) - 6, g_curWidgetYBase - 6, (g_curWidgetWidth << 3) + 12, g_curWidgetHeight + 12, 1, true);
 		GUI_DrawBorder((g_curWidgetXBase << 3) - 2, g_curWidgetYBase - 2, (g_curWidgetWidth << 3) + 4, g_curWidgetHeight + 4, 2, false);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		Input_History_Clear();
 
@@ -162,9 +162,9 @@ bool GUI_Security_Show(void)
 
 		GUI_Security_UndrawText();
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GUI_Screen_Copy(0, 0, g_curWidgetXBase - 1, g_curWidgetYBase - 8, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_2, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		GUI_Security_NormaliseText(buffer);
 

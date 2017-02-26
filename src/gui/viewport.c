@@ -67,7 +67,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 
 		s_tickCursor = g_timerGame;
 
-		Sprites_SetMouseSprite(cursorHotSpots[spriteID].x, cursorHotSpots[spriteID].y, g_sprites[spriteID]);
+		Set_Mouse_Cursor(cursorHotSpots[spriteID].x, cursorHotSpots[spriteID].y, g_sprites[spriteID]);
 
 		g_cursorSpriteID = spriteID;
 	}
@@ -737,7 +737,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 				oldScreenID2 = GFX_Screen_SetActive(SCREEN_1);
 
-				GUI_Mouse_Hide_InWidget(3);
+				Low_Hide_Mouse_InWidget(3);
 			}
 
 			GUI_Widget_Viewport_DrawTile(curPos);
@@ -752,7 +752,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 			GFX_Screen_SetActive(oldScreenID2);
 
-			GUI_Mouse_Show_InWidget();
+			Low_Show_Mouse_InWidget();
 		}
 
 		if (g_changedTilesCount == lengthof(g_changedTiles)) {
@@ -776,7 +776,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 	if (updateDisplay && !drawToMainScreen) {
 		if (g_viewport_fadein) {
-			GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+			Low_Hide_Mouse_InWidget(g_curWidgetIndex);
 
 			/* ENHANCEMENT -- When fading in the game on start, you don't see the fade as it is against the already drawn screen. */
 			if (g_dune2_enhanced) {
@@ -786,7 +786,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			}
 
 			GUI_Screen_FadeIn(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, SCREEN_0);
-			GUI_Mouse_Show_InWidget();
+			Low_Show_Mouse_InWidget();
 
 			g_viewport_fadein = false;
 		} else {
@@ -809,7 +809,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				height = 16;
 
 				if (!init) {
-					GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+					Low_Hide_Mouse_InWidget(g_curWidgetIndex);
 
 					init = true;
 				}
@@ -817,7 +817,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				GUI_Screen_Copy(x, y, x, y, width, height, SCREEN_ACTIVE, SCREEN_0);
 			}
 
-			if (init) GUI_Mouse_Show_InWidget();
+			if (init) Low_Show_Mouse_InWidget();
 		}
 	}
 
@@ -941,7 +941,7 @@ void GUI_Widget_Viewport_RedrawMap(Screen screenID)
 
 	GFX_Screen_SetActive(oldScreenID);
 
-	GUI_Mouse_Hide_InWidget(3);
+	Low_Hide_Mouse_InWidget(3);
 	GUI_Screen_Copy(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_InWidget();
+	Low_Show_Mouse_InWidget();
 }

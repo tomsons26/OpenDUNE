@@ -387,9 +387,9 @@ void Input_HandleInput(uint16 input)
 
 			g_mouseX = inputMouseX;
 			g_mouseY = inputMouseY;
-			if (g_mouseLock == 0) {
-				GUI_Mouse_Hide();
-				GUI_Mouse_Show();
+			if (MouseUpdate == 0) {
+				Low_Hide_Mouse();
+				Low_Show_Mouse();
 			}
 			input = 0x2D;
 		}

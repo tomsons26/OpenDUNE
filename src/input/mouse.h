@@ -3,7 +3,7 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-extern uint16 g_mouseLock;
+extern uint16 MouseUpdate;
 extern bool   g_doubleWidth;
 extern uint16 g_mouseX;
 extern uint16 g_mouseY;

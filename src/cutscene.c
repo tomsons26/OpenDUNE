@@ -813,7 +813,7 @@ static void GameLoop_GameCredits(void)
 	uint8 remap[256];
 	char *credits_buffer;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	Widget_SetCurrentWidget(20);
 
@@ -859,7 +859,7 @@ static void GameLoop_GameCredits(void)
 	credits_buffer = (char *)Get_Page(SCREEN_3) + SCREEN_WIDTH * g_curWidgetHeight;
 	Debug("GameLoop_GameCredits() credit buffer is %d lines in SCREEN_3 buffer\n", g_curWidgetHeight);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	GUI_InitColors(colours, 0, lengthof(colours) - 1);
 

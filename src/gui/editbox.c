@@ -34,9 +34,9 @@ static void GUI_EditBox_BlinkCursor(uint16 positionX, bool resetBlink)
 
 	editBoxShowCursor = !editBoxShowCursor;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_DrawFilledRectangle(positionX, g_curWidgetYBase, positionX + Font_GetCharWidth('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 /**
@@ -88,7 +88,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 	}
 	*t = '\0';
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (paint) Widget_PaintCurrentWidget();
 
@@ -96,7 +96,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 	GUI_EditBox_BlinkCursor(positionX + textWidth, false);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	for (;; sleepIdle()) {
 		uint16 keyWidth;
@@ -155,14 +155,14 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		*(++t) = '\0';
 		textLength++;
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		GUI_EditBox_BlinkCursor(positionX + textWidth, true);
 
 		/* Draw new character */
 		Text_Print_Wrapper(text + textLength - 1, positionX + textWidth, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0x020);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		textWidth += keyWidth;
 
