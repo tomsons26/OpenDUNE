@@ -297,7 +297,7 @@ static void GameLoop_LevelEnd(void)
 				GUI_SetPaletteAnimated(g_palette2, 15);
 				GUI_ClearScreen(SCREEN_0);
 				GameLoop_GameEndAnimation();
-				PrepareEnd();
+				Prog_End();
 				exit(0);
 			}
 
@@ -313,7 +313,7 @@ static void GameLoop_LevelEnd(void)
 
 			if (g_campaignID == 1 || g_campaignID == 7) {
 				if (!GUI_Security_Show()) {
-					PrepareEnd();
+					Prog_End();
 					exit(0);
 				}
 			}
@@ -1290,7 +1290,7 @@ int main(int argc, char **argv)
 
 	printf("%s\n", String_Get_ByIndex(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
 
-	PrepareEnd();
+	Prog_End();
 	Free_IniFile();
 	exit(0);
 }
@@ -1474,7 +1474,7 @@ void Game_LoadScenario(uint8 houseID, uint16 scenarioID)
 	if (!Scenario_Load(scenarioID, houseID)) {
 		GUI_DisplayModalMessage("No more scenarios!", 0xFFFF);
 
-		PrepareEnd();
+		Prog_End();
 		exit(0);
 	}
 
@@ -1492,7 +1492,7 @@ void Game_LoadScenario(uint8 houseID, uint16 scenarioID)
  * Close down facilities used by the program. Always called just before the
  *  program terminates.
  */
-void PrepareEnd(void)
+void Prog_End(void)
 {
 	free(Palette); Palette = NULL;
 

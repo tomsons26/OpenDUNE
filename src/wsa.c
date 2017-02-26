@@ -362,6 +362,7 @@ void Close_Animation(void *wsa)
  */
 
 //This was in BUFF.ASM, nothing to do with WSA but that it's only called by WSA code by Dune 2
+//Later version is called Buffer_To_Page which in TD Dos case just calls MCGA_Buffer_To_Page
 static void Buffer_Bitblit_To_LogicPage(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
 {
 	int16 left;

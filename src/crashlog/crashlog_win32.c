@@ -213,7 +213,7 @@ bool WriteCrashDump(void)
 
 static void ShowCrashlogWindow(void)
 {
-	PrepareEnd();
+	Prog_End();
 	ShowCursor(TRUE);
 	MessageBox(NULL, s_crashText, _T("Fatal Application Failure"), MB_ICONERROR);
 	exit(2);
@@ -222,7 +222,7 @@ static void ShowCrashlogWindow(void)
 static LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS *ep)
 {
 	if (s_handlingException) {
-		PrepareEnd();
+		Prog_End();
 		exit(2);
 	}
 
@@ -257,7 +257,7 @@ static LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS *ep)
 		return EXCEPTION_CONTINUE_EXECUTION;
 	}
 
-	PrepareEnd();
+	Prog_End();
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 

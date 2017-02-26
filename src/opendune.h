@@ -46,6 +46,6 @@ extern void Game_Prepare(void);
 extern void Game_Init(void);
 extern void Game_LoadScenario(uint8 houseID, uint16 scenarioID);
 extern void GameLoop_Uninit(void);
-extern void PrepareEnd(void);
+extern void Prog_End(void);
 
 #endif /* OPENDUNE_H */

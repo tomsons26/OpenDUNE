@@ -142,7 +142,7 @@ extern uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter);
 extern void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyedAllied, uint16 destroyedEnemy, uint16 harvestedAllied, uint16 harvestedEnemy, int16 score, uint8 houseID);
 extern uint8 GUI_PickHouse(void);
 extern void GUI_ChangeSelectionType(uint16 selectionType);
-extern void GUI_InitColors(const uint8 *colors, uint8 first, uint8 last);
+extern void Set_Font_Palette_Range(const uint8 *colors, uint8 first, uint8 last);
 extern void GUI_SetClippingArea(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort, uint16 upgradeCost);
 extern char *GUI_String_Get_ByIndex(int16 stringID);

@@ -99,7 +99,7 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 	colors[0] = 0;
 	for (i = 0; i < 6; i++) colors[i + 1] = 215 + i;
 
-	GUI_InitColors(colors, 0, 15);
+	Set_Font_Palette_Range(colors, 0, 15);
 }
 
 static void GameLoop_FinishAnimation(void)
@@ -244,7 +244,7 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 	colors[0] = 0;
 	for (i = 0; i < 6; i++) colors[i + 1] = 215 + i;
 
-	GUI_InitColors(colors, 0, 15);
+	Set_Font_Palette_Range(colors, 0, 15);
 
 	Font_Select(IntroFontPtr);
 }
@@ -412,7 +412,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				break;
 
 			default:
-				PrepareEnd();
+				Prog_End();
 				Error("Bad mode in animation #%i.\n", animationMode);
 				exit(0);
 		}
@@ -861,7 +861,7 @@ static void GameLoop_GameCredits(void)
 
 	Hide_Mouse();
 
-	GUI_InitColors(colours, 0, lengthof(colours) - 1);
+	Set_Font_Palette_Range(colours, 0, lengthof(colours) - 1);
 
 	g_fontCharOffset = -1;
 

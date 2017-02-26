@@ -240,7 +240,7 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 		case WM_CLOSE:
 			DestroyWindow(s_hwnd);
-			PrepareEnd();
+			Prog_End();
 			exit(0);
 
 		case WM_PAINT: {
@@ -632,7 +632,7 @@ void Video_Tick(void)
 		s_hwnd = CreateWindow(s_className, window_caption, style, CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left, r.bottom - r.top, NULL, NULL, GetModuleHandle(NULL), NULL);
 		if (s_hwnd == NULL) {
 			Error("CreateWindow failed\n");
-			PrepareEnd();
+			Prog_End();
 			return;
 		}
 

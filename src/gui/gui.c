@@ -465,7 +465,7 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
 	colours[0] = bgColour;
 	colours[1] = fgColour;
 
-	GUI_InitColors(colours, 0, 1);
+	Set_Font_Palette_Range(colours, 0, 1);
 
 	s = string;
 	x = left;
@@ -568,7 +568,7 @@ void Text_Print_Wrapper(const char *string, int16 left, int16 top, uint8 fgColou
 		colours[1] = fgColour;
 		colours[4] = 6;
 
-		GUI_InitColors(colours, 0, lengthof(colours) - 1);
+		Set_Font_Palette_Range(colours, 0, lengthof(colours) - 1);
 
 		displayedarg2mid = arg2mid;
 	}
@@ -2284,7 +2284,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
  * @param min The index of the first colour to set.
  * @param max The index of the last colour to set.
  */
-void GUI_InitColors(const uint8 *colours, uint8 first, uint8 last)
+void Set_Font_Palette_Range(const uint8 *colours, uint8 first, uint8 last)
 {
 	uint8 i;
 
@@ -2685,7 +2685,7 @@ static void GUI_FactoryWindow_InitItems(void)
 
 	if (g_factoryWindowTotal == 0) {
 		GUI_DisplayModalMessage("ERROR: No items in construction list!", 0xFFFF);
-		PrepareEnd();
+		Prog_End();
 		exit(0);
 	}
 

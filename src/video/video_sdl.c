@@ -495,7 +495,7 @@ void Video_Tick(void)
 		switch (event.type) {
 			case SDL_QUIT: {
 				s_video_lock = false;
-				PrepareEnd();
+				Prog_End();
 				exit(0);
 			} break;
 
