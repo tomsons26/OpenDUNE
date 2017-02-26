@@ -573,9 +573,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[2][abs(otherSprite)];
 
-			Low_Hide_Mouse_InRegion(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_otherLeft, s_otherTop, 0, 0);
-			Low_Show_Mouse_InRegion();
+			Conditional_Show_Mouse();
 		}
 
 		switch (g_playerHouseID) {
@@ -604,9 +604,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 			movingMouthSprite = Tools_RandomLCG_Range(0, 4);
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			Low_Hide_Mouse_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			Low_Show_Mouse_InRegion();
+			Conditional_Show_Mouse();
 
 			switch (movingMouthSprite) {
 				case 0:
@@ -652,9 +652,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			Low_Hide_Mouse_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			Low_Show_Mouse_InRegion();
+			Conditional_Show_Mouse();
 		}
 	}
 
@@ -674,9 +674,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 				sprite = s_mentatSprites[0][movingEyesSprite];
 
-				Low_Hide_Mouse_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+				Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
 				Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-				Low_Show_Mouse_InRegion();
+				Conditional_Show_Mouse();
 			}
 
 			return;
@@ -782,9 +782,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 		sprite = s_mentatSprites[0][movingEyesSprite];
 
-		Low_Hide_Mouse_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+		Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
 		Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-		Low_Show_Mouse_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -1162,9 +1162,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				break;
 
 			case 2:
-				Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
+				Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 				GUI_Screen_Copy(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-				Low_Show_Mouse_InRegion();
+				Conditional_Show_Mouse();
 
 				step = 3;
 				key = 1;
@@ -1174,9 +1174,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				if (mentatSpeakingMode == 2 && textTick < g_timerGUI) key = 1;
 
 				if ((key != 0 && textDone) || result != 0) {
-					Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 					GUI_Screen_Copy(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					Low_Show_Mouse_InRegion();
+					Conditional_Show_Mouse();
 
 					step = 4;
 					mentatSpeakingMode = 0;
@@ -1202,9 +1202,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 						GFX_Screen_SetActive(SCREEN_0);
 					}
 
-					Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 					GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					Low_Show_Mouse_InRegion();
+					Conditional_Show_Mouse();
 					break;
 				}
 

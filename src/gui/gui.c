@@ -3599,7 +3599,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	int x, y;
 
 	if (screenDst == SCREEN_0) {
-		Low_Hide_Mouse_InRegion(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
+		Conditional_Hide_Mouse(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
 	}
 
 	height /= 2;
@@ -3648,7 +3648,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	}
 
 	if (screenDst == SCREEN_0) {
-		Low_Show_Mouse_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -3713,7 +3713,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	assert(height <= SCREEN_HEIGHT);
 
 	if (screenDst == 0) {
-		Low_Hide_Mouse_InRegion(x, y, x + width, y + height);
+		Conditional_Hide_Mouse(x, y, x + width, y + height);
 	}
 
 	for (i = 0; i < width; i++)  columns[i] = i;
@@ -3766,7 +3766,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	}
 
 	if (screenDst == 0) {
-		Low_Show_Mouse_InRegion();
+		Conditional_Show_Mouse();
 	}
 
 	GFX_Screen_SetActive(oldScreenID);
@@ -3853,9 +3853,9 @@ void Show_Mouse(void)
 
 /**
  * Show the mouse if needed. Should be used in combination with
- *  #Low_Hide_Mouse_InRegion().
+ *  #Conditional_Hide_Mouse().
  */
-void Low_Show_Mouse_InRegion(void)
+void Conditional_Show_Mouse(void)
 {
 	uint8 counter;
 
@@ -3879,10 +3879,10 @@ void Low_Show_Mouse_InRegion(void)
 
 /**
  * Hide the mouse when it is inside the specified region. Works with
- *  #Low_Show_Mouse_InRegion(), which only calls #Low_Show_Mouse() when
+ *  #Conditional_Show_Mouse(), which only calls #Low_Show_Mouse() when
  *  mouse was really hidden.
  */
-void Low_Hide_Mouse_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom)
+void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom)
 {
 	int minx, miny;
 	int maxx, maxy;
@@ -3936,7 +3936,7 @@ void Low_Hide_Mouse_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
  */
 void Low_Show_Mouse_InWidget(void)
 {
-	Low_Show_Mouse_InRegion();
+	Conditional_Show_Mouse();
 }
 
 /**
@@ -3955,7 +3955,7 @@ void Low_Hide_Mouse_InWidget(uint16 widgetIndex)
 	width  = g_widgetProperties[widgetIndex].width << 3;
 	height = g_widgetProperties[widgetIndex].height;
 
-	Low_Hide_Mouse_InRegion(left, top, left + width - 1, top + height - 1);
+	Conditional_Hide_Mouse(left, top, left + width - 1, top + height - 1);
 }
 
 /**

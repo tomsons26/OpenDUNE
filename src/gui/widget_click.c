@@ -424,13 +424,13 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 	height = w->height;
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		Low_Hide_Mouse_InRegion(offsetX, offsetY, offsetX + width, offsetY + height);
+		Conditional_Hide_Mouse(offsetX, offsetY, offsetX + width, offsetY + height);
 	}
 
 	GUI_DrawFilledRectangle(offsetX, offsetY, offsetX + width, offsetY + height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		Low_Show_Mouse_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 

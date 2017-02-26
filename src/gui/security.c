@@ -32,9 +32,9 @@ static void GUI_Security_DrawText(char *text)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
 
-	Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-	Low_Show_Mouse_InRegion();
+	Conditional_Show_Mouse();
 
 	GUI_Screen_Copy(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
 
@@ -42,9 +42,9 @@ static void GUI_Security_DrawText(char *text)
 
 	Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
-	Low_Hide_Mouse_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	Low_Show_Mouse_InRegion();
+	Conditional_Show_Mouse();
 
 	GFX_Screen_SetActive(oldScreenID);
 }
