@@ -29,11 +29,38 @@
 #include "../unit.h"
 
 typedef struct PathType {
-	uint16 packed;                                          /*!< From where we are pathfinding. */
-	 int16 score;                                           /*!< The total score for this Path. */
-	uint16 PathSize;                                       /*!< The size of this Path. */
-	uint8 *buffer;                                          /*!< A buffer to store the Path. */
+	uint16 StartCell;                                          /*!< From where we are pathfinding. */
+	 int16 Score;                                           /*!< The total Score for this Path. */
+	uint16 Length;                                       /*!< The size of this Path. */
+	uint8 *Moves;                                          /*!< A buffer to store the Path. */
 } PathType;
+
+typedef enum FacingType {
+	FACING_NONE = -1,
+
+	FACING_FIXUP_MARK = -2,
+
+	FACING_EDGE_LEFT = -1,
+
+	FACING_EDGE_RIGHT = 1,
+	FACING_ORDINAL_TEST = 1,
+
+	FACING_FIRST = 0,
+
+	FACING_NORTH = 0,		//North
+	FACING_NORTH_EAST = 1,	//North East
+	FACING_EAST = 2,		//East
+	FACING_SOUTH_EAST = 3,	//South East
+	FACING_SOUTH = 4,		//South
+	FACING_SOUTH_WEST = 5,	//South West
+	FACING_WEST = 6,		//West
+	FACING_NORTH_WEST = 7,	//North West
+
+	FACING_LAST = 7,
+
+	FACING_COUNT = 8
+};
+
 
 static const int16 AdjacentCell[8] = {-64, -63, 1, 65, 64, 63, -1, -65}; /*!< Tile index change when moving in a direction. */
 
@@ -1038,11 +1065,11 @@ A***######   B
 */
 
 /**
- * Get the score to enter this tile from a direction.
+ * Get the Score to enter this tile from a direction.
  *
  * @param packed The packed tile.
  * @param direction The direction we move on this tile.
- * @return 256 if tile is not accessable, or a score for entering otherwise.
+ * @return 256 if tile is not accessable, or a Score for entering otherwise.
  */
 static int16 Passable_Cell(uint16 packed, uint8 orient8)
 {
@@ -1068,29 +1095,39 @@ static int16 Passable_Cell(uint16 packed, uint8 orient8)
  * Smoothen the Path found by the pathfinder.
  * @param data The found Path to smoothen.
  */
-static void Optimize_Moves(PathType *data)
+static void Optimize_Moves(PathType *path)
 {
-	static const int8 _trans[8] = {0, 0, 1, 2, 3, -2, -1, 0};
+	static const _trans[8] = {
+		FACING_NORTH,
+		FACING_NORTH,
+		FACING_NORTH_EAST,
+		FACING_EAST,
+		FACING_SOUTH_EAST,
+		FACING_FIXUP_MARK,
+		FACING_NONE,
+		FACING_NORTH
+	};
+
 
 	uint16 packed;
 	uint8 *bufferFrom;
 	uint8 *bufferTo;
 
-	data->buffer[data->PathSize] = 0xFF;
-	packed = data->packed;
+	path->Moves[path->Length] = FACING_NONE;
+	packed = path->StartCell;
 
-	if (data->PathSize > 1) {
-		bufferTo = data->buffer + 1;
+	if (path->Length > 1) {
+		bufferTo = path->Moves + 1;
 
-		while (*bufferTo != 0xFF) {
+		while (*bufferTo != FACING_NONE) {
 			int8 direction;
 			uint8 dir;
 
 			bufferFrom = bufferTo - 1;
 
-			while (*bufferFrom == 0xFE && bufferFrom != data->buffer) bufferFrom--;
+			while (*bufferFrom == FACING_FIXUP_MARK && bufferFrom != path->Moves) bufferFrom--;
 
-			if (*bufferFrom == 0xFE) {
+			if (*bufferFrom == FACING_FIXUP_MARK) {
 				bufferTo++;
 				continue;
 			}
@@ -1100,8 +1137,8 @@ static void Optimize_Moves(PathType *data)
 
 			/* The directions are opposite of each other, so they can both be removed */
 			if (direction == 3) {
-				*bufferFrom = 0xFE;
-				*bufferTo   = 0xFE;
+				*bufferFrom = FACING_FIXUP_MARK;
+				*bufferTo   = FACING_FIXUP_MARK;
 
 				bufferTo++;
 				continue;
@@ -1133,36 +1170,36 @@ static void Optimize_Moves(PathType *data)
 
 			/* In these cases we can do with 1 direction change less, so remove one */
 			*bufferTo = dir;
-			*bufferFrom = 0xFE;
+			*bufferFrom = FACING_FIXUP_MARK;
 
 			/* Walk back one tile */
-			while (*bufferFrom == 0xFE && data->buffer != bufferFrom) bufferFrom--;
-			if (*bufferFrom != 0xFE) {
+			while (*bufferFrom == FACING_FIXUP_MARK && path->Moves != bufferFrom) bufferFrom--;
+			if (*bufferFrom != FACING_FIXUP_MARK) {
 				packed += AdjacentCell[(*bufferFrom + 4) & 0x7];
 			} else {
-				packed = data->packed;
+				packed = path->StartCell;
 			}
 		}
 	}
 
-	bufferFrom = data->buffer;
-	bufferTo   = data->buffer;
-	packed     = data->packed;
-	data->score     = 0;
-	data->PathSize = 0;
+	bufferFrom = path->Moves;
+	bufferTo   = path->Moves;
+	packed     = path->StartCell;
+	path->Score = 0;
+	path->Length = 0;
 
 	/* Build the new improved Path, without gaps */
-	for (; *bufferTo != 0xFF; bufferTo++) {
-		if (*bufferTo == 0xFE) continue;
+	for (; *bufferTo != FACING_NONE; bufferTo++) {
+		if (*bufferTo == FACING_FIXUP_MARK) continue;
 
 		packed += AdjacentCell[*bufferTo];
-		data->score += Passable_Cell(packed, *bufferTo);
-		data->PathSize++;
+		path->Score += Passable_Cell(packed, *bufferTo);
+		path->Length++;
 		*bufferFrom++ = *bufferTo;
 	}
 
-	data->PathSize++;
-	*bufferFrom = 0xFF;
+	path->Length++;
+	*bufferFrom = FACING_NONE;
 }
 
 /**
@@ -1180,8 +1217,8 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 	uint8 *buffer;
 	uint16 bufferSize;
 
-	packedCur  = data->packed;
-	buffer     = data->buffer;
+	packedCur  = data->StartCell;
+	buffer     = data->Moves;
 	bufferSize = 0;
 
 	while (bufferSize < 100) {
@@ -1212,14 +1249,14 @@ static bool Follow_Edge(uint16 packedDst, PathType *data, int8 searchDirection, 
 		/* If we found the destination, smooth the Path and we are done */
 		if (packedNext == packedDst) {
 			*buffer = 0xFF;
-			data->PathSize = bufferSize;
+			data->Length = bufferSize;
 			Optimize_Moves(data);
-			data->PathSize--;
+			data->Length--;
 			return true;
 		}
 
 		/* If we return to our start tile, we didn't find a Path */
-		if (data->packed == packedNext) return false;
+		if (data->StartCell == packedNext) return false;
 
 		/* Now look at the next tile, starting 3 directions back */
 		directionStart = (direction - searchDirection * 3) & 0x7;
@@ -1244,20 +1281,20 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 	uint16 packedCur;
 	PathType res;
 
-	res.packed    = packedSrc;
-	res.score     = 0;
-	res.PathSize = 0;
-	res.buffer    = buffer;
+	res.StartCell = packedSrc;
+	res.Score     = 0;
+	res.Length = 0;
+	res.Moves = buffer;
 
-	res.buffer[0] = 0xFF;
+	res.Moves[0] = 0xFF;
 
 	bufferSize--;
 
 	packedCur = packedSrc;
-	while (res.PathSize < bufferSize) {
+	while (res.Length < bufferSize) {
 		uint8  direction;
 		uint16 packedNext;
-		int16  score;
+		int16  Score;
 
 		if (packedCur == packedDst) break;
 
@@ -1266,15 +1303,15 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 		packedNext = packedCur + AdjacentCell[direction];
 
 		/* Check for valid movement towards the tile */
-		score = Passable_Cell(packedNext, direction);
-		if (score <= 255) {
-			res.buffer[res.PathSize++] = direction;
-			res.score += score;
+		Score = Passable_Cell(packedNext, direction);
+		if (Score <= 255) {
+			res.Moves[res.Length++] = direction;
+			res.Score += Score;
 		} else {
 			uint8 dir;
 			bool foundCounterclockwise = false;
 			bool foundClockwise = false;
-			int16 PathSize;
+			int16 Length;
 			PathType Paths[2];
 			uint8 PathsBuffer[2][102];
 			PathType *bestPath;
@@ -1288,16 +1325,16 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 				if (Passable_Cell(packedNext, dir) > 255) continue;
 
 				/* Try to find a connection between our last valid tile and the new valid tile */
-				Paths[1].packed    = packedCur;
-				Paths[1].score     = 0;
-				Paths[1].PathSize = 0;
-				Paths[1].buffer    = PathsBuffer[0];
+				Paths[1].StartCell = packedCur;
+				Paths[1].Score     = 0;
+				Paths[1].Length = 0;
+				Paths[1].Moves = PathsBuffer[0];
 				foundCounterclockwise = Follow_Edge(packedNext, &Paths[1], -1, direction);
 
-				Paths[0].packed    = packedCur;
-				Paths[0].score     = 0;
-				Paths[0].PathSize = 0;
-				Paths[0].buffer    = PathsBuffer[1];
+				Paths[0].StartCell = packedCur;
+				Paths[0].Score     = 0;
+				Paths[0].Length = 0;
+				Paths[0].Moves = PathsBuffer[1];
 				foundClockwise = Follow_Edge(packedNext, &Paths[0], 1, direction);
 
 				if (foundCounterclockwise || foundClockwise) break;
@@ -1317,17 +1354,17 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 				} else if (!foundCounterclockwise) {
 					bestPath = &Paths[0];
 				} else {
-					bestPath = &Paths[Paths[1].score < Paths[0].score ? 1 : 0];
+					bestPath = &Paths[Paths[1].Score < Paths[0].Score ? 1 : 0];
 				}
 
 				/* Calculate how much more we can copy into our own buffer */
-				PathSize = min(bufferSize - res.PathSize, bestPath->PathSize);
-				if (PathSize <= 0) break;
+				Length = min(bufferSize - res.Length, bestPath->Length);
+				if (Length <= 0) break;
 
 				/* Copy the rest into our own buffer */
-				memcpy(&res.buffer[res.PathSize], bestPath->buffer, PathSize);
-				res.PathSize += PathSize;
-				res.score     += bestPath->score;
+				memcpy(&res.Moves[res.Length], bestPath->Moves, Length);
+				res.Length += Length;
+				res.Score     += bestPath->Score;
 			} else {
 				/* Means we didn't find a Path. packedNext is now equal to packedDst */
 				break;
@@ -1337,7 +1374,7 @@ static PathType Find_Path(uint16 packedSrc, uint16 packedDst, void *buffer, int1
 		packedCur = packedNext;
 	}
 
-	if (res.PathSize < bufferSize) res.buffer[res.PathSize++] = 0xFF;
+	if (res.Length < bufferSize) res.Moves[res.Length++] = 0xFF;
 
 	Optimize_Moves(&res);
 
@@ -1375,11 +1412,11 @@ uint16 Script_Unit_CalculatePath(ScriptEngine *script)
 
 	if (u->Path[0] == 0xFF) {
 		PathType res;
-		uint8 buffer[42];
+		uint8 Moves[42];
 
-		res = Find_Path(packedSrc, packedDst, buffer, 40);
+		res = Find_Path(packedSrc, packedDst, Moves, 40);
 
-		memcpy(u->Path, res.buffer, min(res.PathSize, 14));
+		memcpy(u->Path, res.Moves, min(res.Length, 14));
 
 		if (u->Path[0] == 0xFF) {
 			u->targetMove = 0;
