@@ -15,7 +15,7 @@
 #include "os/error.h"
 
 uint8 g_paletteActive[256 * 3];
-uint8 *g_palette1 = NULL;
+uint8 *GamePalette = NULL;
 uint8 *g_palette2 = NULL;
 uint8 *g_paletteMapping1 = NULL;
 uint8 *g_paletteMapping2 = NULL;

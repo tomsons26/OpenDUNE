@@ -251,7 +251,7 @@ void GameLoop_Uninit(void)
 
 	free(g_readBuffer); g_readBuffer = NULL;
 
-	free(g_palette1); g_palette1 = NULL;
+	free(GamePalette); GamePalette = NULL;
 	free(g_palette2); g_palette2 = NULL;
 	free(g_paletteMapping1); g_paletteMapping1 = NULL;
 	free(g_paletteMapping2); g_paletteMapping2 = NULL;
@@ -305,9 +305,9 @@ static void GameLoop_LevelEnd(void)
 			GameLoop_LevelEndAnimation();
 			Show_Mouse();
 
-			Load_Data("IBM.PAL", g_palette1, 256 * 3);
+			Load_Data("IBM.PAL", GamePalette, 256 * 3);
 
-			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, true);
+			g_scenarioID = Map_Selection(g_campaignID, true);
 
 			GUI_SetPaletteAnimated(g_palette2, 15);
 
@@ -326,7 +326,7 @@ static void GameLoop_LevelEnd(void)
 
 			Free_Icon_Set();
 
-			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, false);
+			g_scenarioID = Map_Selection(g_campaignID, false);
 		}
 
 		g_playerHouse->flags.doneFullScaleAttack = false;
@@ -357,9 +357,9 @@ static void GameLoop_DrawMenu(const char **strings)
 		uint16 pos = top + g_fontCurrent->height * i;
 
 		if (i == props->fgColourBlink) {
-			Text_Print_Wrapper(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
+			Fancy_Text_Print(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
 		} else {
-			Text_Print_Wrapper(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
+			Fancy_Text_Print(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
 		}
 	}
 
@@ -375,10 +375,10 @@ static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint
 	for (i = 0; i < 3; i++) {
 		Hide_Mouse();
 
-		Text_Print_Wrapper(string, left, top, fgColourSelected, bgColour, 0x22);
+		Fancy_Text_Print(string, left, top, fgColourSelected, bgColour, 0x22);
 		Timer_Sleep(2);
 
-		Text_Print_Wrapper(string, left, top, fgColourNormal, bgColour, 0x22);
+		Fancy_Text_Print(string, left, top, fgColourNormal, bgColour, 0x22);
 		Show_Mouse();
 		Timer_Sleep(2);
 	}
@@ -495,8 +495,8 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 
 	if (current != old) {
 		Hide_Mouse();
-		Text_Print_Wrapper(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
-		Text_Print_Wrapper(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
+		Fancy_Text_Print(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
+		Fancy_Text_Print(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
 		Show_Mouse();
 	}
 
@@ -702,7 +702,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 			Sound_Output_Feedback(0xFFFE);
 
-			Load_Data("IBM.PAL", g_palette1, 256 * 3);
+			Load_Data("IBM.PAL", GamePalette, 256 * 3);
 
 			if (!g_canSkipIntro) {
 				File_Create_Personal("ONETIME.DAT");
@@ -741,7 +741,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			GUI_ClearScreen(SCREEN_0);
 			Show_Mouse();
 
-			Set_Palette(g_palette1);
+			Set_Palette(GamePalette);
 
 			if (GUI_Widget_SaveLoad_Click(false)) {
 				loadGame = true;
@@ -773,7 +773,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			strings[i] = String_Get_ByIndex(mainMenuStrings[index][i]);
 		}
 
-		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		maxWidth = 0;
 
@@ -798,10 +798,10 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-		GUI_SetPaletteAnimated(g_palette1, 30);
+		GUI_SetPaletteAnimated(GamePalette, 30);
 
-		Text_Print_Wrapper("V1.07", 319, 192, 133, 0, 0x231, 0x39);
-		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print("V1.07", 319, 192, 133, 0, 0x231, 0x39);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		Widget_SetCurrentWidget(13);
 
@@ -926,8 +926,8 @@ static void GameLoop_Main(void)
 	g_selectionType = SELECTIONTYPE_MENTAT;
 	g_selectionTypeNew = SELECTIONTYPE_MENTAT;
 
-	if (g_palette1) Warning("g_palette1\n");
-	else g_palette1 = calloc(1, 256 * 3);
+	if (GamePalette) Warning("GamePalette\n");
+	else GamePalette = calloc(1, 256 * 3);
 	if (g_palette2) Warning("g_palette2\n");
 	else g_palette2 = calloc(1, 256 * 3);
 
@@ -938,24 +938,24 @@ static void GameLoop_Main(void)
 
 	free(g_readBuffer); g_readBuffer = NULL;
 
-	Load_Data("IBM.PAL", g_palette1, 256 * 3);
+	Load_Data("IBM.PAL", GamePalette, 256 * 3);
 
 	GUI_ClearScreen(SCREEN_0);
 
-	Video_SetPalette(g_palette1, 0, 256);
+	Video_SetPalette(GamePalette, 0, 256);
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 	Set_Palette(g_palette2);
 
 	g_paletteMapping1 = malloc(256);
 	g_paletteMapping2 = malloc(256);
 
-	GUI_Palette_CreateMapping(g_palette1, g_paletteMapping1, 0xC, 0x55);
+	GUI_Palette_CreateMapping(GamePalette, g_paletteMapping1, 0xC, 0x55);
 	g_paletteMapping1[0xFF] = 0xFF;
 	g_paletteMapping1[0xDF] = 0xDF;
 	g_paletteMapping1[0xEF] = 0xEF;
 
-	GUI_Palette_CreateMapping(g_palette1, g_paletteMapping2, 0xF, 0x55);
+	GUI_Palette_CreateMapping(GamePalette, g_paletteMapping2, 0xF, 0x55);
 	g_paletteMapping2[0xFF] = 0xFF;
 	g_paletteMapping2[0xDF] = 0xDF;
 	g_paletteMapping2[0xEF] = 0xEF;
@@ -1008,7 +1008,7 @@ static void GameLoop_Main(void)
 
 			if (s_enableLog != 0) Mouse_SetMouseMode((uint8)s_enableLog, "DUNE.LOG");
 
-			Set_Palette(g_palette1);
+			Set_Palette(GamePalette);
 
 			Show_Mouse();
 		}

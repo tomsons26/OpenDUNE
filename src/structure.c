@@ -1559,7 +1559,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 			Free_Icon_Set();
 
-			memmove(g_palette1, g_paletteActive, 256 * 3);
+			memmove(GamePalette, g_paletteActive, 256 * 3);
 
 			GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
@@ -1571,7 +1571,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 			Sprites_LoadTiles();
 
-			Set_Palette(g_palette1);
+			Set_Palette(GamePalette);
 
 			GUI_ChangeSelectionType(SELECTIONTYPE_STRUCTURE);
 

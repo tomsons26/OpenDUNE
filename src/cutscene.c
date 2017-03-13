@@ -79,17 +79,17 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 
 	GFX_ClearScreen(SCREEN_ACTIVE);
 
-	Load_Data("INTRO.PAL", g_palette1, 256 * 3);
+	Load_Data("INTRO.PAL", GamePalette, 256 * 3);
 
-	memcpy(Palette, g_palette1, 256 * 3);
+	memcpy(Palette, GamePalette, 256 * 3);
 
 	Font_Select(IntroFontPtr);
 
 	GFX_Screen_SetActive(SCREEN_0);
 
-	memcpy(s_palettePartTarget, &g_palette1[(144 + s_houseAnimation_subtitle->colour * 16) * 3], 6 * 3);
+	memcpy(s_palettePartTarget, &GamePalette[(144 + s_houseAnimation_subtitle->colour * 16) * 3], 6 * 3);
 
-	memset(&g_palette1[215 * 3], 0, 6 * 3);
+	memset(&GamePalette[215 * 3], 0, 6 * 3);
 
 	memcpy(s_palettePartCurrent, s_palettePartTarget, 6 * 3);
 
@@ -104,8 +104,8 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 
 static void GameLoop_FinishAnimation(void)
 {
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x1);
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x2);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x1);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x2);
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
 
@@ -146,11 +146,11 @@ static void GameLoop_DrawText(char *string, uint16 top)
 		s = NULL;
 	}
 
-	Text_Print_Wrapper(string, 160, top, 215, 0, 0x100);
+	Fancy_Text_Print(string, 160, top, 215, 0, 0x100);
 
 	if (s == NULL) return;
 
-	Text_Print_Wrapper(s, 160, top + 18, 215, 0, 0x100);
+	Fancy_Text_Print(s, 160, top + 18, 215, 0, 0x100);
 
 	s[-1] = 0xD;
 }
@@ -196,7 +196,7 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 	if (s_subtitleWait == 0xFFFF) s_subtitleWait = subtitle->waitFadein;
 	if (s_subtitleWait-- != 0) return;
 
-	memcpy(s_palettePartTarget, &g_palette1[(144 + (subtitle->colour * 16)) * 3], 18);
+	memcpy(s_palettePartTarget, &GamePalette[(144 + (subtitle->colour * 16)) * 3], 18);
 
 	s_subtitleActive = true;
 
@@ -235,9 +235,9 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 	if (g_playerHouseID != HOUSE_INVALID || s_houseAnimation_currentSubtitle != 2) return;
 
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x21);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x21);
 
-	Text_Print_Wrapper("Copyright (c) 1992 Westwood Studios, Inc.", 160, 189, 215, 0, 0x112);
+	Fancy_Text_Print("Copyright (c) 1992 Westwood Studios, Inc.", 160, 189, 215, 0, 0x112);
 
 	g_fontCharOffset = 0;
 
@@ -365,9 +365,9 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 			GameLoop_PalettePart_Update(true);
 
-			memcpy(&g_palette1[215 * 3], s_palettePartCurrent, 18);
+			memcpy(&GamePalette[215 * 3], s_palettePartCurrent, 18);
 
-			GUI_SetPaletteAnimated(g_palette1, 45);
+			GUI_SetPaletteAnimated(GamePalette, 45);
 
 			addFrameCount++;
 		} else {
@@ -455,7 +455,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 			GUI_SetPaletteAnimated(Palette, 15);
 
-			memcpy(Palette, g_palette1, 256 * 3);
+			memcpy(Palette, GamePalette, 256 * 3);
 		}
 
 		if ((animation->flags & 0x8) != 0) {
@@ -715,7 +715,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 				break;
 
 			case 3:	/* 3 : fade from black */
-				if (counter < 8) Set_Palette(g_palette1 + 256 * 3 * counter);
+				if (counter < 8) Set_Palette(GamePalette + 256 * 3 * counter);
 
 				if (counter-- == 0) {
 					stage++;
@@ -724,7 +724,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 				break;
 
 			case 5:	/* 5 : fade to black */
-				if (counter > 0) Set_Palette(g_palette1 + 256 * 3 * counter);
+				if (counter > 0) Set_Palette(GamePalette + 256 * 3 * counter);
 
 				if (counter++ >= 8) stage = 0;
 				break;
@@ -781,18 +781,18 @@ static void GameCredits_LoadPalette(void)
 	uint16 i;
 	uint8 *p;
 
-	if (g_palette1) Warning("g_palette1 already allocated\n");
-	else g_palette1 = malloc(256 * 3 * 10);
+	if (GamePalette) Warning("GamePalette already allocated\n");
+	else GamePalette = malloc(256 * 3 * 10);
 	if (g_palette2) Warning("g_palette2 already allocated\n");
 	else g_palette2 = calloc(1, 256 * 3);
 
-	Load_Data("IBM.PAL", g_palette1, 256 * 3);
+	Load_Data("IBM.PAL", GamePalette, 256 * 3);
 
 	/* Create 10 fadein/fadeout palettes */
-	p = g_palette1;
+	p = GamePalette;
 	for (i = 0; i < 10; i++) {
 		uint16 j;
-		uint8 *pr = g_palette1;
+		uint8 *pr = GamePalette;
 
 		for (j = 0; j < 255 * 3; j++) *p++ = *pr++ * (9 - i) / 9;
 
@@ -865,7 +865,7 @@ static void GameLoop_GameCredits(void)
 
 	g_fontCharOffset = -1;
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 
 	for (;; sleepIdle()) {
 		Load_Data(String_GenerateFilename("CREDITS"), credits_buffer, Get_Buff(SCREEN_3));

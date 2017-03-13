@@ -40,7 +40,7 @@ static void GUI_Security_DrawText(char *text)
 
 	GUI_Mentat_SplitText(text, 304);
 
-	Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+	Fancy_Text_Print(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
 	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
@@ -102,7 +102,7 @@ bool GUI_Security_Show(void)
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 	Show_Mouse();
 
-	GUI_SetPaletteAnimated(g_palette1, 15);
+	GUI_SetPaletteAnimated(GamePalette, 15);
 
 	strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_TEXT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
 	GUI_Mentat_Loop(wsaHouseFilename, NULL, g_readBuffer, true, NULL);
@@ -155,7 +155,7 @@ bool GUI_Security_Show(void)
 
 		buffer[0] = 0;
 
-		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		Debug("Answer : %s\n", String_Get_ByIndex(questionIndex + 2));
 		GUI_EditBox(buffer, sizeof(buffer) - 1, 9, NULL, &GUI_Mentat_Tick, false);

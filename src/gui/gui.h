@@ -133,7 +133,7 @@ extern void Color_Cycle(void);
 
 extern void GUI_DisplayText(const char *str, int16 importance, ...);
 extern void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour);
-extern void Text_Print_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...);
+extern void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...);
 extern uint16 GUI_DisplayModalMessage(const char *str, uint16 stringID, ...);
 extern uint16 GUI_DisplayHint(uint16 stringID, uint16 spriteID);
 
@@ -146,7 +146,7 @@ extern void Set_Font_Palette_Range(const uint8 *colors, uint8 first, uint8 last)
 extern void GUI_SetClippingArea(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort, uint16 upgradeCost);
 extern char *GUI_String_Get_ByIndex(int16 stringID);
-extern uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win);
+extern uint16 Map_Selection(uint16 campaignID, bool win);
 extern uint16 GUI_Get_Scrollbar_Position(struct Widget *w);
 extern void GUI_FactoryWindow_B495_0F30(void);
 extern struct FactoryWindowItem *GUI_FactoryWindow_GetItem(int16 offset);

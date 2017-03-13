@@ -302,8 +302,8 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 
 			GUI_DrawFilledRectangle(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
 
-			Text_Print_Wrapper(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
-			Text_Print_Wrapper(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
+			Fancy_Text_Print(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
+			Fancy_Text_Print(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
 
 			g_textDisplayNeedsUpdate = false;
 
@@ -515,7 +515,7 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
  * 0x0100 : align center
  * 0x0200 : align right
  */
-void Text_Print_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...)
+void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, uint16 flags, ...)
 {
 	char textBuffer[240];
 	static uint16 displayedarg12low = -1;
@@ -643,8 +643,8 @@ void Color_Cycle(void)
 		uint16 colour;
 
 		colour = (!g_structureHighHealth && animationToggle) ? 6 : 15;
-		if (memcmp(g_palette1 + 3 * 239, g_palette1 + 3 * colour, 3) != 0) {
-			memcpy(g_palette1 + 3 * 239, g_palette1 + 3 * colour, 3);
+		if (memcmp(GamePalette + 3 * 239, GamePalette + 3 * colour, 3) != 0) {
+			memcpy(GamePalette + 3 * 239, GamePalette + 3 * colour, 3);
 			shouldSetPalette = true;
 		}
 
@@ -656,11 +656,11 @@ void Color_Cycle(void)
 		/* selection color */
 		static uint16 selectionStateColour = 15;
 
-		GUI_Palette_ShiftColour(g_palette1, 255, selectionStateColour);
-		GUI_Palette_ShiftColour(g_palette1, 255, selectionStateColour);
-		GUI_Palette_ShiftColour(g_palette1, 255, selectionStateColour);
+		GUI_Palette_ShiftColour(GamePalette, 255, selectionStateColour);
+		GUI_Palette_ShiftColour(GamePalette, 255, selectionStateColour);
+		GUI_Palette_ShiftColour(GamePalette, 255, selectionStateColour);
 
-		if (!GUI_Palette_ShiftColour(g_palette1, 255, selectionStateColour)) {
+		if (!GUI_Palette_ShiftColour(GamePalette, 255, selectionStateColour)) {
 			if (selectionStateColour == 13) {
 				selectionStateColour = 15;
 
@@ -685,9 +685,9 @@ void Color_Cycle(void)
 		/* windtrap color */
 		static uint16 toggleColour = 12;
 
-		GUI_Palette_ShiftColour(g_palette1, 223, toggleColour);
+		GUI_Palette_ShiftColour(GamePalette, 223, toggleColour);
 
-		if (!GUI_Palette_ShiftColour(g_palette1, 223, toggleColour)) {
+		if (!GUI_Palette_ShiftColour(GamePalette, 223, toggleColour)) {
 			toggleColour = (toggleColour == 12) ? 10 : 12;
 		}
 
@@ -696,7 +696,7 @@ void Color_Cycle(void)
 		timerToggle = g_timerGUI + 5;
 	}
 
-	if (shouldSetPalette) Set_Palette(g_palette1);
+	if (shouldSetPalette) Set_Palette(GamePalette);
 
 	Sound_StartSpeech();
 }
@@ -783,7 +783,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 	oldWidgetId = Widget_SetCurrentWidget(1);
 
@@ -810,7 +810,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	Text_Print(textBuffer, g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal);
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 
 	Show_Mouse();
 
@@ -1393,12 +1393,12 @@ static void Text_PrintOnFilledRectangle(const char *string, uint16 top)
 {
 	uint16 halfWidth;
 
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x121);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x121);
 
 	halfWidth = (Font_GetStringWidth(string) / 2) + 4;
 
 	GUI_DrawFilledRectangle(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
-	Text_Print_Wrapper(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
+	Fancy_Text_Print(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
 }
 
 static uint16 GUI_HallOfFame_GetRank(uint16 score)
@@ -1414,7 +1414,7 @@ static uint16 GUI_HallOfFame_GetRank(uint16 score)
 
 static void GUI_HallOfFame_DrawRank(uint16 score, bool fadeIn)
 {
-	Text_Print_Wrapper(String_Get_ByIndex(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
+	Fancy_Text_Print(String_Get_ByIndex(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
 
 	if (!fadeIn) return;
 
@@ -1465,13 +1465,13 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		}
 
 		/* "Score: %d" */
-		Text_Print_Wrapper(String_Get_ByIndex(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
-		Text_Print_Wrapper(buffer, 248, 15, 15, 0, 0x222);
+		Fancy_Text_Print(String_Get_ByIndex(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
+		Fancy_Text_Print(buffer, 248, 15, 15, 0, 0x222);
 		/* "You have attained the rank of" */
-		Text_Print_Wrapper(String_Get_ByIndex(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
+		Fancy_Text_Print(String_Get_ByIndex(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
 	} else {
 		/* "Hall of Fame" */
-		Text_Print_Wrapper(String_Get_ByIndex(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
+		Fancy_Text_Print(String_Get_ByIndex(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
 	}
 
 	switch (g_playerHouseID) {
@@ -1491,8 +1491,8 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 			break;
 	}
 
-	s_palette1_houseColour = g_palette1 + 255 * 3;
-	memcpy(s_palette1_houseColour, g_palette1 + colour * 3, 3);
+	s_palette1_houseColour = GamePalette + 255 * 3;
+	memcpy(s_palette1_houseColour, GamePalette + colour * 3, 3);
 	s_palette1_houseColour += offset;
 
 	if (!hallOfFame) GUI_HallOfFame_Tick();
@@ -1550,8 +1550,8 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	statsBarWidth = 261 - textLeft;
 
 	for (i = 0; i < statsBoxCount; i++) {
-		Text_Print_Wrapper(String_Get_ByIndex(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
-		Text_Print_Wrapper(String_Get_ByIndex(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(String_Get_ByIndex(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(String_Get_ByIndex(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
 	}
 
 	Music_Play(17 + Tools_RandomLCG_Range(0, 5));
@@ -1604,7 +1604,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 			for (score = 0; score < scores[i][j].value; score += scores[i][j].increment) {
 				GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-				Text_Print_Wrapper("%u", 287, posY - 1, 0x14, 0, 0x121, score);
+				Fancy_Text_Print("%u", 287, posY - 1, 0x14, 0, 0x121, score);
 
 				GUI_HallOfFame_Tick();
 
@@ -1624,7 +1624,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 			}
 
 			GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-			Text_Print_Wrapper("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
+			Fancy_Text_Print("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
 
 			GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
 
@@ -1649,7 +1649,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_HallOfFame_Show(score);
 
-	memset(g_palette1 + 255 * 3, 0, 3);
+	memset(GamePalette + 255 * 3, 0, 3);
 
 	GFX_Screen_SetActive(oldScreenID);
 
@@ -1703,7 +1703,7 @@ uint8 GUI_PickHouse(void)
 
 		Hide_Mouse();
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-		GUI_SetPaletteAnimated(g_palette1, 15);
+		GUI_SetPaletteAnimated(GamePalette, 15);
 		Show_Mouse();
 
 		for (houseID = HOUSE_INVALID; houseID == HOUSE_INVALID; sleepIdle()) {
@@ -1753,7 +1753,7 @@ uint8 GUI_PickHouse(void)
 		strncpy(g_readBuffer, String_Get_ByIndex(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
-		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
+		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, GamePalette);
 
 		Hide_Mouse();
 
@@ -2023,7 +2023,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 		GUI_DrawCredits(g_playerHouseID, (g_playerCredits == 0xFFFF) ? 2 : 1);
-		GUI_SetPaletteAnimated(g_palette1, 15);
+		GUI_SetPaletteAnimated(GamePalette, 15);
 
 		Show_Mouse();
 	}
@@ -2770,7 +2770,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
 
-	memcpy(backup, g_palette1 + 255 * 3, 3);
+	memcpy(backup, GamePalette + 255 * 3, 3);
 
 	g_factoryWindowConstructionYard = isConstructionYard;
 	g_factoryWindowStarport = isStarPort;
@@ -2801,9 +2801,9 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 	GUI_FactoryWindow_B495_0F30();
 
-	memcpy(g_palette1 + 255 * 3, backup, 3);
+	memcpy(GamePalette + 255 * 3, backup, 3);
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 
 	/* Visible credits have to be reset, as it might not be the real value */
 	g_playerCredits = 0xFFFF;
@@ -2863,9 +2863,9 @@ static void GUI_StrategicMap_AnimateArrows(void)
 
 	s_arrowAnimationState = (s_arrowAnimationState + 1) % 4;
 
-	memcpy(g_palette1 + 251 * 3, s_strategicMapArrowColors + s_arrowAnimationState * 3, 4 * 3);
+	memcpy(GamePalette + 251 * 3, s_strategicMapArrowColors + s_arrowAnimationState * 3, 4 * 3);
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 }
 
 static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *data)
@@ -2993,7 +2993,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 
 	GUI_DrawFilledRectangle(64, 172, 255, 185, GFX_GetPixel(64, 186));
 
-	Text_Print_Wrapper(string, 64, 175, 12, 0, 0x12);
+	Fancy_Text_Print(string, 64, 175, 12, 0, 0x12);
 
 	while (g_timerGUI + 90 < l_timerNext) sleepIdle();
 
@@ -3166,7 +3166,7 @@ static void GUI_StrategicMap_PrepareRegions(uint16 campaignID)
 	}
 }
 
-static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
+static void Map_SelectionProgression(uint16 campaignID)
 {
 	char key[10];
 	char category[10];
@@ -3208,7 +3208,7 @@ static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 	GUI_StrategicMap_DrawText("");
 }
 
-uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
+uint16 Map_Selection(uint16 campaignID, bool win)
 {
 	uint16 scenarioID;
 	uint16 previousCampaignID;
@@ -3258,8 +3258,8 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 			break;
 	}
 
-	memcpy(loc316, g_palette1 + 251 * 3, 12);
-	memcpy(s_strategicMapArrowColors, g_palette1 + (144 + (g_playerHouseID * 16)) * 3, 4 * 3);
+	memcpy(loc316, GamePalette + 251 * 3, 12);
+	memcpy(s_strategicMapArrowColors, GamePalette + (144 + (g_playerHouseID * 16)) * 3, 4 * 3);
 	memcpy(s_strategicMapArrowColors + 4 * 3, s_strategicMapArrowColors, 4 * 3);
 
 	GUI_Screen_Copy(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
@@ -3281,7 +3281,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
-	GUI_SetPaletteAnimated(g_palette1, 15);
+	GUI_SetPaletteAnimated(GamePalette, 15);
 	Show_Mouse();
 
 	s_strategicMapFastForward = false;
@@ -3330,7 +3330,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_0, SCREEN_1);
 
-	if (campaignID != previousCampaignID) GUI_StrategicMap_ShowProgression(campaignID);
+	if (campaignID != previousCampaignID) Map_SelectionProgression(campaignID);
 
 	Show_Mouse();
 
@@ -3350,7 +3350,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	Input_History_Clear();
 
-	memcpy(g_palette1 + 251 * 3, loc316, 12);
+	memcpy(GamePalette + 251 * 3, loc316, 12);
 
 	GUI_SetPaletteAnimated(palette, 15);
 
@@ -3358,7 +3358,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	GUI_ClearScreen(SCREEN_0);
 	Show_Mouse();
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 
 	return scenarioID;
 }
@@ -3441,21 +3441,21 @@ void GUI_FactoryWindow_DrawDetails(void)
 		GUI_Palette_RemapScreen(128, 48, 184, 112, SCREEN_1, s_factoryWindowGraymapTbl);
 
 		if (g_factoryWindowStarport) {
-			Text_Print_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
+			Fancy_Text_Print(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
 		} else {
-			Text_Print_Wrapper(String_Get_ByIndex(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
+			Fancy_Text_Print(String_Get_ByIndex(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
 
 			if (g_factoryWindowUpgradeCost != 0) {
-				Text_Print_Wrapper(String_Get_ByIndex(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
+				Fancy_Text_Print(String_Get_ByIndex(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
 			} else {
-				Text_Print_Wrapper(String_Get_ByIndex(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
+				Fancy_Text_Print(String_Get_ByIndex(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
 			}
 		}
 	} else {
 		if (g_factoryWindowStarport) {
 			GUI_Screen_Copy(16, 99, 16, 160, 23, 9, SCREEN_1, SCREEN_1);
 			GUI_Screen_Copy(16, 99, 16, 169, 23, 9, SCREEN_1, SCREEN_1);
-			Text_Print_Wrapper(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
+			Fancy_Text_Print(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
 
 			GUI_FactoryWindow_UpdateDetails();
 		}
@@ -3479,20 +3479,20 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 	GUI_DrawFilledRectangle(128, 21, 310, 35, 116);
 
 	if (caption != NULL && *caption != '\0') {
-		Text_Print_Wrapper(caption, 128, 23, 12, 0, 0x12);
+		Fancy_Text_Print(caption, 128, 23, 12, 0, 0x12);
 	} else {
 		FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
 		ObjectInfo *oi = item->objectInfo;
 		uint16 width;
 
-		Text_Print_Wrapper(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
+		Fancy_Text_Print(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
 
 		width = Font_GetStringWidth(String_Get_ByIndex(STR_COST_999));
-		Text_Print_Wrapper(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
+		Fancy_Text_Print(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
 
 		if (g_factoryWindowStarport) {
 			width += Font_GetStringWidth(String_Get_ByIndex(STR_QTY_99)) + 2;
-			Text_Print_Wrapper(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
+			Fancy_Text_Print(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
 		}
 	}
 
@@ -3532,10 +3532,10 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 	if (selectionChanged) {
 		uint16 y;
 
-		memset(g_palette1 + 255 * 3, 0x3F, 3);
+		memset(GamePalette + 255 * 3, 0x3F, 3);
 
 		/* calling Set_Palette() now is useless as it will be done at the end of the function */
-		/*Set_Palette(g_palette1);*/
+		/*Set_Palette(GamePalette);*/
 
 		paletteChangeTimer = 0;
 		paletteColour = 0;
@@ -3561,24 +3561,24 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 
 	switch (g_playerHouseID) {
 		case HOUSE_HARKONNEN:
-			*(g_palette1 + 255 * 3 + 1) = paletteColour;
-			*(g_palette1 + 255 * 3 + 2) = paletteColour;
+			*(GamePalette + 255 * 3 + 1) = paletteColour;
+			*(GamePalette + 255 * 3 + 2) = paletteColour;
 			break;
 
 		case HOUSE_ATREIDES:
-			*(g_palette1 + 255 * 3 + 0) = paletteColour;
-			*(g_palette1 + 255 * 3 + 1) = paletteColour;
+			*(GamePalette + 255 * 3 + 0) = paletteColour;
+			*(GamePalette + 255 * 3 + 1) = paletteColour;
 			break;
 
 		case HOUSE_ORDOS:
-			*(g_palette1 + 255 * 3 + 0) = paletteColour;
-			*(g_palette1 + 255 * 3 + 2) = paletteColour;
+			*(GamePalette + 255 * 3 + 0) = paletteColour;
+			*(GamePalette + 255 * 3 + 2) = paletteColour;
 			break;
 
 		default: break;
 	}
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 }
 
 /**
@@ -4082,7 +4082,7 @@ uint16 GUI_HallOfFame_Tick(void)
 
 	*s_palette1_houseColour += colouringDirection;
 
-	Set_Palette(g_palette1);
+	Set_Palette(GamePalette);
 
 	return 0;
 }
@@ -4247,7 +4247,7 @@ void GUI_HallOfFame_Show(uint16 score)
 		g_widgetProperties[19].fgColourBlink = 6;
 		g_widgetProperties[19].fgColourNormal = 116;
 
-		Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		while (*name == '\0') {
 			char *nameEnd;
@@ -4295,7 +4295,7 @@ void GUI_HallOfFame_Show(uint16 score)
 
 	if (score == 0xFFFF) return;
 
-	memset(g_palette1 + 255 * 3, 0, 3);
+	memset(GamePalette + 255 * 3, 0, 3);
 }
 
 uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
@@ -4311,7 +4311,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 	GUI_DrawFilledRectangle(8, 80, 311, 178, 116);
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 	battleString = String_Get_ByIndex(STR_BATTLE);
 	scoreString = String_Get_ByIndex(STR_SCORE);
@@ -4320,9 +4320,9 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	battleX = scoreX - Font_GetStringWidth(scoreString) / 2 - 8 - Font_GetStringWidth(battleString) / 2;
 	offsetY = 80;
 
-	Text_Print_Wrapper(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
-	Text_Print_Wrapper(battleString, battleX, offsetY, 8, 0, 0x122);
-	Text_Print_Wrapper(scoreString, scoreX, offsetY, 8, 0, 0x122);
+	Fancy_Text_Print(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
+	Fancy_Text_Print(battleString, battleX, offsetY, 8, 0, 0x122);
+	Fancy_Text_Print(scoreString, scoreX, offsetY, 8, 0, 0x122);
 
 	offsetY = 90;
 	for (i = 0; i < 8; i++, offsetY += 11) {
@@ -4343,12 +4343,12 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		if (*data[i].name == '\0') {
 			width = battleX - 36 - Font_GetStringWidth(buffer);
 		} else {
-			Text_Print_Wrapper(buffer, 32, offsetY, 15, 0, 0x22);
+			Fancy_Text_Print(buffer, 32, offsetY, 15, 0, 0x22);
 		}
 
-		Text_Print_Wrapper("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
-		Text_Print_Wrapper("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
-		Text_Print_Wrapper("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
+		Fancy_Text_Print("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
+		Fancy_Text_Print("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
+		Fancy_Text_Print("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
 	}
 
 	if (show) {

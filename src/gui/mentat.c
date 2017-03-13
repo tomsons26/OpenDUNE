@@ -261,8 +261,8 @@ static void GUI_Mentat_Draw(bool force)
 
 	Draw_Shape(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-	Text_Print_Wrapper(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x11);
+	Fancy_Text_Print(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x11);
 
 	line = GUI_Widget_Get_ByIndex(w, 3);
 	for (i = 0; i < 11; i++) {
@@ -425,7 +425,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 	Show_Mouse();
 
-	GUI_SetPaletteAnimated(g_palette1, 15);
+	GUI_SetPaletteAnimated(GamePalette, 15);
 
 	ret = GUI_Mentat_Loop(wsaFilename, NULL, stringBuffer, true, NULL);
 
@@ -493,7 +493,7 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
 	if (houseID == HOUSE_MERCENARY) {
-		Load_Data("BENE.PAL", g_palette1, 256 * 3);
+		Load_Data("BENE.PAL", GamePalette, 256 * 3);
 	}
 
 	memset(s_mentatSprites, 0, sizeof(s_mentatSprites));
@@ -1046,7 +1046,7 @@ static bool GUI_Mentat_DrawInfo(char *text, uint16 left, uint16 top, uint16 heig
 	while (skip-- != 0) text += strlen(text) + 1;
 
 	while (lines-- != 0) {
-		if (*text != '\0') Text_Print_Wrapper(text, left, top, g_curWidgetFGColourBlink, 0, flags);
+		if (*text != '\0') Fancy_Text_Print(text, left, top, g_curWidgetFGColourBlink, 0, flags);
 		top += height;
 		text += strlen(text) + 1;
 	}
@@ -1094,11 +1094,11 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		step = 1;
 	}
 
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x31);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x31);
 
 	descLines = GUI_SplitText(pictureDetails, (g_curWidgetWidth << 3) + 10, '\0');
 
-	Text_Print_Wrapper(NULL, 0, 0, 0, 0, 0x32);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x32);
 
 	textLines = GUI_Mentat_SplitText(text, 304);
 
@@ -1188,7 +1188,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 					if (textLines-- != 0) {
 						GFX_Screen_SetActive(SCREEN_2);
-						Text_Print_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+						Fancy_Text_Print(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 						mentatSpeakingMode = 1;
 						textDelay = (uint32)strlen(text) * 4;
 						textTick = g_timerGUI + textDelay;
