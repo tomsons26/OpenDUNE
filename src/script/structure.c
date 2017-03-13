@@ -402,7 +402,7 @@ uint16 Script_Structure_RotateTurret(ScriptEngine *script)
 	if (rotation < 0 || rotation > 7) return 1;
 
 	/* Find what rotation we should have to look at the target */
-	rotationNeeded = Orientation_Orientation256ToOrientation8(Tile_GetDirection(s->o.position, lookAt));
+	rotationNeeded = Direction_To_Facing(Tile_GetDirection(s->o.position, lookAt));
 
 	/* Do we need to rotate */
 	if (rotationNeeded == rotation) return 0;
@@ -450,7 +450,7 @@ uint16 Script_Structure_GetDirection(ScriptEngine *script)
 
 	tile = Tools_Index_GetTile(encoded);
 
-	return Orientation_Orientation256ToOrientation8(Tile_GetDirection(s->o.position, tile)) << 5;
+	return Direction_To_Facing(Tile_GetDirection(s->o.position, tile)) << 5;
 }
 
 /**
@@ -621,7 +621,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 
 		Unit_SetAction(u, ACTION_MOVE);
 
-		tile = Tile_MoveByRandom(u->o.position, 32, true);
+		tile = Coord_Scatter(u->o.position, 32, true);
 
 		u->targetMove = Tools_Index_Encode(Tile_PackTile(tile), IT_TILE);
 	}

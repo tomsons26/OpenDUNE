@@ -21,15 +21,15 @@ extern uint16 Tile_GetDistancePacked(uint16 packed_from, uint16 packed_to);
 extern uint16 Tile_GetDistanceRoundedUp(CellStruct from, CellStruct to);
 extern CellStruct Tile_AddTileDiff(CellStruct from, CellStruct diff);
 extern CellStruct Tile_Center(CellStruct tile);
-extern void Tile_RemoveFogInRadius(CellStruct tile, uint16 radius);
+extern void Sight_From(CellStruct tile, uint16 radius);
 extern uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to);
 extern uint8 Tile_GetDirectionPacked(uint16 packed_from, uint16 packed_to);
-extern CellStruct Move_Point(CellStruct tile, int16 orientation, uint16 distance);
-extern CellStruct Tile_MoveByRandom(CellStruct tile, uint16 distance, bool center);
+extern CellStruct Coord_Move(CellStruct tile, int16 orientation, uint16 distance);
+extern CellStruct Coord_Scatter(CellStruct tile, uint16 distance, bool center);
 extern int8 Tile_GetDirection(CellStruct from, CellStruct to);
 extern CellStruct Tile_MoveByOrientation(CellStruct position, uint8 orientation);
 
-extern uint8 Orientation_Orientation256ToOrientation8(uint8 orientation);
+extern uint8 Direction_To_Facing(uint8 orientation);
 extern uint8 Orientation_Orientation256ToOrientation16(uint8 orientation);
 
 #endif /* TILE_H */

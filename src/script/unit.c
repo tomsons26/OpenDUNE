@@ -82,7 +82,7 @@ uint16 Script_Unit_RandomSoldier(ScriptEngine *script)
 
 	if (Tools_Random_256() >= g_table_unitInfo[u->o.type].o.spawnChance) return 0;
 
-	position = Tile_MoveByRandom(u->o.position, 20, true);
+	position = Coord_Scatter(u->o.position, 20, true);
 
 	nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, u->o.houseID, position, Tools_Random_256());
 
@@ -587,7 +587,7 @@ uint16 Script_Unit_ExplosionMultiple(ScriptEngine *script)
 	Map_MakeExplosion(EXPLOSION_DEATH_HAND, u->o.position, Tools_RandomLCG_Range(25, 50), 0);
 
 	for (i = 0; i < 7; i++) {
-		Map_MakeExplosion(EXPLOSION_DEATH_HAND, Tile_MoveByRandom(u->o.position, STACK_PEEK(1), false), Tools_RandomLCG_Range(75, 150), 0);
+		Map_MakeExplosion(EXPLOSION_DEATH_HAND, Coord_Scatter(u->o.position, STACK_PEEK(1), false), Tools_RandomLCG_Range(75, 150), 0);
 	}
 
 	return 0;
@@ -1828,7 +1828,7 @@ uint16 Script_Unit_GetRandomTile(ScriptEngine *script)
 
 	if (Tools_Index_GetType(STACK_PEEK(1)) != IT_TILE) return 0;
 
-	tile = Tile_MoveByRandom(u->o.position, 80, true);
+	tile = Coord_Scatter(u->o.position, 80, true);
 
 	return Tools_Index_Encode(Tile_PackTile(tile), IT_TILE);
 }

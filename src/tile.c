@@ -249,7 +249,7 @@ uint16 Tile_GetDistanceRoundedUp(CellStruct from, CellStruct to)
  * @param tile The tile to remove fog around.
  * @param radius The radius to remove fog around.
  */
-void Tile_RemoveFogInRadius(CellStruct tile, uint16 radius)
+void Sight_From(CellStruct tile, uint16 radius)
 {
 	uint16 packed;
 	uint16 x, y;
@@ -309,7 +309,7 @@ uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to)
 		if ((Tools_Random_256() & 1) != 0) dir = -dir;
 
 		position = Tile_UnpackTile(packed_to);
-		position = Move_Point(position, direction + dir, min(distance, 20) << 8);
+		position = Coord_Move(position, direction + dir, min(distance, 20) << 8);
 		packed = Tile_PackTile(position);
 
 		if (Map_IsValidPosition(packed)) return packed;
@@ -408,7 +408,9 @@ static const int8 Move_Point_SinTable[256] = {
  * @param distance The distance.
  * @return The tile.
  */
-CellStruct Move_Point(CellStruct tile, int16 orientation, uint16 distance)
+
+//This is Coord_Move with Move_Point inlined in it
+CellStruct Coord_Move(CellStruct tile, int16 orientation, uint16 distance)
 {
 	int diffX, diffY;
 	int roundingOffsetX, roundingOffsetY;
@@ -438,7 +440,7 @@ CellStruct Move_Point(CellStruct tile, int16 orientation, uint16 distance)
  * @param center Wether to center the offset of the tile.
  * @return The tile.
  */
-CellStruct Tile_MoveByRandom(CellStruct tile, uint16 distance, bool center)
+CellStruct Coord_Scatter(CellStruct tile, uint16 distance, bool center)
 {
 	uint16 x;
 	uint16 y;
@@ -547,7 +549,7 @@ CellStruct Tile_MoveByOrientation(CellStruct position, uint8 orientation)
 	x = Tile_GetX(position);
 	y = Tile_GetY(position);
 
-	orientation = Orientation_Orientation256ToOrientation8(orientation);
+	orientation = Direction_To_Facing(orientation);
 
 	x += xOffsets[orientation];
 	y += yOffsets[orientation];
@@ -565,7 +567,7 @@ CellStruct Tile_MoveByOrientation(CellStruct position, uint8 orientation)
  * @param orientation The 256-based orientation.
  * @return A 8-based orientation.
  */
-uint8 Orientation_Orientation256ToOrientation8(uint8 orientation)
+uint8 Direction_To_Facing(uint8 orientation)
 {
 	return ((orientation + 16) / 32) & 0x7;
 }

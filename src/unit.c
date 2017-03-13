@@ -90,7 +90,7 @@ static void Unit_Rotate(Unit *unit, uint16 level)
 
 	unit->orientation[level].current = newCurrent;
 
-	if (Orientation_Orientation256ToOrientation16(newCurrent) == Orientation_Orientation256ToOrientation16(current) && Orientation_Orientation256ToOrientation8(newCurrent) == Orientation_Orientation256ToOrientation8(current)) return;
+	if (Orientation_Orientation256ToOrientation16(newCurrent) == Orientation_Orientation256ToOrientation16(current) && Direction_To_Facing(newCurrent) == Direction_To_Facing(current)) return;
 
 	Unit_UpdateMap(2, unit);
 }
@@ -1227,7 +1227,7 @@ void Unit_RemoveFog(Unit *unit)
 
 	if (fogUncoverRadius == 0) return;
 
-	Tile_RemoveFogInRadius(unit->o.position, fogUncoverRadius);
+	Sight_From(unit->o.position, fogUncoverRadius);
 }
 
 /**
@@ -1298,7 +1298,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 	ui = &g_table_unitInfo[unit->o.type];
 
-	newPosition = Move_Point(unit->o.position, unit->orientation[0].current, distance);
+	newPosition = Coord_Move(unit->o.position, unit->orientation[0].current, distance);
 
 	if ((newPosition.x == unit->o.position.x) && (newPosition.y == unit->o.position.y)) return false;
 
@@ -1340,7 +1340,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 			uint16 type = Map_GetLandType(packed);
 			/* Produce tracks in the sand */
 			if ((type == LST_NORMAL_SAND || type == LST_ENTIRELY_DUNE) && g_map[packed].overlaySpriteID == 0) {
-				uint8 animationID = Orientation_Orientation256ToOrientation8(unit->orientation[0].current);
+				uint8 animationID = Direction_To_Facing(unit->orientation[0].current);
 
 				assert(animationID < 8);
 				Animation_Start(g_table_animation_unitMove[animationID], unit->o.position, 0, unit->o.houseID, 5);
@@ -1987,7 +1987,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 			bullet->currentDestination = tile;
 
 			if (ui->flags.notAccurate) {
-				bullet->currentDestination = Tile_MoveByRandom(tile, (Tools_Random_256() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Tools_Random_256() + 8, false);
+				bullet->currentDestination = Coord_Scatter(tile, (Tools_Random_256() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Tools_Random_256() + 8, false);
 			}
 
 			bullet->fireDelay = ui->fireDistance & 0xFF;
@@ -1999,7 +1999,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 
 			if (type == UNIT_MISSILE_HOUSE || (bullet->o.seenByHouses & (1 << g_playerHouseID)) != 0) return bullet;
 
-			Tile_RemoveFogInRadius(bullet->o.position, 2);
+			Sight_From(bullet->o.position, 2);
 
 			return bullet;
 		}
@@ -2012,7 +2012,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 
 			orientation = Tile_GetDirection(position, tile);
 
-			t = Move_Point(Move_Point(position, 0, 32), orientation, 128);
+			t = Coord_Move(Coord_Move(position, 0, 32), orientation, 128);
 
 			bullet = Unit_Create(UNIT_INDEX_INVALID, type, houseID, t, orientation);
 			if (bullet == NULL) return NULL;
@@ -2028,7 +2028,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 
 			if ((bullet->o.seenByHouses & (1 << g_playerHouseID)) != 0) return bullet;
 
-			Tile_RemoveFogInRadius(bullet->o.position, 2);
+			Sight_From(bullet->o.position, 2);
 
 			return bullet;
 		}
@@ -2501,7 +2501,7 @@ void Unit_UpdateMap(uint16 type, Unit *unit)
 
 	if (type == 1) {
 		if (House_AreAllied(Unit_GetHouseID(unit), g_playerHouseID) && !Map_IsPositionUnveiled(packed) && unit->o.type != UNIT_SANDWORM) {
-			Tile_RemoveFogInRadius(position, 1);
+			Sight_From(position, 1);
 		}
 
 		if (Object_GetByPackedTile(packed) == NULL) {
@@ -2593,7 +2593,7 @@ void Unit_LaunchHouseMissile(uint16 packed)
 	h = House_Get_ByIndex(g_unitHouseMissile->o.houseID);
 
 	tile = Tile_UnpackTile(packed);
-	tile = Tile_MoveByRandom(tile, 160, false);
+	tile = Coord_Scatter(tile, 160, false);
 
 	packed = Tile_PackTile(tile);
 
@@ -2733,7 +2733,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 
 						s = Structure_Find(&find);
 						if (s != NULL) {
-							feedbackID = ((Orientation_Orientation256ToOrientation8(Tile_GetDirection(s->o.position, unit->o.position)) + 1) & 7) / 2 + 2;
+							feedbackID = ((Direction_To_Facing(Tile_GetDirection(s->o.position, unit->o.position)) + 1) & 7) / 2 + 2;
 						} else {
 							feedbackID = 1;
 						}

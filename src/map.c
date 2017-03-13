@@ -870,7 +870,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 		case 1: {
 			CellStruct position = Tile_UnpackTile(packed);
 
-			position = Tile_MoveByRandom(position, 16, true);
+			position = Coord_Scatter(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
 			Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, houseID, position, Tools_Random_256());
@@ -881,7 +881,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			CellStruct position = Tile_UnpackTile(packed);
 			Unit *u;
 
-			position = Tile_MoveByRandom(position, 16, true);
+			position = Coord_Scatter(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
 			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, enemyHouseID, position, Tools_Random_256());
@@ -894,7 +894,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			CellStruct position = Tile_UnpackTile(packed);
 			Unit *u;
 
-			position = Tile_MoveByRandom(position, 16, true);
+			position = Coord_Scatter(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
 			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_INFANTRY, enemyHouseID, position, Tools_Random_256());
@@ -984,7 +984,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 				s = Structure_Find(&find);
 
 				if (s != NULL) {
-					ret = Tile_PackTile(Tile_MoveByRandom(s->o.position, 120, true));
+					ret = Tile_PackTile(Coord_Scatter(s->o.position, 120, true));
 				} else {
 					Unit *u;
 
@@ -995,7 +995,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 					u = Unit_Find(&find);
 
 					if (u != NULL) {
-						ret = Tile_PackTile(Tile_MoveByRandom(u->o.position, 120, true));
+						ret = Tile_PackTile(Coord_Scatter(u->o.position, 120, true));
 					} else {
 						ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX), mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY));
 					}
@@ -1591,7 +1591,7 @@ void Map_CreateLandscape(uint32 seed)
 		j = Tools_Random_256() & 0x1F;
 		while (j-- != 0) {
 			while (true) {
-				packed = Tile_PackTile(Tile_MoveByRandom(tile, Tools_Random_256() & 0x3F, true));
+				packed = Tile_PackTile(Coord_Scatter(tile, Tools_Random_256() & 0x3F, true));
 
 				if (!Tile_IsOutOfMap(packed)) break;
 			}

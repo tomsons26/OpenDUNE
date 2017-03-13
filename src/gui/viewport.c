@@ -487,7 +487,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			x += g_table_tilediff[0][u->wobbleIndex].x;
 			y += g_table_tilediff[0][u->wobbleIndex].y;
 
-			orientation = Orientation_Orientation256ToOrientation8(u->orientation[0].current);
+			orientation = Direction_To_Facing(u->orientation[0].current);
 
 			if (u->spriteOffset >= 0 || ui->destroyedSpriteID == 0) {
 				static const uint16 values_32C4[8][2] = {
@@ -550,7 +550,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				int16 offsetY = 0;
 				uint16 spriteID = ui->turretSpriteID;
 
-				orientation = Orientation_Orientation256ToOrientation8(u->orientation[ui->o.flags.hasTurret ? 1 : 0].current);
+				orientation = Direction_To_Facing(u->orientation[ui->o.flags.hasTurret ? 1 : 0].current);
 
 				switch (ui->turretSpriteID) {
 					case 0x8D: /* sonic tank */
@@ -669,7 +669,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 					break;
 
 				case DISPLAYMODE_UNIT:
-					orientation = Orientation_Orientation256ToOrientation8(orientation);
+					orientation = Direction_To_Facing(orientation);
 
 					index += values_32E4[orientation][0];
 					spriteFlags |= values_32E4[orientation][1];
@@ -692,7 +692,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				case DISPLAYMODE_ORNITHOPTER: {
 					static const uint16 values_33AE[4] = {2, 1, 0, 1};
 
-					orientation = Orientation_Orientation256ToOrientation8(orientation);
+					orientation = Direction_To_Facing(orientation);
 
 					index += (values_32E4[orientation][0] * 3) + values_33AE[u->spriteOffset & 3];
 					spriteFlags |= values_32E4[orientation][1];

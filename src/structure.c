@@ -461,7 +461,7 @@ bool Structure_Place(Structure *s, uint16 position)
 
 			g_mapSpriteID[position] |= 0x8000;
 
-			if (s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 1);
+			if (s->o.houseID == g_playerHouseID) Sight_From(Tile_UnpackTile(position), 1);
 
 			if (Map_IsPositionUnveiled(position)) t->overlaySpriteID = 0;
 
@@ -487,7 +487,7 @@ bool Structure_Place(Structure *s, uint16 position)
 
 				g_mapSpriteID[curPos] |= 0x8000;
 
-				if (s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 1);
+				if (s->o.houseID == g_playerHouseID) Sight_From(Tile_UnpackTile(curPos), 1);
 
 				if (Map_IsPositionUnveiled(curPos)) t->overlaySpriteID = 0;
 
@@ -510,7 +510,7 @@ bool Structure_Place(Structure *s, uint16 position)
 					g_mapSpriteID[curPos] |= 0x8000;
 
 					if (s->o.houseID == g_playerHouseID) {
-						Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 1);
+						Sight_From(Tile_UnpackTile(curPos), 1);
 						t->overlaySpriteID = 0;
 					}
 
@@ -530,7 +530,7 @@ bool Structure_Place(Structure *s, uint16 position)
 	if (validBuildLocation == 0 && s->o.houseID == g_playerHouseID && !g_debugScenario && g_validateStrictIfZero == 0) return false;
 
 	/* ENHANCEMENT -- In Dune2, it only removes the fog around the top-left tile of a structure, leaving for big structures the right in the fog. */
-	if (!g_dune2_enhanced && s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 2);
+	if (!g_dune2_enhanced && s->o.houseID == g_playerHouseID) Sight_From(Tile_UnpackTile(position), 2);
 
 	s->o.seenByHouses |= 1 << s->o.houseID;
 	if (s->o.houseID == g_playerHouseID) s->o.seenByHouses |= 0xFF;
@@ -584,7 +584,7 @@ bool Structure_Place(Structure *s, uint16 position)
 			Unit_Remove(u);
 
 			/* ENHANCEMENT -- In Dune2, it only removes the fog around the top-left tile of a structure, leaving for big structures the right in the fog. */
-			if (g_dune2_enhanced && s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 2);
+			if (g_dune2_enhanced && s->o.houseID == g_playerHouseID) Sight_From(Tile_UnpackTile(curPos), 2);
 
 		}
 	}
@@ -896,7 +896,7 @@ void Structure_ActivateSpecial(Structure *s)
 				Tools_Random_256();
 
 				position = Tile_UnpackTile(location);
-				position = Tile_MoveByRandom(position, 32, true);
+				position = Coord_Scatter(position, 32, true);
 
 				orientation = Tools_RandomLCG_Range(0, 3);
 				unitType = (orientation == 1) ? UNIT_TROOPER : UNIT_TROOPERS;
@@ -967,7 +967,7 @@ void Structure_RemoveFog(Structure *s)
 		position.y += 256 * (g_table_structure_layoutSize[si->layout].height - 1) / 2;
 	}
 
-	Tile_RemoveFogInRadius(position, si->o.fogUncoverRadius);
+	Sight_From(position, si->o.fogUncoverRadius);
 }
 
 /**

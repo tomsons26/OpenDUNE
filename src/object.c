@@ -125,7 +125,7 @@ uint16 Object_GetDistanceToEncoded(Object *o, uint16 encoded)
 		packed = Tile_PackTile(position);
 
 		/* ENHANCEMENT -- Originally this was o->type, where 'o' refers to a unit. */
-		packed += g_table_structure_layoutEdgeTiles[g_table_structureInfo[s->o.type].layout][(Orientation_Orientation256ToOrientation8(Tile_GetDirection(o->position, position)) + 4) & 7];
+		packed += g_table_structure_layoutEdgeTiles[g_table_structureInfo[s->o.type].layout][(Direction_To_Facing(Tile_GetDirection(o->position, position)) + 4) & 7];
 
 		position = Tile_UnpackTile(packed);
 	} else {
