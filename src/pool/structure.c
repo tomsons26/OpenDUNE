@@ -111,7 +111,7 @@ void Structure_Recount(void)
 
 	for (index = 0; index < STRUCTURE_INDEX_MAX_SOFT; index++) {
 		Structure *s = Structure_Get_ByIndex(index);
-		if (s->o.flags.s.used) g_structureFindArray[g_structureFindCount++] = s;
+		if (s->o.flags.s.IsActive) g_structureFindArray[g_structureFindCount++] = s;
 	}
 }
 
@@ -147,12 +147,12 @@ Structure *Structure_Allocate(uint16 index, uint8 type)
 				/* Find the first unused index */
 				for (index = 0; index < STRUCTURE_INDEX_MAX_SOFT; index++) {
 					s = Structure_Get_ByIndex(index);
-					if (!s->o.flags.s.used) break;
+					if (!s->o.flags.s.IsActive) break;
 				}
 				if (index == STRUCTURE_INDEX_MAX_SOFT) return NULL;
 			} else {
 				s = Structure_Get_ByIndex(index);
-				if (s->o.flags.s.used) return NULL;
+				if (s->o.flags.s.IsActive) return NULL;
 			}
 
 			g_structureFindArray[g_structureFindCount++] = s;
@@ -165,7 +165,7 @@ Structure *Structure_Allocate(uint16 index, uint8 type)
 	s->o.index             = index;
 	s->o.type              = type;
 	s->o.linkedID          = 0xFF;
-	s->o.flags.s.used      = true;
+	s->o.flags.s.IsActive      = true;
 	s->o.flags.s.allocated = true;
 	s->o.script.delay = 0;
 

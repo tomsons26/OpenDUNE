@@ -826,7 +826,7 @@ void Structure_ActivateSpecial(Structure *s)
 	if (s->o.type != STRUCTURE_PALACE) return;
 
 	h = House_Get_ByIndex(s->o.houseID);
-	if (!h->flags.used) return;
+	if (!h->flags.IsActive) return;
 
 	switch (g_table_HouseType[s->o.houseID].specialWeapon) {
 		case HOUSE_WEAPON_MISSILE: {
@@ -1793,7 +1793,7 @@ void Structure_UpdateMap(Structure *s)
 	int i;
 
 	if (s == NULL) return;
-	if (!s->o.flags.s.used) return;
+	if (!s->o.flags.s.IsActive) return;
 	if (s->o.flags.s.isNotOnMap) return;
 
 	si = &g_table_structureInfo[s->o.type];

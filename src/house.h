@@ -62,7 +62,7 @@ typedef enum HouseAnimationType {
  * Flags for House structure
  */
 typedef struct {
-	BIT_U8 used:1;                                      /*!< The House is in use (no longer free in the pool). */
+	BIT_U8 IsActive:1;                                      /*!< The House is in use (no longer free in the pool). */
 	BIT_U8 human:1;                                     /*!< The House is controlled by a human. */
 	BIT_U8 doneFullScaleAttack:1;                       /*!< The House did his one time attack the human with everything we have. */
 	BIT_U8 isAIActive:1;                                /*!< The House has been seen by the human, and everything now becomes active (Team attack, house missiles, rebuilding, ..). */

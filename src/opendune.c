@@ -1323,8 +1323,8 @@ void Game_Prepare(void)
 		u = Unit_Get_ByPackedTile(i);
 		s = Structure_Get_ByPackedTile(i);
 
-		if (u == NULL || !u->o.flags.s.used) t->hasUnit = false;
-		if (s == NULL || !s->o.flags.s.used) t->hasStructure = false;
+		if (u == NULL || !u->o.flags.s.IsActive) t->hasUnit = false;
+		if (s == NULL || !s->o.flags.s.IsActive) t->hasStructure = false;
 		if (t->Revealed) Map_UnveilTile(i, g_playerHouseID);
 	}
 
@@ -1362,7 +1362,7 @@ void Game_Prepare(void)
 		if (s->o.type == STRUCTURE_STARPORT && s->o.linkedID != 0xFF) {
 			Unit *u = Unit_Get_ByIndex(s->o.linkedID);
 
-			if (!u->o.flags.s.used || !u->o.flags.s.isNotOnMap) {
+			if (!u->o.flags.s.IsActive || !u->o.flags.s.isNotOnMap) {
 				s->o.linkedID = 0xFF;
 				s->countDown = 0;
 			} else {

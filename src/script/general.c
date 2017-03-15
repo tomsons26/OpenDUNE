@@ -353,7 +353,7 @@ uint16 Script_General_IsFriendly(ScriptEngine *script)
 
 	o = Tools_Index_GetObject(index);
 
-	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.used) return 0;
+	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.IsActive) return 0;
 
 	res = Script_General_IsEnemy(script);
 

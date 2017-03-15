@@ -10,7 +10,7 @@
  */
 typedef union {
 	struct {
-		BIT_U8 used:1;                                  /*!< The Object is in use (no longer free in the pool). */
+		BIT_U8 IsActive:1;                                  /*!< The Object is in use (no longer free in the pool). */
 		BIT_U8 allocated:1;                             /*!< The Object is allocated (created, and ready to be put on the map). */
 		BIT_U8 isNotOnMap:1;                            /*!< The Object is not on the map (under construction, in refinery, etc). */
 		BIT_U8 isSmoking:1;                             /*!< The Object has a smoke cloud coming out of it. */

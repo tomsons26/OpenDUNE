@@ -1294,7 +1294,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 	bool isSpiceBloom = false;
 	bool isSpecialBloom = false;
 
-	if (unit == NULL || !unit->o.flags.s.used) return false;
+	if (unit == NULL || !unit->o.flags.s.IsActive) return false;
 
 	ui = &g_table_unitInfo[unit->o.type];
 
@@ -2475,7 +2475,7 @@ void Unit_UpdateMap(uint16 type, Unit *unit)
 	Tile *t;
 	uint16 radius;
 
-	if (unit == NULL || unit->o.flags.s.isNotOnMap || !unit->o.flags.s.used) return;
+	if (unit == NULL || unit->o.flags.s.isNotOnMap || !unit->o.flags.s.IsActive) return;
 
 	ui = &g_table_unitInfo[unit->o.type];
 

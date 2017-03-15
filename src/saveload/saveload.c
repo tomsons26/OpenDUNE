@@ -149,7 +149,7 @@ bool SaveLoad_Load(const SaveLoadDesc *sld, FILE *fp, void *object)
 
 				case SLDT_HOUSEFLAGS: {
 					HouseFlags *f = (HouseFlags *)ptr;
-					f->used = (value & 0x01) ? true : false;
+					f->IsActive = (value & 0x01) ? true : false;
 					f->human = (value & 0x02) ? true : false;
 					f->doneFullScaleAttack = (value & 0x04) ? true : false;
 					f->isAIActive = (value & 0x08) ? true : false;
@@ -159,7 +159,7 @@ bool SaveLoad_Load(const SaveLoadDesc *sld, FILE *fp, void *object)
 
 				case SLDT_OBJECTFLAGS: {
 					ObjectFlags *f = (ObjectFlags *)ptr;
-					f->s.used = (value & 0x01) ? true : false;
+					f->s.IsActive = (value & 0x01) ? true : false;
 					f->s.allocated = (value & 0x02) ? true : false;
 					f->s.isNotOnMap = (value & 0x04) ? true : false;
 					f->s.isSmoking = (value & 0x08) ? true : false;
@@ -257,12 +257,12 @@ bool SaveLoad_Save(const SaveLoadDesc *sld, FILE *fp, void *object)
 
 				case SLDT_HOUSEFLAGS: {
 					HouseFlags *f = (HouseFlags *)ptr;
-					value = f->used | (f->human << 1) | (f->doneFullScaleAttack << 2) | (f->isAIActive << 3) | (f->radarActivated << 4);
+					value = f->IsActive | (f->human << 1) | (f->doneFullScaleAttack << 2) | (f->isAIActive << 3) | (f->radarActivated << 4);
 				} break;
 
 				case SLDT_OBJECTFLAGS: {
 					ObjectFlags *f = (ObjectFlags *)ptr;
-					value = f->s.used | (f->s.allocated << 1) | (f->s.isNotOnMap << 2) | (f->s.isSmoking << 3) | (f->s.fireTwiceFlip << 4) | (f->s.animationFlip << 5) | (f->s.bulletIsBig << 6) | (f->s.isWobbling << 7) | (f->s.inTransport << 8) | (f->s.byScenario << 9) | (f->s.degrades << 10) | (f->s.isHighlighted << 11) | (f->s.isDirty << 12) | (f->s.repairing << 13) | (f->s.onHold << 14) | (f->s.isUnit << 16) | (f->s.upgrading << 17);
+					value = f->s.IsActive | (f->s.allocated << 1) | (f->s.isNotOnMap << 2) | (f->s.isSmoking << 3) | (f->s.fireTwiceFlip << 4) | (f->s.animationFlip << 5) | (f->s.bulletIsBig << 6) | (f->s.isWobbling << 7) | (f->s.inTransport << 8) | (f->s.byScenario << 9) | (f->s.degrades << 10) | (f->s.isHighlighted << 11) | (f->s.isDirty << 12) | (f->s.repairing << 13) | (f->s.onHold << 14) | (f->s.isUnit << 16) | (f->s.upgrading << 17);
 				} break;
 
 				case SLDT_TEAMFLAGS: {
