@@ -179,7 +179,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 
 	u->o.hitpoints   = hitpoints * g_table_unitInfo[unitType].o.hitpoints / 256;
 	u->o.position    = position;
-	u->orientation[0].current = orientation;
+	u->orientation[0].Current = orientation;
 	u->actionID     = actionType;
 	u->nextActionID = ACTION_INVALID;
 
@@ -196,8 +196,8 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 
 	Unit_HouseUnitCount_Add(u, u->o.houseID);
 
-	Unit_SetOrientation(u, u->orientation[0].current, true, 0);
-	Unit_SetOrientation(u, u->orientation[0].current, true, 1);
+	Unit_SetOrientation(u, u->orientation[0].Current, true, 0);
+	Unit_SetOrientation(u, u->orientation[0].Current, true, 1);
 	Unit_SetSpeed(u, 0);
 }
 

@@ -11,9 +11,9 @@
 #include "../unit.h"
 
 static const SaveLoadDesc s_saveUnitOrientation[] = {
-	SLD_ENTRY (dir24,  SLDT_INT8, speed),
-	SLD_ENTRY (dir24,  SLDT_INT8, target),
-	SLD_ENTRY (dir24,  SLDT_INT8, current),
+	SLD_ENTRY (dir24,  SLDT_INT8, ROT),
+	SLD_ENTRY (dir24,  SLDT_INT8, Desired),
+	SLD_ENTRY (dir24,  SLDT_INT8, Current),
 	SLD_END
 };
 

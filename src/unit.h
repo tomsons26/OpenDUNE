@@ -129,10 +129,11 @@ typedef enum DisplayMode {
 /**
  * Directional information
  */
+//this would seem is FacingClass
 typedef struct dir24 {
-	int8 speed;                                             /*!< Speed of direction change. */
-	int8 target;                                            /*!< Target direction. */
-	int8 current;                                           /*!< Current direction. */
+	int8 ROT;                                             /*!< Speed of direction change. */
+	int8 Desired;                                            /*!< Target direction. */
+	int8 Current;                                           /*!< Current direction. */
 } dir24;
 
 /**

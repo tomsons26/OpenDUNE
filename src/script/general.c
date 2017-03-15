@@ -207,7 +207,7 @@ uint16 Script_General_GetOrientation(ScriptEngine *script)
 
 	if (u == NULL) return 128;
 
-	return u->orientation[0].current;
+	return u->orientation[0].Current;
 }
 
 /**

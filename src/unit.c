@@ -64,33 +64,33 @@ int16 g_starportAvailable[UNIT_MAX];
  */
 static void Unit_Rotate(Unit *unit, uint16 level)
 {
-	int8 target;
-	int8 current;
+	int8 Desired;
+	int8 Current;
 	int8 newCurrent;
 	int16 diff;
 
 	assert(level == 0 || level == 1);
 
-	if (unit->orientation[level].speed == 0) return;
+	if (unit->orientation[level].ROT == 0) return;
 
-	target = unit->orientation[level].target;
-	current = unit->orientation[level].current;
-	diff = target - current;
+	Desired = unit->orientation[level].Desired;
+	Current = unit->orientation[level].Current;
+	diff = Desired - Current;
 
 	if (diff > 128) diff -= 256;
 	if (diff < -128) diff += 256;
 	diff = abs(diff);
 
-	newCurrent = current + unit->orientation[level].speed;
+	newCurrent = Current + unit->orientation[level].ROT;
 
-	if (abs(unit->orientation[level].speed) >= diff) {
-		unit->orientation[level].speed = 0;
-		newCurrent = target;
+	if (abs(unit->orientation[level].ROT) >= diff) {
+		unit->orientation[level].ROT = 0;
+		newCurrent = Desired;
 	}
 
-	unit->orientation[level].current = newCurrent;
+	unit->orientation[level].Current = newCurrent;
 
-	if (Orientation_Orientation256ToOrientation16(newCurrent) == Orientation_Orientation256ToOrientation16(current) && Direction_To_Facing(newCurrent) == Direction_To_Facing(current)) return;
+	if (Orientation_Orientation256ToOrientation16(newCurrent) == Orientation_Orientation256ToOrientation16(Current) && Direction_To_Facing(newCurrent) == Direction_To_Facing(Current)) return;
 
 	Unit_UpdateMap(2, unit);
 }
@@ -1070,7 +1070,7 @@ bool Unit_StartMovement(Unit *unit)
 
 	ui = &g_table_unitInfo[unit->o.type];
 
-	orientation = (int8)((unit->orientation[0].current + 16) & 0xE0);
+	orientation = (int8)((unit->orientation[0].Current + 16) & 0xE0);
 
 	Unit_SetOrientation(unit, orientation, true, 0);
 	Unit_SetOrientation(unit, orientation, false, 1);
@@ -1298,7 +1298,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 	ui = &g_table_unitInfo[unit->o.type];
 
-	newPosition = Coord_Move(unit->o.position, unit->orientation[0].current, distance);
+	newPosition = Coord_Move(unit->o.position, unit->orientation[0].Current, distance);
 
 	if ((newPosition.x == unit->o.position.x) && (newPosition.y == unit->o.position.y)) return false;
 
@@ -1314,7 +1314,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 		}
 
 		newPosition = unit->o.position;
-		Unit_SetOrientation(unit, unit->orientation[0].current + (Tools_Random_256() & 0xF), false, 0);
+		Unit_SetOrientation(unit, unit->orientation[0].Current + (Tools_Random_256() & 0xF), false, 0);
 	}
 
 	unit->wobbleIndex = 0;
@@ -1340,7 +1340,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 			uint16 type = Map_GetLandType(packed);
 			/* Produce tracks in the sand */
 			if ((type == LST_NORMAL_SAND || type == LST_ENTIRELY_DUNE) && g_map[packed].overlaySpriteID == 0) {
-				uint8 animationID = Direction_To_Facing(unit->orientation[0].current);
+				uint8 animationID = Direction_To_Facing(unit->orientation[0].Current);
 
 				assert(animationID < 8);
 				Animation_Start(g_table_animation_unitMove[animationID], unit->o.position, 0, unit->o.houseID, 5);
@@ -1680,22 +1680,22 @@ void Unit_SetOrientation(Unit *unit, int8 orientation, bool rotateInstantly, uin
 
 	if (unit == NULL) return;
 
-	unit->orientation[level].speed = 0;
-	unit->orientation[level].target = orientation;
+	unit->orientation[level].ROT = 0;
+	unit->orientation[level].Desired = orientation;
 
 	if (rotateInstantly) {
-		unit->orientation[level].current = orientation;
+		unit->orientation[level].Current = orientation;
 		return;
 	}
 
-	if (unit->orientation[level].current == orientation) return;
+	if (unit->orientation[level].Current == orientation) return;
 
-	unit->orientation[level].speed = g_table_unitInfo[unit->o.type].turningSpeed * 4;
+	unit->orientation[level].ROT = g_table_unitInfo[unit->o.type].turningSpeed * 4;
 
-	diff = orientation - unit->orientation[level].current;
+	diff = orientation - unit->orientation[level].Current;
 
 	if ((diff > -128 && diff < 0) || diff > 128) {
-		unit->orientation[level].speed = -unit->orientation[level].speed;
+		unit->orientation[level].ROT = -unit->orientation[level].ROT;
 	}
 }
 

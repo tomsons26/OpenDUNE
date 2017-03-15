@@ -59,7 +59,7 @@ typedef enum FacingType {
 	FACING_LAST = 7,
 
 	FACING_COUNT = 8
-};
+} FacingType;
 
 
 static const int16 AdjacentCell[8] = {-64, -63, 1, 65, 64, 63, -1, -65}; /*!< Tile index change when moving in a direction. */
@@ -223,8 +223,8 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 		Voice_PlayAtTile(24, u->o.position);
 	}
 
-	Unit_SetOrientation(u2, u->orientation[0].current, true, 0);
-	Unit_SetOrientation(u2, u->orientation[0].current, true, 1);
+	Unit_SetOrientation(u2, u->orientation[0].Current, true, 0);
+	Unit_SetOrientation(u2, u->orientation[0].Current, true, 1);
 	Unit_SetSpeed(u2, 0);
 
 	u->o.linkedID = u2->o.linkedID;
@@ -488,7 +488,7 @@ uint16 Script_Unit_MoveToTarget(ScriptEngine *script)
 
 	Unit_SetOrientation(u, orientation, false, 0);
 
-	diff = abs(orientation - u->orientation[0].current);
+	diff = abs(orientation - u->orientation[0].Current);
 	if (diff > 128) diff = 256 - diff;
 
 	Unit_SetSpeed(u, (max(min(distance / 8, 255), 25) * (255 - diff) + 128) / 256);
@@ -625,7 +625,7 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 
 	ui = &g_table_unitInfo[u->o.type];
 
-	if (u->o.type != UNIT_SANDWORM && u->orientation[ui->o.flags.hasTurret ? 1 : 0].speed != 0) return 0;
+	if (u->o.type != UNIT_SANDWORM && u->orientation[ui->o.flags.hasTurret ? 1 : 0].ROT != 0) return 0;
 
 	if (Tools_Index_GetType(target) == IT_TILE && Object_GetByPackedTile(Tools_Index_GetPackedTile(target)) != NULL) Unit_SetTarget(u, target);
 
@@ -641,7 +641,7 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 
 		orientation = Tile_GetDirection(u->o.position, Tools_Index_GetTile(target));
 
-		diff = abs(u->orientation[ui->o.flags.hasTurret ? 1 : 0].current - orientation);
+		diff = abs(u->orientation[ui->o.flags.hasTurret ? 1 : 0].Current - orientation);
 		if (ui->movementType == MOVEMENT_WINGER) diff /= 8;
 
 		if (diff >= 8) return 0;
@@ -739,7 +739,7 @@ uint16 Script_Unit_SetOrientation(ScriptEngine *script)
 
 	Unit_SetOrientation(u, (int8)STACK_PEEK(1), false, 0);
 
-	return u->orientation[0].current;
+	return u->orientation[0].Current;
 }
 
 /**
@@ -769,8 +769,8 @@ uint16 Script_Unit_Rotate(ScriptEngine *script)
 	index = ui->o.flags.hasTurret ? 1 : 0;
 
 	/* Check if we are already rotating */
-	if (u->orientation[index].speed != 0) return 1;
-	current = u->orientation[index].current;
+	if (u->orientation[index].ROT != 0) return 1;
+	current = u->orientation[index].Current;
 
 	if (!Tools_Index_IsValid(u->targetAttack)) return 0;
 
@@ -809,7 +809,7 @@ uint16 Script_Unit_GetOrientation(ScriptEngine *script)
 		return Tile_GetDirection(u->o.position, tile);
 	}
 
-	return u->orientation[0].current;
+	return u->orientation[0].Current;
 }
 
 /**
@@ -983,7 +983,7 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 		case 0x01: return Tools_Index_IsValid(u->targetMove) ? u->targetMove : 0;
 		case 0x02: return ui->fireDistance << 8;
 		case 0x03: return u->o.index;
-		case 0x04: return u->orientation[0].current;
+		case 0x04: return u->orientation[0].Current;
 		case 0x05: return u->targetAttack;
 		case 0x06:
 			if (u->originEncoded == 0 || u->o.type == UNIT_HARVESTER) Unit_FindClosestRefinery(u);
@@ -991,14 +991,14 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 		case 0x07: return u->o.type;
 		case 0x08: return Tools_Index_Encode(u->o.index, IT_UNIT);
 		case 0x09: return u->movingSpeed;
-		case 0x0A: return abs(u->orientation[0].target - u->orientation[0].current);
+		case 0x0A: return abs(u->orientation[0].Desired - u->orientation[0].Current);
 		case 0x0B: return (u->currentDestination.x == 0 && u->currentDestination.y == 0) ? 0 : 1;
 		case 0x0C: return u->fireDelay == 0 ? 1 : 0;
 		case 0x0D: return ui->flags.explodeOnDeath;
 		case 0x0E: return Unit_GetHouseID(u);
 		case 0x0F: return u->o.flags.s.byScenario ? 1 : 0;
-		case 0x10: return u->orientation[ui->o.flags.hasTurret ? 1 : 0].current;
-		case 0x11: return abs(u->orientation[ui->o.flags.hasTurret ? 1 : 0].target - u->orientation[ui->o.flags.hasTurret ? 1 : 0].current);
+		case 0x10: return u->orientation[ui->o.flags.hasTurret ? 1 : 0].Current;
+		case 0x11: return abs(u->orientation[ui->o.flags.hasTurret ? 1 : 0].Desired - u->orientation[ui->o.flags.hasTurret ? 1 : 0].Current);
 		case 0x12: return (ui->movementType & 0x40) == 0 ? 0 : 1;
 		case 0x13: return (u->o.seenByHouses & (1 << g_playerHouseID)) == 0 ? 0 : 1;
 		default:   return 0;
@@ -1433,7 +1433,7 @@ uint16 Script_Unit_CalculatePath(ScriptEngine *script)
 
 	if (u->Path[0] == 0xFF) return 1;
 
-	if (u->orientation[0].current != (int8)(u->Path[0] * 32)) {
+	if (u->orientation[0].Current != (int8)(u->Path[0] * 32)) {
 		Unit_SetOrientation(u, (int8)(u->Path[0] * 32), false, 0);
 		return 1;
 	}
