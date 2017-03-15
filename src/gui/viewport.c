@@ -418,7 +418,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 		if (!u->o.flags.s.isDirty && !forceRedraw) continue;
 		u->o.flags.s.isDirty = false;
 
-		if (!g_map[Tile_PackTile(u->o.position)].isUnveiled && !g_debugScenario) continue;
+		if (!g_map[Tile_PackTile(u->o.position)].Revealed && !g_debugScenario) continue;
 
 		sprite = GUI_Widget_Viewport_Draw_GetSprite(g_table_unitInfo[u->o.type].groundSpriteID, Unit_GetHouseID(u));
 
@@ -478,7 +478,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			if ((!u->o.flags.s.isDirty || u->o.flags.s.isNotOnMap) && !forceRedraw && !BitArray_Test(g_dirtyViewport, packed)) continue;
 			u->o.flags.s.isDirty = false;
 
-			if (!g_map[packed].isUnveiled && !g_debugScenario) continue;
+			if (!g_map[packed].Revealed && !g_debugScenario) continue;
 
 			ui = &g_table_unitInfo[u->o.type];
 
@@ -618,7 +618,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 		e->isDirty = false;
 
-		if (!g_map[curPos].isUnveiled && !g_debugScenario) continue;
+		if (!g_map[curPos].Revealed && !g_debugScenario) continue;
 		if (!Map_IsPositionInViewport(e->position, &x, &y)) continue;
 
 		Draw_Shape(SCREEN_ACTIVE, GUI_Widget_Viewport_Draw_GetSprite(e->spriteID, e->houseID), x, y, 2, 0xC000, s_paletteHouse);
@@ -653,7 +653,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			if ((!u->o.flags.s.isDirty || u->o.flags.s.isNotOnMap) && !forceRedraw && !BitArray_Test(g_dirtyViewport, curPos)) continue;
 			u->o.flags.s.isDirty = false;
 
-			if (!g_map[curPos].isUnveiled && !g_debugScenario) continue;
+			if (!g_map[curPos].Revealed && !g_debugScenario) continue;
 
 			ui = &g_table_unitInfo[u->o.type];
 
@@ -854,7 +854,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 
 	t = &g_map[packed];
 
-	if ((t->isUnveiled && g_playerHouse->flags.radarActivated) || g_debugScenario) {
+	if ((t->Revealed && g_playerHouse->flags.radarActivated) || g_debugScenario) {
 		uint16 type = Map_GetLandType(packed);
 		Unit *u;
 

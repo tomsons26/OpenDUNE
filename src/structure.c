@@ -1816,7 +1816,7 @@ void Structure_UpdateMap(Structure *s)
 
 		t->groundSpriteID = iconMap[i] + s->rotationSpriteDiff;
 
-		if (Sprite_IsUnveiled(t->overlaySpriteID)) t->overlaySpriteID = 0;
+		if (Sprite_Revealed(t->overlaySpriteID)) t->overlaySpriteID = 0;
 
 		Map_Update(position, 0, false);
 	}

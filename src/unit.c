@@ -199,7 +199,7 @@ void GameLoop_Unit(void)
 		if (tickMovement) {
 			Unit_MovementTick(u);
 
-			if (u->fireDelay != 0) {
+			if (u->ROF != 0) {
 				if (ui->movementType == MOVEMENT_WINGER && !ui->flags.isNormalUnit) {
 					CellStruct tile;
 
@@ -212,7 +212,7 @@ void GameLoop_Unit(void)
 					Unit_SetOrientation(u, Tile_GetDirection(u->o.position, tile), false, 0);
 				}
 
-				u->fireDelay--;
+				u->ROF--;
 			}
 		}
 
@@ -424,7 +424,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position
 	u->o.script.delay = 0;
 	u->actionID      = ACTION_GUARD;
 	u->nextActionID  = ACTION_INVALID;
-	u->fireDelay     = 0;
+	u->ROF     = 0;
 	u->distanceToDestination = 0x7FFF;
 	u->targetMove    = 0x0000;
 	u->amount        = 0;
@@ -770,7 +770,7 @@ uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target)
 	distance = Tile_GetDistanceRoundedUp(unit->o.position, target->o.position);
 
 	if (!Map_IsValidPosition(Tile_PackTile(unit->o.position))) {
-		if (targetInfo->fireDistance >= distance) return 0;
+		if (targetInfo->Range >= distance) return 0;
 	}
 
 	priority = targetInfo->o.priorityTarget + targetInfo->o.priorityBuild;
@@ -868,7 +868,7 @@ bool Unit_SetPosition(Unit *u, CellStruct position)
 	u->targetMove = 0;
 	u->targetAttack = 0;
 
-	if (g_map[Tile_PackTile(u->o.position)].isUnveiled) {
+	if (g_map[Tile_PackTile(u->o.position)].Revealed) {
 		/* A new unit being delivered fresh from the factory; force a seenByHouses
 		 *  update and add it to the statistics etc. */
 		u->o.seenByHouses &= ~(1 << u->o.houseID);
@@ -937,7 +937,7 @@ Unit *Unit_FindBestTargetUnit(Unit *u, uint16 mode)
 		position = Tools_Index_GetTile(u->originEncoded);
 	}
 
-	distance = g_table_unitInfo[u->o.type].fireDistance << 8;
+	distance = g_table_unitInfo[u->o.type].Range << 8;
 	if (mode == 2) distance <<= 1;
 
 	find.houseID = HOUSE_INVALID;
@@ -1001,7 +1001,7 @@ static uint16 Unit_Sandworm_GetTargetPriority(Unit *unit, Unit *target)
 		default:                 res = 0;      break;
 	}
 
-	if (target->speed != 0 || target->fireDelay != 0) res *= 4;
+	if (target->speed != 0 || target->ROF != 0) res *= 4;
 
 	distance = Tile_GetDistanceRoundedUp(unit->o.position, target->o.position);
 
@@ -1392,7 +1392,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 			unit->o.flags.s.bulletIsBig = true;
 		}
 
-		if (--unit->o.hitpoints == 0 || unit->fireDelay == 0) {
+		if (--unit->o.hitpoints == 0 || unit->ROF == 0) {
 			Unit_Remove(unit);
 		}
 	} else {
@@ -1420,7 +1420,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 		if (ret) {
 			if (ui->flags.isBullet) {
-				if (unit->fireDelay == 0 || unit->o.type == UNIT_MISSILE_TURRET) {
+				if (unit->ROF == 0 || unit->o.type == UNIT_MISSILE_TURRET) {
 					if (unit->o.type == UNIT_MISSILE_HOUSE) {
 						uint8 i;
 
@@ -1986,15 +1986,15 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 			bullet->o.hitpoints = damage;
 			bullet->currentDestination = tile;
 
-			if (ui->flags.notAccurate) {
+			if (ui->flags.Inaccurate) {
 				bullet->currentDestination = Coord_Scatter(tile, (Tools_Random_256() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Tools_Random_256() + 8, false);
 			}
 
-			bullet->fireDelay = ui->fireDistance & 0xFF;
+			bullet->ROF = ui->Range & 0xFF;
 
 			u = Tools_Index_GetUnit(target);
 			if (u != NULL && g_table_unitInfo[u->o.type].movementType == MOVEMENT_WINGER) {
-				bullet->fireDelay <<= 1;
+				bullet->ROF <<= 1;
 			}
 
 			if (type == UNIT_MISSILE_HOUSE || (bullet->o.seenByHouses & (1 << g_playerHouseID)) != 0) return bullet;
@@ -2018,7 +2018,7 @@ Unit *Unit_CreateBullet(CellStruct position, UnitType type, uint8 houseID, uint1
 			if (bullet == NULL) return NULL;
 
 			if (type == UNIT_SONIC_BLAST) {
-				bullet->fireDelay = ui->fireDistance & 0xFF;
+				bullet->ROF = ui->Range & 0xFF;
 			}
 
 			bullet->currentDestination = tile;
@@ -2287,7 +2287,7 @@ static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 	if (unit == NULL) return NULL;
 
 	position = Tools_Index_GetTile(unit->originEncoded);
-	distance = g_table_unitInfo[unit->o.type].fireDistance << 8;
+	distance = g_table_unitInfo[unit->o.type].Range << 8;
 
 	find.houseID = HOUSE_INVALID;
 	find.index   = 0xFFFF;
@@ -2493,7 +2493,7 @@ void Unit_UpdateMap(uint16 type, Unit *unit)
 	packed = Tile_PackTile(position);
 	t = &g_map[packed];
 
-	if (t->isUnveiled || unit->o.houseID == g_playerHouseID) {
+	if (t->Revealed || unit->o.houseID == g_playerHouseID) {
 		Unit_HouseUnitCount_Add(unit, g_playerHouseID);
 	} else {
 		Unit_HouseUnitCount_Remove(unit);

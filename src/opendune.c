@@ -627,12 +627,12 @@ static void ReadProfileIni(const char *filename)
 	for (key = keys; *key != '\0'; key += strlen(key) + 1) {
 		uint16 damage;
 		uint16 movingSpeedFactor;
-		uint16 fireDelay;
-		uint16 fireDistance;
+		uint16 ROF;
+		uint16 Range;
 
 		Ini_GetString("combat", key, buffer, buffer, 120, source);
 		String_Trim(buffer);
-		if (sscanf(buffer, "%hu,%hu,%hu,%hu", &fireDistance, &damage, &fireDelay, &movingSpeedFactor) < 4) continue;
+		if (sscanf(buffer, "%hu,%hu,%hu,%hu", &Range, &damage, &ROF, &movingSpeedFactor) < 4) continue;
 
 		for (locsi = 0; locsi < UNIT_MAX; locsi++) {
 			UnitInfo *ui = &g_table_unitInfo[locsi];
@@ -641,8 +641,8 @@ static void ReadProfileIni(const char *filename)
 
 			ui->damage            = damage;
 			ui->movingSpeedFactor = movingSpeedFactor;
-			ui->fireDelay         = fireDelay;
-			ui->fireDistance      = fireDistance;
+			ui->ROF         = ROF;
+			ui->Range      = Range;
 			break;
 		}
 	}
@@ -652,7 +652,7 @@ static void ReadProfileIni(const char *filename)
 	for (locsi = 0; locsi < UNIT_MAX; locsi++) {
 		const UnitInfo *ui = &g_table_unitInfo[locsi];
 
-		sprintf(buffer, "%*s%4d,%4d,%4d,%4d", 15 - (int)strlen(ui->o.name), "", ui->fireDistance, ui->damage, ui->fireDelay, ui->movingSpeedFactor);
+		sprintf(buffer, "%*s%4d,%4d,%4d,%4d", 15 - (int)strlen(ui->o.name), "", ui->Range, ui->damage, ui->ROF, ui->movingSpeedFactor);
 		Ini_SetString("combat", ui->o.name, buffer, source);
 	}
 }
@@ -1325,7 +1325,7 @@ void Game_Prepare(void)
 
 		if (u == NULL || !u->o.flags.s.used) t->hasUnit = false;
 		if (s == NULL || !s->o.flags.s.used) t->hasStructure = false;
-		if (t->isUnveiled) Map_UnveilTile(i, g_playerHouseID);
+		if (t->Revealed) Map_UnveilTile(i, g_playerHouseID);
 	}
 
 	find.houseID = HOUSE_INVALID;

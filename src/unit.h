@@ -145,7 +145,7 @@ typedef struct Unit {
 	uint16 originEncoded;                                   /*!< Encoded index, indicating the origin. */
 	uint8  actionID;                                        /*!< Current action. */
 	uint8  nextActionID;                                    /*!< Next action. */
-	uint16 fireDelay;                                       /*!< Delay between firing. In Dune2 this is an uint8. */
+	uint16 ROF;                                       /*!< Delay between firing. In Dune2 this is an uint8. */
 	uint16 distanceToDestination;                           /*!< How much distance between where we are now and where currentDestination is. */
 	uint16 targetAttack;                                    /*!< Target to attack (encoded index). */
 	uint16 targetMove;                                      /*!< Target to move to (encoded index). */
@@ -185,11 +185,11 @@ typedef struct UnitInfo {
 		BIT_U8 isTracked:1;                                 /*!< If true, Unit is tracked-based (and leaves marks in sand). */
 		BIT_U8 isGroundUnit:1;                              /*!< If true, Unit is ground-based. */
 		BIT_U8 mustStayInMap:1;                             /*!< Unit cannot leave the map and bounces off the border (air-based units). */
-		BIT_U8 firesTwice:1;                                /*!< If true, Unit fires twice. */
+		BIT_U8 IsTwoShooter:1;                                /*!< If true, Unit fires twice. */
 		BIT_U8 impactOnSand:1;                              /*!< If true, hitting sand (as bullet / missile) makes an impact (crater-like). */
 		BIT_U8 isNotDeviatable:1;                           /*!< If true, Unit can't be deviated. */
 		BIT_U8 hasAnimationSet:1;                           /*!< If true, the Unit has two set of sprites for animation. */
-		BIT_U8 notAccurate:1;                               /*!< If true, Unit is a bullet and is not very accurate at hitting the target (rockets). */
+		BIT_U8 Inaccurate:1;                               /*!< If true, Unit is a bullet and is not very accurate at hitting the target (rockets). */
 		BIT_U8 isNormalUnit:1;                              /*!< If true, Unit is a normal unit (not a bullet / missile, nor a sandworm / frigate). */
 	} flags;                                                /*!< General flags of the UnitInfo. */
 	uint16 dimension;                                       /*!< The dimension of the Unit Sprite. */
@@ -202,8 +202,8 @@ typedef struct UnitInfo {
 	uint16 actionAI;                                        /*!< Default action for AI units. */
 	uint16 displayMode;                                     /*!< How to draw the Unit. */
 	uint16 destroyedSpriteID;                               /*!< SpriteID of burning Unit for north direction. Can be zero if no such animation. */
-	uint16 fireDelay;                                       /*!< Time between firing at Normal speed. */
-	uint16 fireDistance;                                    /*!< Maximal distance this Unit can fire from. */
+	uint16 ROF;                                       /*!< Time between firing at Normal speed. */
+	uint16 Range;                                    /*!< Maximal distance this Unit can fire from. */
 	uint16 damage;                                          /*!< Damage this Unit does to other Units. */
 	uint16 explosionType;                                   /*!< Type of the explosion of Unit. */
 	uint8  bulletType;                                      /*!< Type of the bullets of Unit. */

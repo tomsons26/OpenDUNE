@@ -25,7 +25,7 @@ static const SaveLoadDesc s_saveUnit[] = {
 	SLD_ENTRY (Unit, SLDT_UINT16, originEncoded),
 	SLD_ENTRY (Unit, SLDT_UINT8,  actionID),
 	SLD_ENTRY (Unit, SLDT_UINT8,  nextActionID),
-	SLD_ENTRY2(Unit, SLDT_UINT8,  fireDelay, SLDT_UINT16),
+	SLD_ENTRY2(Unit, SLDT_UINT8,  ROF, SLDT_UINT16),
 	SLD_ENTRY (Unit, SLDT_UINT16, distanceToDestination),
 	SLD_ENTRY (Unit, SLDT_UINT16, targetAttack),
 	SLD_ENTRY (Unit, SLDT_UINT16, targetMove),
@@ -55,7 +55,7 @@ static const SaveLoadDesc s_saveUnitNewIndex[] = {
 };
 
 static const SaveLoadDesc s_saveUnitNew[] = {
-	SLD_ENTRY (Unit, SLDT_UINT16, fireDelay),
+	SLD_ENTRY (Unit, SLDT_UINT16, ROF),
 	SLD_ENTRY (Unit, SLDT_UINT8,  deviatedHouse),
 	SLD_EMPTY (      SLDT_UINT8),
 	SLD_EMPTY2(      SLDT_UINT16, 6),

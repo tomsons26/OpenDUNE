@@ -378,7 +378,7 @@ uint16 Script_Team_Unknown0788(ScriptEngine *script)
 			continue;
 		}
 
-		distance = g_table_unitInfo[u->o.type].fireDistance << 8;
+		distance = g_table_unitInfo[u->o.type].Range << 8;
 		if (u->actionID == ACTION_ATTACK && u->targetAttack == t->target) {
 			if (u->targetMove != 0) continue;
 			if (Tile_GetDistance(u->o.position, tile) >= distance) continue;

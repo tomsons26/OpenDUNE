@@ -517,7 +517,7 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
 	CellStruct position;
 	uint16 target;
 	uint16 damage;
-	uint16 fireDelay;
+	uint16 ROF;
 	uint16 type;
 
 	s = g_scriptCurrentStructure;
@@ -528,11 +528,11 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
 	if (s->o.type == STRUCTURE_ROCKET_TURRET && Tile_GetDistance(Tools_Index_GetTile(target), s->o.position) >= 0x300) {
 		type      = UNIT_MISSILE_TURRET;
 		damage    = 30;
-		fireDelay = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_LAUNCHER].fireDelay, 1, 0xFFFF, true);
+		ROF = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_LAUNCHER].ROF, 1, 0xFFFF, true);
 	} else {
 		type      = UNIT_BULLET;
 		damage    = 20;
-		fireDelay = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_TANK].fireDelay, 1, 0xFFFF, true);
+		ROF = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_TANK].ROF, 1, 0xFFFF, true);
 	}
 
 	position.x = s->o.position.x + 0x80;
@@ -543,7 +543,7 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
 
 	u->originEncoded = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
 
-	return fireDelay;
+	return ROF;
 }
 
 /**

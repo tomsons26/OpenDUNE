@@ -78,7 +78,7 @@ static void Explosion_Func_TileDamage(Explosion *e, uint16 parameter)
 
 	/* You cannot damage veiled tiles */
 	overlaySpriteID = t->overlaySpriteID;
-	if (!Sprite_IsUnveiled(overlaySpriteID)) return;
+	if (!Sprite_Revealed(overlaySpriteID)) return;
 
 	iconMapIndex = craterIconMapIndex[g_table_landscapeInfo[type].craterType];
 	iconMap = &g_iconMap[g_iconMap[iconMapIndex]];

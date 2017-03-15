@@ -629,11 +629,11 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 
 	if (Tools_Index_GetType(target) == IT_TILE && Object_GetByPackedTile(Tools_Index_GetPackedTile(target)) != NULL) Unit_SetTarget(u, target);
 
-	if (u->fireDelay != 0) return 0;
+	if (u->ROF != 0) return 0;
 
 	distance = Object_GetDistanceToEncoded(&u->o, target);
 
-	if ((int16)(ui->fireDistance << 8) < (int16)distance) return 0;
+	if ((int16)(ui->Range << 8) < (int16)distance) return 0;
 
 	if (u->o.type != UNIT_SANDWORM && (Tools_Index_GetType(target) != IT_UNIT || g_table_unitInfo[Tools_Index_GetUnit(target)->o.type].movementType != MOVEMENT_WINGER)) {
 		int16 diff = 0;
@@ -650,7 +650,7 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 	damage = ui->damage;
 	typeID = ui->bulletType;
 
-	fireTwice = ui->flags.firesTwice && u->o.hitpoints > ui->o.hitpoints / 2;
+	fireTwice = ui->flags.IsTwoShooter && u->o.hitpoints > ui->o.hitpoints / 2;
 
 	if ((u->o.type == UNIT_TROOPERS || u->o.type == UNIT_TROOPER) && (int16)distance > 512) typeID = UNIT_MISSILE_TROOPER;
 
@@ -707,16 +707,16 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 		default: break;
 	}
 
-	u->fireDelay = Tools_AdjustToGameSpeed(ui->fireDelay * 2, 1, 0xFFFF, true);
+	u->ROF = Tools_AdjustToGameSpeed(ui->ROF * 2, 1, 0xFFFF, true);
 
 	if (fireTwice) {
 		u->o.flags.s.fireTwiceFlip = !u->o.flags.s.fireTwiceFlip;
-		if (u->o.flags.s.fireTwiceFlip) u->fireDelay = Tools_AdjustToGameSpeed(5, 1, 10, true);
+		if (u->o.flags.s.fireTwiceFlip) u->ROF = Tools_AdjustToGameSpeed(5, 1, 10, true);
 	} else {
 		u->o.flags.s.fireTwiceFlip = false;
 	}
 
-	u->fireDelay += Tools_Random_256() & 1;
+	u->ROF += Tools_Random_256() & 1;
 
 	Unit_UpdateMap(2, u);
 
@@ -981,7 +981,7 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 	switch (STACK_PEEK(1)) {
 		case 0x00: return u->o.hitpoints * 256 / ui->o.hitpoints;
 		case 0x01: return Tools_Index_IsValid(u->targetMove) ? u->targetMove : 0;
-		case 0x02: return ui->fireDistance << 8;
+		case 0x02: return ui->Range << 8;
 		case 0x03: return u->o.index;
 		case 0x04: return u->orientation[0].Current;
 		case 0x05: return u->targetAttack;
@@ -993,7 +993,7 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 		case 0x09: return u->movingSpeed;
 		case 0x0A: return abs(u->orientation[0].Desired - u->orientation[0].Current);
 		case 0x0B: return (u->currentDestination.x == 0 && u->currentDestination.y == 0) ? 0 : 1;
-		case 0x0C: return u->fireDelay == 0 ? 1 : 0;
+		case 0x0C: return u->ROF == 0 ? 1 : 0;
 		case 0x0D: return ui->flags.explodeOnDeath;
 		case 0x0E: return Unit_GetHouseID(u);
 		case 0x0F: return u->o.flags.s.byScenario ? 1 : 0;

@@ -346,8 +346,8 @@ bool Map_IsPositionUnveiled(uint16 position)
 
 	t = &g_map[position];
 
-	if (!t->isUnveiled) return false;
-	if (!Sprite_IsUnveiled(t->overlaySpriteID)) return false;
+	if (!t->Revealed) return false;
+	if (!Sprite_Revealed(t->overlaySpriteID)) return false;
 
 	return true;
 }
@@ -478,7 +478,7 @@ void Map_MakeExplosion(uint16 type, CellStruct position, uint16 hitpoints, uint1
 			attack = Tools_Index_GetUnit(u->targetAttack);
 			if (attack != NULL) {
 				uint16 packed = Tile_PackTile(u->o.position);
-				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->targetAttack), packed) <= ui->fireDistance) continue;
+				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->targetAttack), packed) <= ui->Range) continue;
 			}
 
 			Unit_SetTarget(u, unitOriginEncoded);
@@ -1298,10 +1298,10 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
 	t = &g_map[packed];
 
 	spriteID = 15;
-	if (t->isUnveiled) {
+	if (t->Revealed) {
 		int i;
 
-		if (g_validateStrictIfZero == 0 && Sprite_IsUnveiled(t->overlaySpriteID)) return;
+		if (g_validateStrictIfZero == 0 && Sprite_Revealed(t->overlaySpriteID)) return;
 
 		spriteID = 0;
 
@@ -1313,7 +1313,7 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
 				continue;
 			}
 
-			if (!g_map[neighbour].isUnveiled) spriteID |= 1 << i;
+			if (!g_map[neighbour].Revealed) spriteID |= 1 << i;
 		}
 	}
 
@@ -1348,8 +1348,8 @@ bool Map_UnveilTile(uint16 packed, uint8 houseID)
 
 	t = &g_map[packed];
 
-	if (t->isUnveiled && Sprite_IsUnveiled(t->overlaySpriteID)) return false;
-	t->isUnveiled = true;
+	if (t->Revealed && Sprite_Revealed(t->overlaySpriteID)) return false;
+	t->Revealed = true;
 
 	Map_MarkTileDirty(packed);
 
@@ -1664,7 +1664,7 @@ void Map_CreateLandscape(uint32 seed)
 		t->groundSpriteID  = iconMap[t->groundSpriteID];
 		t->overlaySpriteID = g_veiledSpriteID;
 		t->houseID         = HOUSE_HARKONNEN;
-		t->isUnveiled      = false;
+		t->Revealed      = false;
 		t->hasUnit         = false;
 		t->hasStructure    = false;
 		t->hasAnimation    = false;
