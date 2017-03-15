@@ -716,7 +716,7 @@ void GUI_UpdateProductionStringID(void)
 	if (s == NULL) return;
 
 	if (!g_table_structureInfo[s->o.type].o.flags.factory) {
-		if (s->o.type == STRUCTURE_PALACE) g_productionStringID = STR_LAUNCH + g_table_houseInfo[s->o.houseID].specialWeapon - 1;
+		if (s->o.type == STRUCTURE_PALACE) g_productionStringID = STR_LAUNCH + g_table_HouseType[s->o.houseID].specialWeapon - 1;
 		return;
 	}
 
@@ -1665,7 +1665,7 @@ uint8 GUI_PickHouse(void)
 	Widget *w = NULL;
 	uint8 palette[3 * 256];
 	uint16 i;
-	HouseType houseID;
+	HousesType houseID;
 
 	houseID = HOUSE_MERCENARY;
 
@@ -3106,7 +3106,7 @@ static void GUI_StrategicMap_ReadHouseRegions(uint8 houseID, uint16 campaignID)
 	char groupText[16];
 	char *s = buffer;
 
-	strncpy(key, g_table_houseInfo[houseID].name, 3);
+	strncpy(key, g_table_HouseType[houseID].name, 3);
 	key[3] = '\0';
 
 	snprintf(groupText, sizeof(groupText), "GROUP%d", campaignID);
@@ -3179,7 +3179,7 @@ static void Map_SelectionProgression(uint16 campaignID)
 		uint8 houseID = (g_playerHouseID + i) % 6;
 		const char *s = buf;
 
-		strncpy(key, g_table_houseInfo[houseID].name, 3);
+		strncpy(key, g_table_HouseType[houseID].name, 3);
 		key[3] = '\0';
 
 		if (Ini_GetString(category, key, NULL, buf, 99, g_fileRegionINI) == NULL) continue;
@@ -4333,9 +4333,9 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 		if (g_config.Language == LANGUAGE_FRENCH) {
 			p1 = String_Get_ByIndex(_rankScores[data[i].rank].rankString);
-			p2 = g_table_houseInfo[data[i].houseID].name;
+			p2 = g_table_HouseType[data[i].houseID].name;
 		} else {
-			p1 = g_table_houseInfo[data[i].houseID].name;
+			p1 = g_table_HouseType[data[i].houseID].name;
 			p2 = String_Get_ByIndex(_rankScores[data[i].rank].rankString);
 		}
 		snprintf(buffer, sizeof(buffer), "%s, %s %s", data[i].name, p1, p2);

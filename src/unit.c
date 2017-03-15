@@ -438,7 +438,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, CellStruct position
 	u->o.flags.s.allocated = true;
 
 	if (ui->movementType == MOVEMENT_TRACKED) {
-		if (Tools_Random_256() < g_table_houseInfo[houseID].degradingChance) {
+		if (Tools_Random_256() < g_table_HouseType[houseID].degradingChance) {
 			u->o.flags.s.degrades = true;
 		}
 	}
@@ -1182,7 +1182,7 @@ bool Unit_Deviation_Decrease(Unit *unit, uint16 amount)
 	if (!ui->flags.isNormalUnit) return false;
 
 	if (amount == 0) {
-		amount = g_table_houseInfo[unit->o.houseID].toughness;
+		amount = g_table_HouseType[unit->o.houseID].toughness;
 	}
 
 	if (unit->deviated > amount) {
@@ -1250,7 +1250,7 @@ bool Unit_Deviate(Unit *unit, uint16 probability, uint8 houseID)
 	if (unit->deviated != 0) return false;
 	if (ui->flags.isNotDeviatable) return false;
 
-	if (probability == 0) probability = g_table_houseInfo[unit->o.houseID].toughness;
+	if (probability == 0) probability = g_table_HouseType[unit->o.houseID].toughness;
 
 	if (unit->o.houseID != g_playerHouseID) {
 		probability -= probability / 8;
@@ -1593,7 +1593,7 @@ bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 
 		Unit_UpdateMap(2, unit);
 
-		if (Tools_Random_256() < g_table_houseInfo[unit->o.houseID].toughness) {
+		if (Tools_Random_256() < g_table_HouseType[unit->o.houseID].toughness) {
 			Unit_SetAction(unit, ACTION_RETREAT);
 		}
 	}
@@ -2054,7 +2054,7 @@ void Unit_DisplayStatusText(Unit *unit)
 	if (unit->o.type == UNIT_SANDWORM) {
 		snprintf(buffer, sizeof(buffer), "%s", String_Get_ByIndex(ui->o.stringID_abbrev));
 	} else {
-		const char *houseName = g_table_houseInfo[Unit_GetHouseID(unit)].name;
+		const char *houseName = g_table_HouseType[Unit_GetHouseID(unit)].name;
 		if (g_config.Language == LANGUAGE_FRENCH) {
 			snprintf(buffer, sizeof(buffer), "%s %s", String_Get_ByIndex(ui->o.stringID_abbrev), houseName);
 		} else {

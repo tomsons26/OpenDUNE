@@ -205,7 +205,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 		s_topHelpList = 0;
 		s_selectedHelpSubject = 0;
 
-		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseInfo[g_playerHouseID].name[0]);
+		sprintf(s_mentatFilename, "MENTAT%c", g_table_HouseType[g_playerHouseID].name[0]);
 		strncpy(s_mentatFilename, String_GenerateFilename(s_mentatFilename), sizeof(s_mentatFilename));
 	}
 
@@ -368,7 +368,7 @@ bool GUI_Widget_Mentat_Click(Widget *w)
 
 	Driver_Voice_Play(NULL, 0xFF);
 
-	Music_Play(g_table_houseInfo[g_playerHouseID].musicBriefing);
+	Music_Play(g_table_HouseType[g_playerHouseID].musicBriefing);
 
 	Free_Icon_Set();
 
@@ -457,7 +457,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
  */
 void GUI_Mentat_ShowBriefing(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_houseInfo[g_playerHouseID].musicBriefing);
+	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_HouseType[g_playerHouseID].musicBriefing);
 }
 
 /**
@@ -465,7 +465,7 @@ void GUI_Mentat_ShowBriefing(void)
  */
 void GUI_Mentat_ShowWin(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_houseInfo[g_playerHouseID].musicWin);
+	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_HouseType[g_playerHouseID].musicWin);
 }
 
 /**
@@ -473,7 +473,7 @@ void GUI_Mentat_ShowWin(void)
  */
 void GUI_Mentat_ShowLose(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_houseInfo[g_playerHouseID].musicLose);
+	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_HouseType[g_playerHouseID].musicLose);
 }
 
 /**
@@ -487,7 +487,7 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	Screen oldScreenID;
 	int i;
 
-	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_houseInfo[houseID].name[0]);
+	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_HouseType[houseID].name[0]);
 	Load_Picture(textBuffer, SCREEN_1, Palette);
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);

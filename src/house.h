@@ -6,7 +6,7 @@
 /**
  * Types of %Houses available in the game.
  */
-typedef enum HouseType {
+typedef enum HousesType {
 	HOUSE_HARKONNEN = 0,
 	HOUSE_ATREIDES  = 1,
 	HOUSE_ORDOS     = 2,
@@ -16,7 +16,7 @@ typedef enum HouseType {
 
 	HOUSE_MAX       = 6,
 	HOUSE_INVALID   = 0xFF
-} HouseType;
+} HousesType;
 
 /**
  * Flags used to indicate houses in a bitmask.
@@ -100,7 +100,7 @@ typedef struct House {
 /**
  * Static information per House type.
  */
-typedef struct HouseInfo {
+typedef struct HouseType {
 	const char *name;                                       /*!< Pointer to name of house. */
 	uint16 toughness;                                       /*!< How though the House is. Gives probability of deviation and chance of retreating. */
 	uint16 degradingChance;                                 /*!< On Unit create, this is the chance a Unit will be set to 'degrading'. */
@@ -114,7 +114,7 @@ typedef struct HouseInfo {
 	uint16 musicLose;                                       /*!< Music played when you lose a mission. */
 	uint16 musicBriefing;                                   /*!< Music played during initial briefing of mission. */
 	const char *voiceFilename;                              /*!< Pointer to filename with the voices of the house. */
-} HouseInfo;
+} HouseType;
 
 /**
  * The information for a single animation frame in House Animation. It is part
@@ -152,20 +152,20 @@ typedef struct HouseAnimation_SoundEffect {
 	uint8  wait;                                            /*!< How long to wait before we play this SoundEffect. */
 } HouseAnimation_SoundEffect;
 
-extern const HouseInfo g_table_houseInfo[HOUSE_MAX];
+extern const HouseType g_table_HouseType[HOUSE_MAX];
 extern const HouseAnimation_Animation g_table_houseAnimation_animation[HOUSEANIMATION_MAX][32];
 extern const HouseAnimation_Subtitle g_table_houseAnimation_subtitle[HOUSEANIMATION_MAX][32];
 extern const HouseAnimation_SoundEffect g_table_houseAnimation_soundEffect[HOUSEANIMATION_MAX][90];
 
 extern House *g_playerHouse;
-extern HouseType g_playerHouseID;
+extern HousesType g_playerHouseID;
 extern uint16 g_houseMissileCountdown;
 extern uint16 g_playerCreditsNoSilo;
 extern uint16 g_playerCredits;
 extern uint32 g_tickHousePowerMaintenance;
 
 extern void GameLoop_House(void);
-extern uint8 HouseType_From_Name(const char *name);
+extern uint8 HousesType_From_Name(const char *name);
 extern bool House_AreAllied(uint8 houseID1, uint8 houseID2);
 extern bool House_UpdateRadarState(House *h);
 extern void House_UpdateCreditsStorage(uint8 houseID);

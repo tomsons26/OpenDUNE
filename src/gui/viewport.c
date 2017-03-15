@@ -868,7 +868,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 			if (mapScale > 1) {
 				spriteID = mapScale + t->houseID * 2 + 29;
 			} else {
-				colour = g_table_houseInfo[t->houseID].minimapColor;
+				colour = g_table_HouseType[t->houseID].minimapColor;
 			}
 		}
 
@@ -885,7 +885,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 				if (u->o.type == UNIT_SANDWORM) {
 					colour = 255;
 				} else {
-					colour = g_table_houseInfo[Unit_GetHouseID(u)].minimapColor;
+					colour = g_table_HouseType[Unit_GetHouseID(u)].minimapColor;
 				}
 			}
 		}
@@ -898,7 +898,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 			if (mapScale > 1) {
 				spriteID = mapScale + s->o.houseID * 2 + 29;
 			} else {
-				colour = g_table_houseInfo[s->o.houseID].minimapColor;
+				colour = g_table_HouseType[s->o.houseID].minimapColor;
 			}
 		} else {
 			if (mapScale > 1) {

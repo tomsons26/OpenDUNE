@@ -19,6 +19,66 @@
 #include "../tile.h"
 #include "../timer.h"
 
+/*some internal names for sounds left in D2 Genesis version
+ROM:00020870 6379 7269 6C73 2063 6F75+                    dc.b 'cyrils council ',0
+ROM:00020880 616D 6D6F 6E73 2061 6476+                    dc.b 'ammons advice  ',0
+ROM:00020890 7261 646E 6F72 7320 7363+                    dc.b 'radnors scheme ',0
+ROM:000208A0 7468 6520 6C65 676F 2074+                    dc.b 'the lego tune  ',0
+ROM:000208B0 7475 7262 756C 656E 6365+                    dc.b 'turbulence     ',0
+ROM:000208C0 7370 6963 6520 7472 6970+                    dc.b 'spice trip     ',0
+ROM:000208D0 636F 6D6D 616E 6420 706F+                    dc.b 'command post   ',0
+ROM:000208E0 7472 656E 6368 696E 6720+                    dc.b 'trenching      ',0
+ROM:000208F0 7374 6172 706F 7274 2020+                    dc.b 'starport       ',0
+ROM:00020900 6576 6173 6976 6520 6163+                    dc.b 'evasive action ',0
+ROM:00020910 6368 6F73 656E 2064 6573+                    dc.b 'chosen destiny ',0
+ROM:00020920 636F 6E71 7565 7374 2020+                    dc.b 'conquest       ',0
+ROM:00020930 736C 6974 6865 7269 6E20+                    dc.b 'slitherin      ',0
+ROM:00020940 6861 726B 6F6E 6E65 6E20+                    dc.b 'harkonnen rules',0
+ROM:00020950 6174 7265 6469 6573 2064+                    dc.b 'atredies dirge ',0
+ROM:00020960 6F72 646F 7320 6469 7267+                    dc.b 'ordos dirge    ',0
+ROM:00020970 6861 726B 6F6E 6E65 6E20+                    dc.b 'harkonnen dirge',0
+ROM:00020980 6669 6E61 6C65 2020 2020+                    dc.b 'finale         ',0
+ROM:00020990 7461 7267 6574 2020 2020+                    dc.b 'target         ',0
+ROM:000209A0 6D65 6E75 2073 656C 6563+                    dc.b 'menu select    ',0
+ROM:000209B0 706F 7369 7469 7665 2073+                    dc.b 'positive select',0
+ROM:000209C0 696E 7661 6C69 6420 7365+                    dc.b 'invalid select ',0
+ROM:000209D0 6275 696C 6469 6E67 2020+                    dc.b 'building       ',0
+ROM:000209E0 706C 6163 656D 656E 7420+                    dc.b 'placement      ',0
+ROM:000209F0 636F 756E 7464 6F77 6E20+                    dc.b 'countdown      ',0
+ROM:00020A00 6372 6564 6974 2064 6F77+                    dc.b 'credit down    ',0
+ROM:00020A10 6372 6564 6974 2075 7020+                    dc.b 'credit up      ',0
+ROM:00020A20 7269 666C 6520 2866 7829+                    dc.b 'rifle (fx)     ',0
+ROM:00020A30 7269 666C 6520 2020 2020+                    dc.b 'rifle          ',0
+ROM:00020A40 6D61 6368 696E 6567 756E+                    dc.b 'machinegun (fx)',0
+ROM:00020A50 6D61 6368 696E 6567 756E+                    dc.b 'machinegun     ',0
+ROM:00020A60 6361 6E6E 6F6E 2028 6678+                    dc.b 'cannon (fx)    ',0
+ROM:00020A70 6361 6E6E 6F6E 2020 2020+                    dc.b 'cannon         ',0
+ROM:00020A80 726F 636B 6574 206C 6175+                    dc.b 'rocket launch  ',0
+ROM:00020A90 736F 6E69 6320 626C 6173+                    dc.b 'sonic blast    ',0
+ROM:00020AA0 6D69 7373 696C 6520 2020+                    dc.b 'missile        ',0
+ROM:00020AB0 6865 6176 7920 6472 6F70+                    dc.b 'heavy drop     ',0
+ROM:00020AC0 6761 7320 6869 7420 2020+                    dc.b 'gas hit        ',0
+ROM:00020AD0 776F 726D 2065 6174 7320+                    dc.b 'worm eats (fx) ',0
+ROM:00020AE0 776F 726D 2065 6174 7320+                    dc.b 'worm eats      ',0
+ROM:00020AF0 6578 706C 6F73 696F 6E20+                    dc.b 'explosion 1    ',0
+ROM:00020B00 6578 706C 6F73 696F 6E20+                    dc.b 'explosion 2    ',0
+ROM:00020B10 6578 706C 6F73 696F 6E20+                    dc.b 'explosion 3    ',0
+ROM:00020B20 6D75 6C74 6920 6578 706C+                    dc.b 'multi explosion',0
+ROM:00020B30 6475 6420 6578 706C 6F73+                    dc.b 'dud explosion  ',0
+ROM:00020B40 7363 7265 616D 2020 2020+                    dc.b 'scream         ',0
+ROM:00020B50 7371 7569 7368 2020 2020+                    dc.b 'squish         ',0
+ROM:00020B60 7374 6174 6963 2028 6678+                    dc.b 'static (fx)    ',0
+ROM:00020B70 7374 6174 6963 2020 2020+                    dc.b 'static         ',0
+ROM:00020B80 636F 6E73 742E 2063 6F6D+                    dc.b 'const. complete',0
+ROM:00020B90 756E 6974 2061 7070 726F+                    dc.b 'unit approach  ',0
+ROM:00020BA0 756E 6465 7220 6174 7461+                    dc.b 'under attack   ',0
+ROM:00020BB0 6465 6174 6820 6861 6E64+                    dc.b 'death hand     ',0
+ROM:00020BC0 7965 7320 7369 7220 2020+                    dc.b 'yes sir        ',0
+ROM:00020BD0 6163 6B6E 6F77 6C65 6467+                    dc.b 'acknowledged   ',0
+ROM:00020BE0 6D6F 7669 6E67 206F 7574+                    dc.b 'moving out     ',0
+ROM:00020BF0 7265 706F 7274 696E 6720+                    dc.b 'reporting      ',0
+ROM:00020C00 706C 616E 6574 2073 6869+                    dc.b 'planet shimmer ',0 
+*/
 
 static void *g_voiceData[NUM_VOICES];            /*!< Preloaded Voices sound data */
 static uint32 g_voiceDataSize[NUM_VOICES];       /*!< Preloaded Voices sound data size in byte */
@@ -242,7 +302,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 				switch (g_config.Language) {
 					case LANGUAGE_FRENCH: prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN: prefixChar = 'G'; break;
-					default: prefixChar = g_table_houseInfo[voiceSet].prefixChar;
+					default: prefixChar = g_table_HouseType[voiceSet].prefixChar;
 				}
 				snprintf(filename, sizeof(filename), str, prefixChar);
 
@@ -334,7 +394,7 @@ void Sound_StartSound(uint16 index)
 
 		filename = g_table_voices[index].string;
 		if (filename[0] == '?') {
-			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, g_playerHouseID < HOUSE_MAX ? g_table_houseInfo[g_playerHouseID].prefixChar : ' ');
+			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, g_playerHouseID < HOUSE_MAX ? g_table_HouseType[g_playerHouseID].prefixChar : ' ');
 
 			Driver_Voice_LoadFile(filenameBuffer, g_readBuffer, g_readBufferSize);
 

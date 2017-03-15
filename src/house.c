@@ -31,7 +31,7 @@
 
 
 House *g_playerHouse = NULL;
-HouseType g_playerHouseID = HOUSE_INVALID;
+HousesType g_playerHouseID = HOUSE_INVALID;
 uint16 g_houseMissileCountdown = 0;
 uint16 g_playerCreditsNoSilo = 0;
 uint16 g_playerCredits = 0; /*!< Credits shown to player as 'current'. */
@@ -253,7 +253,7 @@ void GameLoop_House(void)
 					Sound_Output_Feedback(38);
 				}
 
-				h->starportTimeLeft = (u != NULL) ? g_table_houseInfo[h->index].starportDeliveryTime : 1;
+				h->starportTimeLeft = (u != NULL) ? g_table_HouseType[h->index].starportDeliveryTime : 1;
 			}
 		}
 
@@ -278,13 +278,13 @@ void GameLoop_House(void)
  * Convert the name of a house to the type value of that house, or
  *  HOUSE_INVALID if not found.
  */
-uint8 HouseType_From_Name(const char *name)
+uint8 HousesType_From_Name(const char *name)
 {
 	uint8 index;
 	if (name == NULL) return HOUSE_INVALID;
 
 	for (index = 0; index < 6; index++) {
-		if (strcasecmp(g_table_houseInfo[index].name, name) == 0) return index;
+		if (strcasecmp(g_table_HouseType[index].name, name) == 0) return index;
 	}
 
 	return HOUSE_INVALID;

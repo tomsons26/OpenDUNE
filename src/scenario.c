@@ -49,8 +49,8 @@ static void Scenario_Load_General(void)
 
 static void Scenario_Load_House(uint8 houseID)
 {
-	const char *houseName = g_table_houseInfo[houseID].name;
-	char *houseType;
+	const char *houseName = g_table_HouseType[houseID].name;
+	char *HousesType;
 	char buf[128];
 	char *b;
 	House *h;
@@ -58,8 +58,8 @@ static void Scenario_Load_House(uint8 houseID)
 	/* Get the type of the House (CPU / Human) */
 	Ini_GetString(houseName, "Brain", "NONE", buf, 127, s_scenarioBuffer);
 	for (b = buf; *b != '\0'; b++) if (*b >= 'a' && *b <= 'z') *b += 'A' - 'a';
-	houseType = strstr("HUMAN$CPU", buf);
-	if (houseType == NULL) return;
+	HousesType = strstr("HUMAN$CPU", buf);
+	if (HousesType == NULL) return;
 
 	/* Create the house */
 	h = House_Allocate(houseID);
@@ -69,7 +69,7 @@ static void Scenario_Load_House(uint8 houseID)
 	h->unitCountMax = Ini_GetInteger(houseName, "MaxUnit", 39, s_scenarioBuffer);
 
 	/* For 'Brain = Human' we have to set a few additional things */
-	if (*houseType != 'H') return;
+	if (*HousesType != 'H') return;
 
 	h->flags.human = true;
 
@@ -112,7 +112,7 @@ static void Scenario_Load_Houses(void)
 
 static void Scenario_Load_Unit(const char *key, char *settings)
 {
-	uint8 houseType, unitType, actionType;
+	uint8 HousesType, unitType, actionType;
 	int8 orientation;
 	uint16 hitpoints;
 	CellStruct position;
@@ -127,8 +127,8 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = HouseType_From_Name(settings);
-	if (houseType == HOUSE_INVALID) return;
+	HousesType = HousesType_From_Name(settings);
+	if (HousesType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
 	settings = split + 1;
@@ -173,7 +173,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	if (actionType == ACTION_INVALID) return;
 
 
-	u = Unit_Allocate(UNIT_INDEX_INVALID, unitType, houseType);
+	u = Unit_Allocate(UNIT_INDEX_INVALID, unitType, HousesType);
 	if (u == NULL) return;
 	u->o.flags.s.byScenario = true;
 
@@ -203,7 +203,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 
 static void Scenario_Load_Structure(const char *key, char *settings)
 {
-	uint8 index, houseType, structureType;
+	uint8 index, HousesType, structureType;
 	uint16 hitpoints, position;
 	char *split;
 
@@ -217,15 +217,15 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 		if (split == NULL) return;
 		*split = '\0';
 		/* First value is the House type */
-		houseType = HouseType_From_Name(settings);
-		if (houseType == HOUSE_INVALID) return;
+		HousesType = HousesType_From_Name(settings);
+		if (HousesType == HOUSE_INVALID) return;
 
 		/* Second value is the Structure type */
 		settings = split + 1;
 		structureType = BuildingType_From_Name(settings);
 		if (structureType == STRUCTURE_INVALID) return;
 
-		Structure_Create(STRUCTURE_INDEX_INVALID, structureType, houseType, position);
+		Structure_Create(STRUCTURE_INDEX_INVALID, structureType, HousesType, position);
 		return;
 	}
 
@@ -238,8 +238,8 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = HouseType_From_Name(settings);
-	if (houseType == HOUSE_INVALID) return;
+	HousesType = HousesType_From_Name(settings);
+	if (HousesType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
 	settings = split + 1;
@@ -273,7 +273,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	{
 		Structure *s;
 
-		s = Structure_Create(index, structureType, houseType, position);
+		s = Structure_Create(index, structureType, HousesType, position);
 		if (s == NULL) return;
 
 		s->o.hitpoints = hitpoints * g_table_structureInfo[s->o.type].o.hitpoints / 256;
@@ -338,7 +338,7 @@ static void Scenario_Load_Map_Special(uint16 packed, Tile *t)
 
 static void Scenario_Load_Reinforcement(const char *key, char *settings)
 {
-	uint8 index, houseType, unitType, locationID;
+	uint8 index, HousesType, unitType, locationID;
 	uint16 timeBetween;
 	CellStruct position;
 	bool repeat;
@@ -353,8 +353,8 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = HouseType_From_Name(settings);
-	if (houseType == HOUSE_INVALID) return;
+	HousesType = HousesType_From_Name(settings);
+	if (HousesType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
 	settings = split + 1;
@@ -395,7 +395,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 
 	position.x = 0xFFFF;
 	position.y = 0xFFFF;
-	u = Unit_Create(UNIT_INDEX_INVALID, unitType, houseType, position, 0);
+	u = Unit_Create(UNIT_INDEX_INVALID, unitType, HousesType, position, 0);
 	if (u == NULL) return;
 
 	g_scenario.reinforcement[index].unitID      = u->o.index;
@@ -407,7 +407,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 
 static void Scenario_Load_Team(const char *key, char *settings)
 {
-	uint8 houseType, teamActionType, movementType;
+	uint8 HousesType, teamActionType, movementType;
 	uint16 minMembers, maxMembers;
 	char *split;
 
@@ -419,8 +419,8 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = HouseType_From_Name(settings);
-	if (houseType == HOUSE_INVALID) return;
+	HousesType = HousesType_From_Name(settings);
+	if (HousesType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
 	settings = split + 1;
@@ -460,7 +460,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	/* Fifth value is maximum amount of members in team */
 	maxMembers = atoi(settings);
 
-	Team_Create(houseType, teamActionType, movementType, minMembers, maxMembers);
+	Team_Create(HousesType, teamActionType, movementType, minMembers, maxMembers);
 }
 
 /**
@@ -526,7 +526,7 @@ bool Scenario_Load(uint16 scenarioID, uint8 houseID)
 	g_scenarioID = scenarioID;
 
 	/* Load scenario file */
-	sprintf(filename, "SCEN%c%03d.INI", g_table_houseInfo[houseID].name[0], scenarioID);
+	sprintf(filename, "SCEN%c%03d.INI", g_table_HouseType[houseID].name[0], scenarioID);
 	if (!File_Exists(filename)) return false;
 	s_scenarioBuffer = Read_FileWholeFile(filename);
 
