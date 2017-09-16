@@ -191,7 +191,7 @@ static uint16 Apply_Delta(void *wsa, uint16 frame, uint8 *dst)
 	if (header->flags.displayInBuffer) {
 		Apply_XOR_Delta(dst, header->buffer);
 	} else {
-		Apply_XOR_Delta_On_Page(dst, header->buffer, header->width);
+		XOR_Delta_Buffer(dst, header->buffer, header->width);
 	}
 
 	return 1;
@@ -445,7 +445,7 @@ bool Animate_Frame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen
 	if (header->frameCurrent == header->frames) {
 		if (!header->flags.hasNoAnimation) {
 			if (!header->flags.displayInBuffer) {
-				Format40_Decode_ToScreen(dst, header->buffer, header->width);
+				Copy_Delta_Buffer(dst, header->buffer, header->width);
 			} else {
 				Apply_XOR_Delta(dst, header->buffer);
 			}

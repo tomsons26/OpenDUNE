@@ -67,9 +67,7 @@ void Apply_XOR_Delta(uint8 *dst, uint8 *src)
  * @param width Width of the rectangle.
  */
 
-//Original called Copy_Delta_Buffer or XOR_Delta_Buffer or versions that don't have the recheck function part of those two depending on the variable it recieved, looks like both are merged into one here
-//Format40_Decode_ToScreen might be part of Apply_XOR_Delta_On_Page called functions too
-void Apply_XOR_Delta_On_Page(uint8 *dst, uint8 *src, uint16 width)
+void XOR_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width)
 {
 	uint16 length;
 	uint16 cmd;
@@ -156,7 +154,7 @@ void Apply_XOR_Delta_On_Page(uint8 *dst, uint8 *src, uint16 width)
  * @param src Data source.
  * @param width Width of the rectangle.
  */
-void Format40_Decode_ToScreen(uint8 *dst, uint8 *src, uint16 width)
+void Copy_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width)
 {
 	uint16 length;
 	uint16 cmd;

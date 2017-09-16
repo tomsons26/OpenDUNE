@@ -21,12 +21,10 @@ Apply_XOR_Delta_To_Page_Or_Viewport
 _Apply_XOR_Delta         LP_ASM.ASM 000000B1 0000007A 00000002 00000008 R F . . B . .
 XOR_Delta_Buffer         LP_ASM.ASM 0000012B 000000B9 00000002 00000000 R F . . B . .
 _Apply_XOR_Delta_On_Page LP_ASM.ASM 00000299 00000037 00000002 0000000C R F . . B . .
-
-not sure which Format40_Decode_ToScreen is
 */
 
 extern void Apply_XOR_Delta(uint8 *dst, uint8 *src);
-extern void Apply_XOR_Delta_On_Page(uint8 *dst, uint8 *src, uint16 width);
-extern void Format40_Decode_ToScreen(uint8 *dst, uint8 *src, uint16 width);
+extern void XOR_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width);
+extern void Copy_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width);
 
 #endif /* CODEC_FORMAT40_H */
