@@ -778,8 +778,8 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		maxWidth = 0;
 
 		for (i = 0; i < g_widgetProperties[21].height; i++) {
-			if (Font_GetStringWidth(strings[i]) <= maxWidth) continue;
-			maxWidth = Font_GetStringWidth(strings[i]);
+			if (String_Pixel_Width(strings[i]) <= maxWidth) continue;
+			maxWidth = String_Pixel_Width(strings[i]);
 		}
 
 		maxWidth += 7;
@@ -1017,7 +1017,7 @@ static void GameLoop_Main(void)
 			Music_Play(28);
 
 			g_playerHouseID = HOUSE_MERCENARY;
-			g_playerHouseID = GUI_PickHouse();
+			g_playerHouseID = Choose_Side();
 
 			Hide_Mouse();
 

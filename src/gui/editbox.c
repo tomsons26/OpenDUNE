@@ -35,7 +35,7 @@ static void GUI_EditBox_BlinkCursor(uint16 positionX, bool resetBlink)
 	editBoxShowCursor = !editBoxShowCursor;
 
 	Hide_Mouse();
-	GUI_DrawFilledRectangle(positionX, g_curWidgetYBase, positionX + Font_GetCharWidth('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
+	GUI_DrawFilledRectangle(positionX, g_curWidgetYBase, positionX + Char_Pixel_Width('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
 	Show_Mouse();
 }
 
@@ -76,12 +76,12 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 	textWidth = 0;
 	textLength = 0;
-	maxWidth = (g_curWidgetWidth << 3) - Font_GetCharWidth('W') - 1;
+	maxWidth = (g_curWidgetWidth << 3) - Char_Pixel_Width('W') - 1;
 	t = text;
 
 	/* Calculate the length and width of the current string */
 	for (; *t != '\0'; t++) {
-		textWidth += Font_GetCharWidth(*t);
+		textWidth += Char_Pixel_Width(*t);
 		textLength++;
 
 		if (textWidth >= maxWidth) break;
@@ -133,7 +133,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 			GUI_EditBox_BlinkCursor(positionX + textWidth, true);
 
-			textWidth -= Font_GetCharWidth(*(t - 1));
+			textWidth -= Char_Pixel_Width(*(t - 1));
 			textLength--;
 			*(--t) = '\0';
 
@@ -146,7 +146,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		/* Names can't start with a space, and should be alpha-numeric */
 		if ((key == 0x20 && textLength == 0) || key < 0x20 || key > 0x7E) continue;
 
-		keyWidth = Font_GetCharWidth(key & 0xFF);
+		keyWidth = Char_Pixel_Width(key & 0xFF);
 
 		if (textWidth + keyWidth >= maxWidth || textLength >= maxLength) continue;
 

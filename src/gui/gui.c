@@ -480,7 +480,7 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
 			while (*s == '\n' || *s == '\r') s++;
 		}
 
-		width = Font_GetCharWidth(*s);
+		width = Char_Pixel_Width(*s);
 
 		if (x + width > SCREEN_WIDTH) {
 			x = left;
@@ -585,11 +585,11 @@ void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour,
 
 	switch (flags & 0x0F00) {
 		case 0x100:
-			left -= Font_GetStringWidth(textBuffer) / 2;
+			left -= String_Pixel_Width(textBuffer) / 2;
 			break;
 
 		case 0x200:
-			left -= Font_GetStringWidth(textBuffer);
+			left -= String_Pixel_Width(textBuffer);
 			break;
 	}
 
@@ -874,10 +874,10 @@ uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter)
 
 		lines++;
 
-		while (width < maxwidth && *str != delimiter && *str != '\r' && *str != '\0') width += Font_GetCharWidth(*str++);
+		while (width < maxwidth && *str != delimiter && *str != '\r' && *str != '\0') width += Char_Pixel_Width(*str++);
 
 		if (width >= maxwidth) {
-			while (*str != 0x20 && *str != delimiter && *str != '\r' && *str != '\0') width -= Font_GetCharWidth(*str--);
+			while (*str != 0x20 && *str != delimiter && *str != '\r' && *str != '\0') width -= Char_Pixel_Width(*str--);
 		}
 
 		if (*str != '\0') *str++ = delimiter;
@@ -1395,7 +1395,7 @@ static void Text_PrintOnFilledRectangle(const char *string, uint16 top)
 
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x121);
 
-	halfWidth = (Font_GetStringWidth(string) / 2) + 4;
+	halfWidth = (String_Pixel_Width(string) / 2) + 4;
 
 	GUI_DrawFilledRectangle(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
 	Fancy_Text_Print(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
@@ -1546,7 +1546,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_UNITS_DESTROYED_BY), 119);
 	if (g_scenarioID != 1) Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_BUILDINGS_DESTROYED_BY), 155);
 
-	textLeft = 19 + max(Font_GetStringWidth(String_Get_ByIndex(STR_YOU)), Font_GetStringWidth(String_Get_ByIndex(STR_ENEMY)));
+	textLeft = 19 + max(String_Pixel_Width(String_Get_ByIndex(STR_YOU)), String_Pixel_Width(String_Get_ByIndex(STR_ENEMY)));
 	statsBarWidth = 261 - textLeft;
 
 	for (i = 0; i < statsBoxCount; i++) {
@@ -1659,7 +1659,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 /**
  * Show pick house screen.
  */
-uint8 GUI_PickHouse(void)
+uint8 Choose_Side(void)
 {
 	Screen oldScreenID;
 	Widget *w = NULL;
@@ -3487,11 +3487,11 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 
 		Fancy_Text_Print(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
 
-		width = Font_GetStringWidth(String_Get_ByIndex(STR_COST_999));
+		width = String_Pixel_Width(String_Get_ByIndex(STR_COST_999));
 		Fancy_Text_Print(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
 
 		if (g_factoryWindowStarport) {
-			width += Font_GetStringWidth(String_Get_ByIndex(STR_QTY_99)) + 2;
+			width += String_Pixel_Width(String_Get_ByIndex(STR_QTY_99)) + 2;
 			Fancy_Text_Print(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
 		}
 	}
@@ -4101,7 +4101,7 @@ static Widget *GUI_HallOfFame_CreateButtons(HallOfFameStruct *data)
 	resumeString = String_Get_ByIndex(STR_RESUME_GAME2);
 	clearString  = String_Get_ByIndex(STR_CLEAR_LIST);
 
-	width = max(Font_GetStringWidth(resumeString), Font_GetStringWidth(clearString)) + 6;
+	width = max(String_Pixel_Width(resumeString), String_Pixel_Width(clearString)) + 6;
 
 	/* "Clear List" */
 	wClear = GUI_Widget_Allocate(100, *clearString, 160 - width - 18, 180, 0xFFFE, STR_CLEAR_LIST);
@@ -4316,8 +4316,8 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	battleString = String_Get_ByIndex(STR_BATTLE);
 	scoreString = String_Get_ByIndex(STR_SCORE);
 
-	scoreX = 320 - Font_GetStringWidth(scoreString) / 2 - 12;
-	battleX = scoreX - Font_GetStringWidth(scoreString) / 2 - 8 - Font_GetStringWidth(battleString) / 2;
+	scoreX = 320 - String_Pixel_Width(scoreString) / 2 - 12;
+	battleX = scoreX - String_Pixel_Width(scoreString) / 2 - 8 - String_Pixel_Width(battleString) / 2;
 	offsetY = 80;
 
 	Fancy_Text_Print(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
@@ -4341,7 +4341,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		snprintf(buffer, sizeof(buffer), "%s, %s %s", data[i].name, p1, p2);
 
 		if (*data[i].name == '\0') {
-			width = battleX - 36 - Font_GetStringWidth(buffer);
+			width = battleX - 36 - String_Pixel_Width(buffer);
 		} else {
 			Fancy_Text_Print(buffer, 32, offsetY, 15, 0, 0x22);
 		}

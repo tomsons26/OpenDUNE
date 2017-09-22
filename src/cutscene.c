@@ -666,7 +666,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 
 			switch (strings[stringCount].type) {
 				case 3:		/* "xxx by:" text : on the left */
-					strings[stringCount].x = 157 - Font_GetStringWidth(text);
+					strings[stringCount].x = 157 - String_Pixel_Width(text);
 					break;
 
 				case 4:		/* names on the right */
@@ -674,7 +674,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 					break;
 
 				default:	/* centered strings */
-					strings[stringCount].x = 1 + (SCREEN_WIDTH - Font_GetStringWidth(text)) / 2;
+					strings[stringCount].x = 1 + (SCREEN_WIDTH - String_Pixel_Width(text)) / 2;
 					break;
 			}
 

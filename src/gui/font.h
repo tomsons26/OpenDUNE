@@ -27,8 +27,8 @@ extern Font *g_fontCurrent;
 
 extern bool Init_Fonts(void);
 extern void Font_Uninit(void);
-extern uint16 Font_GetCharWidth(unsigned char c);
-extern uint16 Font_GetStringWidth(const char *string);
+extern uint16 Char_Pixel_Width(unsigned char c);
+extern uint16 String_Pixel_Width(const char *string);
 extern void Font_Select(Font *f);
 
 #endif /* GUI_FONT_H */

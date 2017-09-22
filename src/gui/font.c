@@ -26,7 +26,7 @@ Font *g_fontCurrent = NULL;
  * @param c The char to get the width of.
  * @return The width of the char in pixels.
  */
-uint16 Font_GetCharWidth(unsigned char c)
+uint16 Char_Pixel_Width(unsigned char c)
 {
 	return g_fontCurrent->chars[c].width + g_fontCharOffset;
 }
@@ -37,14 +37,14 @@ uint16 Font_GetCharWidth(unsigned char c)
  * @param string The string to get the width of.
  * @return The width of the string in pixels.
  */
-uint16 Font_GetStringWidth(const char *string)
+uint16 String_Pixel_Width(const char *string)
 {
 	uint16 width = 0;
 
 	if (string == NULL) return 0;
 
 	while (*string != '\0') {
-		width += Font_GetCharWidth(*string++);
+		width += Char_Pixel_Width(*string++);
 	}
 
 	return width;

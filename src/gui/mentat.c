@@ -1285,11 +1285,11 @@ uint16 GUI_Mentat_SplitText(char *str, uint16 maxWidth)
 		uint16 width = 0;
 
 		while (width < maxWidth && *str != '.' && *str != '!' && *str != '?' && *str != '\0' && *str != '\r') {
-			width += Font_GetCharWidth(*str++);
+			width += Char_Pixel_Width(*str++);
 		}
 
 		if (width >= maxWidth) {
-			while (*str != ' ') width -= Font_GetCharWidth(*str--);
+			while (*str != ' ') width -= Char_Pixel_Width(*str--);
 		}
 
 		height++;
