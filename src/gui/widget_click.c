@@ -870,7 +870,7 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 	Widget_SetCurrentWidget(15);
 
 	Hide_Mouse();
-	GUI_DrawBorder((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
+	_Hilite_Box((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
 	Show_Mouse();
 
 	for (loop = true; loop; sleepIdle()) {
@@ -1280,7 +1280,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	y += 7;
 
-	GUI_DrawLine(129, y, 310, y, 12);
+	_Draw_Line(129, y, 310, y, 12);
 
 	y += 2;
 
@@ -1309,8 +1309,8 @@ static void GUI_Purchase_ShowInvoice(void)
 		Fancy_Text_Print(Extract_String(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
 	}
 
-	GUI_DrawLine(129, 148, 310, 148, 12);
-	GUI_DrawLine(129, 150, 310, 150, 12);
+	_Draw_Line(129, 148, 310, 148, 12);
+	_Draw_Line(129, 150, 310, 150, 12);
 
 	snprintf(textBuffer, sizeof(textBuffer), "%d", total);
 

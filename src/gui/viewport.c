@@ -442,11 +442,11 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 		uint16 y2 = y1 + (g_selectionHeight << 4) - 1;
 
 		GUI_SetClippingArea(0, 40, 239, SCREEN_HEIGHT - 1);
-		GUI_DrawWiredRectangle(x1, y1, x2, y2, 0xFF);
+		_Draw_Rect(x1, y1, x2, y2, 0xFF);
 
 		if (g_selectionState == 0 && g_selectionType == SELECTIONTYPE_PLACE) {
-			GUI_DrawLine(x1, y1, x2, y2, 0xFF);
-			GUI_DrawLine(x2, y1, x1, y2, 0xFF);
+			_Draw_Line(x1, y1, x2, y2, 0xFF);
+			_Draw_Line(x2, y1, x1, y2, 0xFF);
 		}
 
 		GUI_SetClippingArea(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);

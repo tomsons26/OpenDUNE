@@ -175,12 +175,12 @@ assert_compile(lengthof(s_colourBorderSchema) == lengthof(s_HOF_ColourBorderSche
  * @param bottom The bottom position of the rectangle.
  * @param colour The colour of the rectangle.
  */
-void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour)
+void _Draw_Rect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour)
 {
-	GUI_DrawLine(left, top, right, top, colour);
-	GUI_DrawLine(left, bottom, right, bottom, colour);
-	GUI_DrawLine(left, top, left, bottom, colour);
-	GUI_DrawLine(right, top, right, bottom, colour);
+	_Draw_Line(left, top, right, top, colour);
+	_Draw_Line(left, bottom, right, bottom, colour);
+	_Draw_Line(left, top, left, bottom, colour);
+	_Draw_Line(right, top, right, bottom, colour);
 }
 
 /**
@@ -1610,11 +1610,11 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 				g_timerTimeout = 1;
 
-				GUI_DrawLine(posX, posY, posX, posY + 5, colour);
+				_Draw_Line(posX, posY, posX, posY + 5, colour);
 
 				posX++;
 
-				GUI_DrawLine(posX, posY + 1, posX, posY + 6, 12);	/* shadow */
+				_Draw_Line(posX, posY + 1, posX, posY + 6, 12);	/* shadow */
 
 				GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
 
@@ -1860,7 +1860,7 @@ void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colours, uint8 refer
  * @param colourSchemaIndex Index of the colourSchema used.
  * @param fill True if you want the border to be filled.
  */
-void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill)
+void _Hilite_Box(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill)
 {
 	uint16 *colourSchema;
 
@@ -1871,10 +1871,10 @@ void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16
 
 	if (fill) _Fill_Rect(left, top, left + width, top + height, colourSchema[0] & 0xFF);
 
-	GUI_DrawLine(left, top + height, left + width, top + height, colourSchema[1] & 0xFF);
-	GUI_DrawLine(left + width, top, left + width, top + height, colourSchema[1] & 0xFF);
-	GUI_DrawLine(left, top, left + width, top, colourSchema[2] & 0xFF);
-	GUI_DrawLine(left, top, left, top + height, colourSchema[2] & 0xFF);
+	_Draw_Line(left, top + height, left + width, top + height, colourSchema[1] & 0xFF);
+	_Draw_Line(left + width, top, left + width, top + height, colourSchema[1] & 0xFF);
+	_Draw_Line(left, top, left + width, top, colourSchema[2] & 0xFF);
+	_Draw_Line(left, top, left, top + height, colourSchema[2] & 0xFF);
 
 	GFX_PutPixel(left, top + height, colourSchema[3] & 0xFF);
 	GFX_PutPixel(left + width, top, colourSchema[3] & 0xFF);
@@ -1947,7 +1947,7 @@ void GUI_DrawProgressbar(uint16 current, uint16 max)
 	if (current != 0 && height == 0) height = 1;
 
 	if (height != 0) {
-		GUI_DrawBorder(l_info[0] - 1, l_info[1] - 1, l_info[2] + 2, l_info[3] + 2, 1, true);
+		_Hilite_Box(l_info[0] - 1, l_info[1] - 1, l_info[2] + 2, l_info[3] + 2, 1, true);
 	}
 
 	if (width != 0) {
@@ -2374,7 +2374,7 @@ static void ClipRight(int16 *x1, int16 *y1, int16 x2, int16 y2)
  * @param y2 The Y-coordinate of the end of the line.
  * @param colour The colour to use to draw the line.
  */
-void GUI_DrawLine(int16 x1, int16 y1, int16 x2, int16 y2, uint8 colour)
+void _Draw_Line(int16 x1, int16 y1, int16 x2, int16 y2, uint8 colour)
 {
 	uint8 *screen = GFX_Screen_GetActive();
 	int16 increment = 1;
@@ -3544,8 +3544,8 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 		y = g_factoryWindowSelected * 32 + 24;
 
 		Hide_Mouse();
-		GUI_DrawWiredRectangle(71, y - 1, 104, y + 24, 255);
-		GUI_DrawWiredRectangle(72, y, 103, y + 23, 255);
+		_Draw_Rect(71, y - 1, 104, y + 24, 255);
+		_Draw_Rect(72, y, 103, y + 23, 255);
 		Show_Mouse();
 	} else {
 		if (paletteChangeTimer > g_timerGUI) return;

@@ -117,13 +117,13 @@ extern void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst
 extern void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Screen screenDst, uint16 delay, bool skipNull);
 
 extern void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, uint8 colour);
-extern void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill);
+extern void _Hilite_Box(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill);
 extern void GUI_DrawCredits(uint8 houseID, uint16 mode);
 extern void _Fill_Rect(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
-extern void GUI_DrawLine(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
+extern void _Draw_Line(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
 extern void GUI_DrawProgressbar(uint16 current, uint16 max);
 extern void Text_Print_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour, uint8 bgColour, uint16 charWidth);
-extern void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
+extern void _Draw_Rect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
 extern void GUI_DrawXorFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
 
 extern void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colors, uint8 reference, uint8 intensity);

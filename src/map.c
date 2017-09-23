@@ -290,7 +290,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 		top    = (Tile_GetPackedY(packed) - mapInfo->minY) * (mapScale + 1) + 136;
 		bottom = top + mapScale * 10 + 9;
 
-		GUI_DrawWiredRectangle(left, top, right, bottom, 15);
+		_Draw_Rect(left, top, right, bottom, 15);
 
 		for (m = viewportBorder; *m != 0xFFFF; m++) {
 			uint16 curPacked;

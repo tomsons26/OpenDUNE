@@ -113,11 +113,11 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	_Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
 
 	Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], positionX, positionY, 0, 0x100, g_paletteMapping1, buttonDown ? 1 : 0);
 
-	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, false);
+	_Hilite_Box(positionX, positionY, width, height, buttonDown ? 0 : 1, false);
 
 	if (oldScreenID != SCREEN_0) return;
 
@@ -165,8 +165,8 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
-	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
+	_Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	_Hilite_Box(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
 
 	switch (g_productionStringID) {
 		case STR_LAUNCH:
@@ -320,8 +320,8 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
-	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
+	_Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	_Hilite_Box(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
 
 	colour = 0xF;
 	if (buttonSelected) {
@@ -834,7 +834,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							uint16 powerOutput = o->hitpoints * -si->Drain / oi->hitpoints;
 							uint16 powerAverage = (h->windtrapCount == 0) ? 0 : h->Drain / h->windtrapCount;
 
-							GUI_DrawLine(261, 95, 312, 95, 16);
+							_Draw_Line(261, 95, 312, 95, 16);
 							Fancy_Text_Print(Extract_String(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);
 							Fancy_Text_Print("%3d", 292, g_fontCurrent->height * 2 + 80, 29, 0, 0x11, powerAverage);
 							Fancy_Text_Print("%3d", 292, g_fontCurrent->height * 3 + 80, (powerOutput >= powerAverage) ? 29 : 6, 0, 0x11, powerOutput);
@@ -855,12 +855,12 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							creditsStored = h->credits * si->creditsStorage / h->creditsStorage;
 							if (h->credits > h->creditsStorage) creditsStored = si->creditsStorage;
 
-							GUI_DrawLine(261, 95, 312, 95, 16);
+							_Draw_Line(261, 95, 312, 95, 16);
 							Fancy_Text_Print(Extract_String(STR_SPICEHOLDS_4DMAX_4D), 258, 88, 29, 0, 0x11, creditsStored, (si->creditsStorage <= 1000) ? si->creditsStorage : 1000);
 						} break;
 
 						case STRUCTURE_OUTPOST: {
-							GUI_DrawLine(261, 95, 312, 95, 16);
+							_Draw_Line(261, 95, 312, 95, 16);
 							Fancy_Text_Print(Extract_String(STR_RADAR_SCANFRIEND_2DENEMY_2D), 258, 88, 29, 0, 0x11, h->unitCountAllied, h->unitCountEnemy);
 						} break;
 					}
@@ -937,13 +937,13 @@ void GUI_Widget_DrawBorder(uint16 widgetIndex, uint16 borderType, bool pressed)
 		Conditional_Hide_Mouse(left, top, left + width, top + height);
 	}
 
-	GUI_DrawBorder(left, top, width, height, colourSchemaIndex + 1, true);
+	_Hilite_Box(left, top, width, height, colourSchemaIndex + 1, true);
 
 	colourSchemaIndexDiff = borderIndexSize[borderType][0];
 	size = borderIndexSize[borderType][1];
 
 	if (size != 0) {
-		GUI_DrawBorder(left + size, top + size, width - (size * 2), height - (size * 2), colourSchemaIndexDiff + colourSchemaIndex, false);
+		_Hilite_Box(left + size, top + size, width - (size * 2), height - (size * 2), colourSchemaIndexDiff + colourSchemaIndex, false);
 	}
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
