@@ -163,7 +163,7 @@ extern void Conditional_Show_Mouse(void);
 extern void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern void Low_Show_Mouse_InWidget(void);
 extern void Low_Hide_Mouse_InWidget(uint16 widgetIndex);
-extern void GUI_Mouse_SetPosition(uint16 x, uint16 y);
+extern void _Set_Mouse_Pos(uint16 x, uint16 y);
 extern uint16 GUI_HallOfFame_Tick(void);
 extern void GUI_HallOfFame_Show(uint16 score);
 extern uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show);

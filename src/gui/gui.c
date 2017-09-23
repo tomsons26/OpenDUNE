@@ -3232,7 +3232,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 	Mouse_SetRegion(8, 24, 311, 143);
 
-	GUI_Mouse_SetPosition(160, 84);
+	_Set_Mouse_Pos(160, 84);
 
 	Load_Picture("MAPMACH.CPS", SCREEN_2, Palette);
 
@@ -4019,7 +4019,7 @@ void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, 
  * @param x The new X-position of the mouse.
  * @param y The new Y-position of the mouse.
  */
-void GUI_Mouse_SetPosition(uint16 x, uint16 y)
+void _Set_Mouse_Pos(uint16 x, uint16 y)
 {
 	while (MouseUpdate != 0) sleepIdle();
 	MouseUpdate++;
