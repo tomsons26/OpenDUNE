@@ -294,7 +294,7 @@ static void GameLoop_LevelEnd(void)
 			if (g_campaignID == 9) {
 				Hide_Mouse();
 
-				GUI_SetPaletteAnimated(g_palette2, 15);
+				_Fade_Palette_To(g_palette2, 15);
 				GUI_ClearScreen(SCREEN_0);
 				GameLoop_GameEndAnimation();
 				Prog_End();
@@ -309,7 +309,7 @@ static void GameLoop_LevelEnd(void)
 
 			g_scenarioID = Map_Selection(g_campaignID, true);
 
-			GUI_SetPaletteAnimated(g_palette2, 15);
+			_Fade_Palette_To(g_palette2, 15);
 
 			if (g_campaignID == 1 || g_campaignID == 7) {
 				if (!GUI_Security_Show()) {
@@ -737,7 +737,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		case STR_LOAD_GAME:
 			Hide_Mouse();
-			GUI_SetPaletteAnimated(g_palette2, 30);
+			_Fade_Palette_To(g_palette2, 30);
 			GUI_ClearScreen(SCREEN_0);
 			Show_Mouse();
 
@@ -798,7 +798,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-		GUI_SetPaletteAnimated(GamePalette, 30);
+		_Fade_Palette_To(GamePalette, 30);
 
 		Fancy_Text_Print("V1.07", 319, 192, 133, 0, 0x231, 0x39);
 		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);

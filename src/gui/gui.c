@@ -1703,7 +1703,7 @@ uint8 Choose_Side(void)
 
 		Hide_Mouse();
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-		GUI_SetPaletteAnimated(GamePalette, 15);
+		_Fade_Palette_To(GamePalette, 15);
 		Show_Mouse();
 
 		for (houseID = HOUSE_INVALID; houseID == HOUSE_INVALID; sleepIdle()) {
@@ -1737,7 +1737,7 @@ uint8 Choose_Side(void)
 			w = next;
 		}
 
-		GUI_SetPaletteAnimated(palette, 15);
+		_Fade_Palette_To(palette, 15);
 
 		if (g_debugSkipDialogs || g_debugScenario) break;
 
@@ -1774,7 +1774,7 @@ uint8 Choose_Side(void)
 		if (yes_no == 0x8001) {
 			_Fade_Score();
 		} else {
-			GUI_SetPaletteAnimated(palette, 15);
+			_Fade_Palette_To(palette, 15);
 		}
 
 		while (w != NULL) {
@@ -1803,7 +1803,7 @@ uint8 Choose_Side(void)
 
 	Show_Mouse();
 
-	GUI_SetPaletteAnimated(palette, 15);
+	_Fade_Palette_To(palette, 15);
 
 	return houseID;
 }
@@ -2023,7 +2023,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 		GUI_DrawCredits(g_playerHouseID, (g_playerCredits == 0xFFFF) ? 2 : 1);
-		GUI_SetPaletteAnimated(GamePalette, 15);
+		_Fade_Palette_To(GamePalette, 15);
 
 		Show_Mouse();
 	}
@@ -3228,7 +3228,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 	previousCampaignID = campaignID - (win ? 1 : 0);
 	oldScreenID = _Set_LogicPage(SCREEN_2);
 
-	GUI_SetPaletteAnimated(palette, 15);
+	_Fade_Palette_To(palette, 15);
 
 	Mouse_SetRegion(8, 24, 311, 143);
 
@@ -3281,7 +3281,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
-	GUI_SetPaletteAnimated(GamePalette, 15);
+	_Fade_Palette_To(GamePalette, 15);
 	Show_Mouse();
 
 	s_strategicMapFastForward = false;
@@ -3352,7 +3352,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 	memcpy(GamePalette + 251 * 3, loc316, 12);
 
-	GUI_SetPaletteAnimated(palette, 15);
+	_Fade_Palette_To(palette, 15);
 
 	Hide_Mouse();
 	GUI_ClearScreen(SCREEN_0);
@@ -4534,7 +4534,7 @@ void GUI_DrawScreen(Screen screenID)
  * @param palette The new palette.
  * @param ticksOfAnimation The amount of ticks it should take.
  */
-void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation)
+void _Fade_Palette_To(uint8 *palette, int16 ticksOfAnimation)
 {
 	bool progress;
 	int16 diffPerTick;

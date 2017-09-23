@@ -425,7 +425,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 	Show_Mouse();
 
-	GUI_SetPaletteAnimated(GamePalette, 15);
+	_Fade_Palette_To(GamePalette, 15);
 
 	ret = GUI_Mentat_Loop(wsaFilename, NULL, stringBuffer, true, NULL);
 

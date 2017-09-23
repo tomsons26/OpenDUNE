@@ -107,7 +107,7 @@ static void GameLoop_FinishAnimation(void)
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x1);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x2);
 
-	GUI_SetPaletteAnimated(g_palette2, 60);
+	_Fade_Palette_To(g_palette2, 60);
 
 	GUI_ClearScreen(SCREEN_0);
 
@@ -367,7 +367,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 			memcpy(&GamePalette[215 * 3], s_palettePartCurrent, 18);
 
-			GUI_SetPaletteAnimated(GamePalette, 45);
+			_Fade_Palette_To(GamePalette, 45);
 
 			addFrameCount++;
 		} else {
@@ -453,7 +453,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 			memcpy(&Palette[215 * 3], s_palettePartCurrent, 18);
 
-			GUI_SetPaletteAnimated(Palette, 15);
+			_Fade_Palette_To(Palette, 15);
 
 			memcpy(Palette, GamePalette, 256 * 3);
 		}
@@ -463,7 +463,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 			memcpy(&Palette[215 * 3], s_palettePartCurrent, 18);
 
-			GUI_SetPaletteAnimated(Palette, 45);
+			_Fade_Palette_To(Palette, 45);
 		}
 
 		Close_Animation(wsa);
@@ -769,7 +769,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 	}
 
 	/* fade to black */
-	GUI_SetPaletteAnimated(g_palette2, 120);
+	_Fade_Palette_To(g_palette2, 120);
 
 	GUI_ClearScreen(SCREEN_0);
 	GUI_ClearScreen(spriteScreenID);
@@ -823,7 +823,7 @@ static void GameLoop_GameCredits(void)
 
 	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 
-	GUI_SetPaletteAnimated(Palette, 60);
+	_Fade_Palette_To(Palette, 60);
 
 	Music_Play(0);
 
@@ -877,7 +877,7 @@ static void GameLoop_GameCredits(void)
 		Music_Play(33);
 	}
 
-	GUI_SetPaletteAnimated(g_palette2, 60);
+	_Fade_Palette_To(g_palette2, 60);
 
 	_Fade_Score();
 
@@ -953,7 +953,7 @@ static void Gameloop_Logos(void)
 	wsa = Open_Animation("WESTWOOD.WSA", Get_Page(SCREEN_1), Get_Buff(SCREEN_1) + Get_Buff(SCREEN_2) + Get_Buff(SCREEN_3), true);
 	Animate_Frame(wsa, frame++, 0, 0, SCREEN_0);
 
-	GUI_SetPaletteAnimated(Palette, 60);
+	_Fade_Palette_To(Palette, 60);
 
 	Music_Play(0x24);
 
@@ -970,11 +970,11 @@ static void Gameloop_Logos(void)
 		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
-	GUI_SetPaletteAnimated(g_palette2, 60);
+	_Fade_Palette_To(g_palette2, 60);
 
 	while (Driver_Music_IsPlaying()) sleepIdle();
 
-	GUI_SetPaletteAnimated(g_palette2, 60);
+	_Fade_Palette_To(g_palette2, 60);
 
 	GFX_ClearScreen(SCREEN_ACTIVE);
 
@@ -982,13 +982,13 @@ static void Gameloop_Logos(void)
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-	GUI_SetPaletteAnimated(Palette, 30);
+	_Fade_Palette_To(Palette, 30);
 
 	for (g_timerTimeout = 60; g_timerTimeout != 0; sleepIdle()) {
 		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
-	GUI_SetPaletteAnimated(g_palette2, 30);
+	_Fade_Palette_To(g_palette2, 30);
 
 	GUI_ClearScreen(SCREEN_0);
 
@@ -996,14 +996,14 @@ static void Gameloop_Logos(void)
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-	GUI_SetPaletteAnimated(Palette, 30);
+	_Fade_Palette_To(Palette, 30);
 
 	for (g_timerTimeout = 180; g_timerTimeout != 0; sleepIdle()) {
 		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
 logos_exit:
-	GUI_SetPaletteAnimated(g_palette2, 30);
+	_Fade_Palette_To(g_palette2, 30);
 
 	GUI_ClearScreen(SCREEN_0);
 
