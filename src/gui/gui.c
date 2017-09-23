@@ -298,7 +298,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 		oldWidgetId = Widget_SetCurrentWidget(7);
 
 		if (g_textDisplayNeedsUpdate) {
-			Screen oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+			Screen oldScreenID = _Set_LogicPage(SCREEN_1);
 
 			_Fill_Rect(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
 
@@ -307,7 +307,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 
 			g_textDisplayNeedsUpdate = false;
 
-			GFX_Screen_SetActive(oldScreenID);
+			_Set_LogicPage(oldScreenID);
 		}
 
 		Low_Hide_Mouse_InWidget(7);
@@ -781,7 +781,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	Hide_Mouse();
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+	oldScreenID = _Set_LogicPage(SCREEN_0);
 
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
@@ -818,7 +818,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 		Color_Cycle();
 	}
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	do {
 		Color_Cycle();
@@ -849,7 +849,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 		g_viewport_forceRedraw = true;
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	Show_Mouse();
 
@@ -1428,7 +1428,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 	uint16 colour;
 	uint16 offset;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	Load_Picture("FAME.CPS", SCREEN_1, Palette);
 
@@ -1497,7 +1497,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 
 	if (!hallOfFame) GUI_HallOfFame_Tick();
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 static void GUI_EndStats_Sleep(uint16 delay)
@@ -1538,7 +1538,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	GUI_HallOfFame_DrawBackground(score, false);
 
@@ -1558,7 +1558,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	scores[0][0].value = harvestedAllied;
 	scores[0][1].value = harvestedEnemy;
@@ -1638,22 +1638,22 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	Show_Mouse();
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	for (;; sleepIdle()) {
 		GUI_HallOfFame_Tick();
 		if (Input_Keyboard_NextKey() != 0) break;
 	}
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	GUI_HallOfFame_Show(score);
 
 	memset(GamePalette + 255 * 3, 0, 3);
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
-	Driver_Music_FadeOut();
+	_Fade_Score();
 }
 
 /**
@@ -1746,7 +1746,7 @@ uint8 Choose_Side(void)
 
 		g_playerHouseID = HOUSE_MERCENARY;
 
-		oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+		oldScreenID = _Set_LogicPage(SCREEN_0);
 
 		Show_Mouse();
 
@@ -1772,7 +1772,7 @@ uint8 Choose_Side(void)
 		}
 
 		if (yes_no == 0x8001) {
-			Driver_Music_FadeOut();
+			_Fade_Score();
 		} else {
 			GUI_SetPaletteAnimated(palette, 15);
 		}
@@ -1788,7 +1788,7 @@ uint8 Choose_Side(void)
 		Load_Palette_Mercenaries();
 		Sprites_LoadTiles();
 
-		GFX_Screen_SetActive(oldScreenID);
+		_Set_LogicPage(oldScreenID);
 
 		while (Driver_Voice_IsPlaying()) sleepIdle();
 
@@ -1799,7 +1799,7 @@ uint8 Choose_Side(void)
 
 	GUI_Palette_CreateRemap(houseID);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	Show_Mouse();
 
@@ -1965,7 +1965,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	Screen oldScreenID;
 	Widget *w;
 
-	oldScreenID = GFX_Screen_SetActive((screenID == SCREEN_0) ? SCREEN_1 : screenID);
+	oldScreenID = _Set_LogicPage((screenID == SCREEN_0) ? SCREEN_1 : screenID);
 
 	g_viewport_forceRedraw = true;
 
@@ -2017,7 +2017,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	}
 
 	if (screenID == SCREEN_0) {
-		GFX_Screen_SetActive(SCREEN_0);
+		_Set_LogicPage(SCREEN_0);
 
 		Hide_Mouse();
 
@@ -2028,11 +2028,11 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	GUI_DrawCredits(g_playerHouseID, 2);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 }
 
 /**
@@ -2068,7 +2068,7 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 
 	if (mode == 0 && h->credits == creditsAnimation && creditsAnimationOffset == 0) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	oldWidgetId = Widget_SetCurrentWidget(4);
 
@@ -2140,7 +2140,7 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 		Low_Show_Mouse_InWidget();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	Widget_SetCurrentWidget(oldWidgetId);
 }
@@ -2161,7 +2161,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 		g_unitSelected = NULL;
 	}
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	if (g_selectionType != selectionType) {
 		uint16 oldSelectionType = g_selectionType;
@@ -2275,7 +2275,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 		}
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -2701,7 +2701,7 @@ static void GUI_FactoryWindow_Init(void)
 	int16 i;
 	ObjectInfo *oi;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	Load_Picture("CHOAM.CPS", SCREEN_1, NULL);
 	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
@@ -2747,13 +2747,13 @@ static void GUI_FactoryWindow_Init(void)
 
 	GUI_FactoryWindow_PrepareScrollList();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 
 	GUI_FactoryWindow_DrawDetails();
 
 	GUI_DrawCredits(g_playerHouseID, 1);
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -2768,7 +2768,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 	Screen oldScreenID;
 	uint8 backup[3];
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+	oldScreenID = _Set_LogicPage(SCREEN_0);
 
 	memcpy(backup, GamePalette + 255 * 3, 3);
 
@@ -2797,7 +2797,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 	GUI_DrawCredits(g_playerHouseID, 1);
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	GUI_FactoryWindow_B495_0F30();
 
@@ -2976,7 +2976,7 @@ static bool GUI_StrategicMap_FastForwardToggleWithESC(void)
 
 	s_strategicMapFastForward = !s_strategicMapFastForward;
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	return s_strategicMapFastForward;
 }
@@ -2987,7 +2987,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 	Screen oldScreenID;
 	uint16 y;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	GUI_Screen_Copy(8, 165, 8, 186, 24, 14, SCREEN_0, SCREEN_1);
 
@@ -3007,7 +3007,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 
 	l_timerNext = g_timerGUI + 90;
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
@@ -3067,7 +3067,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 	}
 
 	Show_Mouse();
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	for (loop = true; loop; sleepIdle()) {
 		region = GUI_StrategicMap_ClickedRegion();
@@ -3226,7 +3226,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 	memset(palette, 0, 256 * 3);
 
 	previousCampaignID = campaignID - (win ? 1 : 0);
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = _Set_LogicPage(SCREEN_2);
 
 	GUI_SetPaletteAnimated(palette, 15);
 
@@ -3293,7 +3293,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 
-		Input_History_Clear();
+		_Clear_KeyBuffer();
 
 		Sprites_CPS_LoadRegionClick();
 
@@ -3318,7 +3318,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 	Load_Picture("DUNERGN.CPS", SCREEN_1, Palette);
 
-	GFX_Screen_SetActive(SCREEN_1);
+	_Set_LogicPage(SCREEN_1);
 
 	GUI_StrategicMap_PrepareRegions(previousCampaignID);
 
@@ -3342,13 +3342,13 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 		scenarioID = 0;
 	}
 
-	Driver_Music_FadeOut();
+	_Fade_Score();
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	Mouse_SetRegion(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	memcpy(GamePalette + 251 * 3, loc316, 12);
 
@@ -3407,7 +3407,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 	ObjectInfo *oi = item->objectInfo;
 	void *wsa;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
 	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
@@ -3465,7 +3465,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, oldScreenID);
 	Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	GUI_FactoryWindow_DrawCaption(NULL);
 }
@@ -3474,7 +3474,7 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 {
 	Screen oldScreenID;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	_Fill_Rect(128, 21, 310, 35, 116);
 
@@ -3500,7 +3500,7 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 	if (oldScreenID == SCREEN_0) GFX_Screen_Copy2(128, 21, 128, 21, 182, 14, SCREEN_1, oldScreenID, false);
 	Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 void GUI_FactoryWindow_UpdateDetails(void)
@@ -3739,7 +3739,7 @@ void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Sc
 		rows[i] = tmp;
 	}
 
-	oldScreenID = GFX_Screen_SetActive(screenDst);
+	oldScreenID = _Set_LogicPage(screenDst);
 
 	for (j = 0; j < height; j++) {
 		uint16 j2 = j;
@@ -3751,11 +3751,11 @@ void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Sc
 
 			if (++j2 >= height) j2 = 0;
 
-			GFX_Screen_SetActive(screenSrc);
+			_Set_LogicPage(screenSrc);
 
 			colour = GFX_GetPixel(curX, curY);
 
-			GFX_Screen_SetActive(screenDst);
+			_Set_LogicPage(screenDst);
 
 			if (skipNull && colour == 0) continue;
 
@@ -3769,7 +3769,7 @@ void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Sc
 		Conditional_Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -4253,9 +4253,9 @@ void GUI_HallOfFame_Show(uint16 score)
 			char *nameEnd;
 			Screen oldScreenID;
 
-			oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+			oldScreenID = _Set_LogicPage(SCREEN_0);
 			Widget_SetAndPaintCurrentWidget(19);
-			GFX_Screen_SetActive(oldScreenID);
+			_Set_LogicPage(oldScreenID);
 
 			GUI_EditBox(name, 5, 19, NULL, &GUI_HallOfFame_Tick, false);
 
@@ -4281,9 +4281,9 @@ void GUI_HallOfFame_Show(uint16 score)
 
 	w = GUI_HallOfFame_CreateButtons(data);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 
 	for (g_doQuitHOF = false; !g_doQuitHOF; sleepIdle()) {
 		GUI_Widget_HandleEvents(w);
@@ -4291,7 +4291,7 @@ void GUI_HallOfFame_Show(uint16 score)
 
 	GUI_HallOfFame_DeleteButtons(w);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	if (score == 0xFFFF) return;
 
@@ -4309,7 +4309,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	uint16 battleX;
 	uint8 i;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 	_Fill_Rect(8, 80, 311, 178, 116);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
@@ -4357,7 +4357,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	return width;
 }
@@ -4445,7 +4445,7 @@ void GUI_DrawScreen(Screen screenID)
 	if (g_selectionType == SELECTIONTYPE_UNKNOWN6) return;
 	if (g_selectionType == SELECTIONTYPE_INTRO) return;
 
-	oldScreenID = GFX_Screen_SetActive(screenID);
+	oldScreenID = _Set_LogicPage(screenID);
 
 	if (!GFX_Screen_IsActive(SCREEN_0)) g_viewport_forceRedraw = true;
 
@@ -4521,7 +4521,7 @@ void GUI_DrawScreen(Screen screenID)
 
 	g_viewport_forceRedraw = false;
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	Map_SetSelectionObjectPosition(g_selectionRectanglePosition);
 	Map_UpdateMinimapPosition(g_minimapPosition, false);

@@ -30,7 +30,7 @@ static void GUI_Security_DrawText(char *text)
 {
 	Screen oldScreenID;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = _Set_LogicPage(SCREEN_2);
 
 	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
@@ -46,7 +46,7 @@ static void GUI_Security_DrawText(char *text)
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
 	Conditional_Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 static void GUI_Security_UndrawText(void)
@@ -111,7 +111,7 @@ bool GUI_Security_Show(void)
 
 	oldCurrentWidget = Widget_SetCurrentWidget(8);
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = _Set_LogicPage(SCREEN_2);
 
 	for (i = 0, valid = false; i < 3 && !valid; i++) {
 		void *wsa;
@@ -144,14 +144,14 @@ bool GUI_Security_Show(void)
 		GUI_Screen_Copy(g_curWidgetXBase - 1, g_curWidgetYBase - 8, 0, 0, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_0, SCREEN_2);
 		Show_Mouse();
 
-		GFX_Screen_SetActive(SCREEN_0);
+		_Set_LogicPage(SCREEN_0);
 
 		Hide_Mouse();
 		GUI_DrawBorder((g_curWidgetXBase << 3) - 6, g_curWidgetYBase - 6, (g_curWidgetWidth << 3) + 12, g_curWidgetHeight + 12, 1, true);
 		GUI_DrawBorder((g_curWidgetXBase << 3) - 2, g_curWidgetYBase - 2, (g_curWidgetWidth << 3) + 4, g_curWidgetHeight + 4, 2, false);
 		Show_Mouse();
 
-		Input_History_Clear();
+		_Clear_KeyBuffer();
 
 		buffer[0] = 0;
 
@@ -183,7 +183,7 @@ bool GUI_Security_Show(void)
 
 		tickWaitTill = g_timerGUI + (uint32)strlen(g_readBuffer) * 4;
 
-		Input_History_Clear();
+		_Clear_KeyBuffer();
 
 		/* ENHANCEMENT -- In Dune2, the + 120 is on the other side, causing the 'You are wrong! / Well done.' screen to appear very short (close to invisible, so to say) */
 		while (g_timerGUI + (g_dune2_enhanced ? 0 : 120) < tickWaitTill + (g_dune2_enhanced ? 120 : 0)) {
@@ -202,9 +202,9 @@ bool GUI_Security_Show(void)
 
 	Widget_SetCurrentWidget(oldCurrentWidget);
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	Load_Palette_Mercenaries();
 

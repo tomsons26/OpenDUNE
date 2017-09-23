@@ -61,7 +61,7 @@ typedef enum Screen {
 
 extern void GFX_Init(void);
 extern void GFX_Uninit(void);
-extern Screen GFX_Screen_SetActive(Screen screenID);
+extern Screen _Set_LogicPage(Screen screenID);
 extern bool GFX_Screen_IsActive(Screen screenID);
 extern void *GFX_Screen_GetActive(void);
 extern uint16 Get_Buff(Screen screenID);

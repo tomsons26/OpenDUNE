@@ -36,7 +36,7 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 
 	if (w == NULL) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	positionX = w->offsetX + (g_widgetProperties[w->parentID].xBase << 3);
 	positionY = w->offsetY +  g_widgetProperties[w->parentID].yBase;
@@ -65,7 +65,7 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 		Conditional_Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -103,7 +103,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = _Set_LogicPage(SCREEN_1);
 	}
 
 	buttonDown = w->state.hover2;
@@ -125,7 +125,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	Conditional_Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -155,7 +155,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = _Set_LogicPage(SCREEN_1);
 	}
 
 	buttonDown = w->state.hover2;
@@ -285,7 +285,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	Conditional_Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -307,7 +307,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = _Set_LogicPage(SCREEN_1);
 	}
 
 	stringID = w->stringID;
@@ -351,7 +351,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	Conditional_Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -638,7 +638,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		Widget *w = g_widgetLinkedListHead;
 		int i;
 
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = _Set_LogicPage(SCREEN_1);
 		oldWidgetID = Widget_SetCurrentWidget(6);
 
 		widget30 = GUI_Widget_Get_ByIndex(w, 7);
@@ -908,7 +908,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 
 	if (actionType > 1) {
 		Widget_SetCurrentWidget(oldWidgetID);
-		GFX_Screen_SetActive(oldScreenID);
+		_Set_LogicPage(oldScreenID);
 	}
 }
 

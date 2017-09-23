@@ -76,7 +76,7 @@ void *Get_Page(Screen screenID)
  * @param screenID The new screen to get active.
  * @return Old screenID that was currently active.
  */
-Screen GFX_Screen_SetActive(Screen screenID)
+Screen _Set_LogicPage(Screen screenID)
 {
 	Screen oldScreen = s_screenActiveID;
 	if (screenID != SCREEN_ACTIVE) {

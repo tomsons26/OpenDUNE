@@ -442,7 +442,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	g_widgetLinkedListTail = NULL;
 
-	GFX_Screen_SetActive(SCREEN_1);
+	_Set_LogicPage(SCREEN_1);
 
 	Widget_SetCurrentWidget(desc->index);
 
@@ -545,7 +545,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 }
 
 static void GUI_Window_BackupScreen(WindowDesc *desc)
@@ -746,7 +746,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 					if (!GUI_YesNo(STR_ARE_YOU_SURE_YOU_WISH_TO_PICK_A_NEW_HOUSE)) break;
 
 					loop = false;
-					Driver_Music_FadeOut();
+					_Fade_Score();
 					g_gameMode = GM_PICKHOUSE;
 					break;
 
@@ -865,7 +865,7 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 
 	if (*saveDesc == '[') index = s_savegameCountOnDisk;
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 
 	Widget_SetCurrentWidget(15);
 
@@ -1272,7 +1272,7 @@ static void GUI_Purchase_ShowInvoice(void)
 	uint16 x;
 	char textBuffer[12];
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	_Fill_Rect(128, 48, 311, 159, 20);
 
@@ -1324,11 +1324,11 @@ static void GUI_Purchase_ShowInvoice(void)
 	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, SCREEN_0);
 	Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	_Set_LogicPage(SCREEN_0);
 
 	GUI_FactoryWindow_DrawCaption(String_Get_ByIndex(STR_INVOICE_OF_UNITS_ON_ORDER));
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 
 	for (; GUI_Widget_HandleEvents(w) == 0; sleepIdle()) {
 		GUI_DrawCredits(g_playerHouseID, 0);
@@ -1338,13 +1338,13 @@ static void GUI_Purchase_ShowInvoice(void)
 		Color_Cycle();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	w = GUI_Widget_Get_ByIndex(w, 10);
 
 	if (w != NULL && Mouse_InsideRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height) != 0) {
 		while (Input_Test(0x41) != 0 || Input_Test(0x42) != 0) sleepIdle();
-		Input_History_Clear();
+		_Clear_KeyBuffer();
 	}
 
 	if (g_factoryWindowResult == FACTORY_CONTINUE) GUI_FactoryWindow_DrawDetails();

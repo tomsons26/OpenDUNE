@@ -447,7 +447,7 @@ void Driver_UnloadFile(Driver *driver)
 	driver->contentMalloced = false;
 }
 
-void Driver_Music_FadeOut(void)
+void _Fade_Score(void)
 {
 	Driver *music = g_driverMusic;
 	MSBuffer *musicBuffer = g_bufferMusic;

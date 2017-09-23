@@ -365,7 +365,7 @@ static void GameLoop_DrawMenu(const char **strings)
 
 	Show_Mouse();
 
-	Input_History_Clear();
+	_Clear_KeyBuffer();
 }
 
 static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint8 fgColourNormal, uint8 fgColourSelected, uint8 bgColour)
@@ -696,7 +696,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 			Hide_Mouse();
 
-			Driver_Music_FadeOut();
+			_Fade_Score();
 
 			GameLoop_GameIntroAnimation();
 
@@ -1004,7 +1004,7 @@ static void GameLoop_Main(void)
 
 			_Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 12);
 
-			Input_History_Clear();
+			_Clear_KeyBuffer();
 
 			if (s_enableLog != 0) Mouse_SetMouseMode((uint8)s_enableLog, "DUNE.LOG");
 
@@ -1083,7 +1083,7 @@ static void GameLoop_Main(void)
 			}
 		}
 
-		GFX_Screen_SetActive(SCREEN_0);
+		_Set_LogicPage(SCREEN_0);
 
 		key = GUI_Widget_HandleEvents(g_widgetLinkedListHead);
 
@@ -1130,7 +1130,7 @@ static void GameLoop_Main(void)
 
 	Widget_SetCurrentWidget(0);
 
-	GFX_Screen_SetActive(SCREEN_1);
+	_Set_LogicPage(SCREEN_1);
 
 	GFX_ClearScreen(SCREEN_1);
 

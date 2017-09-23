@@ -257,7 +257,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	if (packed != 0xFFFF && packed == minimapPreviousPosition && !forceUpdate) return;
 	if (g_selectionType == SELECTIONTYPE_MENTAT) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = _Set_LogicPage(SCREEN_1);
 
 	cleared = false;
 
@@ -306,7 +306,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	_Set_LogicPage(oldScreenID);
 
 	minimapPreviousPosition = packed;
 }
