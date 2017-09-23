@@ -193,7 +193,7 @@ void GameLoop_House(void)
 				if (h->credits > maxCredits) {
 					h->credits = maxCredits;
 
-					GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_SPICE_STORAGE_AVAILABLE_SPICE_IS_LOST), 1);
+					GUI_DisplayText(Extract_String(STR_INSUFFICIENT_SPICE_STORAGE_AVAILABLE_SPICE_IS_LOST), 1);
 				}
 			}
 
@@ -204,12 +204,12 @@ void GameLoop_House(void)
 
 				if (g_playerCreditsNoSilo == 0 && g_campaignID > 1 && h->credits != 0) {
 					if (h->creditsStorage != 0 && ((h->credits * 256 / h->creditsStorage) > 200)) {
-						GUI_DisplayText(String_Get_ByIndex(STR_SPICE_STORAGE_CAPACITY_LOW_BUILD_SILOS), 0);
+						GUI_DisplayText(Extract_String(STR_SPICE_STORAGE_CAPACITY_LOW_BUILD_SILOS), 0);
 					}
 				}
 
 				if (h->credits < 100 && g_playerCreditsNoSilo != 0) {
-					GUI_DisplayText(String_Get_ByIndex(STR_CREDITS_ARE_LOW_HARVEST_SPICE_FOR_MORE_CREDITS), 0);
+					GUI_DisplayText(Extract_String(STR_CREDITS_ARE_LOW_HARVEST_SPICE_FOR_MORE_CREDITS), 0);
 				}
 			}
 		}
@@ -340,7 +340,7 @@ static void House_EnsureHarvesterAvailable(uint8 houseID)
 
 	if (houseID != g_playerHouseID) return;
 
-	GUI_DisplayText(String_Get_ByIndex(STR_HARVESTER_IS_HEADING_TO_REFINERY), 0);
+	GUI_DisplayText(Extract_String(STR_HARVESTER_IS_HEADING_TO_REFINERY), 0);
 }
 
 /**
@@ -517,7 +517,7 @@ void House_CalculatePowerAndCredit(House *h)
 
 	/* Check if we are low on power */
 	if (h->index == g_playerHouseID && h->Drain > h->Power) {
-		GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
+		GUI_DisplayText(Extract_String(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
 	}
 
 	/* If there are no buildings left, you lose your right on 'credits without storage' */

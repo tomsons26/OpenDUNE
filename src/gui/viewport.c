@@ -239,7 +239,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 
 			if (h->Power < h->Drain) {
 				if ((h->Bldngs & (1 << STRUCTURE_OUTPOST)) != 0) {
-					GUI_DisplayText(String_Get_ByIndex(STR_NOT_ENOUGH_POWER_FOR_RADAR_BUILD_WINDTRAPS), 3);
+					GUI_DisplayText(Extract_String(STR_NOT_ENOUGH_POWER_FOR_RADAR_BUILD_WINDTRAPS), 3);
 				}
 			}
 			return true;
@@ -248,10 +248,10 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		Voice_Play(47);
 
 		if (g_structureActiveType == STRUCTURE_SLAB_1x1 || g_structureActiveType == STRUCTURE_SLAB_2x2) {
-			GUI_DisplayText(String_Get_ByIndex(STR_CAN_NOT_PLACE_FOUNDATION_HERE), 2);
+			GUI_DisplayText(Extract_String(STR_CAN_NOT_PLACE_FOUNDATION_HERE), 2);
 		} else {
 			GUI_DisplayHint(STR_STRUCTURES_MUST_BE_PLACED_ON_CLEAR_ROCK_OR_CONCRETE_AND_ADJACENT_TO_ANOTHER_FRIENDLY_STRUCTURE, 0xFFFF);
-			GUI_DisplayText(String_Get_ByIndex(STR_CAN_NOT_PLACE_S_HERE), 2, String_Get_ByIndex(si->o.stringID_abbrev));
+			GUI_DisplayText(Extract_String(STR_CAN_NOT_PLACE_S_HERE), 2, Extract_String(si->o.stringID_abbrev));
 		}
 		return true;
 	}

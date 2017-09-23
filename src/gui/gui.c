@@ -1414,7 +1414,7 @@ static uint16 GUI_HallOfFame_GetRank(uint16 score)
 
 static void GUI_HallOfFame_DrawRank(uint16 score, bool fadeIn)
 {
-	Fancy_Text_Print(String_Get_ByIndex(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
+	Fancy_Text_Print(Extract_String(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
 
 	if (!fadeIn) return;
 
@@ -1457,7 +1457,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 
 	if (score != 0xFFFF) {
 		char buffer[64];
-		snprintf(buffer, sizeof(buffer), String_Get_ByIndex(STR_TIME_DH_DM), s_ticksPlayed / 60, s_ticksPlayed % 60);
+		snprintf(buffer, sizeof(buffer), Extract_String(STR_TIME_DH_DM), s_ticksPlayed / 60, s_ticksPlayed % 60);
 
 		if (s_ticksPlayed < 60) {
 			char *hours = strchr(buffer, '0');
@@ -1465,13 +1465,13 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		}
 
 		/* "Score: %d" */
-		Fancy_Text_Print(String_Get_ByIndex(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
+		Fancy_Text_Print(Extract_String(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
 		Fancy_Text_Print(buffer, 248, 15, 15, 0, 0x222);
 		/* "You have attained the rank of" */
-		Fancy_Text_Print(String_Get_ByIndex(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
+		Fancy_Text_Print(Extract_String(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
 	} else {
 		/* "Hall of Fame" */
-		Fancy_Text_Print(String_Get_ByIndex(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
+		Fancy_Text_Print(Extract_String(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
 	}
 
 	switch (g_playerHouseID) {
@@ -1542,16 +1542,16 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_HallOfFame_DrawBackground(score, false);
 
-	Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_SPICE_HARVESTED_BY), 83);
-	Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_UNITS_DESTROYED_BY), 119);
-	if (g_scenarioID != 1) Text_PrintOnFilledRectangle(String_Get_ByIndex(STR_BUILDINGS_DESTROYED_BY), 155);
+	Text_PrintOnFilledRectangle(Extract_String(STR_SPICE_HARVESTED_BY), 83);
+	Text_PrintOnFilledRectangle(Extract_String(STR_UNITS_DESTROYED_BY), 119);
+	if (g_scenarioID != 1) Text_PrintOnFilledRectangle(Extract_String(STR_BUILDINGS_DESTROYED_BY), 155);
 
-	textLeft = 19 + max(String_Pixel_Width(String_Get_ByIndex(STR_YOU)), String_Pixel_Width(String_Get_ByIndex(STR_ENEMY)));
+	textLeft = 19 + max(String_Pixel_Width(Extract_String(STR_YOU)), String_Pixel_Width(Extract_String(STR_ENEMY)));
 	statsBarWidth = 261 - textLeft;
 
 	for (i = 0; i < statsBoxCount; i++) {
-		Fancy_Text_Print(String_Get_ByIndex(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
-		Fancy_Text_Print(String_Get_ByIndex(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(Extract_String(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(Extract_String(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
 	}
 
 	Music_Play(17 + Tools_RandomLCG_Range(0, 5));
@@ -1741,8 +1741,8 @@ uint8 Choose_Side(void)
 
 		if (g_debugSkipDialogs || g_debugScenario) break;
 
-		w = GUI_Widget_Link(w, GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_YES)[0]), 168, 168, 373, 0));
-		w = GUI_Widget_Link(w, GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_NO)[0]), 240, 168, 375, 0));
+		w = GUI_Widget_Link(w, GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(Extract_String(STR_YES)[0]), 168, 168, 373, 0));
+		w = GUI_Widget_Link(w, GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(Extract_String(STR_NO)[0]), 240, 168, 375, 0));
 
 		g_playerHouseID = HOUSE_MERCENARY;
 
@@ -1750,7 +1750,7 @@ uint8 Choose_Side(void)
 
 		Show_Mouse();
 
-		strncpy(g_readBuffer, String_Get_ByIndex(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
+		strncpy(g_readBuffer, Extract_String(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
 		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, GamePalette);
@@ -1910,7 +1910,7 @@ uint16 GUI_DisplayHint(uint16 stringID, uint16 spriteID)
 	if ((*hintsShown & mask) != 0) return 0;
 	*hintsShown |= mask;
 
-	return GUI_DisplayModalMessage(String_Get_ByIndex(stringID), spriteID);
+	return GUI_DisplayModalMessage(Extract_String(stringID), spriteID);
 }
 
 void GUI_DrawProgressbar(uint16 current, uint16 max)
@@ -2569,7 +2569,7 @@ static uint32 GUI_FactoryWindow_CreateWidgets(void)
 		w->flags.notused2 = (wi->flags & 0x0080) ? true : false;
 		w->flags.buttonFilterLeft = (wi->flags >> 8) & 0x0f;
 		w->flags.buttonFilterRight = (wi->flags >> 12) & 0x0f;
-		w->shortcut  = (wi->shortcut < 0) ? abs(wi->shortcut) : GUI_Widget_GetShortcut(*String_Get_ByIndex(wi->shortcut));
+		w->shortcut  = (wi->shortcut < 0) ? abs(wi->shortcut) : GUI_Widget_GetShortcut(*Extract_String(wi->shortcut));
 		w->clickProc = wi->clickProc;
 		w->width     = wi->width;
 		w->height    = wi->height;
@@ -2811,7 +2811,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 	return g_factoryWindowResult;
 }
 
-char *GUI_String_Get_ByIndex(int16 stringID)
+char *GUI_Extract_String(int16 stringID)
 {
 	extern char g_savegameDesc[5][51];
 
@@ -2853,7 +2853,7 @@ char *GUI_String_Get_ByIndex(int16 stringID)
 		default: break;
 	}
 
-	return String_Get_ByIndex(stringID);
+	return Extract_String(stringID);
 }
 
 static void GUI_StrategicMap_AnimateArrows(void)
@@ -3289,7 +3289,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 	if (win && campaignID == 1) {
 		Load_Picture("PLANET.CPS", SCREEN_1, Palette);
 
-		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_THREE_HOUSES_HAVE_COME_TO_DUNE));
+		GUI_StrategicMap_DrawText(Extract_String(STR_THREE_HOUSES_HAVE_COME_TO_DUNE));
 
 		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 
@@ -3303,7 +3303,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 		Load_Picture("DUNEMAP.CPS", SCREEN_1 , Palette);
 
-		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_TO_TAKE_CONTROL_OF_THE_LAND));
+		GUI_StrategicMap_DrawText(Extract_String(STR_TO_TAKE_CONTROL_OF_THE_LAND));
 
 		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, GUI_StrategicMap_FastForwardToggleWithESC() ? 0 : 1, false);
 
@@ -3311,7 +3311,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 			if (GUI_StrategicMap_FastForwardToggleWithESC()) break;
 		}
 
-		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_THAT_HAS_BECOME_DIVIDED));
+		GUI_StrategicMap_DrawText(Extract_String(STR_THAT_HAS_BECOME_DIVIDED));
 	} else {
 		Sprites_CPS_LoadRegionClick();
 	}
@@ -3335,7 +3335,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 	Show_Mouse();
 
 	if (*g_regions >= campaignID) {
-		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_SELECT_YOUR_NEXT_REGION));
+		GUI_StrategicMap_DrawText(Extract_String(STR_SELECT_YOUR_NEXT_REGION));
 
 		scenarioID = GUI_StrategicMap_ScenarioSelection(campaignID);
 	} else {
@@ -3441,21 +3441,21 @@ void GUI_FactoryWindow_DrawDetails(void)
 		GUI_Palette_RemapScreen(128, 48, 184, 112, SCREEN_1, s_factoryWindowGraymapTbl);
 
 		if (g_factoryWindowStarport) {
-			Fancy_Text_Print(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
+			Fancy_Text_Print(Extract_String(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
 		} else {
-			Fancy_Text_Print(String_Get_ByIndex(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
+			Fancy_Text_Print(Extract_String(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
 
 			if (g_factoryWindowUpgradeCost != 0) {
-				Fancy_Text_Print(String_Get_ByIndex(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
+				Fancy_Text_Print(Extract_String(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
 			} else {
-				Fancy_Text_Print(String_Get_ByIndex(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
+				Fancy_Text_Print(Extract_String(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
 			}
 		}
 	} else {
 		if (g_factoryWindowStarport) {
 			GUI_Screen_Copy(16, 99, 16, 160, 23, 9, SCREEN_1, SCREEN_1);
 			GUI_Screen_Copy(16, 99, 16, 169, 23, 9, SCREEN_1, SCREEN_1);
-			Fancy_Text_Print(String_Get_ByIndex(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
+			Fancy_Text_Print(Extract_String(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
 
 			GUI_FactoryWindow_UpdateDetails();
 		}
@@ -3485,14 +3485,14 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 		ObjectInfo *oi = item->objectInfo;
 		uint16 width;
 
-		Fancy_Text_Print(String_Get_ByIndex(oi->stringID_full), 128, 23, 12, 0, 0x12);
+		Fancy_Text_Print(Extract_String(oi->stringID_full), 128, 23, 12, 0, 0x12);
 
-		width = String_Pixel_Width(String_Get_ByIndex(STR_COST_999));
-		Fancy_Text_Print(String_Get_ByIndex(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
+		width = String_Pixel_Width(Extract_String(STR_COST_999));
+		Fancy_Text_Print(Extract_String(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
 
 		if (g_factoryWindowStarport) {
-			width += String_Pixel_Width(String_Get_ByIndex(STR_QTY_99)) + 2;
-			Fancy_Text_Print(String_Get_ByIndex(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
+			width += String_Pixel_Width(Extract_String(STR_QTY_99)) + 2;
+			Fancy_Text_Print(Extract_String(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
 		}
 	}
 
@@ -4098,8 +4098,8 @@ static Widget *GUI_HallOfFame_CreateButtons(HallOfFameStruct *data)
 	memcpy(s_temporaryColourBorderSchema, s_colourBorderSchema, sizeof(s_colourBorderSchema));
 	memcpy(s_colourBorderSchema, s_HOF_ColourBorderSchema, sizeof(s_colourBorderSchema));
 
-	resumeString = String_Get_ByIndex(STR_RESUME_GAME2);
-	clearString  = String_Get_ByIndex(STR_CLEAR_LIST);
+	resumeString = Extract_String(STR_RESUME_GAME2);
+	clearString  = Extract_String(STR_CLEAR_LIST);
 
 	width = max(String_Pixel_Width(resumeString), String_Pixel_Width(clearString)) + 6;
 
@@ -4313,14 +4313,14 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	_Fill_Rect(8, 80, 311, 178, 116);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-	battleString = String_Get_ByIndex(STR_BATTLE);
-	scoreString = String_Get_ByIndex(STR_SCORE);
+	battleString = Extract_String(STR_BATTLE);
+	scoreString = Extract_String(STR_SCORE);
 
 	scoreX = 320 - String_Pixel_Width(scoreString) / 2 - 12;
 	battleX = scoreX - String_Pixel_Width(scoreString) / 2 - 8 - String_Pixel_Width(battleString) / 2;
 	offsetY = 80;
 
-	Fancy_Text_Print(String_Get_ByIndex(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
+	Fancy_Text_Print(Extract_String(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
 	Fancy_Text_Print(battleString, battleX, offsetY, 8, 0, 0x122);
 	Fancy_Text_Print(scoreString, scoreX, offsetY, 8, 0, 0x122);
 
@@ -4332,11 +4332,11 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		if (data[i].score == 0) break;
 
 		if (g_config.Language == LANGUAGE_FRENCH) {
-			p1 = String_Get_ByIndex(_rankScores[data[i].rank].rankString);
+			p1 = Extract_String(_rankScores[data[i].rank].rankString);
 			p2 = g_table_HouseType[data[i].houseID].name;
 		} else {
 			p1 = g_table_HouseType[data[i].houseID].name;
-			p2 = String_Get_ByIndex(_rankScores[data[i].rank].rankString);
+			p2 = Extract_String(_rankScores[data[i].rank].rankString);
 		}
 		snprintf(buffer, sizeof(buffer), "%s, %s %s", data[i].name, p1, p2);
 

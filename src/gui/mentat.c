@@ -88,8 +88,8 @@ static void GUI_Mentat_ShowDialog(uint8 houseID, uint16 stringID, const char *ws
 
 	if (g_debugSkipDialogs) return;
 
-	w1 = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_PROCEED)[0]), 168, 168, 379, 0);
-	w2 = GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_REPEAT)[0]), 240, 168, 381, 0);
+	w1 = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(Extract_String(STR_PROCEED)[0]), 168, 168, 379, 0);
+	w2 = GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(Extract_String(STR_REPEAT)[0]), 240, 168, 381, 0);
 
 	w1 = GUI_Widget_Link(w1, w2);
 
@@ -102,7 +102,7 @@ static void GUI_Mentat_ShowDialog(uint8 houseID, uint16 stringID, const char *ws
 	stringID += STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40;
 
 	do {
-		strncpy(g_readBuffer, String_Get_ByIndex(stringID), g_readBufferSize);
+		strncpy(g_readBuffer, Extract_String(stringID), g_readBufferSize);
 		sleepIdle();
 	} while (GUI_Mentat_Show(g_readBuffer, wsaFilename, w1) == 0x8002);
 
@@ -261,7 +261,7 @@ static void GUI_Mentat_Draw(bool force)
 
 	Draw_Shape(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-	Fancy_Text_Print(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
+	Fancy_Text_Print(Extract_String(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x11);
 
 	line = GUI_Widget_Get_ByIndex(w, 3);
@@ -319,7 +319,7 @@ static void GUI_Mentat_ShowHelpList(bool proceed)
 
 	GUI_Mentat_Display(NULL, g_playerHouseID);
 
-	g_widgetMentatFirst = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(*String_Get_ByIndex(STR_EXIT)), 200, 168, proceed ? 379 : 377, 5);
+	g_widgetMentatFirst = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(*Extract_String(STR_EXIT)), 200, 168, proceed ? 379 : 377, 5);
 	g_widgetMentatFirst->shortcut2 = 'n';
 
 	GUI_Mentat_Create_HelpScreen_Widgets();
@@ -958,7 +958,7 @@ static void GUI_Mentat_ShowHelp(void)
 
 		index = *text - 44 + g_campaignID * 4 + STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + g_playerHouseID * 40;
 
-		strncpy(g_readBuffer, String_Get_ByIndex(index), g_readBufferSize);
+		strncpy(g_readBuffer, Extract_String(index), g_readBufferSize);
 	} else {
 		picture = (char *)g_readBuffer;
 		desc    = text;

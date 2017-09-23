@@ -73,7 +73,7 @@ const char *String_GenerateFilename(const char *name)
  * @param stringID The index of the string.
  * @return The pointer to the string.
  */
-char *String_Get_ByIndex(uint16 stringID)
+char *Extract_String(uint16 stringID)
 {
 	return s_strings[stringID];
 }

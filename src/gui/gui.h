@@ -145,7 +145,7 @@ extern void GUI_ChangeSelectionType(uint16 selectionType);
 extern void Set_Font_Palette_Range(const uint8 *colors, uint8 first, uint8 last);
 extern void GUI_SetClippingArea(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort, uint16 upgradeCost);
-extern char *GUI_String_Get_ByIndex(int16 stringID);
+extern char *GUI_Extract_String(int16 stringID);
 extern uint16 Map_Selection(uint16 campaignID, bool win);
 extern uint16 GUI_Get_Scrollbar_Position(struct Widget *w);
 extern void GUI_FactoryWindow_B495_0F30(void);

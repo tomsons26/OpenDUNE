@@ -281,7 +281,7 @@ static void GameLoop_LevelEnd(void)
 		if (GameLoop_IsLevelWon()) {
 			Sound_Output_Feedback(40);
 
-			GUI_DisplayModalMessage(String_Get_ByIndex(STR_YOU_HAVE_SUCCESSFULLY_COMPLETED_YOUR_MISSION), 0xFFFF);
+			GUI_DisplayModalMessage(Extract_String(STR_YOU_HAVE_SUCCESSFULLY_COMPLETED_YOUR_MISSION), 0xFFFF);
 
 			GUI_Mentat_ShowWin();
 
@@ -320,7 +320,7 @@ static void GameLoop_LevelEnd(void)
 		} else {
 			Sound_Output_Feedback(41);
 
-			GUI_DisplayModalMessage(String_Get_ByIndex(STR_YOU_HAVE_FAILED_YOUR_MISSION), 0xFFFF);
+			GUI_DisplayModalMessage(Extract_String(STR_YOU_HAVE_FAILED_YOUR_MISSION), 0xFFFF);
 
 			GUI_Mentat_ShowLose();
 
@@ -770,7 +770,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 				continue;
 			}
 
-			strings[i] = String_Get_ByIndex(mainMenuStrings[index][i]);
+			strings[i] = Extract_String(mainMenuStrings[index][i]);
 		}
 
 		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
@@ -1288,7 +1288,7 @@ int main(int argc, char **argv)
 
 	GameLoop_Main();
 
-	printf("%s\n", String_Get_ByIndex(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
+	printf("%s\n", Extract_String(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
 
 	Prog_End();
 	Free_IniFile();

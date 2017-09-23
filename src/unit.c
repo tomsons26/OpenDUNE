@@ -2052,13 +2052,13 @@ void Unit_DisplayStatusText(Unit *unit)
 	ui = &g_table_unitInfo[unit->o.type];
 
 	if (unit->o.type == UNIT_SANDWORM) {
-		snprintf(buffer, sizeof(buffer), "%s", String_Get_ByIndex(ui->o.stringID_abbrev));
+		snprintf(buffer, sizeof(buffer), "%s", Extract_String(ui->o.stringID_abbrev));
 	} else {
 		const char *houseName = g_table_HouseType[Unit_GetHouseID(unit)].name;
 		if (g_config.Language == LANGUAGE_FRENCH) {
-			snprintf(buffer, sizeof(buffer), "%s %s", String_Get_ByIndex(ui->o.stringID_abbrev), houseName);
+			snprintf(buffer, sizeof(buffer), "%s %s", Extract_String(ui->o.stringID_abbrev), houseName);
 		} else {
-			snprintf(buffer, sizeof(buffer), "%s %s", houseName, String_Get_ByIndex(ui->o.stringID_abbrev));
+			snprintf(buffer, sizeof(buffer), "%s %s", houseName, Extract_String(ui->o.stringID_abbrev));
 		}
 	}
 
@@ -2087,7 +2087,7 @@ void Unit_DisplayStatusText(Unit *unit)
 			size_t len = strlen(buffer);
 			char *s = buffer + len;
 
-			snprintf(s, sizeof(buffer) - len, String_Get_ByIndex(stringID), unit->amount);
+			snprintf(s, sizeof(buffer) - len, Extract_String(stringID), unit->amount);
 		}
 	}
 

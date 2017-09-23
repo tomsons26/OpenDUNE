@@ -448,18 +448,18 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	GUI_Widget_DrawBorder(g_curWidgetIndex, 2, true);
 
-	if (GUI_String_Get_ByIndex(desc->stringID) != NULL) {
-		Fancy_Text_Print(GUI_String_Get_ByIndex(desc->stringID), (g_curWidgetXBase << 3) + (g_curWidgetWidth << 2), g_curWidgetYBase + 6 + ((desc == &g_yesNoWindowDesc) ? 2 : 0), 238, 0, 0x122);
+	if (GUI_Extract_String(desc->stringID) != NULL) {
+		Fancy_Text_Print(GUI_Extract_String(desc->stringID), (g_curWidgetXBase << 3) + (g_curWidgetWidth << 2), g_curWidgetYBase + 6 + ((desc == &g_yesNoWindowDesc) ? 2 : 0), 238, 0, 0x122);
 	}
 
-	if (GUI_String_Get_ByIndex(desc->widgets[0].stringID) == NULL) {
-		Fancy_Text_Print(String_Get_ByIndex(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (g_curWidgetXBase + 2) << 3, g_curWidgetYBase + 42, 232, 0, 0x22);
+	if (GUI_Extract_String(desc->widgets[0].stringID) == NULL) {
+		Fancy_Text_Print(Extract_String(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (g_curWidgetXBase + 2) << 3, g_curWidgetYBase + 42, 232, 0, 0x22);
 	}
 
 	for (i = 0; i < desc->widgetCount; i++) {
 		Widget *w = &g_table_windowWidgets[i];
 
-		if (GUI_String_Get_ByIndex(desc->widgets[i].stringID) == NULL) continue;
+		if (GUI_Extract_String(desc->widgets[i].stringID) == NULL) continue;
 
 		w->next      = NULL;
 		w->offsetX   = desc->widgets[i].offsetX;
@@ -471,9 +471,9 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 		if (desc != &g_savegameNameWindowDesc) {
 			if (desc->widgets[i].labelStringId != STR_NULL) {
-				w->shortcut = GUI_Widget_GetShortcut(*GUI_String_Get_ByIndex(desc->widgets[i].labelStringId));
+				w->shortcut = GUI_Widget_GetShortcut(*GUI_Extract_String(desc->widgets[i].labelStringId));
 			} else {
-				w->shortcut = GUI_Widget_GetShortcut(*GUI_String_Get_ByIndex(desc->widgets[i].stringID));
+				w->shortcut = GUI_Widget_GetShortcut(*GUI_Extract_String(desc->widgets[i].stringID));
 			}
 		}
 
@@ -501,9 +501,9 @@ static void GUI_Window_Create(WindowDesc *desc)
 		if (desc->widgets[i].labelStringId == STR_NULL) continue;
 
 		if (g_config.Language == LANGUAGE_FRENCH) {
-			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (g_widgetProperties[w->parentID].xBase << 3) + 40, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x22);
+			Fancy_Text_Print(GUI_Extract_String(desc->widgets[i].labelStringId), (g_widgetProperties[w->parentID].xBase << 3) + 40, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x22);
 		} else {
-			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (g_widgetProperties[w->parentID].xBase << 3) - 10, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x222);
+			Fancy_Text_Print(GUI_Extract_String(desc->widgets[i].labelStringId), w->offsetX + (g_widgetProperties[w->parentID].xBase << 3) - 10, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x222);
 		}
 	}
 
@@ -825,7 +825,7 @@ static void FillSavegameDesc(bool save)
 		if (s_savegameIndexBase - i == s_savegameCountOnDisk) {
 			if (!save) continue;
 
-			strncpy(desc, String_Get_ByIndex(STR_EMPTY_SLOT_), 50);
+			strncpy(desc, Extract_String(STR_EMPTY_SLOT_), 50);
 			continue;
 		}
 
@@ -1276,7 +1276,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	_Fill_Rect(128, 48, 311, 159, 20);
 
-	Fancy_Text_Print(String_Get_ByIndex(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
+	Fancy_Text_Print(Extract_String(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
 
 	y += 7;
 
@@ -1299,14 +1299,14 @@ static void GUI_Purchase_ShowInvoice(void)
 			snprintf(textBuffer, sizeof(textBuffer), "%02d %5d", g_factoryWindowItems[i].amount, amount);
 
 			oi = g_factoryWindowItems[i].objectInfo;
-			Fancy_Text_Print(String_Get_ByIndex(oi->stringID_full), 128, y, 8, 0, 0x11);
+			Fancy_Text_Print(Extract_String(oi->stringID_full), 128, y, 8, 0, 0x11);
 
 			Text_Print_Monospace(textBuffer, 311 - (short)strlen(textBuffer) * 6, y, 15, 0, 6);
 
 			y += 8;
 		}
 	} else {
-		Fancy_Text_Print(String_Get_ByIndex(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
+		Fancy_Text_Print(Extract_String(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
 	}
 
 	GUI_DrawLine(129, 148, 310, 148, 12);
@@ -1317,7 +1317,7 @@ static void GUI_Purchase_ShowInvoice(void)
 	x = 311 - (short)strlen(textBuffer) * 6;
 
 	/* "Total Cost :" */
-	Fancy_Text_Print(GUI_String_Get_ByIndex(STR_TOTAL_COST_), x - 3, 152, 11, 0, 0x211);
+	Fancy_Text_Print(GUI_Extract_String(STR_TOTAL_COST_), x - 3, 152, 11, 0, 0x211);
 	Text_Print_Monospace(textBuffer, x, 152, 11, 0, 6);
 
 	Hide_Mouse();
@@ -1326,7 +1326,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	_Set_LogicPage(SCREEN_0);
 
-	GUI_FactoryWindow_DrawCaption(String_Get_ByIndex(STR_INVOICE_OF_UNITS_ON_ORDER));
+	GUI_FactoryWindow_DrawCaption(Extract_String(STR_INVOICE_OF_UNITS_ON_ORDER));
 
 	_Clear_KeyBuffer();
 

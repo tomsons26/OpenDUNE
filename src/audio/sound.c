@@ -175,7 +175,7 @@ void Music_InitMT32(void)
 
 	Driver_Music_Play(0, 0xFF);
 
-	Text_Print(String_Get_ByIndex(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
+	Text_Print(Extract_String(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
 
 	while (Driver_Music_IsPlaying()) {
 		Timer_Sleep(60);
@@ -435,7 +435,7 @@ void Sound_Output_Feedback(uint16 index)
 	if (g_enableVoices == 0 || g_gameConfig.sounds == 0) {
 		Driver_Sound_Play(g_feedback[index].VocType, 0xFF);
 
-		g_viewportMessageText = String_Get_ByIndex(g_feedback[index].messageId);
+		g_viewportMessageText = Extract_String(g_feedback[index].messageId);
 
 		if ((g_viewportMessageCounter & 1) != 0) {
 			g_viewport_forceRedraw = true;

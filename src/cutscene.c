@@ -211,11 +211,11 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 		if (g_feedback[feedback_index].messageId != 0) {
 			/* force drawing of subtitle */
-			GameLoop_DrawText(String_Get_ByIndex(subtitle->stringID), subtitle->top);
+			GameLoop_DrawText(Extract_String(subtitle->stringID), subtitle->top);
 		}
 	} else {
 		if (subtitle->stringID != STR_NULL) {
-			GameLoop_DrawText(String_Get_ByIndex(subtitle->stringID), subtitle->top);
+			GameLoop_DrawText(Extract_String(subtitle->stringID), subtitle->top);
 		}
 	}
 
