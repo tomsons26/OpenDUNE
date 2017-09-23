@@ -389,7 +389,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				left = x << 4;
 
 				if (!g_debugScenario && g_veiledSpriteID == t->overlaySpriteID) {
-					GUI_DrawFilledRectangle(left, top, left + 15, top + 15, 12);
+					_Fill_Rect(left, top, left + 15, top + 15, 12);
 					continue;
 				}
 
@@ -781,7 +781,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			/* ENHANCEMENT -- When fading in the game on start, you don't see the fade as it is against the already drawn screen. */
 			if (g_dune2_enhanced) {
 				Screen oldScreenID2 = GFX_Screen_SetActive(SCREEN_0);
-				GUI_DrawFilledRectangle(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 0);
+				_Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 0);
 				GFX_Screen_SetActive(oldScreenID2);
 			}
 

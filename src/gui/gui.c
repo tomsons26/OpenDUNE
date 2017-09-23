@@ -191,7 +191,7 @@ void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom
  * @param bottom The bottom position of the rectangle.
  * @param colour The colour of the rectangle.
  */
-void GUI_DrawFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
+void _Fill_Rect(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
 {
 	uint16 x;
 	uint16 y;
@@ -300,7 +300,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 		if (g_textDisplayNeedsUpdate) {
 			Screen oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-			GUI_DrawFilledRectangle(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
+			_Fill_Rect(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
 
 			Fancy_Text_Print(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
 			Fancy_Text_Print(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
@@ -1397,7 +1397,7 @@ static void Text_PrintOnFilledRectangle(const char *string, uint16 top)
 
 	halfWidth = (String_Pixel_Width(string) / 2) + 4;
 
-	GUI_DrawFilledRectangle(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
+	_Fill_Rect(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
 	Fancy_Text_Print(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
 }
 
@@ -1445,10 +1445,10 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 
 	GUI_Screen_Copy(xSrc, 136, 33, 8, 7, 56, SCREEN_1, SCREEN_1);
 
-	GUI_DrawFilledRectangle(8, 136, 175, 191, 116);
+	_Fill_Rect(8, 136, 175, 191, 116);
 
 	if (hallOfFame) {
-		GUI_DrawFilledRectangle(8, 80, 311, 191, 116);
+		_Fill_Rect(8, 80, 311, 191, 116);
 		if (score != 0xFFFF) GUI_HallOfFame_DrawRank(score, false);
 	} else {
 		GFX_Screen_Copy2(8, 80, 8, 116, 304, 36, SCREEN_1, SCREEN_1, false);
@@ -1603,7 +1603,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 			posY = 93 + (i * 36) + (j * 9);
 
 			for (score = 0; score < scores[i][j].value; score += scores[i][j].increment) {
-				GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
+				_Fill_Rect(271, posY, 303, posY + 5, 226);
 				Fancy_Text_Print("%u", 287, posY - 1, 0x14, 0, 0x121, score);
 
 				GUI_HallOfFame_Tick();
@@ -1623,7 +1623,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 				GUI_EndStats_Sleep(g_timerTimeout);
 			}
 
-			GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
+			_Fill_Rect(271, posY, 303, posY + 5, 226);
 			Fancy_Text_Print("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
 
 			GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
@@ -1869,7 +1869,7 @@ void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16
 
 	colourSchema = s_colourBorderSchema[colourSchemaIndex];
 
-	if (fill) GUI_DrawFilledRectangle(left, top, left + width, top + height, colourSchema[0] & 0xFF);
+	if (fill) _Fill_Rect(left, top, left + width, top + height, colourSchema[0] & 0xFF);
 
 	GUI_DrawLine(left, top + height, left + width, top + height, colourSchema[1] & 0xFF);
 	GUI_DrawLine(left + width, top, left + width, top + height, colourSchema[1] & 0xFF);
@@ -1951,7 +1951,7 @@ void GUI_DrawProgressbar(uint16 current, uint16 max)
 	}
 
 	if (width != 0) {
-		GUI_DrawFilledRectangle(l_info[0], l_info[1] + l_info[3] - height, l_info[0] + width - 1, l_info[1] + l_info[3] - 1, (uint8)colour);
+		_Fill_Rect(l_info[0], l_info[1] + l_info[3] - height, l_info[0] + width - 1, l_info[1] + l_info[3] - 1, (uint8)colour);
 	}
 }
 
@@ -2743,7 +2743,7 @@ static void GUI_FactoryWindow_Init(void)
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 	Show_Mouse();
 
-	GUI_DrawFilledRectangle(64, 0, 112, SCREEN_HEIGHT - 1, GFX_GetPixel(72, 23));
+	_Fill_Rect(64, 0, 112, SCREEN_HEIGHT - 1, GFX_GetPixel(72, 23));
 
 	GUI_FactoryWindow_PrepareScrollList();
 
@@ -2991,7 +2991,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 
 	GUI_Screen_Copy(8, 165, 8, 186, 24, 14, SCREEN_0, SCREEN_1);
 
-	GUI_DrawFilledRectangle(64, 172, 255, 185, GFX_GetPixel(64, 186));
+	_Fill_Rect(64, 172, 255, 185, GFX_GetPixel(64, 186));
 
 	Fancy_Text_Print(string, 64, 175, 12, 0, 0x12);
 
@@ -3277,7 +3277,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 		default: break;
 	}
 
-	GUI_DrawFilledRectangle(8, 24, 311, 143, 12);
+	_Fill_Rect(8, 24, 311, 143, 12);
 
 	Hide_Mouse();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
@@ -3476,7 +3476,7 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	GUI_DrawFilledRectangle(128, 21, 310, 35, 116);
+	_Fill_Rect(128, 21, 310, 35, 116);
 
 	if (caption != NULL && *caption != '\0') {
 		Fancy_Text_Print(caption, 128, 23, 12, 0, 0x12);
@@ -4310,7 +4310,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	uint8 i;
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
-	GUI_DrawFilledRectangle(8, 80, 311, 178, 116);
+	_Fill_Rect(8, 80, 311, 178, 116);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 	battleString = String_Get_ByIndex(STR_BATTLE);

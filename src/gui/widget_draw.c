@@ -400,10 +400,10 @@ void GUI_Widget_Scrollbar_Draw(Widget *w)
 	}
 
 	/* Draw background */
-	GUI_DrawFilledRectangle(positionX, positionY, positionX + width - 1, positionY + height - 1, w->bgColourNormal);
+	_Fill_Rect(positionX, positionY, positionX + width - 1, positionY + height - 1, w->bgColourNormal);
 
 	/* Draw where we currently are */
-	GUI_DrawFilledRectangle(positionX + scrollLeft, positionY + scrollTop, positionX + scrollRight, positionY + scrollBottom, (scrollbar->pressed == 0) ? w->fgColourNormal : w->fgColourSelected);
+	_Fill_Rect(positionX + scrollLeft, positionY + scrollTop, positionX + scrollRight, positionY + scrollBottom, (scrollbar->pressed == 0) ? w->fgColourNormal : w->fgColourSelected);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
 		Conditional_Show_Mouse();

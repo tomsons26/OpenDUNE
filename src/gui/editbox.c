@@ -35,7 +35,7 @@ static void GUI_EditBox_BlinkCursor(uint16 positionX, bool resetBlink)
 	editBoxShowCursor = !editBoxShowCursor;
 
 	Hide_Mouse();
-	GUI_DrawFilledRectangle(positionX, g_curWidgetYBase, positionX + Char_Pixel_Width('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
+	_Fill_Rect(positionX, g_curWidgetYBase, positionX + Char_Pixel_Width('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
 	Show_Mouse();
 }
 

@@ -1002,7 +1002,7 @@ static void GameLoop_Main(void)
 
 			g_canSkipIntro = false;
 
-			GUI_DrawFilledRectangle(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 12);
+			_Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 12);
 
 			Input_History_Clear();
 

@@ -427,7 +427,7 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 		Conditional_Hide_Mouse(offsetX, offsetY, offsetX + width, offsetY + height);
 	}
 
-	GUI_DrawFilledRectangle(offsetX, offsetY, offsetX + width, offsetY + height, colour);
+	_Fill_Rect(offsetX, offsetY, offsetX + width, offsetY + height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
 		Conditional_Show_Mouse();
@@ -1274,7 +1274,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	GUI_DrawFilledRectangle(128, 48, 311, 159, 20);
+	_Fill_Rect(128, 48, 311, 159, 20);
 
 	Fancy_Text_Print(String_Get_ByIndex(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
 
