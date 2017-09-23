@@ -377,7 +377,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				addFrameCount++;
 
 				if ((animation->flags & 0x480) == 0x80) {
-					GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, 1, false);
+					Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, 1, false);
 				} else if ((animation->flags & 0x480) == 0x400) {
 					GUI_Screen_FadeIn(1, 24, 1, 24, 38, 120, SCREEN_1, SCREEN_0);
 				}
@@ -852,7 +852,7 @@ static void GameLoop_GameCredits(void)
 
 	GUI_Palette_RemapScreen(g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetWidth << 3, g_curWidgetHeight, SCREEN_1, remap);
 
-	GUI_Screen_FadeIn2(g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetWidth << 3, g_curWidgetHeight, SCREEN_1, SCREEN_0, 1, false);
+	Bit_It_In(g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetWidth << 3, g_curWidgetHeight, SCREEN_1, SCREEN_0, 1, false);
 
 	GameCredits_LoadPalette();
 

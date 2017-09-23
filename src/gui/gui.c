@@ -3145,7 +3145,7 @@ static void GUI_StrategicMap_DrawRegion(uint8 houseId, uint16 region, bool progr
 
 	if (!progressive) return;
 
-	GUI_Screen_FadeIn2(x + 8, y + 24, Sprite_GetWidth(sprite), Sprite_GetHeight(sprite), SCREEN_1, SCREEN_0, GUI_StrategicMap_FastForwardToggleWithESC() ? 0 : 1, false);
+	Bit_It_In(x + 8, y + 24, Sprite_GetWidth(sprite), Sprite_GetHeight(sprite), SCREEN_1, SCREEN_0, GUI_StrategicMap_FastForwardToggleWithESC() ? 0 : 1, false);
 }
 
 static void GUI_StrategicMap_PrepareRegions(uint16 campaignID)
@@ -3291,7 +3291,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_THREE_HOUSES_HAVE_COME_TO_DUNE));
 
-		GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
+		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 
 		Input_History_Clear();
 
@@ -3305,7 +3305,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 
 		GUI_StrategicMap_DrawText(String_Get_ByIndex(STR_TO_TAKE_CONTROL_OF_THE_LAND));
 
-		GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, GUI_StrategicMap_FastForwardToggleWithESC() ? 0 : 1, false);
+		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, GUI_StrategicMap_FastForwardToggleWithESC() ? 0 : 1, false);
 
 		for (g_timerTimeout = 60; g_timerTimeout != 0; sleepIdle()) {
 			if (GUI_StrategicMap_FastForwardToggleWithESC()) break;
@@ -3325,7 +3325,7 @@ uint16 Map_Selection(uint16 campaignID, bool win)
 	if (GUI_StrategicMap_FastForwardToggleWithESC()) {
 		GUI_Screen_Copy(1, 24, 1, 24, 38, 120, SCREEN_1, SCREEN_0);
 	} else {
-		GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
+		Bit_It_In(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 	}
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_0, SCREEN_1);
@@ -3700,7 +3700,7 @@ void GUI_FactoryWindow_PrepareScrollList(void)
  * @param delay The delay.
  * @param skipNull Wether to copy pixels with colour 0.
  */
-void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Screen screenDst, uint16 delay, bool skipNull)
+void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Screen screenDst, uint16 delay, bool skipNull)
 {
 	Screen oldScreenID;
 	uint16 i;
