@@ -376,7 +376,7 @@ static void Read_Scenario_INI_Reinforcement(const char *key, char *settings)
 	
 	//... this was a seperate function called Source_From_Name
 	
-	     if (strcasecmp(settings, "NORTH")     == 0) locationID = 0;
+	     if (strcasecmp(settings, "NORTH")     == 0) locationID = 0; //inlined Source_From_Name
 	else if (strcasecmp(settings, "EAST")      == 0) locationID = 1;
 	else if (strcasecmp(settings, "SOUTH")     == 0) locationID = 2;
 	else if (strcasecmp(settings, "WEST")      == 0) locationID = 3;
