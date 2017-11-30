@@ -24,7 +24,7 @@ extern MSBuffer *g_bufferMusic;
 extern MSBuffer *g_bufferSound[4];
 
 extern void Sound_Init(void);
-extern bool Driver_Music_IsPlaying(void);
+extern bool Score_Status(void);
 extern bool Driver_Voice_IsPlaying(void);
 extern void Driver_Sound_Play(int16 index, int16 volume);
 extern void Stop_Score(void);

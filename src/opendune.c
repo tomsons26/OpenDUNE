@@ -905,9 +905,9 @@ static void GameLoop_Main(void)
 	Sprites_Init();
 
 #ifdef MUNT
-	if (IniFile_GetInteger("mt32midi", 1) != 0) Music_InitMT32();
+	if (IniFile_GetInteger("mt32midi", 1) != 0) MT32_Init();
 #else
-	if (IniFile_GetInteger("mt32midi", 0) != 0) Music_InitMT32();
+	if (IniFile_GetInteger("mt32midi", 0) != 0) MT32_Init();
 #endif
 
 	Input_Flags_SetBits(INPUT_FLAG_KEY_REPEAT | INPUT_FLAG_UNKNOWN_0010 | INPUT_FLAG_UNKNOWN_0200 |
@@ -1075,7 +1075,7 @@ static void GameLoop_Main(void)
 			} else {
 				g_musicInBattle = 0;
 				if (g_enableSoundMusic != 0 && g_timerGUI > l_timerNext) {
-					if (!Driver_Music_IsPlaying()) {
+					if (!Score_Status()) {
 						Music_Play(Tools_RandomLCG_Range(0, 8) + 8);
 						l_timerNext = g_timerGUI + 300;
 					}

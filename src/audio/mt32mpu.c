@@ -861,7 +861,7 @@ void MPU_Stop(uint16 index)
 	data->playing = 0;
 }
 
-uint16 MPU_IsPlaying(uint16 index)
+uint16 AIL_sequence_status(uint16 index)
 {
 	MSData *data;
 

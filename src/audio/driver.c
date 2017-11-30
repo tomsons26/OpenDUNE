@@ -169,14 +169,14 @@ void Sound_Init(void)
 	g_enableVoices = Drivers_Voice_Init(g_enableVoices);
 }
 
-bool Driver_Music_IsPlaying(void)
+bool Score_Status(void)
 {
 	MSBuffer *buffer = g_bufferMusic;
 
 	if (g_driverMusic->index == 0xFFFF) return false;
 	if (buffer->index == 0xFFFF) return false;
 
-	return MPU_IsPlaying(buffer->index) == 1;
+	return AIL_sequence_status(buffer->index) == 1;
 }
 
 bool Driver_Voice_IsPlaying(void)

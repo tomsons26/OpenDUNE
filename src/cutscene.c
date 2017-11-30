@@ -972,7 +972,7 @@ static void Gameloop_Logos(void)
 
 	_Fade_Palette_To(g_palette2, 60);
 
-	while (Driver_Music_IsPlaying()) sleepIdle();
+	while (Score_Status()) sleepIdle();
 
 	_Fade_Palette_To(g_palette2, 60);
 
