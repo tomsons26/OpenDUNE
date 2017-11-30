@@ -228,7 +228,7 @@ extern uint16 GUI_Widget_Scrollbar_CalculatePosition(WidgetScrollbar *scrollbar)
 extern uint16 GUI_Widget_Scrollbar_CalculateScrollPosition(WidgetScrollbar *scrollbar);
 extern void GUI_Widget_Free_WithScrollbar(Widget *w);
 extern Widget *GUI_Widget_Insert(Widget *w1, Widget *w2);
-extern uint16 Widget_SetCurrentWidget(uint16 index);
+extern uint16 Change_Window(uint16 index);
 extern uint16 Widget_SetAndPaintCurrentWidget(uint16 index);
 extern void Widget_PaintCurrentWidget(void);
 

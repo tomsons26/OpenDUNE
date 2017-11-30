@@ -1079,7 +1079,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	textTick = 0;
 	textDelay = 0;
 
-	oldWidgetID = Widget_SetCurrentWidget(8);
+	oldWidgetID = Change_Window(8);
 	oldScreenID = _Set_LogicPage(SCREEN_2);
 
 	wsa = NULL;
@@ -1253,9 +1253,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		GUI_Mentat_DrawInfo(pictureDetails, (g_curWidgetXBase << 3) + 5, g_curWidgetYBase + 3, 8, 0, lines, 0x31);
 
 		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-		Low_Hide_Mouse_InWidget(g_curWidgetIndex);
+		Window_Hide_Mouse(g_curWidgetIndex);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
-		Low_Show_Mouse_InWidget();
+		Window_Show_Mouse();
 		dirty = false;
 	}
 
@@ -1263,10 +1263,10 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 	_Set_LogicPage(SCREEN_2);
 	Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-	Low_Hide_Mouse_InWidget(g_curWidgetIndex);
+	Window_Hide_Mouse(g_curWidgetIndex);
 	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
-	Low_Show_Mouse_InWidget();
-	Widget_SetCurrentWidget(oldWidgetID);
+	Window_Show_Mouse();
+	Change_Window(oldWidgetID);
 	_Set_LogicPage(oldScreenID);
 
 	_Clear_KeyBuffer();

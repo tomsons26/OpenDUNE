@@ -295,7 +295,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 		}
 		if (displayTimer > g_timerGUI) return;
 
-		oldWidgetId = Widget_SetCurrentWidget(7);
+		oldWidgetId = Change_Window(7);
 
 		if (g_textDisplayNeedsUpdate) {
 			Screen oldScreenID = _Set_LogicPage(SCREEN_1);
@@ -310,7 +310,7 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 			_Set_LogicPage(oldScreenID);
 		}
 
-		Low_Hide_Mouse_InWidget(7);
+		Window_Hide_Mouse(7);
 
 		if (textOffset + g_curWidgetHeight > 24) {
 			height = 24 - textOffset;
@@ -319,9 +319,9 @@ void GUI_DisplayText(const char *str, int16 importance, ...)
 		}
 
 		GUI_Screen_Copy(g_curWidgetXBase, textOffset, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, height, SCREEN_1, SCREEN_0);
-		Low_Show_Mouse_InWidget();
+		Window_Show_Mouse();
 
-		Widget_SetCurrentWidget(oldWidgetId);
+		Change_Window(oldWidgetId);
 
 		if (textOffset != 0) {
 			if (line3Importance <= line2Importance) {
@@ -755,7 +755,7 @@ static void GUI_Widget_SetProperties(uint16 index, uint16 xpos, uint16 ypos, uin
 	g_widgetProperties[index].width  = width;
 	g_widgetProperties[index].height = height;
 
-	if (g_curWidgetIndex == index) Widget_SetCurrentWidget(index);
+	if (g_curWidgetIndex == index) Change_Window(index);
 }
 
 /**
@@ -785,11 +785,11 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-	oldWidgetId = Widget_SetCurrentWidget(1);
+	oldWidgetId = Change_Window(1);
 
 	g_widgetProperties[1].height = g_fontCurrent->height * max(GUI_SplitText(textBuffer, ((g_curWidgetWidth - ((spriteID == 0xFFFF) ? 2 : 7)) << 3) - 6, '\r'), 3) + 18;
 
-	Widget_SetCurrentWidget(1);
+	Change_Window(1);
 
 	screenBackup = malloc(GFX_GetSize(g_curWidgetWidth * 8, g_curWidgetHeight));
 
@@ -841,7 +841,7 @@ uint16 GUI_DisplayModalMessage(const char *str, uint16 spriteID, ...)
 		GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, screenBackup);
 	}
 
-	Widget_SetCurrentWidget(oldWidgetId);
+	Change_Window(oldWidgetId);
 
 	if (screenBackup != NULL) {
 		free(screenBackup);
@@ -1876,8 +1876,8 @@ void _Hilite_Box(uint16 left, uint16 top, uint16 width, uint16 height, uint16 co
 	_Draw_Line(left, top, left + width, top, colourSchema[2] & 0xFF);
 	_Draw_Line(left, top, left, top + height, colourSchema[2] & 0xFF);
 
-	GFX_PutPixel(left, top + height, colourSchema[3] & 0xFF);
-	GFX_PutPixel(left + width, top, colourSchema[3] & 0xFF);
+	_Put_Pixel(left, top + height, colourSchema[3] & 0xFF);
+	_Put_Pixel(left + width, top, colourSchema[3] & 0xFF);
 }
 
 /**
@@ -2070,7 +2070,7 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 
 	oldScreenID = _Set_LogicPage(SCREEN_1);
 
-	oldWidgetId = Widget_SetCurrentWidget(4);
+	oldWidgetId = Change_Window(4);
 
 	creditsDiff = h->credits - creditsAnimation;
 	if (creditsDiff != 0) {
@@ -2135,14 +2135,14 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 	}
 
 	if (!GFX_Screen_IsActive(oldScreenID)) {
-		Low_Hide_Mouse_InWidget(5);
+		Window_Hide_Mouse(5);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase - 40, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, oldScreenID);
-		Low_Show_Mouse_InWidget();
+		Window_Show_Mouse();
 	}
 
 	_Set_LogicPage(oldScreenID);
 
-	Widget_SetCurrentWidget(oldWidgetId);
+	Change_Window(oldWidgetId);
 }
 
 /**
@@ -2200,7 +2200,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 			GUI_DrawInterfaceAndRadar(SCREEN_0);
 		}
 
-		Widget_SetCurrentWidget(g_table_selectionType[selectionType].defaultWidget);
+		Change_Window(g_table_selectionType[selectionType].defaultWidget);
 
 		if (g_curWidgetIndex != 0) {
 			GUI_Widget_DrawBorder(g_curWidgetIndex, 0, false);
@@ -2238,7 +2238,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 					Set_Mouse_Cursor(0, 0, g_sprites[0]);
 				}
 
-				Widget_SetCurrentWidget(g_table_selectionType[selectionType].defaultWidget);
+				Change_Window(g_table_selectionType[selectionType].defaultWidget);
 				break;
 
 			case SELECTIONTYPE_TARGET:
@@ -3759,7 +3759,7 @@ void Bit_It_In(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Sc
 
 			if (skipNull && colour == 0) continue;
 
-			GFX_PutPixel(curX, curY, colour);
+			_Put_Pixel(curX, curY, colour);
 		}
 
 		Timer_Sleep(delay);
@@ -3932,20 +3932,20 @@ void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom
 
 /**
  * Show the mouse if needed. Should be used in combination with
- *  Low_Hide_Mouse_InWidget().
+ *  Window_Hide_Mouse().
  */
-void Low_Show_Mouse_InWidget(void)
+void Window_Show_Mouse(void)
 {
 	Conditional_Show_Mouse();
 }
 
 /**
  * Hide the mouse when it is inside the specified widget. Works with
- *  #Low_Show_Mouse_InWidget(), which only calls #Low_Show_Mouse() when
+ *  #Window_Show_Mouse(), which only calls #Low_Show_Mouse() when
  *  mouse was really hidden.
  * @param widgetIndex The index of the widget to check on.
  */
-void Low_Hide_Mouse_InWidget(uint16 widgetIndex)
+void Window_Hide_Mouse(uint16 widgetIndex)
 {
 	uint16 left, top;
 	uint16 width, height;
@@ -4471,7 +4471,7 @@ void GUI_DrawScreen(Screen screenID)
 			Map_SetSelectionObjectPosition(0xFFFF);
 			hasScrolled = true;
 
-			Low_Hide_Mouse_InWidget(2);
+			Window_Hide_Mouse(2);
 
 			GUI_Screen_Copy(max(-xOffset << 1, 0), 40 + max(-yOffset << 4, 0), max(0, xOffset << 1), 40 + max(0, yOffset << 4), xOverlap << 1, yOverlap << 4, SCREEN_0, SCREEN_1);
 		} else {
@@ -4526,7 +4526,7 @@ void GUI_DrawScreen(Screen screenID)
 	Map_SetSelectionObjectPosition(g_selectionRectanglePosition);
 	Map_UpdateMinimapPosition(g_minimapPosition, false);
 
-	Low_Show_Mouse_InWidget();
+	Window_Show_Mouse();
 }
 
 /**

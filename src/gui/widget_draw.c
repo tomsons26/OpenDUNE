@@ -639,7 +639,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		int i;
 
 		oldScreenID = _Set_LogicPage(SCREEN_1);
-		oldWidgetID = Widget_SetCurrentWidget(6);
+		oldWidgetID = Change_Window(6);
 
 		widget30 = GUI_Widget_Get_ByIndex(w, 7);
 		GUI_Widget_MakeInvisible(widget30);
@@ -901,13 +901,13 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 	}
 
 	if (actionType != 0) {
-		Low_Hide_Mouse_InWidget(6);
+		Window_Hide_Mouse(6);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, SCREEN_0);
-		Low_Show_Mouse_InWidget();
+		Window_Show_Mouse();
 	}
 
 	if (actionType > 1) {
-		Widget_SetCurrentWidget(oldWidgetID);
+		Change_Window(oldWidgetID);
 		_Set_LogicPage(oldScreenID);
 	}
 }

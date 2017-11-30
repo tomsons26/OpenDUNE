@@ -107,7 +107,7 @@ extern uint16 g_cursorDefaultSpriteID;
 extern bool g_structureHighHealth;
 extern bool g_var_37B8;
 
-#define GUI_ClearScreen(screenID) GFX_ClearScreen(screenID)
+#define GUI_ClearScreen(screenID) Clear_Screen(screenID)
 extern void GUI_DrawScreen(Screen screenID);
 extern void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, uint16 flags, ...);
 extern void GUI_DrawInterfaceAndRadar(Screen screenID);
@@ -161,8 +161,8 @@ extern void Show_Mouse(void);
 extern void Hide_Mouse(void);
 extern void Conditional_Show_Mouse(void);
 extern void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom);
-extern void Low_Show_Mouse_InWidget(void);
-extern void Low_Hide_Mouse_InWidget(uint16 widgetIndex);
+extern void Window_Show_Mouse(void);
+extern void Window_Hide_Mouse(uint16 widgetIndex);
 extern void _Set_Mouse_Pos(uint16 x, uint16 y);
 extern uint16 GUI_HallOfFame_Tick(void);
 extern void GUI_HallOfFame_Show(uint16 score);

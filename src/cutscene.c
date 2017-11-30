@@ -77,7 +77,7 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 	s_palettePartCount        = 0;
 	s_paletteAnimationTimeout = 0;
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	Load_Data("INTRO.PAL", GamePalette, 256 * 3);
 
@@ -588,7 +588,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 	uint16 stage = 4;
 	uint16 counter = 60;
 
-	Widget_SetCurrentWidget(windowID);
+	Change_Window(windowID);
 
 	spriteX = (g_curWidgetWidth << 3) - Sprite_GetWidth(g_sprites[spriteID]);
 	spriteY = g_curWidgetHeight - Sprite_GetHeight(g_sprites[spriteID]);
@@ -815,7 +815,7 @@ static void GameLoop_GameCredits(void)
 
 	Hide_Mouse();
 
-	Widget_SetCurrentWidget(20);
+	Change_Window(20);
 
 	Load_Picture("BIGPLAN.CPS", SCREEN_1, Palette);
 
@@ -881,7 +881,7 @@ static void GameLoop_GameCredits(void)
 
 	_Fade_Score();
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 }
 
 /**
@@ -945,7 +945,7 @@ static void Gameloop_Logos(void)
 	oldScreenID = _Set_LogicPage(SCREEN_0);
 
 	Set_Palette(g_palette2);
-	GFX_ClearScreen(SCREEN_0);
+	Clear_Screen(SCREEN_0);
 
 	Load_Data("WESTWOOD.PAL", Palette, 256 * 3);
 
@@ -976,7 +976,7 @@ static void Gameloop_Logos(void)
 
 	_Fade_Palette_To(g_palette2, 60);
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	Load_Picture(String_GenerateFilename("AND"), SCREEN_1, Palette);
 

@@ -936,7 +936,7 @@ Widget *GUI_Widget_Insert(Widget *w1, Widget *w2)
  * @param index %Widget number to select.
  * @return Index of the previous selected widget.
  */
-uint16 Widget_SetCurrentWidget(uint16 index)
+uint16 Change_Window(uint16 index)
 {
 	uint16 oldIndex = g_curWidgetIndex;
 	g_curWidgetIndex = index;
@@ -958,7 +958,7 @@ uint16 Widget_SetCurrentWidget(uint16 index)
  */
 uint16 Widget_SetAndPaintCurrentWidget(uint16 index)
 {
-	index = Widget_SetCurrentWidget(index);
+	index = Change_Window(index);
 
 	Widget_PaintCurrentWidget();
 

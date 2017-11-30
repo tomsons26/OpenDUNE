@@ -224,7 +224,7 @@ void GFX_Init_SpriteInfo(uint16 widthSize, uint16 heightSize)
  * @param y The Y-coordinate on the screen.
  * @param colour The colour of the pixel to put on the screen.
  */
-void GFX_PutPixel(uint16 x, uint16 y, uint8 colour)
+void _Put_Pixel(uint16 x, uint16 y, uint8 colour)
 {
 	if (y >= SCREEN_HEIGHT) return;
 	if (x >= SCREEN_WIDTH) return;
@@ -360,7 +360,7 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
 /**
  * Clears the screen.
  */
-void GFX_ClearScreen(Screen screenID)
+void Clear_Screen(Screen screenID)
 {
 	memset(Get_Page(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 }

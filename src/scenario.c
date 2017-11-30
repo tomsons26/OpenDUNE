@@ -29,7 +29,7 @@ Scenario g_scenario;
 
 static void *s_scenarioBuffer = NULL;
 
-static void Scenario_Load_General(void)
+static void Read_Scenario_INI_General(void)
 {
 	g_scenario.winFlags          = Ini_GetInteger("BASIC", "WinFlags",    0,                            s_scenarioBuffer);
 	g_scenario.loseFlags         = Ini_GetInteger("BASIC", "LoseFlags",   0,                            s_scenarioBuffer);
@@ -47,7 +47,7 @@ static void Scenario_Load_General(void)
 	g_selectionPosition = g_selectionRectanglePosition;
 }
 
-static void Scenario_Load_House(uint8 houseID)
+static void Read_Scenario_INI_House(uint8 houseID)
 {
 	const char *houseName = g_table_HouseType[houseID].name;
 	char *HousesType;
@@ -78,13 +78,13 @@ static void Scenario_Load_House(uint8 houseID)
 	g_playerCreditsNoSilo = h->credits;
 }
 
-static void Scenario_Load_Houses(void)
+static void Read_Scenario_INI_Houses(void)
 {
 	House *h;
 	uint8 houseID;
 
 	for (houseID = 0; houseID < HOUSE_MAX; houseID++) {
-		Scenario_Load_House(houseID);
+		Read_Scenario_INI_House(houseID);
 	}
 
 	h = g_playerHouse;
@@ -110,7 +110,7 @@ static void Scenario_Load_Houses(void)
 	}
 }
 
-static void Scenario_Load_Unit(const char *key, char *settings)
+static void Read_Scenario_INI_Unit(const char *key, char *settings)
 {
 	uint8 HousesType, unitType, actionType;
 	int8 orientation;
@@ -201,7 +201,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	Unit_SetSpeed(u, 0);
 }
 
-static void Scenario_Load_Structure(const char *key, char *settings)
+static void Read_Scenario_INI_Structure(const char *key, char *settings)
 {
 	uint8 index, HousesType, structureType;
 	uint16 hitpoints, position;
@@ -282,7 +282,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	}
 }
 
-static void Scenario_Load_Map(const char *key, char *settings)
+static void Read_Scenario_INI_Map(const char *key, char *settings)
 {
 	Tile *t;
 	uint16 packed;
@@ -314,13 +314,13 @@ static void Scenario_Load_Map(const char *key, char *settings)
 	if (!t->Revealed) t->overlaySpriteID = g_veiledSpriteID;
 }
 
-static void Scenario_Load_Map_Bloom(uint16 packed, Tile *t)
+static void Read_Scenario_INI_Map_Bloom(uint16 packed, Tile *t)
 {
 	t->groundSpriteID = g_bloomSpriteID;
 	g_mapSpriteID[packed] |= 0x8000;
 }
 
-static void Scenario_Load_Map_Field(uint16 packed, Tile *t)
+static void Read_Scenario_INI_Map_Field(uint16 packed, Tile *t)
 {
 	Map_Bloom_ExplodeSpice(packed, HOUSE_INVALID);
 
@@ -330,13 +330,13 @@ static void Scenario_Load_Map_Field(uint16 packed, Tile *t)
 	}
 }
 
-static void Scenario_Load_Map_Special(uint16 packed, Tile *t)
+static void Read_Scenario_INI_Map_Special(uint16 packed, Tile *t)
 {
 	t->groundSpriteID = g_bloomSpriteID + 1;
 	g_mapSpriteID[packed] |= 0x8000;
 }
 
-static void Scenario_Load_Reinforcement(const char *key, char *settings)
+static void Read_Scenario_INI_Reinforcement(const char *key, char *settings)
 {
 	uint8 index, HousesType, unitType, locationID;
 	uint16 timeBetween;
@@ -405,7 +405,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	g_scenario.reinforcement[index].repeat      = repeat ? 1 : 0;
 }
 
-static void Scenario_Load_Team(const char *key, char *settings)
+static void Read_Scenario_INI_Team(const char *key, char *settings)
 {
 	uint8 HousesType, teamActionType, movementType;
 	uint16 minMembers, maxMembers;
@@ -468,7 +468,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
  * @param key Unit type to set.
  * @param settings Count to set.
  */
-static void Scenario_Load_Choam(const char *key, char *settings)
+static void Read_Scenario_INI_Choam(const char *key, char *settings)
 {
 	uint8 unitType;
 
@@ -478,7 +478,7 @@ static void Scenario_Load_Choam(const char *key, char *settings)
 	g_starportAvailable[unitType] = atoi(settings);
 }
 
-static void Scenario_Load_MapParts(const char *key, void (*ptr)(uint16 packed, Tile *t))
+static void Read_Scenario_INI_MapParts(const char *key, void (*ptr)(uint16 packed, Tile *t))
 {
 	char *s;
 	char buf[128];
@@ -499,7 +499,7 @@ static void Scenario_Load_MapParts(const char *key, void (*ptr)(uint16 packed, T
 	}
 }
 
-static void Scenario_Load_Chunk(const char *category, void (*ptr)(const char *key, char *settings))
+static void Read_Scenario_INI_Chunk(const char *category, void (*ptr)(const char *key, char *settings))
 {
 	char *buffer = g_readBuffer;
 
@@ -516,7 +516,7 @@ static void Scenario_Load_Chunk(const char *category, void (*ptr)(const char *ke
 	}
 }
 
-bool Scenario_Load(uint16 scenarioID, uint8 houseID)
+bool Read_Scenario_INI(uint16 scenarioID, uint8 houseID)
 {
 	char filename[14];
 	int i;
@@ -532,7 +532,7 @@ bool Scenario_Load(uint16 scenarioID, uint8 houseID)
 
 	memset(&g_scenario, 0, sizeof(Scenario));
 
-	Scenario_Load_General();
+	Read_Scenario_INI_General();
 	Sprites_LoadTiles();
 	Map_CreateLandscape(g_scenario.mapSeed);
 
@@ -540,18 +540,18 @@ bool Scenario_Load(uint16 scenarioID, uint8 houseID)
 		g_scenario.reinforcement[i].unitID = UNIT_INDEX_INVALID;
 	}
 
-	Scenario_Load_Houses();
+	Read_Scenario_INI_Houses();
 
-	Scenario_Load_Chunk("UNITS", &Scenario_Load_Unit);
-	Scenario_Load_Chunk("STRUCTURES", &Scenario_Load_Structure);
-	Scenario_Load_Chunk("MAP", &Scenario_Load_Map);
-	Scenario_Load_Chunk("REINFORCEMENTS", &Scenario_Load_Reinforcement);
-	Scenario_Load_Chunk("TEAMS", &Scenario_Load_Team);
-	Scenario_Load_Chunk("CHOAM", &Scenario_Load_Choam);
+	Read_Scenario_INI_Chunk("UNITS", &Read_Scenario_INI_Unit);
+	Read_Scenario_INI_Chunk("STRUCTURES", &Read_Scenario_INI_Structure);
+	Read_Scenario_INI_Chunk("MAP", &Read_Scenario_INI_Map);
+	Read_Scenario_INI_Chunk("REINFORCEMENTS", &Read_Scenario_INI_Reinforcement);
+	Read_Scenario_INI_Chunk("TEAMS", &Read_Scenario_INI_Team);
+	Read_Scenario_INI_Chunk("CHOAM", &Read_Scenario_INI_Choam);
 
-	Scenario_Load_MapParts("Bloom", Scenario_Load_Map_Bloom);
-	Scenario_Load_MapParts("Field", Scenario_Load_Map_Field);
-	Scenario_Load_MapParts("Special", Scenario_Load_Map_Special);
+	Read_Scenario_INI_MapParts("Bloom", Read_Scenario_INI_Map_Bloom);
+	Read_Scenario_INI_MapParts("Field", Read_Scenario_INI_Map_Field);
+	Read_Scenario_INI_MapParts("Special", Read_Scenario_INI_Map_Special);
 
 	g_tickScenarioStart = g_timerGame;
 

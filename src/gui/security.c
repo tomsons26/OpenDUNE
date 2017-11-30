@@ -109,7 +109,7 @@ bool GUI_Security_Show(void)
 
 	questionsCount = atoi(Extract_String(STR_SECURITY_COUNT));
 
-	oldCurrentWidget = Widget_SetCurrentWidget(8);
+	oldCurrentWidget = Change_Window(8);
 
 	oldScreenID = _Set_LogicPage(SCREEN_2);
 
@@ -121,7 +121,7 @@ bool GUI_Security_Show(void)
 
 		questionIndex = Tools_RandomLCG_Range(0, questionsCount - 1) * 3 + STR_SECURITY_QUESTIONS;
 
-		Widget_SetCurrentWidget(8);
+		Change_Window(8);
 
 		wsa = Open_Animation(Extract_String(questionIndex + 1), Get_Page(SCREEN_1), Get_Buff(SCREEN_1), false);
 		Animate_Frame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
@@ -129,16 +129,16 @@ bool GUI_Security_Show(void)
 
 		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-		Low_Hide_Mouse_InWidget(g_curWidgetIndex);
+		Window_Hide_Mouse(g_curWidgetIndex);
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
-		Low_Show_Mouse_InWidget();
+		Window_Show_Mouse();
 
 		strncpy(g_readBuffer, Extract_String(questionIndex), g_readBufferSize);
 		GUI_Security_DrawText(g_readBuffer);
 
 		g_interrogationTimer = g_timerGUI + (uint32)strlen(g_readBuffer) * 4;
 
-		Widget_SetCurrentWidget(9);
+		Change_Window(9);
 
 		Hide_Mouse();
 		GUI_Screen_Copy(g_curWidgetXBase - 1, g_curWidgetYBase - 8, 0, 0, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_0, SCREEN_2);
@@ -200,7 +200,7 @@ bool GUI_Security_Show(void)
 		GUI_Security_UndrawText();
 	}
 
-	Widget_SetCurrentWidget(oldCurrentWidget);
+	Change_Window(oldCurrentWidget);
 
 	_Set_LogicPage(oldScreenID);
 

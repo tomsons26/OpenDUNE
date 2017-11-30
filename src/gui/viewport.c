@@ -358,7 +358,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 	oldScreenID = _Set_LogicPage(SCREEN_1);
 
-	oldWidgetID = Widget_SetCurrentWidget(2);
+	oldWidgetID = Change_Window(2);
 
 	if (g_dirtyViewportCount != 0 || forceRedraw) {
 		for (y = 0; y < 10; y++) {
@@ -737,7 +737,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 				oldScreenID2 = _Set_LogicPage(SCREEN_1);
 
-				Low_Hide_Mouse_InWidget(3);
+				Window_Hide_Mouse(3);
 			}
 
 			GUI_Widget_Viewport_DrawTile(curPos);
@@ -752,7 +752,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 			_Set_LogicPage(oldScreenID2);
 
-			Low_Show_Mouse_InWidget();
+			Window_Show_Mouse();
 		}
 
 		if (g_changedTilesCount == lengthof(g_changedTiles)) {
@@ -776,7 +776,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 	if (updateDisplay && !drawToMainScreen) {
 		if (g_viewport_fadein) {
-			Low_Hide_Mouse_InWidget(g_curWidgetIndex);
+			Window_Hide_Mouse(g_curWidgetIndex);
 
 			/* ENHANCEMENT -- When fading in the game on start, you don't see the fade as it is against the already drawn screen. */
 			if (g_dune2_enhanced) {
@@ -786,7 +786,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			}
 
 			GUI_Screen_FadeIn(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, SCREEN_0);
-			Low_Show_Mouse_InWidget();
+			Window_Show_Mouse();
 
 			g_viewport_fadein = false;
 		} else {
@@ -809,7 +809,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				height = 16;
 
 				if (!init) {
-					Low_Hide_Mouse_InWidget(g_curWidgetIndex);
+					Window_Hide_Mouse(g_curWidgetIndex);
 
 					init = true;
 				}
@@ -817,13 +817,13 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				GUI_Screen_Copy(x, y, x, y, width, height, SCREEN_ACTIVE, SCREEN_0);
 			}
 
-			if (init) Low_Show_Mouse_InWidget();
+			if (init) Window_Show_Mouse();
 		}
 	}
 
 	_Set_LogicPage(oldScreenID);
 
-	Widget_SetCurrentWidget(oldWidgetID);
+	Change_Window(oldWidgetID);
 }
 
 /**
@@ -917,7 +917,7 @@ void GUI_Widget_Viewport_DrawTile(uint16 packed)
 		y *= g_scenario.mapScale + 1;
 		Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], x, y, 3, 0x4000);
 	} else {
-		GFX_PutPixel(x + 256, y + 136, colour & 0xFF);
+		_Put_Pixel(x + 256, y + 136, colour & 0xFF);
 	}
 }
 
@@ -941,7 +941,7 @@ void GUI_Widget_Viewport_RedrawMap(Screen screenID)
 
 	_Set_LogicPage(oldScreenID);
 
-	Low_Hide_Mouse_InWidget(3);
+	Window_Hide_Mouse(3);
 	GUI_Screen_Copy(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
-	Low_Show_Mouse_InWidget();
+	Window_Show_Mouse();
 }

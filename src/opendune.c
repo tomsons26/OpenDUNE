@@ -803,7 +803,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		Fancy_Text_Print("V1.07", 319, 192, 133, 0, 0x231, 0x39);
 		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-		Widget_SetCurrentWidget(13);
+		Change_Window(13);
 
 		GUI_Widget_DrawBorder(13, 2, 1);
 
@@ -1128,11 +1128,11 @@ static void GameLoop_Main(void)
 
 	Hide_Mouse();
 
-	Widget_SetCurrentWidget(0);
+	Change_Window(0);
 
 	_Set_LogicPage(SCREEN_1);
 
-	GFX_ClearScreen(SCREEN_1);
+	Clear_Screen(SCREEN_1);
 
 	GUI_Screen_FadeIn(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 }
@@ -1168,7 +1168,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	MDisabled = -1;
 
 	GFX_Init();
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	Font_Select(FontNew8Ptr);
 
@@ -1180,7 +1180,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 
 	Tools_RandomLCG_Seed((unsigned)time(NULL));
 
-	Widget_SetCurrentWidget(0);
+	Change_Window(0);
 
 	return true;
 }
@@ -1471,7 +1471,7 @@ void Game_LoadScenario(uint8 houseID, uint16 scenarioID)
 
 	g_validateStrictIfZero++;
 
-	if (!Scenario_Load(scenarioID, houseID)) {
+	if (!Read_Scenario_INI(scenarioID, houseID)) {
 		GUI_DisplayModalMessage("No more scenarios!", 0xFFFF);
 
 		Prog_End();

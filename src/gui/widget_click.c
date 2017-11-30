@@ -444,7 +444,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	_Set_LogicPage(SCREEN_1);
 
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
 	GUI_Widget_DrawBorder(g_curWidgetIndex, 2, true);
 
@@ -539,7 +539,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	Hide_Mouse();
 
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
 	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 
@@ -550,7 +550,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 static void GUI_Window_BackupScreen(WindowDesc *desc)
 {
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
 	Hide_Mouse();
 	GFX_CopyToBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Page(SCREEN_2));
@@ -559,7 +559,7 @@ static void GUI_Window_BackupScreen(WindowDesc *desc)
 
 static void GUI_Window_RestoreScreen(WindowDesc *desc)
 {
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
 	Hide_Mouse();
 	GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Page(SCREEN_2));
@@ -867,7 +867,7 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 
 	_Set_LogicPage(SCREEN_0);
 
-	Widget_SetCurrentWidget(15);
+	Change_Window(15);
 
 	Hide_Mouse();
 	_Hilite_Box((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);

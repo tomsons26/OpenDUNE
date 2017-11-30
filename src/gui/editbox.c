@@ -67,7 +67,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 		oldScreenID = _Set_LogicPage(SCREEN_0);
 
-		oldWidgetID = Widget_SetCurrentWidget(widgetID);
+		oldWidgetID = Change_Window(widgetID);
 
 		returnValue = 0x0;
 	}
@@ -174,7 +174,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		Input_Flags_ClearBits(INPUT_FLAG_NO_TRANSLATE);
 		Input_Flags_SetBits(INPUT_FLAG_UNKNOWN_2000);
 
-		Widget_SetCurrentWidget(oldWidgetID);
+		Change_Window(oldWidgetID);
 
 		_Set_LogicPage(oldScreenID);
 	}
