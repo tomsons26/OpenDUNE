@@ -1699,7 +1699,7 @@ uint8 Choose_Side(void)
 			w = GUI_Widget_Link(w, w2);
 		}
 
-		Load_Picture(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
+		Load_Picture(Language_Name("HERALD"), SCREEN_1, NULL);
 
 		Hide_Mouse();
 		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -1753,7 +1753,7 @@ uint8 Choose_Side(void)
 		strncpy(g_readBuffer, Extract_String(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
-		Load_Picture(String_GenerateFilename("MISC"), SCREEN_1, GamePalette);
+		Load_Picture(Language_Name("MISC"), SCREEN_1, GamePalette);
 
 		Hide_Mouse();
 

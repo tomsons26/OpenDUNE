@@ -790,7 +790,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		g_widgetProperties[13].yBase  = 160 - ((g_widgetProperties[21].height * g_fontCurrent->height) >> 1);
 		g_widgetProperties[13].height = (g_widgetProperties[21].height * g_fontCurrent->height) + 11;
 
-		Load_Picture(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
+		Load_Picture(Language_Name("TITLE"), SCREEN_1, NULL);
 
 		Hide_Mouse();
 

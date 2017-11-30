@@ -868,7 +868,7 @@ static void GameLoop_GameCredits(void)
 	Set_Palette(GamePalette);
 
 	for (;; sleepIdle()) {
-		Load_Data(String_GenerateFilename("CREDITS"), credits_buffer, Get_Buff(SCREEN_3));
+		Load_Data(Language_Name("CREDITS"), credits_buffer, Get_Buff(SCREEN_3));
 
 		GameCredits_Play(credits_buffer, 20, SCREEN_1, SCREEN_2, 6);
 
@@ -978,7 +978,7 @@ static void Gameloop_Logos(void)
 
 	Clear_Screen(SCREEN_ACTIVE);
 
-	Load_Picture(String_GenerateFilename("AND"), SCREEN_1, Palette);
+	Load_Picture(Language_Name("AND"), SCREEN_1, Palette);
 
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 

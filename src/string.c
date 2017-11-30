@@ -57,7 +57,7 @@ uint16 UnDip_Text(const char *source, char *dest)
  * @param name The string to append extension to.
  * @return The new string.
  */
-const char *String_GenerateFilename(const char *name)
+const char *Language_Name(const char *name)
 {
 	static char filename[14];
 
@@ -104,7 +104,7 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 	uint16 count;
 	uint16 i;
 
-	buf = Read_FileWholeFile(String_GenerateFilename(filename));
+	buf = Read_FileWholeFile(Language_Name(filename));
 	count = READ_LE_UINT16(buf) / 2;
 
 	if (end < 0) end = start + count - 1;
