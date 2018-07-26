@@ -831,7 +831,7 @@ static void FillSavegameDesc(bool save)
 
 		filename = GenerateSavegameFilename(s_savegameIndexBase - i);
 
-		fileId = ChunkFile_Open_Personal(filename);
+		fileId = Open_Iff_File_Personal(filename);
 		if (fileId == FILE_INVALID) continue;
 		Read_Iff_Chunk(fileId, HTOBE32(CC_NAME), desc, 50);
 		Close_Iff_File(fileId);

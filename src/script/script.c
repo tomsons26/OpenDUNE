@@ -519,6 +519,27 @@ bool Script_Run(ScriptEngine *script)
 			int16 right = STACK_POP();
 			int16 left  = STACK_POP();
 
+            //these are       
+            /*
+            CODE_AND
+            CODE_OR
+            CODE_EQ
+            CODE_NE
+            CODE_LT
+            CODE_LE
+            CODE_GT
+            CODE_GE
+            CODE_PLUS
+            CODE_MINUS
+            CODE_TIMES
+            CODE_DIVIDE
+            CODE_ASR
+            CODE_ASL
+            CODE_BITAND
+            CODE_BITOR
+            CODE_MOD
+            CODE_XOR
+            */
 			switch (parameter) {
 				case 0:  STACK_PUSH((left && right) ? 1 : 0); break; /* left && right */
 				case 1:  STACK_PUSH((left || right) ? 1 : 0); break; /* left || right */
@@ -632,9 +653,9 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 
 	if (!File_Exists(filename)) return 0;
 
-	index = ChunkFile_Open(filename);
+	index = Open_Iff_File(filename);
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_TEXT));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_TEXT));
 	total += length;
 
 	if (length != 0) {
@@ -648,7 +669,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 		Read_Iff_Chunk(index, HTOBE32(CC_TEXT), scriptInfo->text, length);
 	}
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_ORDR));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_ORDR));
 	total += length;
 
 	if (length == 0) {
@@ -671,7 +692,7 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 		scriptInfo->offsets[i] = BETOH16(scriptInfo->offsets[i]);
 	}
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_DATA));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_DATA));
 	total += length;
 
 	if (length == 0) {

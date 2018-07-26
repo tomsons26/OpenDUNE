@@ -202,12 +202,12 @@ static void Load_Icon_Set(const char *filename)
 	uint32 paletteLength;
 	int8   info[4];
 
-	fileIndex = ChunkFile_Open(filename);
+	fileIndex = Open_Iff_File(filename);
 
 	/* Get the length of the chunks */
-	spriteDataLength = ChunkFile_Seek(fileIndex, HTOBE32(CC_SSET));
-	tableLength      = ChunkFile_Seek(fileIndex, HTOBE32(CC_RTBL));
-	paletteLength    = ChunkFile_Seek(fileIndex, HTOBE32(CC_RPAL));
+	spriteDataLength = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_SSET));
+	tableLength      = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_RTBL));
+	paletteLength    = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_RPAL));
 
 	/* Read the header information */
 	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SINF), info, 4);

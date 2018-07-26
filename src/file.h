@@ -57,7 +57,7 @@ extern uint16 *Read_FileWholeFileLE16(const char *filename);
 extern uint32 Read_FileFile(const char *filename, void *buf);
 extern uint8 Open_Iff_File(enum SearchDirectory dir, const char *filename);
 extern void Close_Iff_File(uint8 index);
-extern uint32 ChunkFile_Seek(uint8 index, uint32 header);
+extern uint32 Get_Iff_Chunk_Size(uint8 index, uint32 header);
 extern uint32 Read_Iff_Chunk(uint8 index, uint32 header, void *buffer, uint32 buflen);
 
 #define File_Exists(FILENAME)               File_Exists_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, NULL)
@@ -67,8 +67,8 @@ extern uint32 Read_Iff_Chunk(uint8 index, uint32 header, void *buffer, uint32 bu
 #define File_Open_Personal(FILENAME,MODE)   File_Open_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, MODE)
 #define Load_Data(FILENAME,BUFFER,LENGTH)          Load_Data_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, BUFFER, LENGTH)
 #define Load_Data_Personal(FILENAME,BUFFER,LENGTH) Load_Data_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, BUFFER, LENGTH)
-#define ChunkFile_Open(FILENAME)            Open_Iff_File(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME)
-#define ChunkFile_Open_Personal(FILENAME)   Open_Iff_File(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME)
+#define Open_Iff_File(FILENAME)            Open_Iff_File(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME)
+#define Open_Iff_File_Personal(FILENAME)   Open_Iff_File(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME)
 
 extern FILE *fopendatadir(enum SearchDirectory dir, const char *name, const char *mode);
 extern bool fread_le_uint32(uint32 *value, FILE *stream);

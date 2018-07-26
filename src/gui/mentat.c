@@ -209,7 +209,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 		strncpy(s_mentatFilename, Language_Name(s_mentatFilename), sizeof(s_mentatFilename));
 	}
 
-	fileID = ChunkFile_Open(s_mentatFilename);
+	fileID = Open_Iff_File(s_mentatFilename);
 	length = Read_Iff_Chunk(fileID, HTOBE32(CC_NAME), helpDataList, Get_Buff(SCREEN_1));
 	Close_Iff_File(fileID);
 
@@ -926,7 +926,7 @@ static void GUI_Mentat_ShowHelp(void)
 	noDesc = (subject[5] == '0');	/* or no WSA file ? */
 	offset = HTOBE32(*(uint32 *)(subject + 1));
 
-	fileID = ChunkFile_Open(s_mentatFilename);
+	fileID = Open_Iff_File(s_mentatFilename);
 	Read_Iff_Chunk(fileID, HTOBE32(CC_INFO), &info, 12);
 	Close_Iff_File(fileID);
 

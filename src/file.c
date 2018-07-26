@@ -1002,7 +1002,7 @@ uint8 Open_Iff_File(enum SearchDirectory dir, const char *filename)
 /**
  * Close an opened chunk file.
  *
- * @param index The index given by ChunkFile_Open() of the file.
+ * @param index The index given by Open_Iff_File() of the file.
  */
 void Close_Iff_File(uint8 index)
 {
@@ -1014,11 +1014,11 @@ void Close_Iff_File(uint8 index)
 /**
  * Seek to the given chunk inside a chunk file.
  *
- * @param index The index given by ChunkFile_Open() of the file.
+ * @param index The index given by Open_Iff_File() of the file.
  * @param chunk The chunk to seek to.
  * @return The length of the chunk (0 if not found).
  */
-uint32 ChunkFile_Seek(uint8 index, uint32 chunk)
+uint32 Get_Iff_Chunk_Size(uint8 index, uint32 chunk)
 {
 	uint32 value = 0;
 	uint32 length = 0;
@@ -1053,7 +1053,7 @@ uint32 ChunkFile_Seek(uint8 index, uint32 chunk)
 /**
  * Read bytes from a chunk file into a buffer.
  *
- * @param index The index given by ChunkFile_Open() of the file.
+ * @param index The index given by Open_Iff_File() of the file.
  * @param chunk The chunk to read from.
  * @param buffer The buffer to read into.
  * @param length The amount of bytes to read.
