@@ -92,8 +92,8 @@ static void GUI_Mentat_ShowDialog(uint8 houseID, uint16 stringID, const char *ws
 		return;
 	}
 
-	w1 = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_PROCEED)[0]), 168, 168, 379, 0);
-	w2 = GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(String_Get_ByIndex(STR_REPEAT)[0]), 240, 168, 381, 0);
+	w1 = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(Text_String(STR_PROCEED)[0]), 168, 168, 379, 0);
+	w2 = GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(Text_String(STR_REPEAT)[0]), 240, 168, 381, 0);
 
 	w1 = GUI_Widget_Link(w1, w2);
 
@@ -106,14 +106,14 @@ static void GUI_Mentat_ShowDialog(uint8 houseID, uint16 stringID, const char *ws
 	stringID += STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40;
 
 	do {
-		strncpy(g_readBuffer, String_Get_ByIndex(stringID), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(stringID), g_readBufferSize);
 		sleepIdle();
 	} while (GUI_Mentat_Show(g_readBuffer, wsaFilename, w1) == 0x8002);
 
 	free(w2);
 	free(w1);
 
-	if (musicID != 0xFFFF) Driver_Music_FadeOut();
+	if (musicID != 0xFFFF) Fade_Score();
 }
 
 static void GUI_Mentat_HelpListLoop(void)
@@ -204,18 +204,18 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 	uint16 i;
 
 	if (init) {
-		helpDataList = GFX_Screen_Get_ByIndex(SCREEN_1);
+		helpDataList = Get_Buff(SCREEN_1);
 
 		s_topHelpList = 0;
 		s_selectedHelpSubject = 0;
 
-		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseInfo[g_playerHouseID].name[0]);
-		strncpy(s_mentatFilename, String_GenerateFilename(s_mentatFilename), sizeof(s_mentatFilename));
+		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseInfo[Whom].name[0]);
+		strncpy(s_mentatFilename, Language_Name(s_mentatFilename), sizeof(s_mentatFilename));
 	}
 
-	fileID = ChunkFile_Open(s_mentatFilename);
-	length = ChunkFile_Read(fileID, HTOBE32(CC_NAME), helpDataList, GFX_Screen_GetSize_ByIndex(SCREEN_1));
-	ChunkFile_Close(fileID);
+	fileID = Open_Iff_File(s_mentatFilename);
+	length = Read_Iff_Chunk(fileID, HTOBE32(CC_NAME), helpDataList, GFX_Screen_GetSize_ByIndex(SCREEN_1));
+	Close_Iff_File(fileID);
 
 	s_numberHelpSubjects = 0;
 	helpSubjects = helpDataList;
@@ -259,14 +259,14 @@ static void GUI_Mentat_Draw(bool force)
 
 	displayedHelpSubject = s_topHelpList;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
-	Widget_SetAndPaintCurrentWidget(8);
+	Change_New_Window(8);
 
-	GUI_DrawSprite(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Draw_Shape(SCREEN_1, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-	GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x11);
+	Fancy_Text_Print(Text_String(STR_SELECT_SUBJECT), (WinX << 3) + 16, WinY + 2, 12, 0, 0x12);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x11);
 
 	line = GUI_Widget_Get_ByIndex(w, 3);
 	for (i = 0; i < 11; i++) {
@@ -301,10 +301,10 @@ static void GUI_Mentat_Draw(bool force)
 	GUI_Widget_Draw(GUI_Widget_Get_ByIndex(w, 16));
 	GUI_Widget_Draw(GUI_Widget_Get_ByIndex(w, 17));
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
-	GFX_Screen_SetActive(oldScreenID);
+	Hide_Mouse();
+	Byte_Blit(WinX, WinY, WinX, WinY, WinW, WinH, SCREEN_1, SCREEN_0);
+	Show_Mouse();
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -315,28 +315,28 @@ static void GUI_Mentat_ShowHelpList(bool proceed)
 {
 	Screen oldScreenID;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	/* ENHANCEMENT -- After visiting Mentat (the help) window, auto-repeat of keys gets disabled. */
 	if (!g_dune2_enhanced) Input_Flags_SetBits(INPUT_FLAG_KEY_REPEAT);
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
-	GUI_Mentat_Display(NULL, g_playerHouseID);
+	GUI_Mentat_Display(NULL, Whom);
 
-	g_widgetMentatFirst = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(*String_Get_ByIndex(STR_EXIT)), 200, 168, proceed ? 379 : 377, 5);
+	g_widgetMentatFirst = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(*Text_String(STR_EXIT)), 200, 168, proceed ? 379 : 377, 5);
 	g_widgetMentatFirst->shortcut2 = 'n';
 
 	GUI_Mentat_Create_HelpScreen_Widgets();
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Show_Mouse();
 
 	GUI_Mentat_LoadHelpSubjects(true);
 
 	GUI_Mentat_Draw(true);
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 
 	GUI_Mentat_HelpListLoop();
 
@@ -353,7 +353,7 @@ static void GUI_Mentat_ShowHelpList(bool proceed)
 	/* ENHANCEMENT -- After visiting Mentat (the help) window, auto-repeat of keys gets disabled. */
 	if (!g_dune2_enhanced) Input_Flags_ClearBits(INPUT_FLAG_KEY_REPEAT);
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -372,7 +372,7 @@ bool GUI_Widget_Mentat_Click(Widget *w)
 
 	Driver_Voice_Play(NULL, 0xFF);
 
-	Music_Play(g_table_houseInfo[g_playerHouseID].musicBriefing);
+	Music_Play(g_table_houseInfo[Whom].musicBriefing);
 
 	Sprites_UnloadTiles();
 
@@ -390,7 +390,7 @@ bool GUI_Widget_Mentat_Click(Widget *w)
 
 	GUI_DrawInterfaceAndRadar(SCREEN_0);
 
-	Music_Play(Tools_RandomLCG_Range(0, 5) + 8);
+	Music_Play(IRandom(0, 5) + 8);
 
 	return true;
 }
@@ -408,28 +408,28 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 
 	Sprites_UnloadTiles();
 
-	GUI_Mentat_Display(wsaFilename, g_playerHouseID);
+	GUI_Mentat_Display(wsaFilename, Whom);
 
-	GFX_Screen_SetActive(SCREEN_1);
+	Set_LogicPage(SCREEN_1);
 
-	Widget_SetAndPaintCurrentWidget(8);
+	Change_New_Window(8);
 
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		Animate_Frame(wsa, 0, WinX * 8, WinY, SCREEN_1);
+		Close_Animation(wsa);
 	}
 
-	GUI_DrawSprite(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-	GFX_Screen_SetActive(SCREEN_0);
+	Draw_Shape(SCREEN_1, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Set_LogicPage(SCREEN_0);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Show_Mouse();
 
-	GUI_SetPaletteAnimated(g_palette1, 15);
+	Fade_Palette_To(g_palette1, 15);
 
 	ret = GUI_Mentat_Loop(wsaFilename, NULL, stringBuffer, true, NULL);
 
@@ -445,7 +445,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 		} while ((ret & 0x8000) == 0);
 	}
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	if (w != NULL) {
 		/* reset palette and tiles */
@@ -461,7 +461,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
  */
 void GUI_Mentat_ShowBriefing(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_houseInfo[g_playerHouseID].musicBriefing);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_houseInfo[Whom].musicBriefing);
 }
 
 /**
@@ -469,7 +469,7 @@ void GUI_Mentat_ShowBriefing(void)
  */
 void GUI_Mentat_ShowWin(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_houseInfo[g_playerHouseID].musicWin);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_houseInfo[Whom].musicWin);
 }
 
 /**
@@ -477,7 +477,7 @@ void GUI_Mentat_ShowWin(void)
  */
 void GUI_Mentat_ShowLose(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_houseInfo[g_playerHouseID].musicLose);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_houseInfo[Whom].musicLose);
 }
 
 /**
@@ -492,9 +492,9 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	int i;
 
 	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_houseInfo[houseID].name[0]);
-	Sprites_LoadImage(textBuffer, SCREEN_1, g_palette_998A);
+	Load_Picture(textBuffer, SCREEN_1, g_palette_998A);
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	if (houseID == HOUSE_MERCENARY) {
 		File_ReadBlockFile("BENE.PAL", g_palette1, 256 * 3);
@@ -532,18 +532,18 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	g_shoulderLeft = s_mentatSpritePositions[houseID][6];
 	g_shoulderTop  = s_mentatSpritePositions[houseID][7];
 
-	Widget_SetAndPaintCurrentWidget(8);
+	Change_New_Window(8);
 
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		Animate_Frame(wsa, 0, WinX * 8, WinY, SCREEN_1);
+		Close_Animation(wsa);
 	}
 
-	GUI_DrawSprite(SCREEN_1, g_sprites[397 + houseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-	GFX_Screen_SetActive(oldScreenID);
+	Draw_Shape(SCREEN_1, g_sprites[397 + houseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -577,23 +577,23 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[2][abs(otherSprite)];
 
-			GUI_Mouse_Hide_InRegion(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
-			GUI_DrawSprite(SCREEN_0, sprite, s_otherLeft, s_otherTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Hide_Mouse(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
+			Draw_Shape(SCREEN_0, sprite, s_otherLeft, s_otherTop, 0, 0);
+			Conditional_Show_Mouse();
 		}
 
-		switch (g_playerHouseID) {
+		switch (Whom) {
 			case HOUSE_HARKONNEN:
 				movingOtherTimer = g_timerGUI + 300 * 60;
 				break;
 			case HOUSE_ATREIDES:
-				movingOtherTimer = g_timerGUI + 60 * Tools_RandomLCG_Range(1,3);
+				movingOtherTimer = g_timerGUI + 60 * IRandom(1,3);
 				break;
 			case HOUSE_ORDOS:
 				if (otherSprite != 0) {
 					movingOtherTimer = g_timerGUI + 6;
 				} else {
-					movingOtherTimer = g_timerGUI + 60 * Tools_RandomLCG_Range(10, 19);
+					movingOtherTimer = g_timerGUI + 60 * IRandom(10, 19);
 				}
 				break;
 			default:
@@ -605,24 +605,24 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 		if (movingMouthTimer < g_timerGUI) {
 			uint8 *sprite;
 
-			movingMouthSprite = Tools_RandomLCG_Range(0, 4);
+			movingMouthSprite = IRandom(0, 4);
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			GUI_Mouse_Hide_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
-			GUI_DrawSprite(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
+			Conditional_Show_Mouse();
 
 			switch (movingMouthSprite) {
 				case 0:
-					movingMouthTimer = g_timerGUI + Tools_RandomLCG_Range(7, 30);
+					movingMouthTimer = g_timerGUI + IRandom(7, 30);
 					break;
 				case 1:
 				case 2:
 				case 3:
-					movingMouthTimer = g_timerGUI + Tools_RandomLCG_Range(6, 10);
+					movingMouthTimer = g_timerGUI + IRandom(6, 10);
 					break;
 				case 4:
-					movingMouthTimer = g_timerGUI + Tools_RandomLCG_Range(5, 6);
+					movingMouthTimer = g_timerGUI + IRandom(5, 6);
 					break;
 				default:
 					break;
@@ -640,7 +640,7 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 		} else if (Mouse_InsideRegion(s_mouthLeft, s_mouthTop, s_mouthRight, s_mouthBottom) != 0) {
 			if (movingMouthTimer != 0xFFFFFFFF) {
 				movingMouthTimer = 0xFFFFFFFF;
-				movingMouthSprite = Tools_RandomLCG_Range(1, 4);
+				movingMouthSprite = IRandom(1, 4);
 				partNeedsRedraw = true;
 			}
 		} else {
@@ -656,9 +656,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			GUI_Mouse_Hide_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
-			GUI_DrawSprite(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
+			Conditional_Show_Mouse();
 		}
 	}
 
@@ -678,9 +678,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 				sprite = s_mentatSprites[0][movingEyesSprite];
 
-				GUI_Mouse_Hide_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
-				GUI_DrawSprite(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-				GUI_Mouse_Show_InRegion();
+				Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+				Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
+				Conditional_Show_Mouse();
 			}
 
 			return;
@@ -713,15 +713,15 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 			movingEyesNextSprite = 0;
 
 			if (movingEyesSprite != 4) {
-				movingEyesTimer = g_timerGUI + Tools_RandomLCG_Range(20, 180);
+				movingEyesTimer = g_timerGUI + IRandom(20, 180);
 			} else {
-				movingEyesTimer = g_timerGUI + Tools_RandomLCG_Range(12, 30);
+				movingEyesTimer = g_timerGUI + IRandom(12, 30);
 			}
 		} else {
 			i = 0;
 			switch (speakingMode) {
 				case 0:
-					i = Tools_RandomLCG_Range(0, 7);
+					i = IRandom(0, 7);
 					if (i > 5) {
 						i = 1;
 					} else {
@@ -735,7 +735,7 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 					if (movingEyesSprite != ((!g_interrogation) ? 0 : 3)) {
 						i = 0;
 					} else {
-						i = Tools_RandomLCG_Range(0, 17);
+						i = IRandom(0, 17);
 						if (i > 9) {
 							i = 0;
 						} else {
@@ -747,7 +747,7 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 					break;
 
 				default:
-					i = Tools_RandomLCG_Range(0, 15);
+					i = IRandom(0, 15);
 					if (i > 10) {
 						i = 2;
 					} else {
@@ -761,7 +761,7 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 			if ((i == 2 && movingEyesSprite == 1) || (i == 1 && movingEyesSprite == 2)) {
 				movingEyesNextSprite = i;
 				movingEyesSprite = 0;
-				movingEyesTimer = g_timerGUI + Tools_RandomLCG_Range(1, 5);
+				movingEyesTimer = g_timerGUI + IRandom(1, 5);
 			} else {
 				if (i != movingEyesSprite && (i == 4 || movingEyesSprite == 4)) {
 					movingEyesNextSprite = i;
@@ -770,9 +770,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 				} else {
 					movingEyesSprite = i;
 					if (i != 4) {
-						movingEyesTimer = g_timerGUI + Tools_RandomLCG_Range(15, 180);
+						movingEyesTimer = g_timerGUI + IRandom(15, 180);
 					} else {
-						movingEyesTimer = g_timerGUI + Tools_RandomLCG_Range(6, 60);
+						movingEyesTimer = g_timerGUI + IRandom(6, 60);
 					}
 				}
 			}
@@ -786,9 +786,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 		sprite = s_mentatSprites[0][movingEyesSprite];
 
-		GUI_Mouse_Hide_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
-		GUI_DrawSprite(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-		GUI_Mouse_Show_InRegion();
+		Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+		Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -845,7 +845,7 @@ void GUI_Mentat_Create_HelpScreen_Widgets(void)
 	g_widgetMentatTail = NULL;
 	ypos = 8;
 
-	w = (Widget *)GFX_Screen_Get_ByIndex(SCREEN_2);
+	w = (Widget *)Get_Buff(SCREEN_2);
 
 	memset(w, 0, 13 * sizeof(Widget));
 
@@ -930,21 +930,21 @@ static void GUI_Mentat_ShowHelp(void)
 	noDesc = (subject[5] == '0');	/* or no WSA file ? */
 	offset = HTOBE32(*(uint32 *)(subject + 1));
 
-	fileID = ChunkFile_Open(s_mentatFilename);
-	ChunkFile_Read(fileID, HTOBE32(CC_INFO), &info, 12);
-	ChunkFile_Close(fileID);
+	fileID = Open_Iff_File(s_mentatFilename);
+	Read_Iff_Chunk(fileID, HTOBE32(CC_INFO), &info, 12);
+	Close_Iff_File(fileID);
 
 	info.length = HTOBE32(info.length);
 
 	text = g_readBuffer;
-	compressedText = GFX_Screen_Get_ByIndex(SCREEN_1);
+	compressedText = Get_Buff(SCREEN_1);
 
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
-	File_Seek(fileID, offset, 0);
-	File_Read(fileID, compressedText, info.length);
-	String_Decompress(compressedText, text, g_readBufferSize);
-	String_TranslateSpecial(text);
-	File_Close(fileID);
+	Seek_File(fileID, offset, 0);
+	Read_File(fileID, compressedText, info.length);
+	UnDip_Text(compressedText, text, g_readBufferSize);
+	Fixup_Text(text);
+	Close_File(fileID);
 
 	/* skip WSA file name (or string index) */
 	while (*text != '*' && *text != '?') text++;
@@ -960,9 +960,9 @@ static void GUI_Mentat_ShowHelp(void)
 		desc    = NULL;
 		text    = (char *)g_readBuffer;
 
-		index = *text - 44 + g_campaignID * 4 + STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + g_playerHouseID * 40;
+		index = *text - 44 + g_campaignID * 4 + STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + Whom * 40;
 
-		strncpy(g_readBuffer, String_Get_ByIndex(index), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(index), g_readBufferSize);
 	} else {
 		picture = (char *)g_readBuffer;
 		desc    = text;
@@ -1045,17 +1045,17 @@ static bool GUI_Mentat_DrawInfo(char *text, uint16 left, uint16 top, uint16 heig
 
 	if (lines <= 0) return false;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = Set_LogicPage(SCREEN_2);
 
 	while (skip-- != 0) text += strlen(text) + 1;
 
 	while (lines-- != 0) {
-		if (*text != '\0') GUI_DrawText_Wrapper(text, left, top, g_curWidgetFGColourBlink, 0, flags);
+		if (*text != '\0') Fancy_Text_Print(text, left, top, g_curWidgetFGColourBlink, 0, flags);
 		top += height;
 		text += strlen(text) + 1;
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	return true;
 }
@@ -1083,26 +1083,26 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	textTick = 0;
 	textDelay = 0;
 
-	oldWidgetID = Widget_SetCurrentWidget(8);
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldWidgetID = Change_Window(8);
+	oldScreenID = Set_LogicPage(SCREEN_2);
 
 	wsa = NULL;
 
 	if (wsaFilename != NULL) {
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
 	}
 
 	step = 0;
 	if (wsa == NULL) {
-		Widget_PaintCurrentWidget();
+		New_Window();
 		step = 1;
 	}
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x31);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x31);
 
-	descLines = GUI_SplitText(pictureDetails, (g_curWidgetWidth << 3) + 10, '\0');
+	descLines = GUI_SplitText(pictureDetails, (WinW << 3) + 10, '\0');
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x32);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x32);
 
 	textLines = GUI_Mentat_SplitText(text, 304);
 
@@ -1112,14 +1112,14 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	g_timerTimeout = 0;
 	descTick = g_timerGUI + 30;
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	textDone = false;
 	result = 0;
 	for (done = false; !done; sleepIdle()) {
 		uint16 key;
 
-		GFX_Screen_SetActive(SCREEN_0);
+		Set_LogicPage(SCREEN_0);
 
 		key = GUI_Widget_HandleEvents(w);
 
@@ -1166,9 +1166,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				break;
 
 			case 2:
-				GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
-				GUI_Screen_Copy(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-				GUI_Mouse_Show_InRegion();
+				Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
+				Byte_Blit(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
+				Conditional_Show_Mouse();
 
 				step = 3;
 				key = 1;
@@ -1178,9 +1178,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				if (mentatSpeakingMode == 2 && textTick < g_timerGUI) key = 1;
 
 				if ((key != 0 && textDone) || result != 0) {
-					GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
-					GUI_Screen_Copy(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					GUI_Mouse_Show_InRegion();
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
+					Byte_Blit(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
+					Conditional_Show_Mouse();
 
 					step = 4;
 					mentatSpeakingMode = 0;
@@ -1188,11 +1188,11 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				}
 
 				if (key != 0) {
-					GUI_Screen_Copy(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
+					Byte_Blit(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
 
 					if (textLines-- != 0) {
-						GFX_Screen_SetActive(SCREEN_2);
-						GUI_DrawText_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+						Set_LogicPage(SCREEN_2);
+						Fancy_Text_Print(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 						mentatSpeakingMode = 1;
 						textDelay = (uint32)strlen(text) * 4;
 						textTick = g_timerGUI + textDelay;
@@ -1203,12 +1203,12 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 							textDone = true;
 						}
 
-						GFX_Screen_SetActive(SCREEN_0);
+						Set_LogicPage(SCREEN_0);
 					}
 
-					GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
-					GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					GUI_Mouse_Show_InRegion();
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
+					Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
+					Conditional_Show_Mouse();
 					break;
 				}
 
@@ -1238,13 +1238,13 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 			do {
 				if (step == 0 && frame > 4) step = 1;
 
-				if (!WSA_DisplayFrame(wsa, frame++, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2)) {
+				if (!Animate_Frame(wsa, frame++, WinX << 3, WinY, SCREEN_2)) {
 					if (step == 0) step = 1;
 
 					if (loopAnimation) {
 						frame = 0;
 					} else {
-						WSA_Unload(wsa);
+						Close_Animation(wsa);
 						wsa = NULL;
 					}
 				}
@@ -1254,26 +1254,26 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 		if (!dirty) continue;
 
-		GUI_Mentat_DrawInfo(pictureDetails, (g_curWidgetXBase << 3) + 5, g_curWidgetYBase + 3, 8, 0, lines, 0x31);
+		GUI_Mentat_DrawInfo(pictureDetails, (WinX << 3) + 5, WinY + 3, 8, 0, lines, 0x31);
 
-		GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-		GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
-		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
+		Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+		GUI_Mouse_Hide_InWidget(Window);
+		Byte_Blit(WinX, WinY, WinX, WinY, WinW, WinH, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 		dirty = false;
 	}
 
-	if (wsa != NULL) WSA_Unload(wsa);
+	if (wsa != NULL) Close_Animation(wsa);
 
-	GFX_Screen_SetActive(SCREEN_2);
-	GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-	GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
-	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
+	Set_LogicPage(SCREEN_2);
+	Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	GUI_Mouse_Hide_InWidget(Window);
+	Byte_Blit(WinX, WinY, WinX, WinY, WinW, WinH, SCREEN_2, SCREEN_0);
 	GUI_Mouse_Show_InWidget();
-	Widget_SetCurrentWidget(oldWidgetID);
-	GFX_Screen_SetActive(oldScreenID);
+	Change_Window(oldWidgetID);
+	Set_LogicPage(oldScreenID);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	return result;
 }
@@ -1289,11 +1289,11 @@ uint16 GUI_Mentat_SplitText(char *str, uint16 maxWidth)
 		uint16 width = 0;
 
 		while (width < maxWidth && *str != '.' && *str != '!' && *str != '?' && *str != '\0' && *str != '\r') {
-			width += Font_GetCharWidth(*str++);
+			width += Char_Pixel_Width(*str++);
 		}
 
 		if (width >= maxWidth) {
-			while (*str != ' ') width -= Font_GetCharWidth(*str--);
+			while (*str != ' ') width -= Char_Pixel_Width(*str--);
 		}
 
 		height++;

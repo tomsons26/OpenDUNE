@@ -106,16 +106,16 @@ void Map_SetSelection(uint16 packed)
 		return;
 	}
 
-	if ((packed != 0xFFFF && g_map[packed].overlayTileID != g_veiledTileID) || g_debugScenario) {
-		Structure *s;
+	if ((packed != 0xFFFF && g_map[packed].overlayTileID != g_veiledTileID) || Debug_Map) {
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(packed);
 		if (s != NULL) {
-			const StructureInfo *si;
+			const BuildingType *si;
 
-			si = &g_table_structureInfo[s->o.type];
-			if (s->o.houseID == g_playerHouseID && g_selectionType != SELECTIONTYPE_MENTAT) {
-				GUI_DisplayHint(si->o.hintStringID, si->o.spriteID);
+			si = &g_table_BuildingType[s->o.type];
+			if (s->o.houseID == Whom && g_selectionType != SELECTIONTYPE_MENTAT) {
+				GUI_DisplayHint(si->ot.hintStringID, si->ot.spriteID);
 			}
 
 			packed = Tile_PackTile(s->o.position);
@@ -124,7 +124,7 @@ void Map_SetSelection(uint16 packed)
 
 			Structure_UpdateMap(s);
 		} else {
-			Map_SetSelectionSize(STRUCTURE_LAYOUT_1x1);
+			Map_SetSelectionSize(BSIZE_1x1);
 		}
 
 		if (g_selectionType != SELECTIONTYPE_TARGET) {
@@ -145,7 +145,7 @@ void Map_SetSelection(uint16 packed)
 		return;
 	}
 
-	Map_SetSelectionSize(STRUCTURE_LAYOUT_1x1);
+	Map_SetSelectionSize(BSIZE_1x1);
 	g_selectionPosition = packed;
 	return;
 }
@@ -257,7 +257,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	if (packed != 0xFFFF && packed == minimapPreviousPosition && !forceUpdate) return;
 	if (g_selectionType == SELECTIONTYPE_MENTAT) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	cleared = false;
 
@@ -290,7 +290,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 		top    = (Tile_GetPackedY(packed) - mapInfo->minY) * (mapScale + 1) + 136;
 		bottom = top + mapScale * 10 + 9;
 
-		GUI_DrawWiredRectangle(left, top, right, bottom, 15);
+		Draw_Rect(left, top, right, bottom, 15);
 
 		for (m = viewportBorder; *m != 0xFFFF; m++) {
 			uint16 curPacked;
@@ -301,12 +301,12 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	}
 
 	if (cleared && oldScreenID == SCREEN_0) {
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
+		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	minimapPreviousPosition = packed;
 }
@@ -342,7 +342,7 @@ bool Map_IsPositionUnveiled(uint16 position)
 {
 	Tile *t;
 
-	if (g_debugScenario) return true;
+	if (Debug_Map) return true;
 
 	t = &g_map[position];
 
@@ -431,7 +431,7 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 				Unit_Damage(u, hitpoints >> (distance >> 2), 0);
 			}
 
-			if (u->o.houseID == g_playerHouseID) continue;
+			if (u->o.houseID == Whom) continue;
 
 			us = Tools_Index_GetUnit(unitOriginEncoded);
 			if (us == NULL) continue;
@@ -460,9 +460,9 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 			if (u->o.type == UNIT_HARVESTER) {
 				const UnitInfo *uis = &g_table_unitInfo[us->o.type];
 
-				if (uis->movementType == MOVEMENT_FOOT && u->targetMove == 0) {
+				if (uis->movementType == MOVEMENT_FOOT && u->NavCom == 0) {
 					if (u->actionID != ACTION_MOVE) Unit_SetAction(u, ACTION_MOVE);
-					u->targetMove = unitOriginEncoded;
+					u->NavCom = unitOriginEncoded;
 					continue;
 				}
 			}
@@ -473,12 +473,12 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 				Unit_SetAction(u, ACTION_HUNT);
 			}
 
-			if (u->targetAttack != 0 && u->actionID != ACTION_HUNT) continue;
+			if (u->TarCom != 0 && u->actionID != ACTION_HUNT) continue;
 
-			attack = Tools_Index_GetUnit(u->targetAttack);
+			attack = Tools_Index_GetUnit(u->TarCom);
 			if (attack != NULL) {
 				uint16 packed = Tile_PackTile(u->o.position);
-				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->targetAttack), packed) <= ui->fireDistance) continue;
+				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->TarCom), packed) <= ui->Range) continue;
 			}
 
 			Unit_SetTarget(u, unitOriginEncoded);
@@ -486,13 +486,13 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 	}
 
 	if (!s_debugNoExplosionDamage && hitpoints != 0) {
-		Structure *s = Structure_Get_ByPackedTile(positionPacked);
+		Building *s = Structure_Get_ByPackedTile(positionPacked);
 
 		if (s != NULL) {
 			if (type == EXPLOSION_IMPACT_LARGE) {
-				const StructureInfo *si = &g_table_structureInfo[s->o.type];
+				const BuildingType *si = &g_table_BuildingType[s->o.type];
 
-				if (si->o.hitpoints / 2 > s->o.hitpoints) {
+				if (si->ot.hitpoints / 2 > s->o.hitpoints) {
 					type = EXPLOSION_SMOKE_PLUME;
 				}
 			}
@@ -503,8 +503,8 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 	}
 
 	if (Map_GetLandscapeType(positionPacked) == LST_WALL && hitpoints != 0) {
-		if ((g_table_structureInfo[STRUCTURE_WALL].o.hitpoints <= hitpoints) ||
-		    (Tools_Random_256() <= (hitpoints * 256 / g_table_structureInfo[STRUCTURE_WALL].o.hitpoints))) {
+		if ((g_table_BuildingType[STRUCTURE_WALL].ot.hitpoints <= hitpoints) ||
+		    (Random() <= (hitpoints * 256 / g_table_BuildingType[STRUCTURE_WALL].ot.hitpoints))) {
 			Map_UpdateWall(positionPacked);
 		}
 	}
@@ -674,7 +674,7 @@ void Map_Bloom_ExplodeSpice(uint16 packed, uint8 houseID)
 		Map_MakeExplosion(EXPLOSION_SPICE_BLOOM_TREMOR, Tile_UnpackTile(packed), 0, 0);
 	}
 
-	if (houseID == g_playerHouseID) Sound_Output_Feedback(36);
+	if (houseID == Whom) Sound_Output_Feedback(36);
 
 	Map_FillCircleWithSpice(packed, 5);
 }
@@ -703,13 +703,13 @@ void Map_FillCircleWithSpice(uint16 packed, uint16 radius)
 
 			if (distance > radius) continue;
 
-			if (distance == radius && (Tools_Random_256() & 1) == 0) continue;
+			if (distance == radius && (Random() & 1) == 0) continue;
 
 			if (Map_GetLandscapeType(curPacked) == LST_SPICE) continue;
 
 			Map_ChangeSpiceAmount(curPacked, 1);
 
-			if (g_debugScenario) {
+			if (Debug_Map) {
 				Map_MarkTileDirty(curPacked);
 			}
 		}
@@ -862,9 +862,9 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 		break;
 	}
 
-	switch (Tools_Random_256() & 0x3) {
+	switch (Random() & 0x3) {
 		case 0:
-			h->credits += Tools_RandomLCG_Range(150, 400);
+			h->credits += IRandom(150, 400);
 			break;
 
 		case 1: {
@@ -873,7 +873,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, houseID, position, Tools_Random_256());
+			Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, houseID, position, Random());
 			break;
 		}
 
@@ -884,7 +884,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, enemyHouseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, enemyHouseID, position, Random());
 
 			if (u != NULL) Unit_SetAction(u, ACTION_HUNT);
 			break;
@@ -897,7 +897,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_INFANTRY, enemyHouseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_INFANTRY, enemyHouseID, position, Random());
 
 			if (u != NULL) Unit_SetAction(u, ACTION_HUNT);
 			break;
@@ -931,7 +931,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 
 		/* Find the house of an enemy */
 		while (true) {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Find(&find);
 			if (s == NULL) break;
@@ -947,35 +947,35 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 	while (ret == 0) {
 		switch (locationID) {
 			case 0: /* North */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX - 2), mapInfo->minY + mapOffset);
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX - 2), mapInfo->minY + mapOffset);
 				break;
 
 			case 1: /* East */
-				ret = Tile_PackXY(mapInfo->minX + mapInfo->sizeX - mapOffset, mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY - 2));
+				ret = Tile_PackXY(mapInfo->minX + mapInfo->sizeX - mapOffset, mapInfo->minY + IRandom(0, mapInfo->sizeY - 2));
 				break;
 
 			case 2: /* South */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX - 2), mapInfo->minY + mapInfo->sizeY - mapOffset);
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX - 2), mapInfo->minY + mapInfo->sizeY - mapOffset);
 				break;
 
 			case 3: /* West */
-				ret = Tile_PackXY(mapInfo->minX + mapOffset, mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY - 2));
+				ret = Tile_PackXY(mapInfo->minX + mapOffset, mapInfo->minY + IRandom(0, mapInfo->sizeY - 2));
 				break;
 
 			case 4: /* Air */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX), mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY));
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX), mapInfo->minY + IRandom(0, mapInfo->sizeY));
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
 			case 5: /* Visible */
-				ret = Tile_PackXY(Tile_GetPackedX(g_minimapPosition) + Tools_RandomLCG_Range(0, 14), Tile_GetPackedY(g_minimapPosition) + Tools_RandomLCG_Range(0, 9));
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				ret = Tile_PackXY(Tile_GetPackedX(g_minimapPosition) + IRandom(0, 14), Tile_GetPackedY(g_minimapPosition) + IRandom(0, 9));
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
 			case 6: /* Enemy Base */
 			case 7: { /* Home Base */
 				PoolFindStruct find;
-				Structure *s;
+				Building *s;
 
 				find.houseID = houseID;
 				find.index   = 0xFFFF;
@@ -999,11 +999,11 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 						tile32 unpacked = Tile_MoveByRandom(u->o.position, 120, true);
 						ret = Tile_PackTile(unpacked);
 					} else {
-						ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX), mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY));
+						ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX), mapInfo->minY + IRandom(0, mapInfo->sizeY));
 					}
 				}
 
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 			}
 
@@ -1195,7 +1195,7 @@ void Map_SelectNext(bool getNext)
 	if (g_unitSelected != NULL) {
 		if (Map_IsTileVisible(Tile_PackTile(g_unitSelected->o.position))) selected = &g_unitSelected->o;
 	} else {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -1212,11 +1212,11 @@ void Map_SelectNext(bool getNext)
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		if (!g_table_unitInfo[u->o.type].o.flags.tabSelectable) continue;
+		if (!g_table_unitInfo[u->o.type].ot.flags.tabSelectable) continue;
 
 		if (!Map_IsTileVisible(Tile_PackTile(u->o.position))) continue;
 
-		if ((u->o.seenByHouses & (1 << g_playerHouseID)) == 0) continue;
+		if ((u->o.seenByHouses & (1 << Whom)) == 0) continue;
 
 		if (first == NULL) first = &u->o;
 		last = &u->o;
@@ -1243,7 +1243,7 @@ void Map_SelectNext(bool getNext)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -1252,7 +1252,7 @@ void Map_SelectNext(bool getNext)
 
 		if (!Map_IsTileVisible(Tile_PackTile(s->o.position))) continue;
 
-		if ((s->o.seenByHouses & (1 << g_playerHouseID)) == 0) continue;
+		if ((s->o.seenByHouses & (1 << Whom)) == 0) continue;
 
 		if (first == NULL) first = &s->o;
 		last = &s->o;
@@ -1319,7 +1319,7 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
 	if (tileID != 0) {
 		if (tileID != 15) {
 			Unit *u = Unit_Get_ByPackedTile(packed);
-			if (u != NULL) Unit_HouseUnitCount_Add(u, g_playerHouseID);
+			if (u != NULL) Unit_HouseUnitCount_Add(u, Whom);
 		}
 
 		tileID = g_iconMap[g_iconMap[ICM_ICONGROUP_FOG_OF_WAR] + tileID];
@@ -1338,11 +1338,11 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
  */
 bool Map_UnveilTile(uint16 packed, uint8 houseID)
 {
-	Structure *s;
+	Building *s;
 	Unit *u;
 	Tile *t;
 
-	if (houseID != g_playerHouseID) return false;
+	if (houseID != Whom) return false;
 	if (Tile_IsOutOfMap(packed)) return false;
 
 	t = &g_map[packed];
@@ -1456,29 +1456,29 @@ void Map_CreateLandscape(uint32 seed)
 
 	/* Place random data on a 4x4 grid. */
 	for (i = 0; i < 272; i++) {
-		memory[i] = Tools_Random_256() & 0xF;
+		memory[i] = Random() & 0xF;
 		if (memory[i] > 0xA) memory[i] = 0xA;
 	}
 
-	i = (Tools_Random_256() & 0xF) + 1;
+	i = (Random() & 0xF) + 1;
 	while (i-- != 0) {
-		int16 base = Tools_Random_256();
+		int16 base = Random();
 
 		for (j = 0; j < lengthof(around); j++) {
 			int16 index = min(max(0, base + around[j]), 272);
 
-			memory[index] = (memory[index] + (Tools_Random_256() & 0xF)) & 0xF;
+			memory[index] = (memory[index] + (Random() & 0xF)) & 0xF;
 		}
 	}
 
-	i = (Tools_Random_256() & 0x3) + 1;
+	i = (Random() & 0x3) + 1;
 	while (i-- != 0) {
-		int16 base = Tools_Random_256();
+		int16 base = Random();
 
 		for (j = 0; j < lengthof(around); j++) {
 			int16 index = min(max(0, base + around[j]), 272);
 
-			memory[index] = Tools_Random_256() & 0x3;
+			memory[index] = Random() & 0x3;
 		}
 	}
 
@@ -1549,11 +1549,11 @@ void Map_CreateLandscape(uint32 seed)
 	}
 
 	/* Filter each tile to determine its final type. */
-	spriteID1 = Tools_Random_256() & 0xF;
+	spriteID1 = Random() & 0xF;
 	if (spriteID1 < 0x8) spriteID1 = 0x8;
 	if (spriteID1 > 0xC) spriteID1 = 0xC;
 
-	spriteID2 = (Tools_Random_256() & 0x3) - 1;
+	spriteID2 = (Random() & 0x3) - 1;
 	if (spriteID2 > spriteID1 - 3) spriteID2 = spriteID1 - 3;
 
 	for (i = 0; i < 4096; i++) {
@@ -1573,24 +1573,24 @@ void Map_CreateLandscape(uint32 seed)
 	}
 
 	/* Add some spice. */
-	i = Tools_Random_256() & 0x2F;
+	i = Random() & 0x2F;
 	while (i-- != 0) {
 		tile32 tile;
 		uint16 packed;
 
 		while (true) {
-			packed = Tools_Random_256() & 0x3F;
-			packed = Tile_PackXY(Tools_Random_256() & 0x3F, packed);
+			packed = Random() & 0x3F;
+			packed = Tile_PackXY(Random() & 0x3F, packed);
 
 			if (g_table_landscapeInfo[g_map[packed].groundTileID].canBecomeSpice) break;
 		}
 
 		tile = Tile_UnpackTile(packed);
 
-		j = Tools_Random_256() & 0x1F;
+		j = Random() & 0x1F;
 		while (j-- != 0) {
 			while (true) {
-				tile32 unpacked = Tile_MoveByRandom(tile, Tools_Random_256() & 0x3F, true);
+				tile32 unpacked = Tile_MoveByRandom(tile, Random() & 0x3F, true);
 				packed = Tile_PackTile(unpacked);
 
 				if (!Tile_IsOutOfMap(packed)) break;

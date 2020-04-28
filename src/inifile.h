@@ -9,7 +9,7 @@ extern bool Load_IniFile(void);
 
 extern void Free_IniFile(void);
 
-extern bool SetLanguage_From_IniFile(DuneCfg *config);
+extern bool SetLanguage_From_IniFile(ConfigType *config);
 
 /* if source is NULL, defaultValue will still be returned */
 extern char *IniFile_GetString(const char *key, const char *defaultValue, char *dest, uint16 length);

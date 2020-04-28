@@ -38,6 +38,6 @@ typedef struct Scenario {
 
 extern Scenario g_scenario;
 
-extern bool Scenario_Load(uint16 scenarioID, uint8 houseID);
+extern bool Read_Scenario_INI(uint16 scenarioID, uint8 houseID);
 
 #endif /* SCENARIO_H */

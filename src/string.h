@@ -6,7 +6,7 @@
 /**
  * Types of Language available in the game.
  */
-typedef enum Language {
+typedef enum LanguageType {
 	LANGUAGE_ENGLISH     = 0,
 	LANGUAGE_FRENCH      = 1,
 	LANGUAGE_GERMAN      = 2,
@@ -15,14 +15,14 @@ typedef enum Language {
 
 	LANGUAGE_MAX         = 5,
 	LANGUAGE_INVALID     = 0xFF
-} Language;
+} LanguageType;
 
 extern const char * const g_languageSuffixes[LANGUAGE_MAX];
 
-extern uint16 String_Decompress(const char *source, char *dest, uint16 destLen);
-extern const char *String_GenerateFilename(const char *name);
-extern char *String_Get_ByIndex(uint16 stringID);
-extern void String_TranslateSpecial(char *string);
+extern uint16 UnDip_Text(const char *source, char *dest, uint16 destLen);
+extern const char *Language_Name(const char *name);
+extern char *Text_String(uint16 stringID);
+extern void Fixup_Text(char *string);
 extern void String_Init(void);
 extern void String_Uninit(void);
 extern uint8 *String_NextString(uint8 *ptr);

@@ -170,15 +170,15 @@ typedef struct WindowDesc {
 } WindowDesc;
 
 /** Widget properties. */
-typedef struct WidgetProperties {
-	uint16 xBase;                                           /*!< Horizontal base coordinate divided by 8. */
-	uint16 yBase;                                           /*!< Vertical base coordinate. */
-	uint16 width;                                           /*!< Width of the widget divided by 8. */
-	uint16 height;                                          /*!< Height of the widget. */
+typedef struct WindowType {
+	uint16 X;                                           /*!< Horizontal base coordinate divided by 8. */
+	uint16 Y;                                           /*!< Vertical base coordinate. */
+	uint16 W;                                           /*!< Width of the widget divided by 8. */
+	uint16 H;                                          /*!< Height of the widget. */
 	uint8  fgColourBlink;                                   /*!< Foreground colour for 'blink'. */
 	uint8  fgColourNormal;                                  /*!< Foreground colour for 'normal'. */
 	uint8  fgColourSelected;                                /*!< Foreground colour when 'selected' */
-} WidgetProperties;
+} WindowType;
 
 extern WidgetInfo g_table_gameWidgetInfo[19];
 extern WidgetInfo g_table_factoryWidgetInfo[13];
@@ -198,12 +198,12 @@ extern Widget *g_widgetMentatScrollUp;
 extern Widget *g_widgetMentatScrollDown;
 extern Widget *g_widgetMentatScrollbar;
 
-extern WidgetProperties g_widgetProperties[22];
-extern uint16 g_curWidgetIndex;
-extern uint16 g_curWidgetXBase;
-extern uint16 g_curWidgetYBase;
-extern uint16 g_curWidgetWidth;
-extern uint16 g_curWidgetHeight;
+extern WindowType WindowList[22];
+extern uint16 Window;
+extern uint16 WinX;
+extern uint16 WinY;
+extern uint16 WinW;
+extern uint16 WinH;
 extern uint8  g_curWidgetFGColourBlink;
 extern uint8  g_curWidgetFGColourNormal;
 
@@ -228,9 +228,9 @@ extern uint16 GUI_Widget_Scrollbar_CalculatePosition(WidgetScrollbar *scrollbar)
 extern uint16 GUI_Widget_Scrollbar_CalculateScrollPosition(WidgetScrollbar *scrollbar);
 extern void GUI_Widget_Free_WithScrollbar(Widget *w);
 extern Widget *GUI_Widget_Insert(Widget *w1, Widget *w2);
-extern uint16 Widget_SetCurrentWidget(uint16 index);
-extern uint16 Widget_SetAndPaintCurrentWidget(uint16 index);
-extern void Widget_PaintCurrentWidget(void);
+extern uint16 Change_Window(uint16 index);
+extern uint16 Change_New_Window(uint16 index);
+extern void New_Window(void);
 
 /* viewport.c */
 extern bool GUI_Widget_Viewport_Click(Widget *w);

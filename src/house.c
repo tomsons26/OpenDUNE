@@ -31,7 +31,7 @@
 
 
 House *g_playerHouse = NULL;
-HouseType g_playerHouseID = HOUSE_INVALID;
+HousesType Whom = HOUSE_INVALID;
 uint16 g_houseMissileCountdown = 0;
 uint16 g_playerCreditsNoSilo = 0;
 uint16 g_playerCredits = 0; /*!< Credits shown to player as 'current'. */
@@ -59,7 +59,7 @@ void GameLoop_House(void)
 	bool tickMissileCountdown     = false;
 	bool tickStarportAvailability = false;
 
-	if (g_debugScenario) return;
+	if (Debug_Map) return;
 
 	if (s_tickHouseHouse <= g_timerGame) {
 		tickHouse = true;
@@ -95,14 +95,14 @@ void GameLoop_House(void)
 		g_houseMissileCountdown--;
 		Sound_Output_Feedback(g_houseMissileCountdown + 41);
 
-		if (g_houseMissileCountdown == 0) Unit_LaunchHouseMissile(Map_FindLocationTile(4, g_playerHouseID));
+		if (g_houseMissileCountdown == 0) Unit_LaunchHouseMissile(Map_FindLocationTile(4, Whom));
 	}
 
 	if (tickStarportAvailability) {
 		uint16 type;
 
 		/* Pick a random unit to increase starport availability */
-		type = Tools_RandomLCG_Range(0, UNIT_MAX - 1);
+		type = IRandom(0, UNIT_MAX - 1);
 
 		/* Increase how many of this unit is available via starport by one */
 		if (g_starportAvailable[type] != 0 && g_starportAvailable[type] < 10) {
@@ -134,7 +134,7 @@ void GameLoop_House(void)
 
 			if (locationID >= 4) {
 				if (nu == NULL) {
-					nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_CARRYALL, u->o.houseID, Tile_UnpackTile(Map_FindLocationTile(Tools_Random_256() & 3, u->o.houseID)), 100);
+					nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_CARRYALL, u->o.houseID, Tile_UnpackTile(Map_FindLocationTile(Random() & 3, u->o.houseID)), 100);
 
 					if (nu != NULL) {
 						nu->o.flags.s.byScenario = true;
@@ -184,7 +184,7 @@ void GameLoop_House(void)
 		if (tickHouse) {
 			/* ENHANCEMENT -- Originally this code was outside the house loop, which seems very odd.
 			 *  This problem is considered to be so bad, that the original code has been removed. */
-			if (h->index != g_playerHouseID) {
+			if (h->index != Whom) {
 				if (h->creditsStorage < h->credits) {
 					h->credits = h->creditsStorage;
 				}
@@ -193,23 +193,23 @@ void GameLoop_House(void)
 				if (h->credits > maxCredits) {
 					h->credits = maxCredits;
 
-					GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_SPICE_STORAGE_AVAILABLE_SPICE_IS_LOST), 1);
+					GUI_DisplayText(Text_String(STR_INSUFFICIENT_SPICE_STORAGE_AVAILABLE_SPICE_IS_LOST), 1);
 				}
 			}
 
-			if (h->index == g_playerHouseID) {
+			if (h->index == Whom) {
 				if (h->creditsStorage > g_playerCreditsNoSilo) {
 					g_playerCreditsNoSilo = 0;
 				}
 
 				if (g_playerCreditsNoSilo == 0 && g_campaignID > 1 && h->credits != 0) {
 					if (h->creditsStorage != 0 && ((h->credits * 256 / h->creditsStorage) > 200)) {
-						GUI_DisplayText(String_Get_ByIndex(STR_SPICE_STORAGE_CAPACITY_LOW_BUILD_SILOS), 0);
+						GUI_DisplayText(Text_String(STR_SPICE_STORAGE_CAPACITY_LOW_BUILD_SILOS), 0);
 					}
 				}
 
 				if (h->credits < 100 && g_playerCreditsNoSilo != 0) {
-					GUI_DisplayText(String_Get_ByIndex(STR_CREDITS_ARE_LOW_HARVEST_SPICE_FOR_MORE_CREDITS), 0);
+					GUI_DisplayText(Text_String(STR_CREDITS_ARE_LOW_HARVEST_SPICE_FOR_MORE_CREDITS), 0);
 				}
 			}
 		}
@@ -223,7 +223,7 @@ void GameLoop_House(void)
 			if ((int16)h->starportTimeLeft < 0) h->starportTimeLeft = 0;
 
 			if (h->starportTimeLeft == 0) {
-				Structure *s;
+				Building *s;
 
 				s = Structure_Get_ByIndex(g_structureIndex);
 				if (s->o.type == STRUCTURE_STARPORT && s->o.houseID == h->index) {
@@ -298,7 +298,7 @@ uint8 House_StringToType(const char *name)
 static void House_EnsureHarvesterAvailable(uint8 houseID)
 {
 	PoolFindStruct find;
-	Structure *s;
+	Building *s;
 
 	find.houseID = houseID;
 	find.type    = 0xFFFF;
@@ -338,9 +338,9 @@ static void House_EnsureHarvesterAvailable(uint8 houseID)
 
 	if (Unit_CreateWrapper(houseID, UNIT_HARVESTER, Tools_Index_Encode(s->o.index, IT_STRUCTURE)) == NULL) return;
 
-	if (houseID != g_playerHouseID) return;
+	if (houseID != Whom) return;
 
-	GUI_DisplayText(String_Get_ByIndex(STR_HARVESTER_IS_HEADING_TO_REFINERY), 0);
+	GUI_DisplayText(Text_String(STR_HARVESTER_IS_HEADING_TO_REFINERY), 0);
 }
 
 /**
@@ -360,7 +360,7 @@ bool House_AreAllied(uint8 houseID1, uint8 houseID2)
 		return (houseID1 == HOUSE_ATREIDES || houseID2 == HOUSE_ATREIDES);
 	}
 
-	return (houseID1 != g_playerHouseID && houseID2 != g_playerHouseID);
+	return (houseID1 != Whom && houseID2 != Whom);
 }
 
 /**
@@ -375,7 +375,7 @@ bool House_UpdateRadarState(House *h)
 	uint16 frameCount;
 	bool activate;
 
-	if (h == NULL || h->index != g_playerHouseID) return false;
+	if (h == NULL || h->index != Whom) return false;
 
 	wsa = NULL;
 
@@ -391,12 +391,12 @@ bool House_UpdateRadarState(House *h)
 
 	if (h->flags.radarActivated == activate) return false;
 
-	wsa = WSA_LoadFile("STATIC.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), true);
-	frameCount = WSA_GetFrameCount(wsa);
+	wsa = Open_Animation("STATIC.WSA", Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), true);
+	frameCount = Animate_Frame_Count(wsa);
 
 	g_textDisplayNeedsUpdate = true;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	while (Driver_Voice_IsPlaying()) sleepIdle();
 
@@ -404,22 +404,22 @@ bool House_UpdateRadarState(House *h)
 
 	Sound_Output_Feedback(activate ? 28 : 29);
 
-	frameCount = WSA_GetFrameCount(wsa);
+	frameCount = Animate_Frame_Count(wsa);
 
 	for (frame = 0; frame < frameCount; frame++) {
-		WSA_DisplayFrame(wsa, activate ? frameCount - frame : frame, 256, 136, SCREEN_0);
+		Animate_Frame(wsa, activate ? frameCount - frame : frame, 256, 136, SCREEN_0);
 		GUI_PaletteAnimate();
 
-		Timer_Sleep(3);
+		Delay(3);
 	}
 
 	h->flags.radarActivated = activate;
 
-	WSA_Unload(wsa);
+	Close_Animation(wsa);
 
 	g_viewport_forceRedraw = true;
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_Widget_Viewport_RedrawMap(SCREEN_0);
 
@@ -445,13 +445,13 @@ void House_UpdateCreditsStorage(uint8 houseID)
 
 	creditsStorage = 0;
 	while (true) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingType[s->o.type];
 		creditsStorage += si->creditsStorage;
 	}
 
@@ -482,15 +482,15 @@ void House_CalculatePowerAndCredit(House *h)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 		/* ENHANCEMENT -- Only count structures that are placed on the map, not ones we are building. */
 		if (g_dune2_enhanced && s->o.flags.s.isNotOnMap) continue;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingType[s->o.type];
 
 		h->creditsStorage += si->creditsStorage;
 
@@ -501,27 +501,27 @@ void House_CalculatePowerAndCredit(House *h)
 		}
 
 		/* Negative value and full health means everything goes to production */
-		if (s->o.hitpoints >= si->o.hitpoints) {
+		if (s->o.hitpoints >= si->ot.hitpoints) {
 			h->powerProduction += -si->powerUsage;
 			continue;
 		}
 
 		/* Negative value and partial health, calculate how much should go to production (capped at 50%) */
 		/* ENHANCEMENT -- The 50% cap of Dune2 is silly and disagress with the GUI. If your hp is 10%, so should the production. */
-		if (!g_dune2_enhanced && s->o.hitpoints <= si->o.hitpoints / 2) {
+		if (!g_dune2_enhanced && s->o.hitpoints <= si->ot.hitpoints / 2) {
 			h->powerProduction += (-si->powerUsage) / 2;
 			continue;
 		}
-		h->powerProduction += (-si->powerUsage) * s->o.hitpoints / si->o.hitpoints;
+		h->powerProduction += (-si->powerUsage) * s->o.hitpoints / si->ot.hitpoints;
 	}
 
 	/* Check if we are low on power */
-	if (h->index == g_playerHouseID && h->powerUsage > h->powerProduction) {
-		GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
+	if (h->index == Whom && h->powerUsage > h->powerProduction) {
+		GUI_DisplayText(Text_String(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
 	}
 
 	/* If there are no buildings left, you lose your right on 'credits without storage' */
-	if (h->index == g_playerHouseID && h->structuresBuilt == 0 && g_validateStrictIfZero == 0) {
+	if (h->index == Whom && h->structuresBuilt == 0 && g_validateStrictIfZero == 0) {
 		g_playerCreditsNoSilo = 0;
 	}
 }

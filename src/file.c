@@ -649,7 +649,7 @@ bool File_Exists_Ex(enum SearchDirectory dir, const char *filename, uint32 *file
 		if (index != FILE_INVALID) {
 			exists = true;
 			if (fileSize != NULL) *fileSize = File_GetSize(index);
-			File_Close(index);
+			Close_File(index);
 		}
 	}
 
@@ -686,7 +686,7 @@ uint8 File_Open_Ex(enum SearchDirectory dir, const char *filename, uint8 mode)
  *
  * @param index The index given by File_Open() of the file.
  */
-void File_Close(uint8 index)
+void Close_File(uint8 index)
 {
 	if (index >= FILE_MAX) return;
 	if (s_file[index].fp == NULL) return;
@@ -708,7 +708,7 @@ void File_Close(uint8 index)
  * @param length The amount of bytes to read.
  * @return The amount of bytes truly read, or 0 if there was a failure.
  */
-uint32 File_Read(uint8 index, void *buffer, uint32 length)
+uint32 Read_File(uint8 index, void *buffer, uint32 length)
 {
 	if (index >= FILE_MAX) return 0;
 	if (s_file[index].fp == NULL) return 0;
@@ -719,7 +719,7 @@ uint32 File_Read(uint8 index, void *buffer, uint32 length)
 
 	if (fread(buffer, length, 1, s_file[index].fp) != 1) {
 		Error("Read error\n");
-		File_Close(index);
+		Close_File(index);
 
 		length = 0;
 	}
@@ -737,7 +737,7 @@ uint32 File_Read(uint8 index, void *buffer, uint32 length)
 uint16 File_Read_LE16(uint8 index)
 {
 	uint8 buffer[2];
-	File_Read(index, buffer, sizeof(buffer));
+	Read_File(index, buffer, sizeof(buffer));
 	return READ_LE_UINT16(buffer);
 }
 
@@ -750,7 +750,7 @@ uint16 File_Read_LE16(uint8 index)
 uint32 File_Read_LE32(uint8 index)
 {
 	uint8 buffer[4];
-	File_Read(index, buffer, sizeof(buffer));
+	Read_File(index, buffer, sizeof(buffer));
 	return READ_LE_UINT32(buffer);
 }
 
@@ -769,7 +769,7 @@ uint32 File_Write(uint8 index, void *buffer, uint32 length)
 
 	if (fwrite(buffer, length, 1, s_file[index].fp) != 1) {
 		Error("Write error\n");
-		File_Close(index);
+		Close_File(index);
 
 		length = 0;
 	}
@@ -801,11 +801,11 @@ bool File_Write_LE16(uint8 index, uint16 value)
  * @param mode Mode of seeking. 0 = SEEK_SET, 1 = SEEK_CUR, 2 = SEEK_END.
  * @return The new position inside the file, relative from the start.
  */
-uint32 File_Seek(uint8 index, uint32 position, uint8 mode)
+uint32 Seek_File(uint8 index, uint32 position, uint8 mode)
 {
 	if (index >= FILE_MAX) return 0;
 	if (s_file[index].fp == NULL) return 0;
-	if (mode > 2) { File_Close(index); return 0; }
+	if (mode > 2) { Close_File(index); return 0; }
 
 	switch (mode) {
 		case 0:
@@ -867,7 +867,7 @@ void File_Create_Personal(const char *filename)
 	uint8 index;
 
 	index = _File_Open(SEARCHDIR_PERSONAL_DATA_DIR, filename, FILE_MODE_WRITE);
-	if (index != FILE_INVALID) File_Close(index);
+	if (index != FILE_INVALID) Close_File(index);
 }
 
 /**
@@ -884,8 +884,8 @@ uint32 File_ReadBlockFile_Ex(enum SearchDirectory dir, const char *filename, voi
 
 	index = File_Open_Ex(dir, filename, FILE_MODE_READ);
 	if (index == FILE_INVALID) return 0;
-	length = File_Read(index, buffer, length);
-	File_Close(index);
+	length = Read_File(index, buffer, length);
+	Close_File(index);
 	return length;
 }
 
@@ -907,12 +907,12 @@ void *File_ReadWholeFile(const char *filename)
 	length = File_GetSize(index);
 
 	buffer = malloc(length + 1);
-	File_Read(index, buffer, length);
+	Read_File(index, buffer, length);
 
 	/* In case of text-files it can be very important to have a \0 at the end */
 	((char *)buffer)[length] = '\0';
 
-	File_Close(index);
+	Close_File(index);
 
 	return buffer;
 }
@@ -938,12 +938,12 @@ uint16 *File_ReadWholeFileLE16(const char *filename)
 	count = File_GetSize(index) / sizeof(uint16);
 
 	buffer = malloc(count * sizeof(uint16));
-	if (File_Read(index, buffer, count * sizeof(uint16)) != count * sizeof(uint16)) {
+	if (Read_File(index, buffer, count * sizeof(uint16)) != count * sizeof(uint16)) {
 		free(buffer);
 		return NULL;
 	}
 
-	File_Close(index);
+	Close_File(index);
 
 #if __BYTE_ORDER == __BIG_ENDIAN
 	for(i = 0; i < count; i++) {
@@ -968,8 +968,8 @@ uint32 File_ReadFile(const char *filename, void *buf)
 
 	index = File_Open(filename, FILE_MODE_READ);
 	length = File_GetSize(index);
-	File_Read(index, buf, length);
-	File_Close(index);
+	Read_File(index, buf, length);
+	Close_File(index);
 
 	return length;
 }
@@ -980,7 +980,7 @@ uint32 File_ReadFile(const char *filename, void *buf)
  * @param filename The name of the file to open.
  * @return An index value refering to the opened file, or FILE_INVALID.
  */
-uint8 ChunkFile_Open_Ex(enum SearchDirectory dir, const char *filename)
+uint8 Open_Iff_File_Ex(enum SearchDirectory dir, const char *filename)
 {
 	uint8 index;
 	uint32 header;
@@ -989,14 +989,14 @@ uint8 ChunkFile_Open_Ex(enum SearchDirectory dir, const char *filename)
 
 	if(index == FILE_INVALID) return index;
 
-	File_Read(index, &header, 4);
+	Read_File(index, &header, 4);
 
 	if (header != HTOBE32(CC_FORM)) {
-		File_Close(index);
+		Close_File(index);
 		return FILE_INVALID;
 	}
 
-	File_Seek(index, 4, 1);
+	Seek_File(index, 4, 1);
 
 	return index;
 }
@@ -1006,11 +1006,11 @@ uint8 ChunkFile_Open_Ex(enum SearchDirectory dir, const char *filename)
  *
  * @param index The index given by ChunkFile_Open() of the file.
  */
-void ChunkFile_Close(uint8 index)
+void Close_Iff_File(uint8 index)
 {
 	if (index == FILE_INVALID) return;
 
-	File_Close(index);
+	Close_File(index);
 }
 
 /**
@@ -1020,35 +1020,35 @@ void ChunkFile_Close(uint8 index)
  * @param chunk The chunk to seek to.
  * @return The length of the chunk (0 if not found).
  */
-uint32 ChunkFile_Seek(uint8 index, uint32 chunk)
+uint32 Get_Iff_Chunk_Size(uint8 index, uint32 chunk)
 {
 	uint32 value = 0;
 	uint32 length = 0;
 	bool first = true;
 
 	while (true) {
-		if (File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (value == 0 && File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (value == 0 && Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (File_Read(index, &length, 4) != 4 && !first) return 0;
+		if (Read_File(index, &length, 4) != 4 && !first) return 0;
 
 		length = HTOBE32(length);
 
 		if (value == chunk) {
-			File_Seek(index, -8, 1);
+			Seek_File(index, -8, 1);
 			return length;
 		}
 
 		if (first) {
-			File_Seek(index, 12, 0);
+			Seek_File(index, 12, 0);
 			first = false;
 			continue;
 		}
 
 		length += 1;
 		length &= 0xFFFFFFFE;
-		File_Seek(index, length, 1);
+		Seek_File(index, length, 1);
 	}
 }
 
@@ -1061,42 +1061,42 @@ uint32 ChunkFile_Seek(uint8 index, uint32 chunk)
  * @param length The amount of bytes to read.
  * @return The amount of bytes truly read, or 0 if there was a failure.
  */
-uint32 ChunkFile_Read(uint8 index, uint32 chunk, void *buffer, uint32 buflen)
+uint32 Read_Iff_Chunk(uint8 index, uint32 chunk, void *buffer, uint32 buflen)
 {
 	uint32 value = 0;
 	uint32 length = 0;
 	bool first = true;
 
 	while (true) {
-		if (File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (value == 0 && File_Read(index, &value, 4) != 4 && !first) return 0;
+		if (value == 0 && Read_File(index, &value, 4) != 4 && !first) return 0;
 
-		if (File_Read(index, &length, 4) != 4 && !first) return 0;
+		if (Read_File(index, &length, 4) != 4 && !first) return 0;
 
 		length = HTOBE32(length);
 
 		if (value == chunk) {
 			buflen = min(buflen, length);
 
-			File_Read(index, buffer, buflen);
+			Read_File(index, buffer, buflen);
 
 			length += 1;
 			length &= 0xFFFFFFFE;
 
-			if (buflen < length) File_Seek(index, length - buflen, 1);
+			if (buflen < length) Seek_File(index, length - buflen, 1);
 
 			return buflen;
 		}
 
 		if (first) {
-			File_Seek(index, 12, 0);
+			Seek_File(index, 12, 0);
 			first = false;
 			continue;
 		}
 
 		length += 1;
 		length &= 0xFFFFFFFE;
-		File_Seek(index, length, 1);
+		Seek_File(index, length, 1);
 	}
 }

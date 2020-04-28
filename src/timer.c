@@ -374,7 +374,7 @@ bool Timer_SetTimer(TimerType timer, bool set)
  * Sleep for an amount of ticks.
  * @param ticks The amount of ticks to sleep.
  */
-void Timer_Sleep(uint16 ticks)
+void Delay(uint16 ticks)
 {
 	uint32 tick = g_timerSleep + ticks;
 	while (tick >= g_timerSleep) sleepIdle();

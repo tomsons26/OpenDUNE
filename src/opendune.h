@@ -25,11 +25,11 @@ extern uint32 g_hintsShown1;
 extern uint32 g_hintsShown2;
 extern GameMode g_gameMode;
 extern uint16 g_campaignID;
-extern uint16 g_scenarioID;
+extern uint16 ScenarioIdx;
 extern uint16 g_activeAction;
 extern uint32 g_tickScenarioStart;
 extern bool   g_debugGame;
-extern bool   g_debugScenario;
+extern bool   Debug_Map;
 extern bool   g_debugSkipDialogs;
 
 extern uint16 g_validateStrictIfZero;

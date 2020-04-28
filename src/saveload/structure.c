@@ -11,17 +11,17 @@
 #include "../pool/pool.h"
 
 static const SaveLoadDesc s_saveStructure[] = {
-	SLD_SLD   (Structure,              o, g_saveObject),
-	SLD_ENTRY (Structure, SLDT_UINT16, creatorHouseID),
-	SLD_ENTRY (Structure, SLDT_UINT16, rotationSpriteDiff),
+	SLD_SLD   (Building,              o, g_saveObject),
+	SLD_ENTRY (Building, SLDT_UINT16, creatorHouseID),
+	SLD_ENTRY (Building, SLDT_UINT16, rotationSpriteDiff),
 	SLD_EMPTY (           SLDT_UINT8),
-	SLD_ENTRY (Structure, SLDT_UINT16, objectType),
-	SLD_ENTRY (Structure, SLDT_UINT8,  upgradeLevel),
-	SLD_ENTRY (Structure, SLDT_UINT8,  upgradeTimeLeft),
-	SLD_ENTRY (Structure, SLDT_UINT16, countDown),
-	SLD_ENTRY (Structure, SLDT_UINT16, buildCostRemainder),
-	SLD_ENTRY (Structure,  SLDT_INT16, state),
-	SLD_ENTRY (Structure, SLDT_UINT16, hitpointsMax),
+	SLD_ENTRY (Building, SLDT_UINT16, objectType),
+	SLD_ENTRY (Building, SLDT_UINT8,  upgradeLevel),
+	SLD_ENTRY (Building, SLDT_UINT8,  upgradeTimeLeft),
+	SLD_ENTRY (Building, SLDT_UINT16, countDown),
+	SLD_ENTRY (Building, SLDT_UINT16, buildCostRemainder),
+	SLD_ENTRY (Building,  SLDT_INT16, state),
+	SLD_ENTRY (Building, SLDT_UINT16, hitpointsMax),
 	SLD_END
 };
 
@@ -34,8 +34,8 @@ static const SaveLoadDesc s_saveStructure[] = {
 bool Structure_Load(FILE *fp, uint32 length)
 {
 	while (length > 0) {
-		Structure *s;
-		Structure sl;
+		Building *s;
+		Building sl;
 
 		memset(&sl, 0, sizeof(sl));
 
@@ -76,8 +76,8 @@ bool Structure_Save(FILE *fp)
 	find.index   = 0xFFFF;
 
 	while (true) {
-		Structure *s;
-		Structure ss;
+		Building *s;
+		Building ss;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;

@@ -363,7 +363,7 @@ void Video_Uninit(void)
 static void Video_DrawScreen_Scale2x(const struct dirty_area * area)
 {
 	unsigned top, bottom;
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Buff(SCREEN_0);
 	data += (s_screenOffset << 2);
 	if (area != NULL) {
 		top = area->top;
@@ -379,7 +379,7 @@ static void Video_DrawScreen_Hqx(void)
 {
 	uint8 *p;
 
-	p = GFX_Screen_Get_ByIndex(SCREEN_0);
+	p = Get_Buff(SCREEN_0);
 	p += (s_screenOffset << 2);
 
 	switch(s_screen_magnification) {
@@ -400,7 +400,7 @@ static void Video_DrawScreen_Hqx(void)
 
 static void Video_DrawScreen_Nearest_Neighbor(const struct dirty_area * area)
 {
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Buff(SCREEN_0);
 	uint8 *gfx1 = s_gfx_surface->pixels;
 	uint8 *gfx2;
 	uint8 *gfx3;
@@ -525,7 +525,7 @@ static void Video_DrawScreen(const struct dirty_area * area)
 {
 	SDL_LockSurface(s_gfx_surface);
 	if (s_screen_magnification == 1) {
-		uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+		uint8 *data = Get_Buff(SCREEN_0);
 		if (s_gfx_surface->format->BitsPerPixel == 8) {
 			uint8 *gfx = s_gfx_surface->pixels;
 			if (s_gfx_surface->pitch == SCREEN_WIDTH) {
@@ -580,7 +580,7 @@ void Video_Tick(void)
 	s_video_lock = true;
 
 	if (s_showFPS) {
-		Video_ShowFPS(GFX_Screen_Get_ByIndex(SCREEN_0));
+		Video_ShowFPS(Get_Buff(SCREEN_0));
 	}
 
 	while (SDL_PollEvent(&event)) {
@@ -666,11 +666,11 @@ void Video_Tick(void)
 
 #ifdef _DEBUG
 	if (!s_showFPS) {
-		if (GFX_Screen_Get_ByIndex(SCREEN_0) != NULL) {
-			if (!GFX_Screen_IsDirty(SCREEN_0) && memcmp(GFX_Screen_Get_ByIndex(SCREEN_0), s_gfx_screen8, SCREEN_WIDTH * SCREEN_HEIGHT) != 0) {
+		if (Get_Buff(SCREEN_0) != NULL) {
+			if (!GFX_Screen_IsDirty(SCREEN_0) && memcmp(Get_Buff(SCREEN_0), s_gfx_screen8, SCREEN_WIDTH * SCREEN_HEIGHT) != 0) {
 				Warning("**** SCREEN0 DIRTY NOT DETECTED ! ****\n");
 			}
-			memcpy(s_gfx_screen8, GFX_Screen_Get_ByIndex(SCREEN_0), SCREEN_WIDTH * SCREEN_HEIGHT);
+			memcpy(s_gfx_screen8, Get_Buff(SCREEN_0), SCREEN_WIDTH * SCREEN_HEIGHT);
 		}
 	}
 #endif /* _DEBUG */

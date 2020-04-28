@@ -17,8 +17,8 @@
 #include "../timer.h"
 
 static uint16 s_history[128];                /*!< History of input commands. */
-static uint16 s_historyHead = 0;             /*!< The current head inside the #s_history array. */
-static uint16 s_historyTail = 0;             /*!< The current tail inside the #s_history array. */
+static uint16 KeyBufferHead = 0;             /*!< The current head inside the #s_history array. */
+static uint16 KeyBufferTail = 0;             /*!< The current tail inside the #s_history array. */
 static bool   s_input_extendedKey = false;   /*!< If we are currently actively reading an extended key. */
 static uint8  s_activeInputMap[16];          /*!< A 96 bit array, where each active bit means that the Nth key is pressed. */
 
@@ -250,9 +250,9 @@ uint16 Input_Flags_SetBits(uint16 bits)
 }
 
 /** Clear the history buffer. */
-void Input_History_Clear(void)
+void Clear_KeyBuffer(void)
 {
-	s_historyTail = s_historyHead;
+	KeyBufferTail = KeyBufferHead;
 }
 
 /**
@@ -286,7 +286,7 @@ static uint16 Input_ReadHistory(uint16 index)
 			index = (index + 2) & 0xFF;
 		}
 	}
-	if (g_mouseMode != INPUT_MOUSE_MODE_PLAY) s_historyHead = index;
+	if (g_mouseMode != INPUT_MOUSE_MODE_PLAY) KeyBufferHead = index;
 	return value;
 }
 
@@ -299,11 +299,11 @@ static uint16 Input_History_Add(uint16 value)
 {
 	uint16 index;
 
-	index = (s_historyTail + 2) & 0xFF;
-	if (index == s_historyHead) return 1;
+	index = (KeyBufferTail + 2) & 0xFF;
+	if (index == KeyBufferHead) return 1;
 
-	s_history[s_historyTail / 2] = value;
-	s_historyTail = index;
+	s_history[KeyBufferTail / 2] = value;
+	KeyBufferTail = index;
 	return 0;
 }
 
@@ -315,7 +315,7 @@ static void Input_ReadInputFromFile(void)
 
 	if (g_mouseMode == INPUT_MOUSE_MODE_NORMAL || g_mouseMode != INPUT_MOUSE_MODE_PLAY) return;
 
-	if (File_Read(g_mouseFileID, mouseBuffer, 4) != 4) {
+	if (Read_File(g_mouseFileID, mouseBuffer, 4) != 4) {
 		Warning("Input_ReadInputFromFile(): File_Read() error.\n");
 		return;
 	}
@@ -345,14 +345,14 @@ static void Input_ReadInputFromFile(void)
 		}
 	}
 
-	if (File_Read(g_mouseFileID, mouseBuffer, 4) != 4) {
+	if (Read_File(g_mouseFileID, mouseBuffer, 4) != 4) {
 		Warning("Input_ReadInputFromFile(): File_Read() error.\n");
 		return;
 	}
 	Debug("  mouseX=%hu mouseY=%hu\n", mouseBuffer[0], mouseBuffer[1]);
 
-	g_mouseX = g_mouseRecordedX = mouseBuffer[0];
-	value = g_mouseY = g_mouseRecordedY = mouseBuffer[1];
+	MouseX = g_mouseRecordedX = mouseBuffer[0];
+	value = MouseY = g_mouseRecordedY = mouseBuffer[1];
 
 	Mouse_HandleMovementIfMoved(value);
 	g_timerInput = 0;
@@ -378,7 +378,7 @@ static uint16 Input_AddHistory(uint16 value)
 		value = g_mouseInputValue;
 	}
 
-	s_history[s_historyHead / 2] = value;
+	s_history[KeyBufferHead / 2] = value;
 	return value;
 }
 
@@ -407,8 +407,8 @@ void Input_HandleInput(uint16 input)
 	uint16 flags; /* Mask for allowed input types. See InputFlagsEnum. */
 
 	flags       = g_inputFlags;
-	inputMouseX = g_mouseX;
-	inputMouseY = g_mouseY;
+	inputMouseX = MouseX;
+	inputMouseY = MouseY;
 
 	if (g_mouseMode == INPUT_MOUSE_MODE_RECORD) {
 		saveSize = 4;
@@ -476,21 +476,21 @@ void Input_HandleInput(uint16 input)
 				if ((int16)inputMouseY > SCREEN_HEIGHT - 1) inputMouseY = SCREEN_HEIGHT - 1;
 			}
 
-			g_mouseX = inputMouseX;
-			g_mouseY = inputMouseY;
-			if (g_mouseLock == 0) {
+			MouseX = inputMouseX;
+			MouseY = inputMouseY;
+			if (MouseUpdate == 0) {
 				/* Move mouse pointer */
-				GUI_Mouse_Hide();
-				GUI_Mouse_Show();
+				Low_Hide_Mouse();
+				Low_Show_Mouse();
 			}
 			input = 0x2D;
 		}
 	}
 
-	oldTail = s_historyTail;
+	oldTail = KeyBufferTail;
 
 	if (Input_History_Add(input) != 0) {
-		s_historyTail = oldTail;
+		KeyBufferTail = oldTail;
 		return;
 	}
 
@@ -500,7 +500,7 @@ void Input_HandleInput(uint16 input)
 		                   0x41 : change for 1st button
 						   0x42 : change for 2nd button */
 		if ((Input_History_Add(inputMouseX) != 0) || (Input_History_Add(inputMouseY) != 0)) {
-			s_historyTail = oldTail;
+			KeyBufferTail = oldTail;
 			return;
 		}
 
@@ -515,13 +515,13 @@ void Input_HandleInput(uint16 input)
 
 	if (value == 0x2D || value == 0x7F ||
 			((input & 0x800) != 0 && (flags & INPUT_FLAG_KEY_RELEASE) == 0 && value != 0x41 && value != 0x42)) {
-		s_historyTail = oldTail;
+		KeyBufferTail = oldTail;
 	}
 
 	index = (value & 0x7F) >> 3;
 	bit_value <<= (value & 7);
 	if ((bit_value & s_activeInputMap[index]) != 0 && (flags & INPUT_FLAG_KEY_REPEAT) == 0) {
-		s_historyTail = oldTail;
+		KeyBufferTail = oldTail;
 	}
 	s_activeInputMap[index] &= (1 << (value & 7)) ^ 0xFF;	/* Clear bit */
 	s_activeInputMap[index] |= bit_value;					/* set bit */
@@ -538,11 +538,11 @@ void Input_HandleInput(uint16 input)
  * Is input available?
  * @return \c 0 if no input, else a value.
  */
-uint16 Input_IsInputAvailable(void)
+uint16 Check_Key_Num(void)
 {
 	uint16 value;
 
-	value = s_historyHead ^ s_historyTail;
+	value = KeyBufferHead ^ KeyBufferTail;
 
 	return Input_AddHistory(value);
 }
@@ -558,8 +558,8 @@ uint16 Input_Wait(void)
 	for (;; sleepIdle()) {
 		if (g_mouseMode == INPUT_MOUSE_MODE_PLAY) break;
 
-		value = s_historyHead;
-		if (value != s_historyTail) break;
+		value = KeyBufferHead;
+		if (value != KeyBufferTail) break;
 	}
 
 	value = Input_ReadHistory(value);
@@ -588,7 +588,8 @@ uint16 Input_Test(uint16 value)
  * @todo Most users seem to ignore the returned high byte, perhaps make it a
  *      uint8 at some time in the future?
  */
-uint16 Input_Keyboard_HandleKeys(uint16 value)
+// technically Convert_Num_To_ASCII
+uint16 KN_To_KA(uint16 value)
 {
 	uint16 keyFlags;
 
@@ -667,8 +668,8 @@ uint16 Input_WaitForValidInput(void)
 		for (;; sleepIdle()) {
 			if (g_mouseMode == INPUT_MOUSE_MODE_PLAY) break;
 
-			index = s_historyHead;
-			if (index != s_historyTail) break;
+			index = KeyBufferHead;
+			if (index != KeyBufferTail) break;
 		}
 
 		value = Input_ReadHistory(index);
@@ -677,7 +678,7 @@ uint16 Input_WaitForValidInput(void)
 		}
 	} while (i < lengthof(s_keymapIgnore) || (value & 0x800) != 0 || (value & 0xFF) >= 0x7A);
 
-	value = Input_Keyboard_HandleKeys(value);
+	value = KN_To_KA(value);
 	Input_ReadInputFromFile();
 	return value & 0xFF;
 }
@@ -686,7 +687,7 @@ uint16 Input_WaitForValidInput(void)
  * Get the next key.
  * @return Next key.
  */
-uint16 Input_Keyboard_NextKey(void)
+uint16 Check_Key(void)
 {
 	uint16 i;
 	uint16 value;
@@ -696,8 +697,8 @@ uint16 Input_Keyboard_NextKey(void)
 	for (;; sleepIdle()) {
 		uint16 index;
 
-		index = s_historyHead;
-		if (g_mouseMode != INPUT_MOUSE_MODE_PLAY && index == s_historyTail) {
+		index = KeyBufferHead;
+		if (g_mouseMode != INPUT_MOUSE_MODE_PLAY && index == KeyBufferTail) {
 			value = 0;
 			break;
 		}
@@ -713,11 +714,11 @@ uint16 Input_Keyboard_NextKey(void)
 
 		if ((value & 0xFF) >= 0x41 && (value & 0xFF) <= 0x44) index += 4;
 
-		s_historyHead = index + 2;
+		KeyBufferHead = index + 2;
 	}
 
 	if (value != 0) {
-		value = Input_Keyboard_HandleKeys(value) & 0xFF;
+		value = KN_To_KA(value) & 0xFF;
 	}
 
 	return value;

@@ -108,7 +108,7 @@ void Music_Play(uint16 musicID)
  * Initialises the MT-32.
  * @param index The index of the music to play.
  */
-void Music_InitMT32(void)
+void MT32_Init(void)
 {
 	uint16 left = 0;
 
@@ -116,10 +116,10 @@ void Music_InitMT32(void)
 
 	Driver_Music_Play(0, 0xFF);
 
-	GUI_DrawText(String_Get_ByIndex(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
+	GUI_DrawText(Text_String(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
 
 	while (Driver_Music_IsPlaying()) {
-		Timer_Sleep(60);
+		Delay(60);
 
 		left += 6;
 		GUI_DrawText(".", left, 10, 15, 12);
@@ -189,7 +189,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 	for (voice = 0; voice < NUM_VOICES; voice++) {
 		switch (g_table_voices[voice].string[0]) {
 			case '%':
-				if (g_config.language != LANGUAGE_ENGLISH || currentVoiceSet == voiceSet) {
+				if (g_config.Language != LANGUAGE_ENGLISH || currentVoiceSet == voiceSet) {
 					if (voiceSet != 0xFFFF && voiceSet != 0xFFFE) break;
 				}
 
@@ -241,7 +241,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 				if (g_voiceData[voice] != NULL ||
 						currentVoiceSet == voiceSet || voiceSet == 0xFFFF || voiceSet == 0xFFFE) break;
 
-				switch (g_config.language) {
+				switch (g_config.Language) {
 					case LANGUAGE_FRENCH: prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN: prefixChar = 'G'; break;
 					default: prefixChar = g_table_houseInfo[voiceSet].prefixChar;
@@ -254,7 +254,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 			case '+':
 				if (voiceSet == 0xFFFF || g_voiceData[voice] != NULL) break;
 
-				switch (g_config.language) {
+				switch (g_config.Language) {
 					case LANGUAGE_FRENCH:  prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN:  prefixChar = 'G'; break;
 					default: prefixChar = 'Z'; break;
@@ -336,7 +336,7 @@ void Sound_StartSound(uint16 index)
 
 		filename = g_table_voices[index].string;
 		if (filename[0] == '?') {
-			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, g_playerHouseID < HOUSE_MAX ? g_table_houseInfo[g_playerHouseID].prefixChar : ' ');
+			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, Whom < HOUSE_MAX ? g_table_houseInfo[Whom].prefixChar : ' ');
 
 			Driver_Voice_LoadFile(filenameBuffer, g_readBuffer, g_readBufferSize);
 
@@ -377,7 +377,7 @@ void Sound_Output_Feedback(uint16 index)
 	if (g_enableVoices == 0 || g_gameConfig.sounds == 0) {
 		Driver_Sound_Play(g_feedback[index].soundId, 0xFF);
 
-		g_viewportMessageText = String_Get_ByIndex(g_feedback[index].messageId);
+		g_viewportMessageText = Text_String(g_feedback[index].messageId);
 
 		if ((g_viewportMessageCounter & 1) != 0) {
 			g_viewport_forceRedraw = true;
@@ -393,7 +393,7 @@ void Sound_Output_Feedback(uint16 index)
 		uint8 i;
 
 		for (i = 0; i < lengthof(s_spokenWords); i++) {
-			s_spokenWords[i] = (g_config.language == LANGUAGE_ENGLISH) ? g_feedback[index].voiceId[i] : g_translatedVoice[index][i];
+			s_spokenWords[i] = (g_config.Language == LANGUAGE_ENGLISH) ? g_feedback[index].voiceId[i] : g_translatedVoice[index][i];
 		}
 	}
 

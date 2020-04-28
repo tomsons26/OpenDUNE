@@ -35,7 +35,7 @@
 #include "unit.h"
 
 
-Structure *g_structureActive = NULL;
+Building *g_structureActive = NULL;
 uint16 g_structureActivePosition = 0;
 uint16 g_structureActiveType = 0;
 
@@ -82,19 +82,19 @@ void GameLoop_Structure(void)
 	find.index   = 0xFFFF;
 	find.type    = 0xFFFF;
 
-	if (g_debugScenario) return;
+	if (Debug_Map) return;
 
 	while (true) {
-		const StructureInfo *si;
-		const HouseInfo *hi;
-		Structure *s;
+		const BuildingType *si;
+		const HouseType *hi;
+		Building *s;
 		House *h;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 		if (s->o.type == STRUCTURE_SLAB_1x1 || s->o.type == STRUCTURE_SLAB_2x2 || s->o.type == STRUCTURE_WALL) continue;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingType[s->o.type];
 		h  = House_Get_ByIndex(s->o.houseID);
 		hi = &g_table_houseInfo[h->index];
 
@@ -107,7 +107,7 @@ void GameLoop_Structure(void)
 			if (s->countDown != 0) {
 				s->countDown--;
 
-				if (s->o.houseID == g_playerHouseID) {
+				if (s->o.houseID == Whom) {
 					GUI_Widget_ActionPanel_Draw(true);
 				}
 			}
@@ -118,13 +118,13 @@ void GameLoop_Structure(void)
 			}
 		}
 
-		if (tickDegrade && s->o.flags.s.degrades && s->o.hitpoints > si->o.hitpoints / 2) {
+		if (tickDegrade && s->o.flags.s.degrades && s->o.hitpoints > si->ot.hitpoints / 2) {
 			Structure_Damage(s, hi->degradingAmount, 0);
 		}
 
 		if (tickStructure) {
 			if (s->o.flags.s.upgrading) {
-				uint16 upgradeCost = si->o.buildCredits / 40;
+				uint16 upgradeCost = si->ot.Cost / 40;
 
 				if (upgradeCost <= h->credits) {
 					h->credits -= upgradeCost;
@@ -148,23 +148,23 @@ void GameLoop_Structure(void)
 
 				/* ENHANCEMENT -- The calculation of the repaircost is a bit unfair in Dune2, because of rounding errors (they use a 256 float-resolution, which is not sufficient) */
 				if (g_dune2_enhanced) {
-					repairCost = si->o.buildCredits * 2 / si->o.hitpoints;
+					repairCost = si->ot.Cost * 2 / si->ot.hitpoints;
 				} else {
-					repairCost = ((2 * 256 / si->o.hitpoints) * si->o.buildCredits + 128) / 256;
+					repairCost = ((2 * 256 / si->ot.hitpoints) * si->ot.Cost + 128) / 256;
 				}
 
 				if (repairCost <= h->credits) {
 					h->credits -= repairCost;
 
 					/* AIs repair in early games slower than in later games */
-					if (s->o.houseID == g_playerHouseID || g_campaignID >= 3) {
+					if (s->o.houseID == Whom || g_campaignID >= 3) {
 						s->o.hitpoints += 5;
 					} else {
 						s->o.hitpoints += 3;
 					}
 
-					if (s->o.hitpoints > si->o.hitpoints) {
-						s->o.hitpoints = si->o.hitpoints;
+					if (s->o.hitpoints > si->ot.hitpoints) {
+						s->o.hitpoints = si->ot.hitpoints;
 						s->o.flags.s.repairing = false;
 						s->o.flags.s.onHold = false;
 					}
@@ -172,30 +172,30 @@ void GameLoop_Structure(void)
 					s->o.flags.s.repairing = false;
 				}
 			} else {
-				if (!s->o.flags.s.onHold && s->countDown != 0 && s->o.linkedID != 0xFF && s->state == STRUCTURE_STATE_BUSY && si->o.flags.factory) {
-					ObjectInfo *oi;
+				if (!s->o.flags.s.onHold && s->countDown != 0 && s->o.linkedID != 0xFF && s->state == BSTATE_BUSY && si->ot.flags.factory) {
+					ObjectType *oi;
 					uint16 buildSpeed;
 					uint16 buildCost;
 
 					if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-						oi = &g_table_structureInfo[s->objectType].o;
+						oi = &g_table_BuildingType[s->objectType].ot;
 					} else if (s->o.type == STRUCTURE_REPAIR) {
-						oi = &g_table_unitInfo[Unit_Get_ByIndex(s->o.linkedID)->o.type].o;
+						oi = &g_table_unitInfo[Unit_Get_ByIndex(s->o.linkedID)->o.type].ot;
 					} else {
-						oi = &g_table_unitInfo[s->objectType].o;
+						oi = &g_table_unitInfo[s->objectType].ot;
 					}
 
 					buildSpeed = 256;
-					if (s->o.hitpoints < si->o.hitpoints) {
-						buildSpeed = s->o.hitpoints * 256 / si->o.hitpoints;
+					if (s->o.hitpoints < si->ot.hitpoints) {
+						buildSpeed = s->o.hitpoints * 256 / si->ot.hitpoints;
 					}
 
 					/* For AIs, we slow down building speed in all but the last campaign */
-					if (g_playerHouseID != s->o.houseID) {
+					if (Whom != s->o.houseID) {
 						if (buildSpeed > g_campaignID * 20 + 95) buildSpeed = g_campaignID * 20 + 95;
 					}
 
-					buildCost = oi->buildCredits * 256 / oi->buildTime;
+					buildCost = oi->Cost * 256 / oi->Time;
 
 					if (buildSpeed < 256) {
 						buildCost = buildSpeed * buildCost / 256;
@@ -217,30 +217,30 @@ void GameLoop_Structure(void)
 							s->countDown = 0;
 							s->buildCostRemainder = 0;
 
-							Structure_SetState(s, STRUCTURE_STATE_READY);
+							Structure_SetState(s, BSTATE_READY);
 
-							if (s->o.houseID == g_playerHouseID) {
+							if (s->o.houseID == Whom) {
 								if (s->o.type != STRUCTURE_BARRACKS && s->o.type != STRUCTURE_WOR_TROOPER) {
 									uint16 stringID = STR_IS_COMPLETED_AND_AWAITING_ORDERS;
 									if (s->o.type == STRUCTURE_HIGH_TECH) stringID = STR_IS_COMPLETE;
 									if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) stringID = STR_IS_COMPLETED_AND_READY_TO_PLACE;
 
-									GUI_DisplayText("%s %s", 0, String_Get_ByIndex(oi->stringID_full), String_Get_ByIndex(stringID));
+									GUI_DisplayText("%s %s", 0, Text_String(oi->stringID_full), Text_String(stringID));
 
 									Sound_Output_Feedback(0);
 								}
 							} else if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
 								/* An AI immediately places the structure when it is done building */
-								Structure *ns;
+								Building *ns;
 								uint8 i;
 
 								ns = Structure_Get_ByIndex(s->o.linkedID);
 								s->o.linkedID = 0xFF;
 
 								/* The AI places structures which are operational immediately */
-								Structure_SetState(s, STRUCTURE_STATE_IDLE);
+								Structure_SetState(s, BSTATE_IDLE);
 
-								/* Find the position to place the structure */
+								/* Find the position to place the Building */
 								for (i = 0; i < 5; i++) {
 									if (ns->o.type != h->ai_structureRebuild[i][0]) continue;
 
@@ -253,9 +253,9 @@ void GameLoop_Structure(void)
 
 								/* If the AI no longer had in memory where to store the structure, free it and forget about it */
 								if (i == 5) {
-									const StructureInfo *nsi = &g_table_structureInfo[ns->o.type];
+									const BuildingType *nsi = &g_table_BuildingType[ns->o.type];
 
-									h->credits += nsi->o.buildCredits;
+									h->credits += nsi->ot.Cost;
 
 									Structure_Free(ns);
 								}
@@ -263,9 +263,9 @@ void GameLoop_Structure(void)
 						}
 					} else {
 						/* Out of money means the building gets put on hold */
-						if (s->o.houseID == g_playerHouseID) {
+						if (s->o.houseID == Whom) {
 							s->o.flags.s.onHold = true;
-							GUI_DisplayText(String_Get_ByIndex(STR_INSUFFICIENT_FUNDS_CONSTRUCTION_IS_HALTED), 0);
+							GUI_DisplayText(Text_String(STR_INSUFFICIENT_FUNDS_CONSTRUCTION_IS_HALTED), 0);
 						}
 					}
 				}
@@ -279,12 +279,12 @@ void GameLoop_Structure(void)
 						ui = &g_table_unitInfo[Unit_Get_ByIndex(s->o.linkedID)->o.type];
 
 						repairSpeed = 256;
-						if (s->o.hitpoints < si->o.hitpoints) {
-							repairSpeed = s->o.hitpoints * 256 / si->o.hitpoints;
+						if (s->o.hitpoints < si->ot.hitpoints) {
+							repairSpeed = s->o.hitpoints * 256 / si->ot.hitpoints;
 						}
 
 						/* XXX -- This is highly unfair. Repairing becomes more expensive if your structure is more damaged */
-						repairCost = 2 * ui->o.buildCredits / 256;
+						repairCost = 2 * ui->ot.Cost / 256;
 
 						if (repairCost < h->credits) {
 							h->credits -= repairCost;
@@ -294,9 +294,9 @@ void GameLoop_Structure(void)
 							} else {
 								s->countDown = 0;
 
-								Structure_SetState(s, STRUCTURE_STATE_READY);
+								Structure_SetState(s, BSTATE_READY);
 
-								if (s->o.houseID == g_playerHouseID) Sound_Output_Feedback(g_playerHouseID + 55);
+								if (s->o.houseID == Whom) Sound_Output_Feedback(Whom + 55);
 							}
 						}
 					} else if (h->credits != 0) {
@@ -306,14 +306,14 @@ void GameLoop_Structure(void)
 				}
 
 				/* AI maintenance on structures */
-				if (h->flags.isAIActive && s->o.flags.s.allocated && s->o.houseID != g_playerHouseID && h->credits != 0) {
+				if (h->flags.isAIActive && s->o.flags.s.allocated && s->o.houseID != Whom && h->credits != 0) {
 					/* When structure is below 50% hitpoints, start repairing */
-					if (s->o.hitpoints < si->o.hitpoints / 2) {
+					if (s->o.hitpoints < si->ot.hitpoints / 2) {
 						Structure_SetRepairingState(s, 1, NULL);
 					}
 
 					/* If the structure is not doing something, but can build stuff, see if there is stuff to build */
-					if (si->o.flags.factory && s->countDown == 0 && s->o.linkedID == 0xFF) {
+					if (si->ot.flags.factory && s->countDown == 0 && s->o.linkedID == 0xFF) {
 						uint16 type = Structure_AI_PickNextToBuild(s);
 
 						if (type != 0xFFFF) Structure_BuildObject(s, type);
@@ -355,7 +355,7 @@ uint8 Structure_StringToType(const char *name)
 	if (name == NULL) return STRUCTURE_INVALID;
 
 	for (type = 0; type < STRUCTURE_MAX; type++) {
-		if (strcasecmp(g_table_structureInfo[type].o.name, name) == 0) return type;
+		if (strcasecmp(g_table_BuildingType[type].ot.name, name) == 0) return type;
 	}
 
 	return STRUCTURE_INVALID;
@@ -370,15 +370,15 @@ uint8 Structure_StringToType(const char *name)
  * @param position The packed position where to place the Structure. If 0xFFFF, the Structure is not placed.
  * @return The new created Structure, or NULL if something failed.
  */
-Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 position)
+Building *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 position)
 {
-	const StructureInfo *si;
-	Structure *s;
+	const BuildingType *si;
+	Building *s;
 
 	if (houseID >= HOUSE_MAX) return NULL;
 	if (typeID >= STRUCTURE_MAX) return NULL;
 
-	si = &g_table_structureInfo[typeID];
+	si = &g_table_BuildingType[typeID];
 	s = Structure_Allocate(index, typeID);
 	if (s == NULL) return NULL;
 
@@ -388,7 +388,7 @@ Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 po
 	s->o.position.x         = 0;
 	s->o.position.y         = 0;
 	s->o.linkedID           = 0xFF;
-	s->state                = (g_debugScenario) ? STRUCTURE_STATE_IDLE : STRUCTURE_STATE_JUSTBUILT;
+	s->state                = (Debug_Map) ? BSTATE_IDLE : BSTATE_JUSTBUILT;
 
 	if (typeID == STRUCTURE_TURRET) {
 		s->rotationSpriteDiff = g_iconMap[g_iconMap[ICM_ICONGROUP_BASE_DEFENSE_TURRET] + 1];
@@ -397,15 +397,15 @@ Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 po
 		s->rotationSpriteDiff = g_iconMap[g_iconMap[ICM_ICONGROUP_BASE_ROCKET_TURRET] + 1];
 	}
 
-	s->o.hitpoints  = si->o.hitpoints;
-	s->hitpointsMax = si->o.hitpoints;
+	s->o.hitpoints  = si->ot.hitpoints;
+	s->hitpointsMax = si->ot.hitpoints;
 
 	if (houseID == HOUSE_HARKONNEN && typeID == STRUCTURE_LIGHT_VEHICLE) {
 		s->upgradeLevel = 1;
 	}
 
 	/* Check if there is an upgrade available */
-	if (si->o.flags.factory) {
+	if (si->ot.flags.factory) {
 		s->upgradeTimeLeft = Structure_IsUpgradable(s) ? 100 : 0;
 	}
 
@@ -416,7 +416,7 @@ Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 po
 	s->countDown = 0;
 
 	/* AIs get the full upgrade immediately */
-	if (houseID != g_playerHouseID) {
+	if (houseID != Whom) {
 		while (true) {
 			if (!Structure_IsUpgradable(s)) break;
 			s->upgradeLevel++;
@@ -439,15 +439,15 @@ Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 po
  * @param position The (packed) tile to place the struction on.
  * @return True if and only if the structure is placed on the map.
  */
-bool Structure_Place(Structure *s, uint16 position)
+bool Structure_Place(Building *s, uint16 position)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	int16 validBuildLocation;
 
 	if (s == NULL) return false;
 	if (position == 0xFFFF) return false;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	switch (s->o.type) {
 		case STRUCTURE_WALL: {
@@ -462,7 +462,7 @@ bool Structure_Place(Structure *s, uint16 position)
 
 			g_mapTileID[position] |= 0x8000;
 
-			if (s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 1);
+			if (s->o.houseID == Whom) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 1);
 
 			if (Map_IsPositionUnveiled(position)) t->overlayTileID = 0;
 
@@ -488,7 +488,7 @@ bool Structure_Place(Structure *s, uint16 position)
 
 				g_mapTileID[curPos] |= 0x8000;
 
-				if (s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 1);
+				if (s->o.houseID == Whom) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 1);
 
 				if (Map_IsPositionUnveiled(curPos)) t->overlayTileID = 0;
 
@@ -510,7 +510,7 @@ bool Structure_Place(Structure *s, uint16 position)
 
 					g_mapTileID[curPos] |= 0x8000;
 
-					if (s->o.houseID == g_playerHouseID) {
+					if (s->o.houseID == Whom) {
 						Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 1);
 						t->overlayTileID = 0;
 					}
@@ -528,13 +528,13 @@ bool Structure_Place(Structure *s, uint16 position)
 	}
 
 	validBuildLocation = Structure_IsValidBuildLocation(position, s->o.type);
-	if (validBuildLocation == 0 && s->o.houseID == g_playerHouseID && !g_debugScenario && g_validateStrictIfZero == 0) return false;
+	if (validBuildLocation == 0 && s->o.houseID == Whom && !Debug_Map && g_validateStrictIfZero == 0) return false;
 
 	/* ENHANCEMENT -- In Dune2, it only removes the fog around the top-left tile of a structure, leaving for big structures the right in the fog. */
-	if (!g_dune2_enhanced && s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 2);
+	if (!g_dune2_enhanced && s->o.houseID == Whom) Tile_RemoveFogInRadius(Tile_UnpackTile(position), 2);
 
 	s->o.seenByHouses |= 1 << s->o.houseID;
-	if (s->o.houseID == g_playerHouseID) s->o.seenByHouses |= 0xFF;
+	if (s->o.houseID == Whom) s->o.seenByHouses |= 0xFF;
 
 	s->o.flags.s.isNotOnMap = false;
 
@@ -543,15 +543,15 @@ bool Structure_Place(Structure *s, uint16 position)
 	s->o.position.y &= 0xFF00;
 
 	s->rotationSpriteDiff = 0;
-	s->o.hitpoints  = si->o.hitpoints;
-	s->hitpointsMax = si->o.hitpoints;
+	s->o.hitpoints  = si->ot.hitpoints;
+	s->hitpointsMax = si->ot.hitpoints;
 
 	/* If the return value is negative, there are tiles without slab. This gives a penalty to the hitpoints. */
 	if (validBuildLocation < 0) {
 		uint16 tilesWithoutSlab = -(int16)validBuildLocation;
 		uint16 structureTileCount = g_table_structure_layoutTileCount[si->layout];
 
-		s->o.hitpoints -= (si->o.hitpoints / 2) * tilesWithoutSlab / structureTileCount;
+		s->o.hitpoints -= (si->ot.hitpoints / 2) * tilesWithoutSlab / structureTileCount;
 
 		s->o.flags.s.degrades = true;
 	} else {
@@ -585,7 +585,7 @@ bool Structure_Place(Structure *s, uint16 position)
 			Unit_Remove(u);
 
 			/* ENHANCEMENT -- In Dune2, it only removes the fog around the top-left tile of a structure, leaving for big structures the right in the fog. */
-			if (g_dune2_enhanced && s->o.houseID == g_playerHouseID) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 2);
+			if (g_dune2_enhanced && s->o.houseID == Whom) Tile_RemoveFogInRadius(Tile_UnpackTile(curPos), 2);
 
 		}
 	}
@@ -627,7 +627,7 @@ void Structure_CalculateHitpointsMax(House *h)
 
 	if (h == NULL) return;
 
-	if (h->index == g_playerHouseID) House_UpdateRadarState(h);
+	if (h->index == Whom) House_UpdateRadarState(h);
 
 	if (h->powerUsage == 0) {
 		power = 256;
@@ -640,17 +640,17 @@ void Structure_CalculateHitpointsMax(House *h)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) return;
 		if (s->o.type == STRUCTURE_SLAB_1x1 || s->o.type == STRUCTURE_SLAB_2x2 || s->o.type == STRUCTURE_WALL) continue;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingType[s->o.type];
 
-		s->hitpointsMax = si->o.hitpoints * power / 256;
-		s->hitpointsMax = max(s->hitpointsMax, si->o.hitpoints / 2);
+		s->hitpointsMax = si->ot.hitpoints * power / 256;
+		s->hitpointsMax = max(s->hitpointsMax, si->ot.hitpoints / 2);
 
 		if (s->hitpointsMax >= s->o.hitpoints) continue;
 		Structure_Damage(s, 1, 0);
@@ -663,7 +663,7 @@ void Structure_CalculateHitpointsMax(House *h)
  * @param s The structure to set the state of.
  * @param state The new sate value.
  */
-void Structure_SetState(Structure *s, int16 state)
+void Structure_SetState(Building *s, int16 state)
 {
 	if (s == NULL) return;
 	s->state = state;
@@ -677,7 +677,7 @@ void Structure_SetState(Structure *s, int16 state)
  * @param packed The packed tile to get the structure from.
  * @return The structure.
  */
-Structure *Structure_Get_ByPackedTile(uint16 packed)
+Building *Structure_Get_ByPackedTile(uint16 packed)
 {
 	Tile *tile;
 
@@ -710,7 +710,7 @@ uint32 Structure_GetStructuresBuilt(House *h)
 	h->windtrapCount = 0;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -731,16 +731,16 @@ uint32 Structure_GetStructuresBuilt(House *h)
  * @param type The structure type to check the position for.
  * @return 0 if the position is not valid, 1 if the position is valid and have enough slabs, <0 if the position is valid but miss some slabs.
  */
-int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
+int16 Structure_IsValidBuildLocation(uint16 position, StructType type)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	const uint16 *layoutTile;
 	uint8 i;
 	uint16 neededSlabs;
 	bool isValid;
 	uint16 curPos;
 
-	si = &g_table_structureInfo[type];
+	si = &g_table_BuildingType[type];
 	layoutTile = g_table_structure_layoutTiles[si->layout];
 
 	isValid = true;
@@ -752,7 +752,7 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 
 		lst = Map_GetLandscapeType(curPos);
 
-		if (g_debugScenario) {
+		if (Debug_Map) {
 			if (!g_table_landscapeInfo[lst].isValidForStructure2) {
 				isValid = false;
 				break;
@@ -763,7 +763,7 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 				break;
 			}
 
-			if (si->o.flags.notOnConcrete) {
+			if (si->ot.flags.notOnConcrete) {
 				if (!g_table_landscapeInfo[lst].isValidForStructure2 && g_validateStrictIfZero == 0) {
 					isValid = false;
 					break;
@@ -783,11 +783,11 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 		}
 	}
 
-	if (g_validateStrictIfZero == 0 && isValid && type != STRUCTURE_CONSTRUCTION_YARD && !g_debugScenario) {
+	if (g_validateStrictIfZero == 0 && isValid && type != STRUCTURE_CONSTRUCTION_YARD && !Debug_Map) {
 		isValid = false;
 		for (i = 0; i < 16; i++) {
 			uint16 offset, lst;
-			Structure *s;
+			Building *s;
 
 			offset = g_table_structure_layoutTilesAround[si->layout][i];
 			if (offset == 0) break;
@@ -795,14 +795,14 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
 			curPos = position + offset;
 			s = Structure_Get_ByPackedTile(curPos);
 			if (s != NULL) {
-				if (s->o.houseID != g_playerHouseID) continue;
+				if (s->o.houseID != Whom) continue;
 				isValid = true;
 				break;
 			}
 
 			lst = Map_GetLandscapeType(curPos);
 			if (lst != LST_CONCRETE_SLAB && lst != LST_WALL) continue;
-			if (g_map[curPos].houseID != g_playerHouseID) continue;
+			if (g_map[curPos].houseID != Whom) continue;
 
 			isValid = true;
 			break;
@@ -819,7 +819,7 @@ int16 Structure_IsValidBuildLocation(uint16 position, StructureType type)
  *
  * @param s The structure which launches the weapon. Has to be the Palace.
  */
-void Structure_ActivateSpecial(Structure *s)
+void Structure_ActivateSpecial(Building *s)
 {
 	House *h;
 
@@ -827,7 +827,7 @@ void Structure_ActivateSpecial(Structure *s)
 	if (s->o.type != STRUCTURE_PALACE) return;
 
 	h = House_Get_ByIndex(s->o.houseID);
-	if (!h->flags.used) return;
+	if (!h->flags.IsActive) return;
 
 	switch (g_table_houseInfo[s->o.houseID].specialWeapon) {
 		case HOUSE_WEAPON_MISSILE: {
@@ -838,7 +838,7 @@ void Structure_ActivateSpecial(Structure *s)
 			position.y = 0xFFFF;
 
 			g_validateStrictIfZero++;
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_MISSILE_HOUSE, s->o.houseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_MISSILE_HOUSE, s->o.houseID, position, Random());
 			g_validateStrictIfZero--;
 
 			g_unitHouseMissile = u;
@@ -855,7 +855,7 @@ void Structure_ActivateSpecial(Structure *s)
 
 				/* For the AI, try to find the first structure which is not ours, and launch missile to there */
 				while (true) {
-					Structure *sf;
+					Building *sf;
 
 					sf = Structure_Find(&find);
 					if (sf == NULL) break;
@@ -894,12 +894,12 @@ void Structure_ActivateSpecial(Structure *s)
 				uint16 orientation;
 				uint16 unitType;
 
-				Tools_Random_256();
+				Random();
 
 				position = Tile_UnpackTile(location);
 				position = Tile_MoveByRandom(position, 32, true);
 
-				orientation = Tools_RandomLCG_Range(0, 3);
+				orientation = IRandom(0, 3);
 				unitType = (orientation == 1) ? UNIT_TROOPER : UNIT_TROOPERS;
 
 				g_validateStrictIfZero++;
@@ -918,7 +918,7 @@ void Structure_ActivateSpecial(Structure *s)
 			Unit *u;
 			uint16 position;
 
-			/* Find a spot next to the structure */
+			/* Find a spot next to the Building */
 			position = Structure_FindFreePosition(s, false);
 
 			/* If there is no spot, reset countdown */
@@ -928,7 +928,7 @@ void Structure_ActivateSpecial(Structure *s)
 			}
 
 			g_validateStrictIfZero++;
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SABOTEUR, s->o.houseID, Tile_UnpackTile(position), Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SABOTEUR, s->o.houseID, Tile_UnpackTile(position), Random());
 			g_validateStrictIfZero--;
 
 			if (u == NULL) return;
@@ -941,7 +941,7 @@ void Structure_ActivateSpecial(Structure *s)
 		default: break;
 	}
 
-	if (s->o.houseID == g_playerHouseID) {
+	if (s->o.houseID == Whom) {
 		GUI_Widget_ActionPanel_Draw(true);
 	}
 }
@@ -951,14 +951,14 @@ void Structure_ActivateSpecial(Structure *s)
  *
  * @param s The Structure.
  */
-void Structure_RemoveFog(Structure *s)
+void Structure_RemoveFog(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	tile32 position;
 
-	if (s == NULL || s->o.houseID != g_playerHouseID) return;
+	if (s == NULL || s->o.houseID != Whom) return;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	position = s->o.position;
 
@@ -968,7 +968,7 @@ void Structure_RemoveFog(Structure *s)
 		position.y += 256 * (g_table_structure_layoutSize[si->layout].height - 1) / 2;
 	}
 
-	Tile_RemoveFogInRadius(position, si->o.fogUncoverRadius);
+	Tile_RemoveFogInRadius(position, si->ot.Sight);
 }
 
 /**
@@ -976,15 +976,15 @@ void Structure_RemoveFog(Structure *s)
  *
  * @param s The Structure.
  */
-static void Structure_Destroy(Structure *s)
+static void Structure_Destroy(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint8 linkedID;
 	House *h;
 
 	if (s == NULL) return;
 
-	if (g_debugScenario) {
+	if (Debug_Map) {
 		Structure_Remove(s);
 		return;
 	}
@@ -1017,11 +1017,11 @@ static void Structure_Destroy(Structure *s)
 	}
 
 	h = House_Get_ByIndex(s->o.houseID);
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	h->credits -= (h->creditsStorage == 0) ? h->credits : min(h->credits, (h->credits * 256 / h->creditsStorage) * si->creditsStorage / 256);
 
-	if (s->o.houseID != g_playerHouseID) h->credits += si->o.buildCredits + (g_campaignID > 7 ? si->o.buildCredits / 2 : 0);
+	if (s->o.houseID != Whom) h->credits += si->ot.Cost + (g_campaignID > 7 ? si->ot.Cost / 2 : 0);
 
 	if (s->o.type != STRUCTURE_WINDTRAP) return;
 
@@ -1036,18 +1036,18 @@ static void Structure_Destroy(Structure *s)
  * @param range The range in which an explosion should be possible.
  * @return True if and only if the structure is now destroyed.
  */
-bool Structure_Damage(Structure *s, uint16 damage, uint16 range)
+bool Structure_Damage(Building *s, uint16 Damage, uint16 range)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 
 	if (s == NULL) return false;
-	if (damage == 0) return false;
+	if (Damage == 0) return false;
 	if (s->o.script.variables[0] == 1) return false;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
-	if (s->o.hitpoints >= damage) {
-		s->o.hitpoints -= damage;
+	if (s->o.hitpoints >= Damage) {
+		s->o.hitpoints -= Damage;
 	} else {
 		s->o.hitpoints = 0;
 	}
@@ -1055,10 +1055,10 @@ bool Structure_Damage(Structure *s, uint16 damage, uint16 range)
 	if (s->o.hitpoints == 0) {
 		uint16 score;
 
-		score = si->o.buildCredits / 100;
+		score = si->ot.Cost / 100;
 		if (score < 1) score = 1;
 
-		if (House_AreAllied(g_playerHouseID, s->o.houseID)) {
+		if (House_AreAllied(Whom, s->o.houseID)) {
 			g_scenario.destroyedAllied++;
 			g_scenario.score -= score;
 		} else {
@@ -1068,7 +1068,7 @@ bool Structure_Damage(Structure *s, uint16 damage, uint16 range)
 
 		Structure_Destroy(s);
 
-		if (g_playerHouseID == s->o.houseID) {
+		if (Whom == s->o.houseID) {
 			uint16 index;
 
 			switch (s->o.houseID) {
@@ -1099,13 +1099,13 @@ bool Structure_Damage(Structure *s, uint16 damage, uint16 range)
  * @param s The Structure to check.
  * @return True if and only if the structure is upgradable.
  */
-bool Structure_IsUpgradable(Structure *s)
+bool Structure_IsUpgradable(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 
 	if (s == NULL) return false;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	if (s->o.houseID == HOUSE_HARKONNEN && s->o.type == STRUCTURE_HIGH_TECH) return false;
 	if (s->o.houseID == HOUSE_ORDOS && s->o.type == STRUCTURE_HEAVY_VEHICLE && s->upgradeLevel == 1 && si->upgradeCampaign[2] > g_campaignID) return false;
@@ -1117,7 +1117,7 @@ bool Structure_IsUpgradable(Structure *s)
 		if (s->upgradeLevel != 1) return true;
 
 		h = House_Get_ByIndex(s->o.houseID);
-		if ((h->structuresBuilt & g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) == g_table_structureInfo[STRUCTURE_ROCKET_TURRET].o.structuresRequired) return true;
+		if ((h->structuresBuilt & g_table_BuildingType[STRUCTURE_ROCKET_TURRET].ot.structuresRequired) == g_table_BuildingType[STRUCTURE_ROCKET_TURRET].ot.structuresRequired) return true;
 
 		return false;
 	}
@@ -1197,7 +1197,7 @@ bool Structure_ConnectWall(uint16 position, bool recurse)
  * @param s The structure to get the linked unit from.
  * @return The linked unit, or NULL if there was none.
  */
-Unit *Structure_GetLinkedUnit(Structure *s)
+Unit *Structure_GetLinkedUnit(Building *s)
 {
 	if (s->o.linkedID == 0xFF) return NULL;
 	return Unit_Get_ByIndex(s->o.linkedID);
@@ -1208,7 +1208,7 @@ Unit *Structure_GetLinkedUnit(Structure *s)
  *
  * @param unit The Structure to untarget.
  */
-void Structure_UntargetMe(Structure *s)
+void Structure_UntargetMe(Building *s)
 {
 	PoolFindStruct find;
 	uint16 encoded = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
@@ -1225,8 +1225,8 @@ void Structure_UntargetMe(Structure *s)
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		if (u->targetMove == encoded) u->targetMove = 0;
-		if (u->targetAttack == encoded) u->targetAttack = 0;
+		if (u->NavCom == encoded) u->NavCom = 0;
+		if (u->TarCom == encoded) u->TarCom = 0;
 		if (u->o.script.variables[4] == encoded) Object_Script_Variable4_Clear(&u->o);
 	}
 
@@ -1250,9 +1250,9 @@ void Structure_UntargetMe(Structure *s)
  * @param checkForSpice Spot should be as close to spice as possible.
  * @return Position of the free spot, or \c 0 if no free spot available.
  */
-uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice)
+uint16 Structure_FindFreePosition(Building *s, bool checkForSpice)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint16 packed;
 	uint16 spicePacked;  /* Position of the spice, or 0 if not used or if no spice. */
 	uint16 bestPacked;
@@ -1261,14 +1261,14 @@ uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice)
 
 	if (s == NULL) return 0;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 	packed = Tile_PackTile(Tile_Center(s->o.position));
 
 	spicePacked = (checkForSpice) ? Map_SearchSpice(packed, 10) : 0;
 	bestPacked = 0;
 	bestDistance = 0;
 
-	i = Tools_Random_256() & 0xF;
+	i = Random() & 0xF;
 	for (j = 0; j < 16; j++, i = (i + 1) & 0xF) {
 		uint16 offset;
 		uint16 curPacked;
@@ -1302,16 +1302,16 @@ uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice)
  * Remove the structure from the map, free it, and clean up after it.
  * @param s The structure to remove.
  */
-void Structure_Remove(Structure *s)
+void Structure_Remove(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint16 packed;
 	uint16 i;
 	House *h;
 
 	if (s == NULL) return;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 	packed = Tile_PackTile(s->o.position);
 
 	for (i = 0; i < g_table_structure_layoutTileCount[si->layout]; i++) {
@@ -1323,13 +1323,13 @@ void Structure_Remove(Structure *s)
 		t = &g_map[curPacked];
 		t->hasStructure = false;
 
-		if (g_debugScenario) {
+		if (Debug_Map) {
 			t->groundTileID = g_mapTileID[curPacked] & 0x1FF;
 			t->overlayTileID = 0;
 		}
 	}
 
-	if (!g_debugScenario) {
+	if (!Debug_Map) {
 		Animation_Start(g_table_animation_structure[0], s->o.position, si->layout, s->o.houseID, (uint8)si->iconGroup);
 	}
 
@@ -1349,7 +1349,7 @@ void Structure_Remove(Structure *s)
 
 	House_UpdateCreditsStorage(s->o.houseID);
 
-	if (g_debugScenario) return;
+	if (Debug_Map) return;
 
 	switch (s->o.type) {
 		case STRUCTURE_WINDTRAP:
@@ -1365,24 +1365,24 @@ void Structure_Remove(Structure *s)
 }
 
 /**
- * Check if requested structureType can be build on the map with concrete below.
+ * Check if requested StructType can be build on the map with concrete below.
  *
- * @param structureType The type of structure to check for.
+ * @param StructType The type of structure to check for.
  * @param houseID The house to check for.
  * @return True if and only if there are enough slabs available on the map to
  *  build requested structure.
  */
-static bool Structure_CheckAvailableConcrete(uint16 structureType, uint8 houseID)
+static bool Structure_CheckAvailableConcrete(uint16 StructType, uint8 houseID)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint16 tileCount;
 	uint16 i;
 
-	si = &g_table_structureInfo[structureType];
+	si = &g_table_BuildingType[StructType];
 
 	tileCount = g_table_structure_layoutTileCount[si->layout];
 
-	if (structureType == STRUCTURE_SLAB_1x1 || structureType == STRUCTURE_SLAB_2x2) return true;
+	if (StructType == STRUCTURE_SLAB_1x1 || StructType == STRUCTURE_SLAB_2x2) return true;
 
 	for (i = 0; i < 4096; i++) {
 		bool stop = true;
@@ -1409,23 +1409,23 @@ static bool Structure_CheckAvailableConcrete(uint16 structureType, uint8 houseID
  *
  * @param s The Structure.
  */
-static void Structure_CancelBuild(Structure *s)
+static void Structure_CancelBuild(Building *s)
 {
-	ObjectInfo *oi;
+	ObjectType *oi;
 
 	if (s == NULL || s->o.linkedID == 0xFF) return;
 
 	if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-		Structure *s2 = Structure_Get_ByIndex(s->o.linkedID);
-		oi = &g_table_structureInfo[s2->o.type].o;
+		Building *s2 = Structure_Get_ByIndex(s->o.linkedID);
+		oi = &g_table_BuildingType[s2->o.type].ot;
 		Structure_Free(s2);
 	} else {
 		Unit *u = Unit_Get_ByIndex(s->o.linkedID);
-		oi = &g_table_unitInfo[u->o.type].o;
+		oi = &g_table_unitInfo[u->o.type].ot;
 		Unit_Free(u);
 	}
 
-	House_Get_ByIndex(s->o.houseID)->credits += ((oi->buildTime - (s->countDown >> 8)) * 256 / oi->buildTime) * oi->buildCredits / 256;
+	House_Get_ByIndex(s->o.houseID)->credits += ((oi->Time - (s->countDown >> 8)) * 256 / oi->Time) * oi->Cost / 256;
 
 	s->o.flags.s.onHold = false;
 	s->countDown = 0;
@@ -1439,18 +1439,18 @@ static void Structure_CancelBuild(Structure *s)
  * @param objectType The type of the object to build or a special value (0xFFFD, 0xFFFE, 0xFFFF).
  * @return ??.
  */
-bool Structure_BuildObject(Structure *s, uint16 objectType)
+bool Structure_BuildObject(Building *s, uint16 objectType)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	const char *str;
 	Object *o;
-	ObjectInfo *oi;
+	ObjectType *oi;
 
 	if (s == NULL) return false;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
-	if (!si->o.flags.factory) return false;
+	if (!si->ot.flags.factory) return false;
 
 	Structure_SetRepairingState(s, 0, NULL);
 
@@ -1463,8 +1463,8 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 		uint16 upgradeCost = 0;
 		uint32 buildable;
 
-		if (Structure_IsUpgradable(s) && si->o.hitpoints == s->o.hitpoints) {
-			upgradeCost = (si->o.buildCredits + (si->o.buildCredits >> 15)) / 2;
+		if (Structure_IsUpgradable(s) && si->ot.hitpoints == s->o.hitpoints) {
+			upgradeCost = (si->ot.Cost + (si->ot.Cost >> 15)) / 2;
 		}
 
 		if (upgradeCost != 0 && s->o.type == STRUCTURE_HIGH_TECH && s->o.houseID == HOUSE_HARKONNEN) upgradeCost = 0;
@@ -1484,7 +1484,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 			for (i = 0; i < STRUCTURE_MAX; i++) {
 				if ((buildable & (1 << i)) == 0) continue;
-				g_table_structureInfo[i].o.available = 1;
+				g_table_BuildingType[i].ot.available = 1;
 				if (objectType != 0xFFFE) continue;
 				s->objectType = i;
 				return false;
@@ -1509,9 +1509,9 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 						int16 unitsAtStarport = g_starportAvailable[i];
 
 						if (unitsAtStarport == 0) {
-							g_table_unitInfo[i].o.available = 0;
+							g_table_unitInfo[i].ot.available = 0;
 						} else if (unitsAtStarport < 0) {
-							g_table_unitInfo[i].o.available = -1;
+							g_table_unitInfo[i].ot.available = -1;
 						} else if (unitsAtStarport > availableUnits[i]) {
 							g_validateStrictIfZero++;
 							u = Unit_Allocate(UNIT_INDEX_INVALID, i, s->o.houseID);
@@ -1522,8 +1522,8 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 								u->o.linkedID = linkedID;
 								linkedID = u->o.index & 0xFF;
 								availableUnits[i]++;
-								g_table_unitInfo[i].o.available = (int8)availableUnits[i];
-							} else if (availableUnits[i] == 0) g_table_unitInfo[i].o.available = -1;
+								g_table_unitInfo[i].ot.available = (int8)availableUnits[i];
+							} else if (availableUnits[i] == 0) g_table_unitInfo[i].ot.available = -1;
 						}
 					}
 				} while (loop);
@@ -1538,7 +1538,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 				for (i = 0; i < UNIT_MAX; i++) {
 					if ((buildable & (1 << i)) == 0) continue;
-					g_table_unitInfo[i].o.available = 1;
+					g_table_unitInfo[i].ot.available = 1;
 					if (objectType != 0xFFFE) continue;
 					s->objectType = i;
 					return false;
@@ -1563,7 +1563,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 			Sprites_LoadTiles();
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
 			GUI_ChangeSelectionType(SELECTIONTYPE_STRUCTURE);
 
@@ -1595,7 +1595,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 						if (Structure_CheckAvailableConcrete(objectType, s->o.houseID)) continue;
 
-						if (GUI_DisplayHint(STR_THERE_ISNT_ENOUGH_OPEN_CONCRETE_TO_PLACE_THIS_STRUCTURE_YOU_MAY_PROCEED_BUT_WITHOUT_ENOUGH_CONCRETE_THE_BUILDING_WILL_NEED_REPAIRS, g_table_structureInfo[objectType].o.spriteID) == 0) continue;
+						if (GUI_DisplayHint(STR_THERE_ISNT_ENOUGH_OPEN_CONCRETE_TO_PLACE_THIS_STRUCTURE_YOU_MAY_PROCEED_BUT_WITHOUT_ENOUGH_CONCRETE_THE_BUILDING_WILL_NEED_REPAIRS, g_table_BuildingType[objectType].ot.spriteID) == 0) continue;
 
 						s->objectType = objectType;
 
@@ -1612,9 +1612,9 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 					g_validateStrictIfZero--;
 
 					if (u == NULL) {
-						h->credits += g_table_unitInfo[UNIT_CARRYALL].o.buildCredits;
-						if (s->o.houseID != g_playerHouseID) continue;
-						GUI_DisplayText(String_Get_ByIndex(STR_UNABLE_TO_CREATE_MORE), 2);
+						h->credits += g_table_unitInfo[UNIT_CARRYALL].ot.Cost;
+						if (s->o.houseID != Whom) continue;
+						GUI_DisplayText(Text_String(STR_UNABLE_TO_CREATE_MORE), 2);
 						continue;
 					}
 
@@ -1648,13 +1648,13 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 		tile.x = 0xFFFF;
 		tile.y = 0xFFFF;
 
-		oi = &g_table_unitInfo[objectType].o;
+		oi = &g_table_unitInfo[objectType].ot;
 		o = &Unit_Create(UNIT_INDEX_INVALID, (uint8)objectType, s->o.houseID, tile, 0)->o;
-		str = String_Get_ByIndex(g_table_unitInfo[objectType].o.stringID_full);
+		str = Text_String(g_table_unitInfo[objectType].ot.stringID_full);
 	} else {
-		oi = &g_table_structureInfo[objectType].o;
+		oi = &g_table_BuildingType[objectType].ot;
 		o = &Structure_Create(STRUCTURE_INDEX_INVALID, (uint8)objectType, s->o.houseID, 0xFFFF)->o;
-		str = String_Get_ByIndex(g_table_structureInfo[objectType].o.stringID_full);
+		str = Text_String(g_table_BuildingType[objectType].ot.stringID_full);
 	}
 
 	s->o.flags.s.onHold = false;
@@ -1662,20 +1662,20 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 	if (o != NULL) {
 		s->o.linkedID = o->index & 0xFF;
 		s->objectType = objectType;
-		s->countDown = oi->buildTime << 8;
+		s->countDown = oi->Time << 8;
 
-		Structure_SetState(s, STRUCTURE_STATE_BUSY);
+		Structure_SetState(s, BSTATE_BUSY);
 
-		if (s->o.houseID != g_playerHouseID) return true;
+		if (s->o.houseID != Whom) return true;
 
-		GUI_DisplayText(String_Get_ByIndex(STR_PRODUCTION_OF_S_HAS_STARTED), 2, str);
+		GUI_DisplayText(Text_String(STR_PRODUCTION_OF_S_HAS_STARTED), 2, str);
 
 		return true;
 	}
 
-	if (s->o.houseID != g_playerHouseID) return false;
+	if (s->o.houseID != Whom) return false;
 
-	GUI_DisplayText(String_Get_ByIndex(STR_UNABLE_TO_CREATE_MORE), 2);
+	GUI_DisplayText(Text_String(STR_UNABLE_TO_CREATE_MORE), 2);
 
 	return false;
 }
@@ -1688,7 +1688,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
  * @param w The widget.
  * @return True if and only if the state changed.
  */
-bool Structure_SetUpgradingState(Structure *s, int8 state, Widget *w)
+bool Structure_SetUpgradingState(Building *s, int8 state, Widget *w)
 {
 	bool ret = false;
 
@@ -1697,8 +1697,8 @@ bool Structure_SetUpgradingState(Structure *s, int8 state, Widget *w)
 	if (state == -1) state = s->o.flags.s.upgrading ? 0 : 1;
 
 	if (state == 0 && s->o.flags.s.upgrading) {
-		if (s->o.houseID == g_playerHouseID) {
-			GUI_DisplayText(String_Get_ByIndex(STR_UPGRADING_STOPS), 2);
+		if (s->o.houseID == Whom) {
+			GUI_DisplayText(Text_String(STR_UPGRADING_STOPS), 2);
 		}
 
 		s->o.flags.s.upgrading = false;
@@ -1711,8 +1711,8 @@ bool Structure_SetUpgradingState(Structure *s, int8 state, Widget *w)
 
 	if (state == 0 || s->o.flags.s.upgrading || s->upgradeTimeLeft == 0) return ret;
 
-	if (s->o.houseID == g_playerHouseID) {
-		GUI_DisplayText(String_Get_ByIndex(STR_UPGRADING_STARTS), 2);
+	if (s->o.houseID == Whom) {
+		GUI_DisplayText(Text_String(STR_UPGRADING_STARTS), 2);
 	}
 
 	s->o.flags.s.onHold = true;
@@ -1732,7 +1732,7 @@ bool Structure_SetUpgradingState(Structure *s, int8 state, Widget *w)
  * @param w The widget.
  * @return True if and only if the state changed.
  */
-bool Structure_SetRepairingState(Structure *s, int8 state, Widget *w)
+bool Structure_SetRepairingState(Building *s, int8 state, Widget *w)
 {
 	bool ret = false;
 
@@ -1746,8 +1746,8 @@ bool Structure_SetRepairingState(Structure *s, int8 state, Widget *w)
 	if (state == -1) state = s->o.flags.s.repairing ? 0 : 1;
 
 	if (state == 0 && s->o.flags.s.repairing) {
-		if (s->o.houseID == g_playerHouseID) {
-			GUI_DisplayText(String_Get_ByIndex(STR_REPAIRING_STOPS), 2);
+		if (s->o.houseID == Whom) {
+			GUI_DisplayText(Text_String(STR_REPAIRING_STOPS), 2);
 		}
 
 		s->o.flags.s.repairing = false;
@@ -1758,10 +1758,10 @@ bool Structure_SetRepairingState(Structure *s, int8 state, Widget *w)
 		ret = true;
 	}
 
-	if (state == 0 || s->o.flags.s.repairing || s->o.hitpoints == g_table_structureInfo[s->o.type].o.hitpoints) return ret;
+	if (state == 0 || s->o.flags.s.repairing || s->o.hitpoints == g_table_BuildingType[s->o.type].ot.hitpoints) return ret;
 
-	if (s->o.houseID == g_playerHouseID) {
-		GUI_DisplayText(String_Get_ByIndex(STR_REPAIRING_STARTS), 2);
+	if (s->o.houseID == Whom) {
+		GUI_DisplayText(Text_String(STR_REPAIRING_STARTS), 2);
 	}
 
 	s->o.flags.s.onHold = true;
@@ -1776,19 +1776,19 @@ bool Structure_SetRepairingState(Structure *s, int8 state, Widget *w)
  * Update the map with the right data for this structure.
  * @param s The structure to update on the map.
  */
-void Structure_UpdateMap(Structure *s)
+void Structure_UpdateMap(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint16 layoutSize;
 	const uint16 *layout;
 	uint16 *iconMap;
 	int i;
 
 	if (s == NULL) return;
-	if (!s->o.flags.s.used) return;
+	if (!s->o.flags.s.IsActive) return;
 	if (s->o.flags.s.isNotOnMap) return;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	layout = g_table_structure_layoutTiles[si->layout];
 	layoutSize = g_table_structure_layoutTileCount[si->layout];
@@ -1815,8 +1815,8 @@ void Structure_UpdateMap(Structure *s)
 
 	s->o.flags.s.isDirty = true;
 
-	if (s->state >= STRUCTURE_STATE_IDLE) {
-		uint16 animationIndex = (s->state > STRUCTURE_STATE_READY) ? STRUCTURE_STATE_READY : s->state;
+	if (s->state >= BSTATE_IDLE) {
+		uint16 animationIndex = (s->state > BSTATE_READY) ? BSTATE_READY : s->state;
 
 		if (si->animationIndex[animationIndex] == 0xFF) {
 			Animation_Start(NULL, s->o.position, si->layout, s->o.houseID, (uint8)si->iconGroup);
@@ -1831,16 +1831,16 @@ void Structure_UpdateMap(Structure *s)
 	}
 }
 
-uint32 Structure_GetBuildable(Structure *s)
+uint32 Structure_GetBuildable(Building *s)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint32 structuresBuilt;
 	uint32 ret = 0;
 	int i;
 
 	if (s == NULL) return 0;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
 	structuresBuilt = House_Get_ByIndex(s->o.houseID)->structuresBuilt;
 
@@ -1851,7 +1851,7 @@ uint32 Structure_GetBuildable(Structure *s)
 		case STRUCTURE_WOR_TROOPER:
 		case STRUCTURE_BARRACKS:
 			for (i = 0; i < UNIT_MAX; i++) {
-				g_table_unitInfo[i].o.available = 0;
+				g_table_unitInfo[i].ot.available = 0;
 			}
 
 			for (i = 0; i < 8; i++) {
@@ -1864,54 +1864,54 @@ uint32 Structure_GetBuildable(Structure *s)
 				if (unitType == UNIT_TRIKE && s->creatorHouseID == HOUSE_ORDOS) unitType = UNIT_RAIDER_TRIKE;
 
 				ui = &g_table_unitInfo[unitType];
-				upgradeLevelRequired = ui->o.upgradeLevelRequired;
+				upgradeLevelRequired = ui->ot.upgradeLevelRequired;
 
 				if (unitType == UNIT_SIEGE_TANK && s->creatorHouseID == HOUSE_ORDOS) upgradeLevelRequired--;
 
-				if ((structuresBuilt & ui->o.structuresRequired) != ui->o.structuresRequired) continue;
-				if ((ui->o.availableHouse & (1 << s->creatorHouseID)) == 0) continue;
+				if ((structuresBuilt & ui->ot.structuresRequired) != ui->ot.structuresRequired) continue;
+				if ((ui->ot.availableHouse & (1 << s->creatorHouseID)) == 0) continue;
 
 				if (s->upgradeLevel >= upgradeLevelRequired) {
-					ui->o.available = 1;
+					ui->ot.available = 1;
 
 					ret |= (1 << unitType);
 					continue;
 				}
 
 				if (s->upgradeTimeLeft != 0 && s->upgradeLevel + 1 >= upgradeLevelRequired) {
-					ui->o.available = -1;
+					ui->ot.available = -1;
 				}
 			}
 			return ret;
 
 		case STRUCTURE_CONSTRUCTION_YARD:
 			for (i = 0; i < STRUCTURE_MAX; i++) {
-				StructureInfo *localsi = &g_table_structureInfo[i];
+				BuildingType *localsi = &g_table_BuildingType[i];
 				uint16 availableCampaign;
 				uint32 structuresRequired;
 
-				localsi->o.available = 0;
+				localsi->ot.available = 0;
 
-				availableCampaign = localsi->o.availableCampaign;
-				structuresRequired = localsi->o.structuresRequired;
+				availableCampaign = localsi->ot.availableCampaign;
+				structuresRequired = localsi->ot.structuresRequired;
 
 				if (i == STRUCTURE_WOR_TROOPER && s->o.houseID == HOUSE_HARKONNEN && g_campaignID >= 1) {
 					structuresRequired &= ~(1 << STRUCTURE_BARRACKS);
 					availableCampaign = 2;
 				}
 
-				if ((structuresBuilt & structuresRequired) == structuresRequired || s->o.houseID != g_playerHouseID) {
+				if ((structuresBuilt & structuresRequired) == structuresRequired || s->o.houseID != Whom) {
 					if (s->o.houseID != HOUSE_HARKONNEN && i == STRUCTURE_LIGHT_VEHICLE) {
 						availableCampaign = 2;
 					}
 
-					if (g_campaignID >= availableCampaign - 1 && (localsi->o.availableHouse & (1 << s->o.houseID)) != 0) {
-						if (s->upgradeLevel >= localsi->o.upgradeLevelRequired || s->o.houseID != g_playerHouseID) {
-							localsi->o.available = 1;
+					if (g_campaignID >= availableCampaign - 1 && (localsi->ot.availableHouse & (1 << s->o.houseID)) != 0) {
+						if (s->upgradeLevel >= localsi->ot.upgradeLevelRequired || s->o.houseID != Whom) {
+							localsi->ot.available = 1;
 
 							ret |= (1 << i);
-						} else if (s->upgradeTimeLeft != 0 && s->upgradeLevel + 1 >= localsi->o.upgradeLevelRequired) {
-							localsi->o.available = -1;
+						} else if (s->upgradeTimeLeft != 0 && s->upgradeLevel + 1 >= localsi->ot.upgradeLevelRequired) {
+							localsi->ot.available = -1;
 						}
 					}
 				}
@@ -1937,7 +1937,7 @@ void Structure_HouseUnderAttack(uint8 houseID)
 
 	h = House_Get_ByIndex(houseID);
 
-	if (houseID != g_playerHouseID && h->flags.doneFullScaleAttack) return;
+	if (houseID != Whom && h->flags.doneFullScaleAttack) return;
 	h->flags.doneFullScaleAttack = true;
 
 	if (h->flags.human) {
@@ -1975,9 +1975,9 @@ void Structure_HouseUnderAttack(uint8 houseID)
 /**
  * Find the next object to build.
  * @param s The structure in which we can build something.
- * @return The type (either UnitType or StructureType) of what we should build next.
+ * @return The type (either UnitType or StructType) of what we should build next.
  */
-uint16 Structure_AI_PickNextToBuild(Structure *s)
+uint16 Structure_AI_PickNextToBuild(Building *s)
 {
 	PoolFindStruct find;
 	uint16 buildable;
@@ -2027,10 +2027,10 @@ uint16 Structure_AI_PickNextToBuild(Structure *s)
 	for (i = 0; i < UNIT_MAX; i++) {
 		if ((buildable & (1 << i)) == 0) continue;
 
-		if ((Tools_Random_256() % 4) == 0) type = i;
+		if ((Random() % 4) == 0) type = i;
 
 		if (type != 0xFFFF) {
-			if (g_table_unitInfo[i].o.priorityBuild <= g_table_unitInfo[type].o.priorityBuild) continue;
+			if (g_table_unitInfo[i].ot.Risk <= g_table_unitInfo[type].ot.Risk) continue;
 		}
 
 		type = i;

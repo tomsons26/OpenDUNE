@@ -32,7 +32,7 @@ static uint8  s_tileByteSize = 0;	/* size in byte of one sprite pixel data = s_t
  * SCREEN_3 = 64781 = 0xFD0D    * NEVER ACTIVE * only used for game credits and intro */
 #define GFX_SCREEN_BUFFER_COUNT 4
 static const uint16 s_screenBufferSize[GFX_SCREEN_BUFFER_COUNT] = { 0xFA00, 0xFBF4, 0xFA00, 0xFD0D/*, 0xA044*/ };
-static void *s_screenBuffer[GFX_SCREEN_BUFFER_COUNT] = { NULL, NULL, NULL, NULL };
+static void *PageArray[GFX_SCREEN_BUFFER_COUNT] = { NULL, NULL, NULL, NULL };
 #ifdef GFX_STORE_DIRTY_AREA
 static bool s_screen0_is_dirty = false;
 static struct dirty_area s_screen0_dirty_area = { 0, 0, 0, 0 };
@@ -50,7 +50,7 @@ static Screen s_screenActiveID = SCREEN_0;
  */
 void *GFX_Screen_GetActive(void)
 {
-	return GFX_Screen_Get_ByIndex(s_screenActiveID);
+	return Get_Buff(s_screenActiveID);
 }
 #endif
 
@@ -72,12 +72,12 @@ uint16 GFX_Screen_GetSize_ByIndex(Screen screenID)
  * @param screenID The screenbuffer to get.
  * @return A pointer to the screenbuffer.
  */
-void *GFX_Screen_Get_ByIndex(Screen screenID)
+void *Get_Buff(Screen screenID)
 {
 	if (screenID == SCREEN_ACTIVE)
 		screenID = s_screenActiveID;
 	assert(screenID >= 0 && screenID < GFX_SCREEN_BUFFER_COUNT);
-	return s_screenBuffer[screenID];
+	return PageArray[screenID];
 }
 
 /**
@@ -85,7 +85,7 @@ void *GFX_Screen_Get_ByIndex(Screen screenID)
  * @param screenID The new screen to get active.
  * @return Old screenID that was currently active.
  */
-Screen GFX_Screen_SetActive(Screen screenID)
+Screen Set_LogicPage(Screen screenID)
 {
 	Screen oldScreen = s_screenActiveID;
 	if (screenID != SCREEN_ACTIVE) {
@@ -175,13 +175,13 @@ void GFX_Init(void)
 	screenBuffers = calloc(1, totalSize);
 
 	for (i = 1; i < GFX_SCREEN_BUFFER_COUNT; i++) {
-		s_screenBuffer[i] = screenBuffers;
+		PageArray[i] = screenBuffers;
 
 		screenBuffers += GFX_Screen_GetSize_ByIndex(i);
 	}
 
 	/* special case for SCREEN_0 which is the MCGA frame buffer */
-	s_screenBuffer[0] = Video_GetFrameBuffer(GFX_Screen_GetSize_ByIndex(0));
+	PageArray[0] = Video_GetFrameBuffer(GFX_Screen_GetSize_ByIndex(0));
 
 	s_screenActiveID = SCREEN_0;
 }
@@ -193,10 +193,10 @@ void GFX_Uninit(void)
 {
 	int i;
 
-	free(s_screenBuffer[1]);
+	free(PageArray[1]);
 
 	for (i = 0; i < GFX_SCREEN_BUFFER_COUNT; i++) {
-		s_screenBuffer[i] = NULL;
+		PageArray[i] = NULL;
 	}
 }
 
@@ -207,7 +207,7 @@ void GFX_Uninit(void)
  * @param y The y-coordinate to draw the sprite.
  * @param houseID The house the sprite belongs (for recolouring).
  */
-void GFX_DrawTile(uint16 tileID, uint16 x, uint16 y, uint8 houseID)
+void Draw_Stamp(uint16 tileID, uint16 x, uint16 y, uint8 houseID)
 {
 	int i, j;
 	uint8 *icon_palette;
@@ -303,7 +303,7 @@ void GFX_Init_TilesInfo(uint16 widthSize, uint16 heightSize)
  * @param y The Y-coordinate on the screen.
  * @param colour The colour of the pixel to put on the screen.
  */
-void GFX_PutPixel(uint16 x, uint16 y, uint8 colour)
+void Put_Pixel(uint16 x, uint16 y, uint8 colour)
 {
 	if (y >= SCREEN_HEIGHT) return;
 	if (x >= SCREEN_WIDTH) return;
@@ -370,8 +370,8 @@ void GFX_Screen_Copy2(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 widt
 
 	GFX_Screen_SetDirty(screenDst, xDst, yDst, xDst + width, yDst + height);
 
-	src = GFX_Screen_Get_ByIndex(screenSrc);
-	dst = GFX_Screen_Get_ByIndex(screenDst);
+	src = Get_Buff(screenSrc);
+	dst = Get_Buff(screenDst);
 
 	src += xSrc + ySrc * SCREEN_WIDTH;
 	dst += xDst + yDst * SCREEN_WIDTH;
@@ -425,8 +425,8 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
 
 	if (width <= 0 || width > SCREEN_WIDTH) return;
 
-	src = GFX_Screen_Get_ByIndex(screenSrc);
-	dst = GFX_Screen_Get_ByIndex(screenDst);
+	src = Get_Buff(screenSrc);
+	dst = Get_Buff(screenDst);
 
 	src += xSrc + ySrc * SCREEN_WIDTH;
 	dst += xDst + yDst * SCREEN_WIDTH;
@@ -447,9 +447,9 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
 /**
  * Clears the screen.
  */
-void GFX_ClearScreen(Screen screenID)
+void Clear_Screen(Screen screenID)
 {
-	memset(GFX_Screen_Get_ByIndex(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+	memset(Get_Buff(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 	GFX_Screen_SetDirty(screenID, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
@@ -459,7 +459,7 @@ void GFX_ClearScreen(Screen screenID)
  */
 void GFX_ClearBlock(Screen index)
 {
-	memset(GFX_Screen_Get_ByIndex(index), 0, GFX_Screen_GetSize_ByIndex(index));
+	memset(Get_Buff(index), 0, GFX_Screen_GetSize_ByIndex(index));
 	GFX_Screen_SetDirty(index, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
@@ -467,7 +467,7 @@ void GFX_ClearBlock(Screen index)
  * Set a new palette for the screen.
  * @param palette The palette in RGB order.
  */
-void GFX_SetPalette(uint8 *palette)
+void Set_Palette(uint8 *palette)
 {
 	int from, to;
 
@@ -538,7 +538,7 @@ void GFX_CopyFromBuffer(int16 left, int16 top, uint16 width, uint16 height, uint
 	if (width  > SCREEN_WIDTH - left) width  = SCREEN_WIDTH - left;
 	if (height > SCREEN_HEIGHT - top) height = SCREEN_HEIGHT - top;
 
-	screen = GFX_Screen_Get_ByIndex(SCREEN_0);
+	screen = Get_Buff(SCREEN_0);
 	screen += top * SCREEN_WIDTH + left;
 
 	GFX_Screen_SetDirty(SCREEN_0, left, top, left + width, top + height);
@@ -574,7 +574,7 @@ void GFX_CopyToBuffer(int16 left, int16 top, uint16 width, uint16 height, uint8 
 	if (width  > SCREEN_WIDTH - left) width  = SCREEN_WIDTH - left;
 	if (height > SCREEN_HEIGHT - top) height = SCREEN_HEIGHT - top;
 
-	screen = GFX_Screen_Get_ByIndex(SCREEN_0);
+	screen = Get_Buff(SCREEN_0);
 	screen += top * SCREEN_WIDTH + left;
 
 	while (height-- != 0) {

@@ -17,29 +17,29 @@
 #include "../tools.h"
 #include "../video/video.h"
 
-uint16 g_mouseLock;          /*!< Lock for when handling mouse movement. */
+uint16 MouseUpdate;          /*!< Lock for when handling mouse movement. */
 
-uint16 g_mouseX;             /*!< Current X position of the mouse. */
-uint16 g_mouseY;             /*!< Current Y position of the mouse. */
-uint16 g_mousePrevX;         /*!< Previous X position of the mouse. */
-uint16 g_mousePrevY;         /*!< Previous Y position of the mouse. */
+uint16 MouseX;             /*!< Current X position of the mouse. */
+uint16 MouseY;             /*!< Current Y position of the mouse. */
+uint16 MouseXOld;         /*!< Previous X position of the mouse. */
+uint16 MouseYOld;         /*!< Previous Y position of the mouse. */
 
 uint8  g_prevButtonState;    /*!< Previous mouse button state. */
 uint16 g_mouseClickX;        /*!< X position of last mouse click. */
 uint16 g_mouseClickY;        /*!< Y position of last mouse click. */
 
-uint16 g_regionFlags;        /*!< Flags: 0x4000 - Mouse still inside region, 0x8000 - Region check. 0x00FF - Countdown to showing. */
-uint16 g_mouseRegionLeft;    /*!< Region mouse can be in - left position. */
-uint16 g_mouseRegionRight;   /*!< Region mouse can be in - right position. */
-uint16 g_mouseRegionTop;     /*!< Region mouse can be in - top position. */
-uint16 g_mouseRegionBottom;  /*!< Region mouse can be in - bottom position. */
+uint16 MCState;        /*!< Flags: 0x4000 - Mouse still inside region, 0x8000 - Region check. 0x00FF - Countdown to showing. */
+uint16 MouseLeft;    /*!< Region mouse can be in - left position. */
+uint16 MouseRight;   /*!< Region mouse can be in - right position. */
+uint16 MouseTop;     /*!< Region mouse can be in - top position. */
+uint16 MouseBottom;  /*!< Region mouse can be in - bottom position. */
 
 uint16 g_regionMinX;         /*!< Region - minimum value for X position. */
 uint16 g_regionMinY;         /*!< Region - minimum value for Y position. */
 uint16 g_regionMaxX;         /*!< Region - maximum value for X position. */
 uint16 g_regionMaxY;         /*!< Region - maximum value for Y position. */
 
-uint8 g_mouseDisabled;       /*!< Mouse disabled flag */
+uint8 MDisabled;       /*!< Mouse disabled flag */
 uint8 g_mouseHiddenDepth;
 uint8 g_mouseFileID;
 
@@ -58,17 +58,17 @@ uint16 g_inputFlags;
  */
 void Mouse_Init(void)
 {
-	g_mouseX = SCREEN_WIDTH / 2;
-	g_mouseY = SCREEN_HEIGHT / 2;
+	MouseX = SCREEN_WIDTH / 2;
+	MouseY = SCREEN_HEIGHT / 2;
 	g_mouseHiddenDepth = 1;
-	g_regionFlags = 0;
-	g_mouseRegionRight = SCREEN_WIDTH - 1;
-	g_mouseRegionBottom = SCREEN_HEIGHT - 1;
+	MCState = 0;
+	MouseRight = SCREEN_WIDTH - 1;
+	MouseBottom = SCREEN_HEIGHT - 1;
 
-	g_mouseDisabled = 1;
+	MDisabled = 1;
 	g_mouseFileID = FILE_INVALID;
 
-	Video_Mouse_SetPosition(g_mouseX, g_mouseY);
+	Video_Mouse_SetPosition(MouseX, MouseY);
 }
 
 /**
@@ -78,12 +78,12 @@ void Mouse_EventHandler(uint16 mousePosX, uint16 mousePosY, bool mouseButtonLeft
 {
 	uint8 newButtonState = (mouseButtonLeft ? 0x1 : 0x0) | (mouseButtonRight ? 0x2 : 0x0);
 
-	if (g_mouseDisabled == 0) {
+	if (MDisabled == 0) {
 		if (g_mouseMode == INPUT_MOUSE_MODE_NORMAL && (g_inputFlags & INPUT_FLAG_NO_CLICK) == 0) {
 			Input_HandleInput(Mouse_CheckButtons(newButtonState));
 		}
 
-		if (g_mouseMode != INPUT_MOUSE_MODE_PLAY && g_mouseLock == 0) {
+		if (g_mouseMode != INPUT_MOUSE_MODE_PLAY && MouseUpdate == 0) {
 			Mouse_HandleMovement(newButtonState, mousePosX, mousePosY);
 		}
 	}
@@ -116,10 +116,10 @@ void Mouse_SetRegion(uint16 left, uint16 top, uint16 right, uint16 bottom)
 	top    = clamp(top,    0, SCREEN_HEIGHT - 1);
 	bottom = clamp(bottom, 0, SCREEN_HEIGHT - 1);
 
-	g_mouseRegionLeft   = left;
-	g_mouseRegionRight  = right;
-	g_mouseRegionTop    = top;
-	g_mouseRegionBottom = bottom;
+	MouseLeft   = left;
+	MouseRight  = right;
+	MouseTop    = top;
+	MouseBottom = bottom;
 
 	Video_Mouse_SetRegion(left, right, top, bottom);
 }
@@ -137,15 +137,15 @@ uint16 Mouse_InsideRegion(int16 left, int16 top, int16 right, int16 bottom)
 	int16 mx, my;
 	uint16 inside;
 
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
-	mx = g_mouseX;
-	my = g_mouseY;
+	mx = MouseX;
+	my = MouseY;
 
 	inside = (mx < left || mx > right || my < top || my > bottom) ? 0 : 1;
 
-	g_mouseLock--;
+	MouseUpdate--;
 	return inside;
 }
 
@@ -158,7 +158,7 @@ void Mouse_SetMouseMode(uint8 mouseMode, const char *filename)
 			g_mouseMode = mouseMode;
 			if (g_mouseFileID != FILE_INVALID) {
 				Input_Flags_ClearBits(INPUT_FLAG_KEY_RELEASE);
-				File_Close(g_mouseFileID);
+				Close_File(g_mouseFileID);
 				g_mouseFileID = FILE_INVALID;
 			}
 			g_mouseNoRecordedValue = true;
@@ -196,19 +196,19 @@ void Mouse_SetMouseMode(uint8 mouseMode, const char *filename)
 
 			g_mouseNoRecordedValue = true;
 
-			File_Read(g_mouseFileID, &g_mouseInputValue, 2);
-			if (File_Read(g_mouseFileID, &g_mouseRecordedTimer, 2) != 2) break;;
+			Read_File(g_mouseFileID, &g_mouseInputValue, 2);
+			if (Read_File(g_mouseFileID, &g_mouseRecordedTimer, 2) != 2) break;;
 
 			if ((g_mouseInputValue >= 0x41 && g_mouseInputValue <= 0x44) || g_mouseInputValue == 0x2D) {
 				/* 0x2D == '-' 0x41 == 'A' [...] 0x44 == 'D' */
-				File_Read(g_mouseFileID, &g_mouseRecordedX, 2);
-				if (File_Read(g_mouseFileID, &g_mouseRecordedY, 2) == 2) {
-					g_mouseX = g_mouseRecordedX;
-					g_mouseY = g_mouseRecordedY;
+				Read_File(g_mouseFileID, &g_mouseRecordedX, 2);
+				if (Read_File(g_mouseFileID, &g_mouseRecordedY, 2) == 2) {
+					MouseX = g_mouseRecordedX;
+					MouseY = g_mouseRecordedY;
 					g_prevButtonState = 0;
 
-					GUI_Mouse_Hide_Safe();
-					GUI_Mouse_Show_Safe();
+					Hide_Mouse();
+					Show_Mouse();
 
 					g_mouseNoRecordedValue = false;
 					break;
@@ -267,31 +267,31 @@ uint16 Mouse_CheckButtons(uint16 newButtonState)
  */
 static void Mouse_CheckMovement(uint16 mouseX, uint16 mouseY)
 {
-	if (g_mouseHiddenDepth == 0 && (g_mousePrevX != mouseX || g_mousePrevY != mouseY)) {
+	if (g_mouseHiddenDepth == 0 && (MouseXOld != mouseX || MouseYOld != mouseY)) {
 
-		if ((g_regionFlags & 0xC000) != 0xC000) {
-			GUI_Mouse_Hide();
+		if ((MCState & 0xC000) != 0xC000) {
+			Low_Hide_Mouse();
 
-			if ((g_regionFlags & 0x8000) == 0) {
-				GUI_Mouse_Show();
-				g_mousePrevX = mouseX;
-				g_mousePrevY = mouseY;
-				g_mouseLock = 0;
+			if ((MCState & 0x8000) == 0) {
+				Low_Show_Mouse();
+				MouseXOld = mouseX;
+				MouseYOld = mouseY;
+				MouseUpdate = 0;
 				return;
 			}
 		}
 
 		if (mouseX >= g_regionMinX && mouseX <= g_regionMaxX &&
 				mouseY >= g_regionMinY && mouseY <= g_regionMaxY) {
-			g_regionFlags |= 0x4000;
+			MCState |= 0x4000;
 		} else {
-			GUI_Mouse_Show();
+			Low_Show_Mouse();
 		}
 	}
 
-	g_mousePrevX = mouseX;
-	g_mousePrevY = mouseY;
-	g_mouseLock = 0;
+	MouseXOld = mouseX;
+	MouseYOld = mouseY;
+	MouseUpdate = 0;
 }
 
 /**
@@ -302,10 +302,10 @@ static void Mouse_CheckMovement(uint16 mouseX, uint16 mouseY)
  */
 void Mouse_HandleMovement(uint16 newButtonState, uint16 mouseX, uint16 mouseY)
 {
-	g_mouseLock = 0x1;
+	MouseUpdate = 0x1;
 
-	g_mouseX = mouseX;
-	g_mouseY = mouseY;
+	MouseX = mouseX;
+	MouseY = mouseY;
 	if (g_mouseMode != INPUT_MOUSE_MODE_PLAY && g_mouseMode != INPUT_MOUSE_MODE_NORMAL && (g_inputFlags & INPUT_FLAG_NO_CLICK) == 0) {
 		Input_HandleInput(Mouse_CheckButtons(newButtonState));
 	}
@@ -319,9 +319,9 @@ void Mouse_HandleMovement(uint16 newButtonState, uint16 mouseX, uint16 mouseY)
  */
 void Mouse_HandleMovementIfMoved(uint16 newButtonState)
 {
-	if (abs((int16)g_mouseX - (int16)g_mousePrevX) >= 1 ||
-			abs((int16)g_mouseY - (int16)g_mousePrevY) >= 1) {
-		Mouse_HandleMovement(newButtonState, g_mouseX, g_mouseY);
+	if (abs((int16)MouseX - (int16)MouseXOld) >= 1 ||
+			abs((int16)MouseY - (int16)MouseYOld) >= 1) {
+		Mouse_HandleMovement(newButtonState, MouseX, MouseY);
 	}
 }
 

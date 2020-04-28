@@ -11,7 +11,7 @@
  * @param dst The place the decoded fragment will be loaded.
  * @param src The encoded fragment.
  */
-void Format40_Decode(uint8 *dst, uint8 *src)
+void Apply_XOR_Delta(uint8 *dst, uint8 *src)
 {
 	uint16 cmd;
 	uint16 count;
@@ -66,7 +66,7 @@ void Format40_Decode(uint8 *dst, uint8 *src)
  * @param src Data source.
  * @param width Width of the rectangle.
  */
-void Format40_Decode_XorToScreen(uint8 *dst, uint8 *src, uint16 width)
+void XOR_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width)
 {
 	uint16 length;
 	uint16 cmd;
@@ -153,7 +153,7 @@ void Format40_Decode_XorToScreen(uint8 *dst, uint8 *src, uint16 width)
  * @param src Data source.
  * @param width Width of the rectangle.
  */
-void Format40_Decode_ToScreen(uint8 *dst, uint8 *src, uint16 width)
+void Copy_Delta_Buffer(uint8 *dst, uint8 *src, uint16 width)
 {
 	uint16 length;
 	uint16 cmd;

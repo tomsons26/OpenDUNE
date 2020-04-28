@@ -37,6 +37,6 @@ extern char *Drivers_GenerateFilename(const char *name, Driver *driver);
 extern void Drivers_All_Uninit(void);
 extern void Driver_LoadFile(const char *musicName, Driver *driver);
 extern void Driver_UnloadFile(Driver *driver);
-extern void Driver_Music_FadeOut(void);
+extern void Fade_Score(void);
 
 #endif /* DRIVER_H */

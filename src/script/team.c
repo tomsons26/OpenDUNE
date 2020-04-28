@@ -96,7 +96,7 @@ uint16 Script_Team_AddClosestUnit(ScriptEngine *script)
 		if (!u->o.flags.s.byScenario) continue;
 		if (u->o.type == UNIT_SABOTEUR) continue;
 		if (g_table_unitInfo[u->o.type].movementType != t->movementType) continue;
-		if (u->team == 0) {
+		if (u->Team == 0) {
 			distance = Tile_GetDistance(t->position, u->o.position);
 			if (distance >= minDistance && minDistance != 0) continue;
 			minDistance = distance;
@@ -104,7 +104,7 @@ uint16 Script_Team_AddClosestUnit(ScriptEngine *script)
 			continue;
 		}
 
-		t2 = Team_Get_ByIndex(u->team - 1);
+		t2 = Team_Get_ByIndex(u->Team - 1);
 		if (t2->members > t2->minMembers) continue;
 
 		distance = Tile_GetDistance(t->position, u->o.position);
@@ -151,7 +151,7 @@ uint16 Script_Team_GetAverageDistance(ScriptEngine *script)
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
-		if (t->index != u->team - 1) continue;
+		if (t->index != u->Team - 1) continue;
 		count++;
 		averageX += (u->o.position.x >> 8) & 0x3f;
 		averageY += (u->o.position.y >> 8) & 0x3f;
@@ -172,7 +172,7 @@ uint16 Script_Team_GetAverageDistance(ScriptEngine *script)
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
-		if (t->index != u->team - 1) continue;
+		if (t->index != u->Team - 1) continue;
 		distance += Tile_GetDistanceRoundedUp(u->o.position, t->position);
 	}
 
@@ -216,12 +216,12 @@ uint16 Script_Team_Unknown0543(ScriptEngine *script)
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
-		if (t->index != u->team - 1) continue;
+		if (t->index != u->Team - 1) continue;
 
-		tile = Tools_Index_GetTile(u->targetMove);
+		tile = Tools_Index_GetTile(u->NavCom);
 		distanceUnitTeam = Tile_GetDistanceRoundedUp(u->o.position, t->position);
 
-		if (u->targetMove != 0) {
+		if (u->NavCom != 0) {
 			distanceUnitDest = Tile_GetDistanceRoundedUp(u->o.position, tile);
 			distanceTeamDest = Tile_GetDistanceRoundedUp(t->position, tile);
 		} else {
@@ -272,7 +272,7 @@ uint16 Script_Team_FindBestTarget(ScriptEngine *script)
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
-		if (u->team - 1 != t->index) continue;
+		if (u->Team - 1 != t->index) continue;
 		target = Unit_FindBestTargetEncoded(u, t->action == TEAM_ACTION_KAMIKAZE ? 4 : 0);
 		if (target == 0) continue;
 		if (t->target == target) return target;
@@ -372,21 +372,21 @@ uint16 Script_Team_Unknown0788(ScriptEngine *script)
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
-		if (u->team - 1 != t->index) continue;
+		if (u->Team - 1 != t->index) continue;
 		if (t->target == 0) {
 			Unit_SetAction(u, ACTION_GUARD);
 			continue;
 		}
 
-		distance = g_table_unitInfo[u->o.type].fireDistance << 8;
-		if (u->actionID == ACTION_ATTACK && u->targetAttack == t->target) {
-			if (u->targetMove != 0) continue;
+		distance = g_table_unitInfo[u->o.type].Range << 8;
+		if (u->actionID == ACTION_ATTACK && u->TarCom == t->target) {
+			if (u->NavCom != 0) continue;
 			if (Tile_GetDistance(u->o.position, tile) >= distance) continue;
 		}
 
 		if (u->actionID != ACTION_ATTACK) Unit_SetAction(u, ACTION_ATTACK);
 
-		orientation = (Tile_GetDirection(tile, u->o.position) & 0xC0) + Tools_RandomLCG_Range(0, 127);
+		orientation = (Tile_GetDirection(tile, u->o.position) & 0xC0) + IRandom(0, 127);
 		if (orientation < 0) orientation += 256;
 
 		packed = Tile_PackTile(Tile_MoveByDirection(tile, orientation, distance));
@@ -419,7 +419,7 @@ uint16 Script_Team_DisplayText(ScriptEngine *script)
 	uint16 offset;
 
 	t = g_scriptCurrentTeam;
-	if (t->houseID == g_playerHouseID) return 0;
+	if (t->houseID == Whom) return 0;
 
 	offset = BETOH16(*(script->scriptInfo->text + STACK_PEEK(1)));
 	text = (char *)script->scriptInfo->text + offset;

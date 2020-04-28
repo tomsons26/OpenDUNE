@@ -1,10 +1,10 @@
-/** @file src/table/houseinfo.c HouseInfo file table. */
+/** @file src/table/houseinfo.c HouseType file table. */
 
 #include "types.h"
 
 #include "../house.h"
 
-const HouseInfo g_table_houseInfo[HOUSE_MAX] = {
+const HouseType g_table_houseInfo[HOUSE_MAX] = {
 	{ /* 0 */
 		/* name                 */ "Harkonnen",
 		/* toughness            */ 200,

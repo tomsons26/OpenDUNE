@@ -16,7 +16,7 @@
 #include "../object.h"
 
 struct Object *g_scriptCurrentObject;
-struct Structure *g_scriptCurrentStructure;
+struct Building *g_scriptCurrentStructure;
 struct Unit *g_scriptCurrentUnit;
 struct Team *g_scriptCurrentTeam;
 
@@ -632,9 +632,9 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 
 	if (!File_Exists(filename)) return 0;
 
-	index = ChunkFile_Open(filename);
+	index = Open_Iff_File(filename);
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_TEXT));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_TEXT));
 	total += length;
 
 	if (length != 0) {
@@ -645,15 +645,15 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 			scriptInfo->text = calloc(1, length);
 		}
 
-		ChunkFile_Read(index, HTOBE32(CC_TEXT), scriptInfo->text, length);
+		Read_Iff_Chunk(index, HTOBE32(CC_TEXT), scriptInfo->text, length);
 	}
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_ORDR));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_ORDR));
 	total += length;
 
 	if (length == 0) {
 		Script_ClearInfo(scriptInfo);
-		ChunkFile_Close(index);
+		Close_Iff_File(index);
 		return 0;
 	}
 
@@ -665,18 +665,18 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 	}
 
 	scriptInfo->offsetsCount = (length >> 1) & 0xFFFF;
-	ChunkFile_Read(index, HTOBE32(CC_ORDR), scriptInfo->offsets, length);
+	Read_Iff_Chunk(index, HTOBE32(CC_ORDR), scriptInfo->offsets, length);
 
 	for(i = 0; i < (int16)((length >> 1) & 0xFFFF); i++) {
 		scriptInfo->offsets[i] = BETOH16(scriptInfo->offsets[i]);
 	}
 
-	length = ChunkFile_Seek(index, HTOBE32(CC_DATA));
+	length = Get_Iff_Chunk_Size(index, HTOBE32(CC_DATA));
 	total += length;
 
 	if (length == 0) {
 		Script_ClearInfo(scriptInfo);
-		ChunkFile_Close(index);
+		Close_Iff_File(index);
 		return 0;
 	}
 
@@ -688,9 +688,9 @@ uint16 Script_LoadFromFile(const char *filename, ScriptInfo *scriptInfo, const S
 	}
 
 	scriptInfo->startCount = (length >> 1) & 0xFFFF;
-	ChunkFile_Read(index, HTOBE32(CC_DATA), scriptInfo->start, length);
+	Read_Iff_Chunk(index, HTOBE32(CC_DATA), scriptInfo->start, length);
 
-	ChunkFile_Close(index);
+	Close_Iff_File(index);
 
 	return total & 0xFFFF;
 }

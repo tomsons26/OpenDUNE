@@ -76,7 +76,7 @@ static void GUI_Widget_Scrollbar_Scroll(WidgetScrollbar *scrollbar, uint16 scrol
  */
 bool GUI_Widget_SpriteTextButton_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	VARIABLE_NOT_USED(w);
 
@@ -87,7 +87,7 @@ bool GUI_Widget_SpriteTextButton_Click(Widget *w)
 
 		case STR_PLACE_IT:
 			if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-				Structure *ns;
+				Building *ns;
 
 				ns = Structure_Get_ByIndex(s->o.linkedID);
 				g_structureActive = ns;
@@ -163,12 +163,12 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 	scrollbar = w->data;
 
 	positionX = w->offsetX;
-	if (w->offsetX < 0) positionX += g_widgetProperties[w->parentID].width << 3;
-	positionX += g_widgetProperties[w->parentID].xBase << 3;
+	if (w->offsetX < 0) positionX += WindowList[w->parentID].W << 3;
+	positionX += WindowList[w->parentID].X << 3;
 
 	positionY = w->offsetY;
-	if (w->offsetY < 0) positionY += g_widgetProperties[w->parentID].height;
-	positionY += g_widgetProperties[w->parentID].yBase;
+	if (w->offsetY < 0) positionY += WindowList[w->parentID].H;
+	positionY += WindowList[w->parentID].Y;
 
 	if ((w->state.buttonState & 0x44) != 0) {
 		scrollbar->pressed = 0;
@@ -183,10 +183,10 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 		scrollbar->pressed = 0;
 
 		if (w->width > w->height) {
-			positionCurrent = g_mouseX;
+			positionCurrent = MouseX;
 			positionBegin = positionX + scrollbar->position + 1;
 		} else {
-			positionCurrent = g_mouseY;
+			positionCurrent = MouseY;
 			positionBegin = positionY + scrollbar->position + 1;
 		}
 
@@ -205,10 +205,10 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 
 		if (w->width > w->height) {
 			size = w->width - 2 - scrollbar->size;
-			position = g_mouseX - scrollbar->pressedPosition - positionX - 1;
+			position = MouseX - scrollbar->pressedPosition - positionX - 1;
 		} else {
 			size = w->height - 2 - scrollbar->size;
-			position = g_mouseY - scrollbar->pressedPosition - positionY - 1;
+			position = MouseY - scrollbar->pressedPosition - positionY - 1;
 		}
 
 		if (position < 0) {
@@ -249,8 +249,8 @@ bool GUI_Widget_TextButton_Click(Widget *w)
 	u = g_unitSelected;
 	ui = &g_table_unitInfo[u->o.type];
 
-	actions = ui->o.actionsPlayer;
-	if (Unit_GetHouseID(u) != g_playerHouseID && u->o.type != UNIT_HARVESTER) {
+	actions = ui->ot.actionsPlayer;
+	if (Unit_GetHouseID(u) != Whom && u->o.type != UNIT_HARVESTER) {
 		actions = g_table_actionsAI;
 	}
 
@@ -289,9 +289,9 @@ bool GUI_Widget_TextButton_Click(Widget *w)
 	}
 
 	Object_Script_Variable4_Clear(&u->o);
-	u->targetAttack = 0;
-	u->targetMove = 0;
-	u->route[0] = 0xFF;
+	u->TarCom = 0;
+	u->NavCom = 0;
+	u->Path[0] = 0xFF;
 
 	Unit_SetAction(u, action);
 
@@ -341,8 +341,8 @@ bool GUI_Widget_Cancel_Click(Widget *w)
 	VARIABLE_NOT_USED(w);
 
 	if (g_structureActiveType != 0xFFFF) {
-		Structure *s  = Structure_Get_ByPackedTile(g_structureActivePosition);
-		Structure *s2 = g_structureActive;
+		Building *s  = Structure_Get_ByPackedTile(g_structureActivePosition);
+		Building *s2 = g_structureActive;
 
 		assert(s2 != NULL);
 
@@ -380,7 +380,7 @@ bool GUI_Widget_Cancel_Click(Widget *w)
  */
 bool GUI_Widget_Picture_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	VARIABLE_NOT_USED(w);
 
@@ -392,7 +392,7 @@ bool GUI_Widget_Picture_Click(Widget *w)
 
 	s = Structure_Get_ByPackedTile(g_selectionPosition);
 
-	if (s == NULL || !g_table_structureInfo[s->o.type].o.flags.factory) return false;
+	if (s == NULL || !g_table_BuildingType[s->o.type].ot.flags.factory) return false;
 
 	Structure_BuildObject(s, 0xFFFF);
 
@@ -407,7 +407,7 @@ bool GUI_Widget_Picture_Click(Widget *w)
  */
 bool GUI_Widget_RepairUpgrade_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -426,19 +426,19 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 
 	if (w == NULL) return;
 
-	offsetX = w->offsetX + (g_widgetProperties[w->parentID].xBase << 3);
-	offsetY = w->offsetY + g_widgetProperties[w->parentID].yBase;
+	offsetX = w->offsetX + (WindowList[w->parentID].X << 3);
+	offsetY = w->offsetY + WindowList[w->parentID].Y;
 	width = w->width;
 	height = w->height;
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(offsetX, offsetY, offsetX + width, offsetY + height);
+		Conditional_Hide_Mouse(offsetX, offsetY, offsetX + width, offsetY + height);
 	}
 
-	GUI_DrawFilledRectangle(offsetX, offsetY, offsetX + width, offsetY + height, colour);
+	Fill_Rect(offsetX, offsetY, offsetX + width, offsetY + height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -450,18 +450,18 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	g_widgetLinkedListTail = NULL;
 
-	GFX_Screen_SetActive(SCREEN_1);
+	Set_LogicPage(SCREEN_1);
 
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
-	GUI_Widget_DrawBorder(g_curWidgetIndex, 2, true);
+	GUI_Widget_DrawBorder(Window, 2, true);
 
 	if (GUI_String_Get_ByIndex(desc->stringID) != NULL) {
-		GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->stringID), (g_curWidgetXBase << 3) + (g_curWidgetWidth << 2), g_curWidgetYBase + 6 + ((desc == &g_yesNoWindowDesc) ? 2 : 0), 238, 0, 0x122);
+		Fancy_Text_Print(GUI_String_Get_ByIndex(desc->stringID), (WinX << 3) + (WinW << 2), WinY + 6 + ((desc == &g_yesNoWindowDesc) ? 2 : 0), 238, 0, 0x122);
 	}
 
 	if (GUI_String_Get_ByIndex(desc->widgets[0].stringID) == NULL) {
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (g_curWidgetXBase + 2) << 3, g_curWidgetYBase + 42, 232, 0, 0x22);
+		Fancy_Text_Print(Text_String(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (WinX + 2) << 3, WinY + 42, 232, 0, 0x22);
 	}
 
 	for (i = 0; i < desc->widgetCount; i++) {
@@ -508,10 +508,10 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 		if (desc->widgets[i].labelStringId == STR_NULL) continue;
 
-		if (g_config.language == LANGUAGE_FRENCH) {
-			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (g_widgetProperties[w->parentID].xBase << 3) + 40, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x22);
+		if (g_config.Language == LANGUAGE_FRENCH) {
+			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (WindowList[w->parentID].X << 3) + 40, w->offsetY + WindowList[w->parentID].Y + 3, 232, 0, 0x22);
 		} else {
-			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (g_widgetProperties[w->parentID].xBase << 3) - 10, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x222);
+			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (WindowList[w->parentID].X << 3) - 10, w->offsetY + WindowList[w->parentID].Y + 3, 232, 0, 0x222);
 		}
 	}
 
@@ -545,33 +545,33 @@ static void GUI_Window_Create(WindowDesc *desc)
 		g_widgetLinkedListTail = GUI_Widget_Link(g_widgetLinkedListTail, w);
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
-	GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
+	Byte_Blit(WinX, WinY, WinX, WinY, WinW, WinH, SCREEN_1, SCREEN_0);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 }
 
 static void GUI_Window_BackupScreen(WindowDesc *desc)
 {
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
-	GUI_Mouse_Hide_Safe();
-	GFX_CopyToBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, GFX_Screen_Get_ByIndex(SCREEN_2));
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	GFX_CopyToBuffer(WinX * 8, WinY, WinW * 8, WinH, Get_Buff(SCREEN_2));
+	Show_Mouse();
 }
 
 static void GUI_Window_RestoreScreen(WindowDesc *desc)
 {
-	Widget_SetCurrentWidget(desc->index);
+	Change_Window(desc->index);
 
-	GUI_Mouse_Hide_Safe();
-	GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, GFX_Screen_Get_ByIndex(SCREEN_2));
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	GFX_CopyFromBuffer(WinX * 8, WinY, WinW * 8, WinH, Get_Buff(SCREEN_2));
+	Show_Mouse();
 }
 
 /**
@@ -607,7 +607,7 @@ static void GUI_Widget_GameControls_Click(Widget *w)
 					break;
 
 				case 2:
-					if (++g_gameConfig.gameSpeed >= 5) g_gameConfig.gameSpeed = 0;
+					if (++g_gameConfig.GameSpeed >= 5) g_gameConfig.GameSpeed = 0;
 					break;
 
 				case 3:
@@ -615,7 +615,7 @@ static void GUI_Widget_GameControls_Click(Widget *w)
 					break;
 
 				case 4:
-					g_gameConfig.autoScroll ^= 0x1;
+					g_gameConfig.AutoScroll ^= 0x1;
 					break;
 
 				case 5:
@@ -646,14 +646,14 @@ static void ShadeScreen(void)
 	for (i = 0; i < 231 * 3; i++) g_palette1[i] = g_palette1[i] / 2;
 	for (i = 239 * 3; i < 256 * 3; i++) g_palette1[i] = g_palette1[i] / 2;
 
-	GFX_SetPalette(g_palette_998A);
+	Set_Palette(g_palette_998A);
 }
 
 static void UnshadeScreen(void)
 {
 	memmove(g_palette1, g_palette_998A, 256 * 3);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 }
 
 static bool GUI_YesNo(uint16 stringID)
@@ -711,7 +711,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 
 	Timer_SetTimer(TIMER_GAME, false);
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 	ShadeScreen();
 
@@ -754,7 +754,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 					if (!GUI_YesNo(STR_ARE_YOU_SURE_YOU_WISH_TO_PICK_A_NEW_HOUSE)) break;
 
 					loop = false;
-					Driver_Music_FadeOut();
+					Fade_Score();
 					g_gameMode = GM_PICKHOUSE;
 					break;
 
@@ -833,7 +833,7 @@ static void FillSavegameDesc(bool save)
 		if (s_savegameIndexBase - i == s_savegameCountOnDisk) {
 			if (!save) continue;
 
-			strncpy(desc, String_Get_ByIndex(STR_EMPTY_SLOT_), 50);
+			strncpy(desc, Text_String(STR_EMPTY_SLOT_), 50);
 			continue;
 		}
 
@@ -841,8 +841,8 @@ static void FillSavegameDesc(bool save)
 
 		fileId = ChunkFile_Open_Personal(filename);
 		if (fileId == FILE_INVALID) continue;
-		ChunkFile_Read(fileId, HTOBE32(CC_NAME), desc, 50);
-		ChunkFile_Close(fileId);
+		Read_Iff_Chunk(fileId, HTOBE32(CC_NAME), desc, 50);
+		Close_Iff_File(fileId);
 		continue;
 	}
 }
@@ -873,19 +873,19 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 
 	if (*saveDesc == '[') index = s_savegameCountOnDisk;
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 
-	Widget_SetCurrentWidget(15);
+	Change_Window(15);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_DrawBorder((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Draw_Box((WinX << 3) - 1, WinY - 1, (WinW << 3) + 2, WinH + 2, 4, false);
+	Show_Mouse();
 
 	for (loop = true; loop; sleepIdle()) {
 		uint16 eventKey;
 		Widget *w = g_widgetLinkedListTail;
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 232, 235, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 232, 235, 0x22);
 
 		eventKey = GUI_EditBox(saveDesc, 50, 15, g_widgetLinkedListTail, NULL, widgetPaint);
 		widgetPaint = false;
@@ -1113,7 +1113,7 @@ bool GUI_Production_ResumeGame_Click(Widget *w)
 
 			i++;
 
-			GUI_DrawCredits(g_playerHouseID, 0);
+			GUI_DrawCredits(Whom, 0);
 		}
 	}
 
@@ -1143,14 +1143,14 @@ static void GUI_FactoryWindow_ScrollList(int16 step)
 
 	GUI_FactoryWindow_B495_0F30();
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	for (i = 0; i < 32; i++) {
 		y += step;
 		GFX_Screen_Copy2(72, y, 72, 16, 32, 136, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_FactoryWindow_PrepareScrollList();
 
@@ -1164,7 +1164,7 @@ static void GUI_FactoryWindow_FailScrollList(int16 step)
 
 	GUI_FactoryWindow_B495_0F30();
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	GUI_FactoryWindow_B495_0F30();
 
@@ -1178,7 +1178,7 @@ static void GUI_FactoryWindow_FailScrollList(int16 step)
 		GFX_Screen_Copy2(72, y, 72, 16, 32, 136, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_FactoryWindow_UpdateSelection(true);
 }
@@ -1280,15 +1280,15 @@ static void GUI_Purchase_ShowInvoice(void)
 	uint16 x;
 	char textBuffer[12];
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
-	GUI_DrawFilledRectangle(128, 48, 311, 159, 20);
+	Fill_Rect(128, 48, 311, 159, 20);
 
-	GUI_DrawText_Wrapper(String_Get_ByIndex(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
+	Fancy_Text_Print(Text_String(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
 
 	y += 7;
 
-	GUI_DrawLine(129, y, 310, y, 12);
+	Draw_Line(129, y, 310, y, 12);
 
 	y += 2;
 
@@ -1296,7 +1296,7 @@ static void GUI_Purchase_ShowInvoice(void)
 		uint16 i;
 
 		for (i = 0; i < g_factoryWindowTotal; i++) {
-			ObjectInfo *oi;
+			ObjectType *oi;
 			uint16 amount;
 
 			if (g_factoryWindowItems[i].amount == 0) continue;
@@ -1307,52 +1307,52 @@ static void GUI_Purchase_ShowInvoice(void)
 			snprintf(textBuffer, sizeof(textBuffer), "%02d %5d", g_factoryWindowItems[i].amount, amount);
 
 			oi = g_factoryWindowItems[i].objectInfo;
-			GUI_DrawText_Wrapper(String_Get_ByIndex(oi->stringID_full), 128, y, 8, 0, 0x11);
+			Fancy_Text_Print(Text_String(oi->stringID_full), 128, y, 8, 0, 0x11);
 
 			GUI_DrawText_Monospace(textBuffer, 311 - (short)strlen(textBuffer) * 6, y, 15, 0, 6);
 
 			y += 8;
 		}
 	} else {
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
+		Fancy_Text_Print(Text_String(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
 	}
 
-	GUI_DrawLine(129, 148, 310, 148, 12);
-	GUI_DrawLine(129, 150, 310, 150, 12);
+	Draw_Line(129, 148, 310, 148, 12);
+	Draw_Line(129, 150, 310, 150, 12);
 
 	snprintf(textBuffer, sizeof(textBuffer), "%d", total);
 
 	x = 311 - (short)strlen(textBuffer) * 6;
 
 	/* "Total Cost :" */
-	GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(STR_TOTAL_COST_), x - 3, 152, 11, 0, 0x211);
+	Fancy_Text_Print(GUI_String_Get_ByIndex(STR_TOTAL_COST_), x - 3, 152, 11, 0, 0x211);
 	GUI_DrawText_Monospace(textBuffer, x, 152, 11, 0, 6);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(16, 48, 16, 48, 23, 112, SCREEN_1, SCREEN_0);
+	Show_Mouse();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 
-	GUI_FactoryWindow_DrawCaption(String_Get_ByIndex(STR_INVOICE_OF_UNITS_ON_ORDER));
+	GUI_FactoryWindow_DrawCaption(Text_String(STR_INVOICE_OF_UNITS_ON_ORDER));
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	for (; GUI_Widget_HandleEvents(w) == 0; sleepIdle()) {
-		GUI_DrawCredits(g_playerHouseID, 0);
+		GUI_DrawCredits(Whom, 0);
 
 		GUI_FactoryWindow_UpdateSelection(false);
 
 		GUI_PaletteAnimate();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	w = GUI_Widget_Get_ByIndex(w, 10);
 
 	if (w != NULL && Mouse_InsideRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height) != 0) {
 		while (Input_Test(0x41) != 0 || Input_Test(0x42) != 0) sleepIdle();
-		Input_History_Clear();
+		Clear_KeyBuffer();
 	}
 
 	if (g_factoryWindowResult == FACTORY_CONTINUE) GUI_FactoryWindow_DrawDetails();
@@ -1389,7 +1389,7 @@ bool GUI_Production_BuildThis_Click(Widget *w)
 		}
 	} else {
 		FactoryWindowItem *item;
-		ObjectInfo *oi;
+		ObjectType *oi;
 
 		item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
 		oi = item->objectInfo;
@@ -1413,7 +1413,7 @@ bool GUI_Production_BuildThis_Click(Widget *w)
 bool GUI_Purchase_Plus_Click(Widget *w)
 {
 	FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
-	ObjectInfo *oi = item->objectInfo;
+	ObjectType *oi = item->objectInfo;
 	House *h = g_playerHouse;
 	bool canCreateMore = true;
 	uint16 type = item->objectType;

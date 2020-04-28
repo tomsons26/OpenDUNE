@@ -35,7 +35,7 @@
  */
 uint16 Script_Structure_GetState(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 
 	VARIABLE_NOT_USED(script);
 
@@ -53,20 +53,20 @@ uint16 Script_Structure_GetState(ScriptEngine *script)
  */
 uint16 Script_Structure_SetState(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	int16 state;
 
 	s = g_scriptCurrentStructure;
 	state = STACK_PEEK(1);
 
-	if (state == STRUCTURE_STATE_DETECT) {
+	if (state == BSTATE_DETECT) {
 		if (s->o.linkedID == 0xFF) {
-			state = STRUCTURE_STATE_IDLE;
+			state = BSTATE_IDLE;
 		} else {
 			if (s->countDown == 0) {
-				state = STRUCTURE_STATE_READY;
+				state = BSTATE_READY;
 			} else {
-				state = STRUCTURE_STATE_BUSY;
+				state = BSTATE_BUSY;
 			}
 		}
 	}
@@ -104,8 +104,8 @@ uint16 Script_Structure_RemoveFogAroundTile(ScriptEngine *script)
  */
 uint16 Script_Structure_RefineSpice(ScriptEngine *script)
 {
-	const StructureInfo *si;
-	Structure *s;
+	const BuildingType *si;
+	Building *s;
 	Unit *u;
 	House *h;
 	uint16 harvesterStep, creditsStep;
@@ -115,27 +115,27 @@ uint16 Script_Structure_RefineSpice(ScriptEngine *script)
 	s = g_scriptCurrentStructure;
 
 	if (s->o.linkedID == 0xFF) {
-		Structure_SetState(s, STRUCTURE_STATE_IDLE);
+		Structure_SetState(s, BSTATE_IDLE);
 		return 0;
 	}
 
 	u = Unit_Get_ByIndex(s->o.linkedID);
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingType[s->o.type];
 
-	harvesterStep = (s->o.hitpoints * 256 / si->o.hitpoints) * 3 / 256;
+	harvesterStep = (s->o.hitpoints * 256 / si->ot.hitpoints) * 3 / 256;
 
 	if (u->amount < harvesterStep) harvesterStep = u->amount;
 	if (u->amount != 0 && harvesterStep < 1) harvesterStep = 1;
 	if (harvesterStep == 0) return 0;
 
 	creditsStep = 7;
-	if (u->o.houseID != g_playerHouseID) {
-		creditsStep += (Tools_Random_256() % 4) - 1;
+	if (u->o.houseID != Whom) {
+		creditsStep += (Random() % 4) - 1;
 	}
 
 	creditsStep *= harvesterStep;
 
-	if (House_AreAllied(g_playerHouseID, s->o.houseID)) {
+	if (House_AreAllied(Whom, s->o.houseID)) {
 		g_scenario.harvestedAllied += creditsStep;
 		if (g_scenario.harvestedAllied > 65000) g_scenario.harvestedAllied = 65000;
 	} else {
@@ -163,7 +163,7 @@ uint16 Script_Structure_RefineSpice(ScriptEngine *script)
 uint16 Script_Structure_Unknown0A81(ScriptEngine *script)
 {
 	uint16 structureIndex;
-	Structure *s;
+	Building *s;
 	Unit *u;
 
 	VARIABLE_NOT_USED(script);
@@ -194,7 +194,7 @@ uint16 Script_Structure_Unknown0A81(ScriptEngine *script)
  */
 uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	Unit *u;
 	Unit *carryall;
 	uint16 type;
@@ -203,7 +203,7 @@ uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
 
 	s = g_scriptCurrentStructure;
 
-	if (s->state != STRUCTURE_STATE_READY) return IT_NONE;
+	if (s->state != BSTATE_READY) return IT_NONE;
 	if (s->o.linkedID == 0xFF) return IT_NONE;
 
 	type = STACK_PEEK(1);
@@ -212,7 +212,7 @@ uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
 
 	u = Unit_Get_ByIndex(s->o.linkedID);
 
-	if (g_playerHouseID == s->o.houseID && u->o.type == UNIT_HARVESTER && (u->targetLast.x == 0 && u->targetLast.y == 0) && position != 0) {
+	if (Whom == s->o.houseID && u->o.type == UNIT_HARVESTER && (u->targetLast.x == 0 && u->targetLast.y == 0) && position != 0) {
 		return IT_NONE;
 	}
 
@@ -237,7 +237,7 @@ uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
 uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 {
 	tile32 tile;
-	Structure *s;
+	Building *s;
 	Unit *u;
 	uint16 position;
 
@@ -253,10 +253,10 @@ uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 		s->o.linkedID = u->o.linkedID;
 		u->o.linkedID = 0xFF;
 
-		if (s->o.linkedID == 0xFF) Structure_SetState(s, STRUCTURE_STATE_IDLE);
+		if (s->o.linkedID == 0xFF) Structure_SetState(s, BSTATE_IDLE);
 		Object_Script_Variable4_Clear(&s->o);
 
-		if (s->o.houseID == g_playerHouseID) Sound_Output_Feedback(g_playerHouseID + 49);
+		if (s->o.houseID == Whom) Sound_Output_Feedback(Whom + 49);
 
 		return 1;
 	}
@@ -276,17 +276,17 @@ uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 	Unit_SetOrientation(u, Tile_GetDirection(s->o.position, u->o.position) & 0xE0, true, 0);
 	Unit_SetOrientation(u, u->orientation[0].current, true, 1);
 
-	if (u->o.houseID == g_playerHouseID && u->o.type == UNIT_HARVESTER) {
+	if (u->o.houseID == Whom && u->o.type == UNIT_HARVESTER) {
 		GUI_DisplayHint(STR_SEARCH_FOR_SPICE_FIELDS_TO_HARVEST, 0x6A);
 	}
 
-	if (s->o.linkedID == 0xFF) Structure_SetState(s, STRUCTURE_STATE_IDLE);
+	if (s->o.linkedID == 0xFF) Structure_SetState(s, BSTATE_IDLE);
 	Object_Script_Variable4_Clear(&s->o);
 
-	if (s->o.houseID != g_playerHouseID) return 1;
+	if (s->o.houseID != Whom) return 1;
 	if (s->o.type == STRUCTURE_REPAIR) return 1;
 
-	Sound_Output_Feedback(g_playerHouseID + ((u->o.type == UNIT_HARVESTER) ? 68 : 30));
+	Sound_Output_Feedback(Whom + ((u->o.type == UNIT_HARVESTER) ? 68 : 30));
 
 	return 1;
 }
@@ -303,7 +303,7 @@ uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 uint16 Script_Structure_FindTargetUnit(ScriptEngine *script)
 {
 	PoolFindStruct find;
-	Structure *s;
+	Building *s;
 	Unit *u;
 	uint32 distanceCurrent;
 	uint32 targetRange;
@@ -374,7 +374,7 @@ uint16 Script_Structure_FindTargetUnit(ScriptEngine *script)
  */
 uint16 Script_Structure_RotateTurret(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	tile32 lookAt;
 	Tile *tile;
 	uint16 baseTileID;
@@ -391,7 +391,7 @@ uint16 Script_Structure_RotateTurret(ScriptEngine *script)
 	lookAt = Tools_Index_GetTile(encoded);
 	tile   = &g_map[Tile_PackTile(s->o.position)];
 
-	/* Find the base sprite of the structure */
+	/* Find the base sprite of the Building */
 	if (s->o.type == STRUCTURE_ROCKET_TURRET) {
 		baseTileID = g_iconMap[g_iconMap[ICM_ICONGROUP_BASE_ROCKET_TURRET] + 2];
 	} else {
@@ -439,7 +439,7 @@ uint16 Script_Structure_RotateTurret(ScriptEngine *script)
  */
 uint16 Script_Structure_GetDirection(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	tile32 tile;
 	uint16 encoded;
 
@@ -475,7 +475,7 @@ uint16 Script_Structure_Unknown11B9(ScriptEngine *script)
 	if (u == NULL) return 0;
 
 	Object_Script_Variable4_Clear(&u->o);
-	u->targetMove = 0;
+	u->NavCom = 0;
 
 	return 0;
 }
@@ -490,11 +490,11 @@ uint16 Script_Structure_Unknown11B9(ScriptEngine *script)
  */
 uint16 Script_Structure_VoicePlay(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 
 	s = g_scriptCurrentStructure;
 
-	if (s->o.houseID != g_playerHouseID) return 0;
+	if (s->o.houseID != Whom) return 0;
 
 	Voice_PlayAtTile(STACK_PEEK(1), s->o.position);
 
@@ -512,12 +512,12 @@ uint16 Script_Structure_VoicePlay(ScriptEngine *script)
  */
 uint16 Script_Structure_Fire(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	Unit *u;
 	tile32 position;
 	uint16 target;
-	uint16 damage;
-	uint16 fireDelay;
+	uint16 Damage;
+	uint16 ROF;
 	uint16 type;
 
 	s = g_scriptCurrentStructure;
@@ -527,23 +527,23 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
 
 	if (s->o.type == STRUCTURE_ROCKET_TURRET && Tile_GetDistance(Tools_Index_GetTile(target), s->o.position) >= 0x300) {
 		type      = UNIT_MISSILE_TURRET;
-		damage    = 30;
-		fireDelay = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_LAUNCHER].fireDelay, 1, 0xFFFF, true);
+		Damage    = 30;
+		ROF = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_LAUNCHER].ROF, 1, 0xFFFF, true);
 	} else {
 		type      = UNIT_BULLET;
-		damage    = 20;
-		fireDelay = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_TANK].fireDelay, 1, 0xFFFF, true);
+		Damage    = 20;
+		ROF = Tools_AdjustToGameSpeed(g_table_unitInfo[UNIT_TANK].ROF, 1, 0xFFFF, true);
 	}
 
 	position.x = s->o.position.x + 0x80;
 	position.y = s->o.position.y + 0x80;
-	u = Unit_CreateBullet(position, type, s->o.houseID, damage, target);
+	u = Unit_CreateBullet(position, type, s->o.houseID, Damage, target);
 
 	if (u == NULL) return 0;
 
 	u->originEncoded = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
 
-	return fireDelay;
+	return ROF;
 }
 
 /**
@@ -556,7 +556,7 @@ uint16 Script_Structure_Fire(ScriptEngine *script)
  */
 uint16 Script_Structure_Explode(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	uint16 position;
 	uint16 layout;
 	uint16 i;
@@ -564,7 +564,7 @@ uint16 Script_Structure_Explode(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	s = g_scriptCurrentStructure;
-	layout = g_table_structureInfo[s->o.type].layout;
+	layout = g_table_BuildingType[s->o.type].layout;
 	position = Tile_PackTile(s->o.position);
 
 	for (i = 0; i < g_table_structure_layoutTileCount[layout]; i++) {
@@ -588,7 +588,7 @@ uint16 Script_Structure_Explode(ScriptEngine *script)
  */
 uint16 Script_Structure_Destroy(ScriptEngine *script)
 {
-	Structure *s;
+	Building *s;
 	uint16 position;
 	uint16 layout;
 	uint16 i;
@@ -596,7 +596,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	s = g_scriptCurrentStructure;
-	layout = g_table_structureInfo[s->o.type].layout;
+	layout = g_table_BuildingType[s->o.type].layout;
 	position = Tile_PackTile(s->o.position);
 
 	Structure_Remove(s);
@@ -607,14 +607,14 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 
 		tile = Tile_UnpackTile(position + g_table_structure_layoutTiles[layout][i]);
 
-		if (g_table_structureInfo[s->o.type].o.spawnChance < Tools_Random_256()) continue;
+		if (g_table_BuildingType[s->o.type].ot.spawnChance < Random()) continue;
 
-		u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, s->o.houseID, tile, Tools_Random_256());
+		u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, s->o.houseID, tile, Random());
 		if (u == NULL) continue;
 
-		u->o.hitpoints = g_table_unitInfo[UNIT_SOLDIER].o.hitpoints * (Tools_Random_256() & 3) / 256;
+		u->o.hitpoints = g_table_unitInfo[UNIT_SOLDIER].ot.hitpoints * (Random() & 3) / 256;
 
-		if (s->o.houseID != g_playerHouseID) {
+		if (s->o.houseID != Whom) {
 			Unit_SetAction(u, ACTION_ATTACK);
 			continue;
 		}
@@ -623,16 +623,16 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 
 		tile = Tile_MoveByRandom(u->o.position, 32, true);
 
-		u->targetMove = Tools_Index_Encode(Tile_PackTile(tile), IT_TILE);
+		u->NavCom = Tools_Index_Encode(Tile_PackTile(tile), IT_TILE);
 	}
 
-	if (g_debugScenario) return 0;
-	if (s->o.houseID != g_playerHouseID) return 0;
+	if (Debug_Map) return 0;
+	if (s->o.houseID != Whom) return 0;
 
-	if (g_config.language == LANGUAGE_FRENCH) {
-		GUI_DisplayText("%s %s %s", 0, String_Get_ByIndex(g_table_structureInfo[s->o.type].o.stringID_full), g_table_houseInfo[s->o.houseID].name, String_Get_ByIndex(STR_IS_DESTROYED));
+	if (g_config.Language == LANGUAGE_FRENCH) {
+		GUI_DisplayText("%s %s %s", 0, Text_String(g_table_BuildingType[s->o.type].ot.stringID_full), g_table_houseInfo[s->o.houseID].name, Text_String(STR_IS_DESTROYED));
 	} else {
-		GUI_DisplayText("%s %s %s", 0, g_table_houseInfo[s->o.houseID].name, String_Get_ByIndex(g_table_structureInfo[s->o.type].o.stringID_full), String_Get_ByIndex(STR_IS_DESTROYED));
+		GUI_DisplayText("%s %s %s", 0, g_table_houseInfo[s->o.houseID].name, Text_String(g_table_BuildingType[s->o.type].ot.stringID_full), Text_String(STR_IS_DESTROYED));
 	}
 
 	return 0;

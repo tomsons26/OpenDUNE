@@ -24,7 +24,7 @@ typedef enum TeamActionType {
  * flags for Team structure
  */
 typedef struct {
-	BIT_U8 used:1;                                      /*!< The Team is in use (no longer free in the pool). */
+	BIT_U8 IsActive:1;                                      /*!< The Team is in use (no longer free in the pool). */
 	BIT_U8 notused_0002:7;                              /*!< Never used - remaining bits. */
 } TeamFlags;
 

@@ -14,22 +14,22 @@
 #include "unit.h"
 
 
-static uint8 s_randomSeed[4];
+static uint8 RandNumb[4];
 static uint32 s_randomLCG;
 
 uint16 Tools_AdjustToGameSpeed(uint16 normal, uint16 minimum, uint16 maximum, bool inverseSpeed)
 {
-	uint16 gameSpeed = g_gameConfig.gameSpeed;
+	uint16 GameSpeed = g_gameConfig.GameSpeed;
 
-	if (gameSpeed == 2) return normal;
-	if (gameSpeed > 4) return normal;
+	if (GameSpeed == 2) return normal;
+	if (GameSpeed > 4) return normal;
 
 	if (maximum > normal * 2) maximum = normal * 2;
 	if (minimum < normal / 2) minimum = normal / 2;
 
-	if (inverseSpeed) gameSpeed = 4 - gameSpeed;
+	if (inverseSpeed) GameSpeed = 4 - GameSpeed;
 
-	switch (gameSpeed) {
+	switch (GameSpeed) {
 		case 0: return minimum;
 		case 1: return normal - (normal - minimum) / 2;
 		case 3: return normal + (maximum - normal) / 2;
@@ -111,11 +111,11 @@ bool Tools_Index_IsValid(uint16 encoded)
 	switch (Tools_Index_GetType(encoded)) {
 		case IT_UNIT:
 			if (index >= UNIT_INDEX_MAX) return false;
-			return Unit_Get_ByIndex(index)->o.flags.s.used && Unit_Get_ByIndex(index)->o.flags.s.allocated;
+			return Unit_Get_ByIndex(index)->o.flags.s.IsActive && Unit_Get_ByIndex(index)->o.flags.s.allocated;
 
 		case IT_STRUCTURE:
 			if (index >= STRUCTURE_INDEX_MAX_HARD) return false;
-			return Structure_Get_ByIndex(index)->o.flags.s.used;
+			return Structure_Get_ByIndex(index)->o.flags.s.IsActive;
 
 		case IT_TILE : return true;
 
@@ -162,13 +162,13 @@ tile32 Tools_Index_GetTile(uint16 encoded)
 		case IT_TILE: return Tile_UnpackTile(index);
 		case IT_UNIT: return (index < UNIT_INDEX_MAX) ? Unit_Get_ByIndex(index)->o.position : tile;
 		case IT_STRUCTURE: {
-			const StructureInfo *si;
-			Structure *s;
+			const BuildingType *si;
+			Building *s;
 
 			if (index >= STRUCTURE_INDEX_MAX_HARD) return tile;
 
 			s = Structure_Get_ByIndex(index);
-			si = &g_table_structureInfo[s->o.type];
+			si = &g_table_BuildingType[s->o.type];
 
 			return Tile_AddTileDiff(s->o.position, g_table_structure_layoutTileDiff[si->layout]);
 		}
@@ -198,7 +198,7 @@ Unit *Tools_Index_GetUnit(uint16 encoded)
  * @param id The encoded index to get the Structure of.
  * @return The Structure.
  */
-Structure *Tools_Index_GetStructure(uint16 encoded)
+Building *Tools_Index_GetStructure(uint16 encoded)
 {
 	uint16 index;
 
@@ -236,20 +236,20 @@ Object *Tools_Index_GetObject(uint16 encoded)
  *
  * @return The random value.
  */
-uint8 Tools_Random_256(void)
+uint8 Random(void)
 {
 	uint16 val16;
 	uint8 val8;
 
-	val16 = (s_randomSeed[1] << 8) | s_randomSeed[2];
+	val16 = (RandNumb[1] << 8) | RandNumb[2];
 	val8 = ((val16 ^ 0x8000) >> 15) & 1;
-	val16 = (val16 << 1) | ((s_randomSeed[0] >> 1) & 1);
-	val8 = (s_randomSeed[0] >> 2) - s_randomSeed[0] - val8;
-	s_randomSeed[0] = (val8 << 7) | (s_randomSeed[0] >> 1);
-	s_randomSeed[1] = val16 >> 8;
-	s_randomSeed[2] = val16 & 0xFF;
+	val16 = (val16 << 1) | ((RandNumb[0] >> 1) & 1);
+	val8 = (RandNumb[0] >> 2) - RandNumb[0] - val8;
+	RandNumb[0] = (val8 << 7) | (RandNumb[0] >> 1);
+	RandNumb[1] = val16 >> 8;
+	RandNumb[2] = val16 & 0xFF;
 
-	return s_randomSeed[0] ^ s_randomSeed[1];
+	return RandNumb[0] ^ RandNumb[1];
 }
 
 /**
@@ -258,10 +258,10 @@ uint8 Tools_Random_256(void)
  */
 void Tools_Random_Seed(uint32 seed)
 {
-	s_randomSeed[0] = (seed >>  0) & 0xFF;
-	s_randomSeed[1] = (seed >>  8) & 0xFF;
-	s_randomSeed[2] = (seed >> 16) & 0xFF;
-	s_randomSeed[3] = (seed >> 24) & 0xFF;
+	RandNumb[0] = (seed >>  0) & 0xFF;
+	RandNumb[1] = (seed >>  8) & 0xFF;
+	RandNumb[2] = (seed >> 16) & 0xFF;
+	RandNumb[3] = (seed >> 24) & 0xFF;
 }
 
 /**
@@ -289,7 +289,7 @@ static int16 Tools_RandomLCG(void)
  * @param max The maximum value.
  * @return The random value.
  */
-uint16 Tools_RandomLCG_Range(uint16 min, uint16 max)
+uint16 IRandom(uint16 min, uint16 max)
 {
 	uint16 ret;
 

@@ -52,8 +52,8 @@ typedef struct FactoryWindowItem {
 	uint16 objectType;                                      /*!< Which object is this item. */
 	int8   amount;                                          /*!< How many are available. */
 	uint16 credits;                                         /*!< What is the current price. */
-	uint16 sortPriority;                                    /*!< The sorting priority. */
-	struct ObjectInfo *objectInfo;                          /*!< The ObjectInfo of the item. */
+	uint16 Sort;                                    /*!< The sorting priority. */
+	struct ObjectType *objectInfo;                          /*!< The ObjectInfo of the item. */
 } FactoryWindowItem;
 
 /**
@@ -96,10 +96,10 @@ extern uint16 g_selectionHeight;
 extern int16  g_selectionState;
 extern bool g_doQuitHOF;
 
-extern uint16 g_mouseSpriteHotspotX;
-extern uint16 g_mouseSpriteHotspotY;
-extern uint16 g_mouseWidth;
-extern uint16 g_mouseHeight;
+extern uint16 MouseXHot;
+extern uint16 MouseYHot;
+extern uint16 MouseWidth;
+extern uint16 MouseHeight;
 
 extern uint16 g_cursorSpriteID;
 extern uint16 g_cursorDefaultSpriteID;
@@ -131,40 +131,40 @@ extern bool g_var_37B8;
 /* position posX,posY is relative to center of sprite */
 #define DRAWSPRITE_FLAG_CENTER 0x8000
 
-#define GUI_ClearScreen(screenID) GFX_ClearScreen(screenID)
+#define Clear_Page(screenID) Clear_Screen(screenID)
 extern void GUI_DrawScreen(Screen screenID);
-extern void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...);
+extern void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...);
 extern void GUI_DrawInterfaceAndRadar(Screen screenID);
 extern void GUI_Palette_RemapScreen(uint16 left, uint16 top, uint16 width, uint16 height, Screen screenID, const uint8 *remap);
-extern void GUI_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
+extern void Byte_Blit(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
 extern void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint16 width, uint16 height, Screen screenSrc, Screen screenDst);
 extern void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Screen screenDst, uint16 delay, bool skipNull);
 
 extern void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, uint8 colour);
-extern void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill);
+extern void Draw_Box(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill);
 extern void GUI_DrawCredits(uint8 houseID, uint16 mode);
-extern void GUI_DrawFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
-extern void GUI_DrawLine(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
+extern void Fill_Rect(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
+extern void Draw_Line(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
 extern void GUI_DrawProgressbar(uint16 current, uint16 max);
 extern void GUI_DrawText_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour, uint8 bgColour, uint16 charWidth);
-extern void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
-extern void GUI_DrawXorFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
+extern void Draw_Rect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
+extern void Eor_Region(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
 
 extern void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colors, uint8 reference, uint8 intensity);
 extern void GUI_Palette_CreateRemap(uint8 houseID);
-extern void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation);
+extern void Fade_Palette_To(uint8 *palette, int16 ticksOfAnimation);
 extern void GUI_PaletteAnimate(void);
 
 extern void GUI_DisplayText(const char *str, int importance, ...);
 extern void GUI_DrawText(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour);
-extern void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...);
+extern void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...);
 extern uint16 GUI_DisplayModalMessage(const char *str, unsigned int stringID, ...);
 extern uint16 GUI_DisplayHint(uint16 stringID, uint16 spriteID);
 
 extern void GUI_UpdateProductionStringID(void);
 extern uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter);
 extern void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyedAllied, uint16 destroyedEnemy, uint16 harvestedAllied, uint16 harvestedEnemy, int16 score, uint8 houseID);
-extern uint8 GUI_PickHouse(void);
+extern uint8 Choose_Side(void);
 extern void GUI_ChangeSelectionType(uint16 selectionType);
 extern void GUI_InitColors(const uint8 *colors, uint8 first, uint8 last);
 extern void GUI_SetClippingArea(uint16 left, uint16 top, uint16 right, uint16 bottom);
@@ -179,15 +179,15 @@ extern void GUI_FactoryWindow_DrawCaption(const char *caption);
 extern void GUI_FactoryWindow_UpdateDetails(const FactoryWindowItem *item);
 extern void GUI_FactoryWindow_UpdateSelection(bool selectionChanged);
 extern void GUI_FactoryWindow_PrepareScrollList(void);
-extern void GUI_Mouse_Show(void);
-extern void GUI_Mouse_Hide(void);
-extern void GUI_Mouse_Show_Safe(void);
-extern void GUI_Mouse_Hide_Safe(void);
-extern void GUI_Mouse_Show_InRegion(void);
-extern void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom);
+extern void Low_Show_Mouse(void);
+extern void Low_Hide_Mouse(void);
+extern void Show_Mouse(void);
+extern void Hide_Mouse(void);
+extern void Conditional_Show_Mouse(void);
+extern void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern void GUI_Mouse_Show_InWidget(void);
 extern void GUI_Mouse_Hide_InWidget(uint16 widgetIndex);
-extern void GUI_Mouse_SetPosition(uint16 x, uint16 y);
+extern void Set_Mouse_Pos(uint16 x, uint16 y);
 extern uint16 GUI_HallOfFame_Tick(void);
 extern void GUI_HallOfFame_Show(uint16 score);
 extern uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show);

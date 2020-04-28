@@ -91,7 +91,7 @@ static void Animation_Func_Pause(Animation *animation, int16 parameter)
 {
 	assert(parameter >= 0);
 
-	animation->tickNext = g_timerGUI + parameter + (Tools_Random_256() % 4);
+	animation->tickNext = g_timerGUI + parameter + (Random() % 4);
 }
 
 /**
@@ -143,7 +143,7 @@ static void Animation_Func_SetGroundTile(Animation *animation, int16 parameter)
 
 	/* Some special case for turrets */
 	if ((parameter > 1) && (animation->iconGroup == ICM_ICONGROUP_BASE_DEFENSE_TURRET || animation->iconGroup == ICM_ICONGROUP_BASE_ROCKET_TURRET)) {
-		Structure *s = Structure_Get_ByPackedTile(packed);
+		Building *s = Structure_Get_ByPackedTile(packed);
 		assert(s != NULL);
 		assert(layoutTileCount == 1);
 

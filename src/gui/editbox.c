@@ -34,9 +34,9 @@ static void GUI_EditBox_BlinkCursor(uint16 positionX, bool resetBlink)
 
 	editBoxShowCursor = !editBoxShowCursor;
 
-	GUI_Mouse_Hide_Safe();
-	GUI_DrawFilledRectangle(positionX, g_curWidgetYBase, positionX + Font_GetCharWidth('W'), g_curWidgetYBase + g_curWidgetHeight - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Fill_Rect(positionX, WinY, positionX + Char_Pixel_Width('W'), WinY + WinH - 1, (editBoxShowCursor) ? g_curWidgetFGColourBlink : g_curWidgetFGColourNormal);
+	Show_Mouse();
 }
 
 /**
@@ -65,38 +65,38 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		Input_Flags_SetBits(INPUT_FLAG_NO_TRANSLATE);
 		Input_Flags_ClearBits(INPUT_FLAG_UNKNOWN_2000);
 
-		oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+		oldScreenID = Set_LogicPage(SCREEN_0);
 
-		oldWidgetID = Widget_SetCurrentWidget(widgetID);
+		oldWidgetID = Change_Window(widgetID);
 
 		returnValue = 0x0;
 	}
 
-	positionX = g_curWidgetXBase << 3;
+	positionX = WinX << 3;
 
 	textWidth = 0;
 	textLength = 0;
-	maxWidth = (g_curWidgetWidth << 3) - Font_GetCharWidth('W') - 1;
+	maxWidth = (WinW << 3) - Char_Pixel_Width('W') - 1;
 	t = text;
 
 	/* Calculate the length and width of the current string */
 	for (; *t != '\0'; t++) {
-		textWidth += Font_GetCharWidth(*t);
+		textWidth += Char_Pixel_Width(*t);
 		textLength++;
 
 		if (textWidth >= maxWidth) break;
 	}
 	*t = '\0';
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
-	if (paint) Widget_PaintCurrentWidget();
+	if (paint) New_Window();
 
-	GUI_DrawText_Wrapper(text, positionX, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0);
+	Fancy_Text_Print(text, positionX, WinY, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0);
 
 	GUI_EditBox_BlinkCursor(positionX + textWidth, false);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	for (;; sleepIdle()) {
 		uint16 keyWidth;
@@ -133,7 +133,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 			GUI_EditBox_BlinkCursor(positionX + textWidth, true);
 
-			textWidth -= Font_GetCharWidth(*(t - 1));
+			textWidth -= Char_Pixel_Width(*(t - 1));
 			textLength--;
 			*(--t) = '\0';
 
@@ -141,12 +141,12 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 			continue;
 		}
 
-		key = Input_Keyboard_HandleKeys(key) & 0xFF;
+		key = KN_To_KA(key) & 0xFF;
 
 		/* Names can't start with a space, and should be alpha-numeric */
 		if ((key == 0x20 && textLength == 0) || key < 0x20 || key > 0x7E) continue;
 
-		keyWidth = Font_GetCharWidth(key & 0xFF);
+		keyWidth = Char_Pixel_Width(key & 0xFF);
 
 		if (textWidth + keyWidth >= maxWidth || textLength >= maxLength) continue;
 
@@ -155,14 +155,14 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		*(++t) = '\0';
 		textLength++;
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		GUI_EditBox_BlinkCursor(positionX + textWidth, true);
 
 		/* Draw new character */
-		GUI_DrawText_Wrapper(text + textLength - 1, positionX + textWidth, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0x020);
+		Fancy_Text_Print(text + textLength - 1, positionX + textWidth, WinY, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0x020);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		textWidth += keyWidth;
 
@@ -174,9 +174,9 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 		Input_Flags_ClearBits(INPUT_FLAG_NO_TRANSLATE);
 		Input_Flags_SetBits(INPUT_FLAG_UNKNOWN_2000);
 
-		Widget_SetCurrentWidget(oldWidgetID);
+		Change_Window(oldWidgetID);
 
-		GFX_Screen_SetActive(oldScreenID);
+		Set_LogicPage(oldScreenID);
 	}
 
 	return returnValue;

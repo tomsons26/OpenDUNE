@@ -3,26 +3,26 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-extern uint16 g_mouseLock;
+extern uint16 MouseUpdate;
 extern bool   g_doubleWidth;
-extern uint16 g_mouseX;
-extern uint16 g_mouseY;
-extern uint16 g_mousePrevX;
-extern uint16 g_mousePrevY;
+extern uint16 MouseX;
+extern uint16 MouseY;
+extern uint16 MouseXOld;
+extern uint16 MouseYOld;
 extern uint8  g_prevButtonState;
 extern uint16 g_mouseClickX;
 extern uint16 g_mouseClickY;
-extern uint16 g_regionFlags;
-extern uint16 g_mouseRegionLeft;
-extern uint16 g_mouseRegionRight;
-extern uint16 g_mouseRegionTop;
-extern uint16 g_mouseRegionBottom;
+extern uint16 MCState;
+extern uint16 MouseLeft;
+extern uint16 MouseRight;
+extern uint16 MouseTop;
+extern uint16 MouseBottom;
 extern uint16 g_regionMinX;
 extern uint16 g_regionMinY;
 extern uint16 g_regionMaxX;
 extern uint16 g_regionMaxY;
 
-extern uint8 g_mouseDisabled;
+extern uint8 MDisabled;
 extern uint8 g_mouseHiddenDepth;
 extern uint8 g_mouseFileID;
 extern bool g_mouseNoRecordedValue;

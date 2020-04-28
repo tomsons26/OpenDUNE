@@ -30,30 +30,30 @@ static void GUI_Security_DrawText(char *text)
 {
 	Screen oldScreenID;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = Set_LogicPage(SCREEN_2);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
+	Conditional_Show_Mouse();
 
-	GUI_Screen_Copy(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
+	Byte_Blit(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
 
 	GUI_Mentat_SplitText(text, 304);
 
-	GUI_DrawText_Wrapper(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
+	Fancy_Text_Print(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
+	Conditional_Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 static void GUI_Security_UndrawText(void)
 {
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
+	Show_Mouse();
 }
 
 static void GUI_Security_NormaliseText(char *str)
@@ -91,27 +91,27 @@ bool GUI_Security_Show(void)
 	g_disableOtherMovement = true;
 	g_interrogation = true;
 
-	wsaHouseFilename = House_GetWSAHouseFilename(g_playerHouseID);
+	wsaHouseFilename = House_GetWSAHouseFilename(Whom);
 	if (wsaHouseFilename == NULL) return true;
 
-	GUI_SetPaletteAnimated(g_palette2, 15);
+	Fade_Palette_To(g_palette2, 15);
 
-	GUI_Mentat_Display(wsaHouseFilename, g_playerHouseID);
+	GUI_Mentat_Display(wsaHouseFilename, Whom);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Show_Mouse();
 
-	GUI_SetPaletteAnimated(g_palette1, 15);
+	Fade_Palette_To(g_palette1, 15);
 
-	strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_TEXT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+	strncpy(g_readBuffer, Text_String(STR_SECURITY_TEXT_HARKONNEN + Whom * 3), g_readBufferSize);
 	GUI_Mentat_Loop(wsaHouseFilename, NULL, g_readBuffer, true, NULL);
 
-	questionsCount = atoi(String_Get_ByIndex(STR_SECURITY_COUNT));
+	questionsCount = atoi(Text_String(STR_SECURITY_COUNT));
 
-	oldCurrentWidget = Widget_SetCurrentWidget(8);
+	oldCurrentWidget = Change_Window(8);
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = Set_LogicPage(SCREEN_2);
 
 	for (i = 0, valid = false; i < 3 && !valid; i++) {
 		void *wsa;
@@ -119,62 +119,62 @@ bool GUI_Security_Show(void)
 		uint32 tickWaitTill;
 		char buffer[81];
 
-		questionIndex = Tools_RandomLCG_Range(0, questionsCount - 1) * 3 + STR_SECURITY_QUESTIONS;
+		questionIndex = IRandom(0, questionsCount - 1) * 3 + STR_SECURITY_QUESTIONS;
 
-		Widget_SetCurrentWidget(8);
+		Change_Window(8);
 
-		wsa = WSA_LoadFile(String_Get_ByIndex(questionIndex + 1), GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
-		WSA_Unload(wsa);
+		wsa = Open_Animation(Text_String(questionIndex + 1), Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		Animate_Frame(wsa, 0, WinX << 3, WinY, SCREEN_2);
+		Close_Animation(wsa);
 
-		GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+		Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-		GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
-		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
+		GUI_Mouse_Hide_InWidget(Window);
+		Byte_Blit(WinX, WinY, WinX, WinY, WinW, WinH, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 
-		strncpy(g_readBuffer, String_Get_ByIndex(questionIndex), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(questionIndex), g_readBufferSize);
 		GUI_Security_DrawText(g_readBuffer);
 
 		g_interrogationTimer = g_timerGUI + (uint32)strlen(g_readBuffer) * 4;
 
-		Widget_SetCurrentWidget(9);
+		Change_Window(9);
 
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(g_curWidgetXBase - 1, g_curWidgetYBase - 8, 0, 0, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_0, SCREEN_2);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(WinX - 1, WinY - 8, 0, 0, WinW + 2, WinH + 16, SCREEN_0, SCREEN_2);
+		Show_Mouse();
 
-		GFX_Screen_SetActive(SCREEN_0);
+		Set_LogicPage(SCREEN_0);
 
-		GUI_Mouse_Hide_Safe();
-		GUI_DrawBorder((g_curWidgetXBase << 3) - 6, g_curWidgetYBase - 6, (g_curWidgetWidth << 3) + 12, g_curWidgetHeight + 12, 1, true);
-		GUI_DrawBorder((g_curWidgetXBase << 3) - 2, g_curWidgetYBase - 2, (g_curWidgetWidth << 3) + 4, g_curWidgetHeight + 4, 2, false);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Draw_Box((WinX << 3) - 6, WinY - 6, (WinW << 3) + 12, WinH + 12, 1, true);
+		Draw_Box((WinX << 3) - 2, WinY - 2, (WinW << 3) + 4, WinH + 4, 2, false);
+		Show_Mouse();
 
-		Input_History_Clear();
+		Clear_KeyBuffer();
 
 		buffer[0] = 0;
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-		Debug("Answer : %s\n", String_Get_ByIndex(questionIndex + 2));
+		Debug("Answer : %s\n", Text_String(questionIndex + 2));
 		GUI_EditBox(buffer, sizeof(buffer) - 1, 9, NULL, &GUI_Mentat_Tick, false);
 
 		GUI_Security_UndrawText();
 
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(0, 0, g_curWidgetXBase - 1, g_curWidgetYBase - 8, g_curWidgetWidth + 2, g_curWidgetHeight + 16, SCREEN_2, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(0, 0, WinX - 1, WinY - 8, WinW + 2, WinH + 16, SCREEN_2, SCREEN_0);
+		Show_Mouse();
 
 		GUI_Security_NormaliseText(buffer);
 
-		strncpy(g_readBuffer, String_Get_ByIndex(questionIndex + 2), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(questionIndex + 2), g_readBufferSize);
 		GUI_Security_NormaliseText(g_readBuffer);
 
 		if (strcasecmp(g_readBuffer, buffer) != 0) {
-			strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_WRONG_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_WRONG_HARKONNEN + Whom * 3), g_readBufferSize);
 		} else {
-			strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_CORRECT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_CORRECT_HARKONNEN + Whom * 3), g_readBufferSize);
 
 			valid = true;
 		}
@@ -183,11 +183,11 @@ bool GUI_Security_Show(void)
 
 		tickWaitTill = g_timerGUI + (uint32)strlen(g_readBuffer) * 4;
 
-		Input_History_Clear();
+		Clear_KeyBuffer();
 
 		/* ENHANCEMENT -- In Dune2, the + 120 is on the other side, causing the 'You are wrong! / Well done.' screen to appear very short (close to invisible, so to say) */
 		while (g_timerGUI + (g_dune2_enhanced ? 0 : 120) < tickWaitTill + (g_dune2_enhanced ? 120 : 0)) {
-			if (Input_Keyboard_NextKey() != 0) break;
+			if (Check_Key() != 0) break;
 
 			if (g_timerGUI < tickWaitTill) {
 				GUI_Mentat_Animation(1);
@@ -200,11 +200,11 @@ bool GUI_Security_Show(void)
 		GUI_Security_UndrawText();
 	}
 
-	Widget_SetCurrentWidget(oldCurrentWidget);
+	Change_Window(oldCurrentWidget);
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	Load_Palette_Mercenaries();
 

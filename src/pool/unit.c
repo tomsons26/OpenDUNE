@@ -87,7 +87,7 @@ void Unit_Recount(void)
 
 	for (index = 0; index < UNIT_INDEX_MAX; index++) {
 		Unit *u = Unit_Get_ByIndex(index);
-		if (!u->o.flags.s.used) continue;
+		if (!u->o.flags.s.IsActive) continue;
 
 		h = House_Get_ByIndex(u->o.houseID);
 		h->unitCount++;
@@ -124,12 +124,12 @@ Unit *Unit_Allocate(uint16 index, uint8 type, uint8 houseID)
 
 		for (index = indexStart; index <= indexEnd; index++) {
 			u = Unit_Get_ByIndex(index);
-			if (!u->o.flags.s.used) break;
+			if (!u->o.flags.s.IsActive) break;
 		}
 		if (index > indexEnd) return NULL;
 	} else {
 		u = Unit_Get_ByIndex(index);
-		if (u->o.flags.s.used) return NULL;
+		if (u->o.flags.s.IsActive) return NULL;
 	}
 	assert(u != NULL);
 
@@ -141,11 +141,11 @@ Unit *Unit_Allocate(uint16 index, uint8 type, uint8 houseID)
 	u->o.type                    = type;
 	u->o.houseID                 = houseID;
 	u->o.linkedID                = 0xFF;
-	u->o.flags.s.used            = true;
+	u->o.flags.s.IsActive            = true;
 	u->o.flags.s.allocated       = true;
 	u->o.flags.s.isUnit = true;
 	u->o.script.delay      = 0;
-	u->route[0]            = 0xFF;
+	u->Path[0]            = 0xFF;
 	if (type == UNIT_SANDWORM) u->amount = 3;
 
 	g_unitFindArray[g_unitFindCount++] = u;

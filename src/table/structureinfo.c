@@ -1,4 +1,4 @@
-/** @file src/table/structureinfo.c StructureInfo file table. */
+/** @file src/table/BuildingType.c BuildingType file table. */
 
 #include <stdio.h>
 #include "types.h"
@@ -9,7 +9,7 @@
 #include "../unit.h"
 #include "strings.h"
 
-StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
+BuildingType g_table_BuildingType[STRUCTURE_MAX] = {
 	{ /* 0 */
 		{ /* objectInfo */
 		/* stringID_abbrev      */ STR_CONCRETE,
@@ -51,7 +51,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 0,
-		/* layout               */ STRUCTURE_LAYOUT_1x1,
+		/* layout               */ BSIZE_1x1,
 		/* iconGroup            */ ICM_ICONGROUP_CONCRETE_SLAB,
 		{ /* animationIndex */
 		/* [0]                  */ 2,
@@ -116,7 +116,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 0,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_CONCRETE_SLAB,
 		{ /* animationIndex */
 		/* [0]                  */ 2,
@@ -181,7 +181,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 80,
-		/* layout               */ STRUCTURE_LAYOUT_3x3,
+		/* layout               */ BSIZE_3x3,
 		/* iconGroup            */ ICM_ICONGROUP_HOUSE_PALACE,
 		{ /* animationIndex */
 		/* [0]                  */ 4,
@@ -246,7 +246,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 20,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_LIGHT_VEHICLE_FACTORY,
 		{ /* animationIndex */
 		/* [0]                  */ 14,
@@ -311,7 +311,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 35,
-		/* layout               */ STRUCTURE_LAYOUT_3x2,
+		/* layout               */ BSIZE_3x2,
 		/* iconGroup            */ ICM_ICONGROUP_HEAVY_VEHICLE_FACTORY,
 		{ /* animationIndex */
 		/* [0]                  */ 11,
@@ -376,7 +376,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 35,
-		/* layout               */ STRUCTURE_LAYOUT_3x2,
+		/* layout               */ BSIZE_3x2,
 		/* iconGroup            */ ICM_ICONGROUP_HI_TECH_FACTORY,
 		{ /* animationIndex */
 		/* [0]                  */ 8,
@@ -441,7 +441,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 40,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_IX_RESEARCH,
 		{ /* animationIndex */
 		/* [0]                  */ 20,
@@ -506,7 +506,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 20,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_WOR_TROOPER_FACILITY,
 		{ /* animationIndex */
 		/* [0]                  */ 21,
@@ -571,7 +571,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 0,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_CONSTRUCTION_YARD,
 		{ /* animationIndex */
 		/* [0]                  */ 22,
@@ -636,7 +636,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ -100,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_WINDTRAP_POWER,
 		{ /* animationIndex */
 		/* [0]                  */ 26,
@@ -701,7 +701,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 10,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_INFANTRY_BARRACKS,
 		{ /* animationIndex */
 		/* [0]                  */ 28,
@@ -766,7 +766,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 50,
-		/* layout               */ STRUCTURE_LAYOUT_3x3,
+		/* layout               */ BSIZE_3x3,
 		/* iconGroup            */ ICM_ICONGROUP_STARPORT_FACILITY,
 		{ /* animationIndex */
 		/* [0]                  */ 5,
@@ -831,7 +831,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_HARVESTER,
 		/* creditsStorage       */ 1005,
 		/* powerUsage           */ 30,
-		/* layout               */ STRUCTURE_LAYOUT_3x2,
+		/* layout               */ BSIZE_3x2,
 		/* iconGroup            */ ICM_ICONGROUP_SPICE_REFINERY,
 		{ /* animationIndex */
 		/* [0]                  */ 17,
@@ -896,7 +896,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_HARVESTER | FLAG_UNIT_QUAD | FLAG_UNIT_RAIDER_TRIKE | FLAG_UNIT_TRIKE | FLAG_UNIT_SONIC_TANK | FLAG_UNIT_DEVASTATOR | FLAG_UNIT_SIEGE_TANK | FLAG_UNIT_TANK | FLAG_UNIT_DEVIATOR | FLAG_UNIT_LAUNCHER,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 20,
-		/* layout               */ STRUCTURE_LAYOUT_3x2,
+		/* layout               */ BSIZE_3x2,
 		/* iconGroup            */ ICM_ICONGROUP_VEHICLE_REPAIR_CENTRE,
 		{ /* animationIndex */
 		/* [0]                  */ 23,
@@ -961,7 +961,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 0,
-		/* layout               */ STRUCTURE_LAYOUT_1x1,
+		/* layout               */ BSIZE_1x1,
 		/* iconGroup            */ ICM_ICONGROUP_WALLS,
 		{ /* animationIndex */
 		/* [0]                  */ 0xFF,
@@ -1026,7 +1026,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 10,
-		/* layout               */ STRUCTURE_LAYOUT_1x1,
+		/* layout               */ BSIZE_1x1,
 		/* iconGroup            */ ICM_ICONGROUP_BASE_DEFENSE_TURRET,
 		{ /* animationIndex */
 		/* [0]                  */ 0xFF,
@@ -1091,7 +1091,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 25,
-		/* layout               */ STRUCTURE_LAYOUT_1x1,
+		/* layout               */ BSIZE_1x1,
 		/* iconGroup            */ ICM_ICONGROUP_BASE_ROCKET_TURRET,
 		{ /* animationIndex */
 		/* [0]                  */ 0xFF,
@@ -1156,7 +1156,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 1000,
 		/* powerUsage           */ 5,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_SPICE_STORAGE_SILO,
 		{ /* animationIndex */
 		/* [0]                  */ 27,
@@ -1221,7 +1221,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 		/* enterFilter          */ FLAG_UNIT_NONE,
 		/* creditsStorage       */ 0,
 		/* powerUsage           */ 30,
-		/* layout               */ STRUCTURE_LAYOUT_2x2,
+		/* layout               */ BSIZE_2x2,
 		/* iconGroup            */ ICM_ICONGROUP_RADAR_OUTPOST,
 		{ /* animationIndex */
 		/* [0]                  */ 3,
@@ -1247,7 +1247,7 @@ StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
 };
 
 /** Array with position offset per tile in a structure layout. */
-const uint16 g_table_structure_layoutTiles[STRUCTURE_LAYOUT_MAX][9] = {
+const uint16 g_table_structure_layoutTiles[BSIZE_COUNT][9] = {
 	{0,    0,    0,    0,     0,     0,     0,     0,     0}, /* STRUCTURE_LAYOUT_1x1 */
 	{0,    1,    0,    0,     0,     0,     0,     0,     0}, /* STRUCTURE_LAYOUT_2x1 */
 	{0, 64+0,    0,    0,     0,     0,     0,     0,     0}, /* STRUCTURE_LAYOUT_1x2 */
@@ -1258,7 +1258,7 @@ const uint16 g_table_structure_layoutTiles[STRUCTURE_LAYOUT_MAX][9] = {
 };
 
 /** Array with position offset of edge tiles in a structure layout. */
-const uint16 g_table_structure_layoutEdgeTiles[STRUCTURE_LAYOUT_MAX][8] = {
+const uint16 g_table_structure_layoutEdgeTiles[BSIZE_COUNT][8] = {
 	{0, 0,    0,     0,     0,     0,     0, 0}, /* STRUCTURE_LAYOUT_1x1 */
 	{0, 1,    1,     1,     1,     0,     0, 0}, /* STRUCTURE_LAYOUT_2x1 */
 	{0, 0,    0,  64+0,  64+0,  64+0,     0, 0}, /* STRUCTURE_LAYOUT_1x2 */
@@ -1269,7 +1269,7 @@ const uint16 g_table_structure_layoutEdgeTiles[STRUCTURE_LAYOUT_MAX][8] = {
 };
 
 /** Array with number of tiles in a layout. */
-const uint16 g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX] = {
+const uint16 g_table_structure_layoutTileCount[BSIZE_COUNT] = {
 	1, /* STRUCTURE_LAYOUT_1x1 */
 	2, /* STRUCTURE_LAYOUT_2x1 */
 	2, /* STRUCTURE_LAYOUT_1x2 */
@@ -1280,7 +1280,7 @@ const uint16 g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX] = {
 };
 
 /** Array with TileDiff of a layout. */
-const tile32 g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX] = {
+const tile32 g_table_structure_layoutTileDiff[BSIZE_COUNT] = {
 	{0x0080, 0x0080}, /* STRUCTURE_LAYOUT_1x1 */
 	{0x0100, 0x0080}, /* STRUCTURE_LAYOUT_2x1 */
 	{0x0080, 0x0100}, /* STRUCTURE_LAYOUT_1x2 */
@@ -1291,7 +1291,7 @@ const tile32 g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX] = {
 };
 
 /** Array with size of a layout. */
-const XYSize g_table_structure_layoutSize[STRUCTURE_LAYOUT_MAX] = {
+const XYSize g_table_structure_layoutSize[BSIZE_COUNT] = {
 	{1, 1}, /* STRUCTURE_LAYOUT_1x1 */
 	{2, 1}, /* STRUCTURE_LAYOUT_2x1 */
 	{1, 2}, /* STRUCTURE_LAYOUT_1x2 */
@@ -1302,7 +1302,7 @@ const XYSize g_table_structure_layoutSize[STRUCTURE_LAYOUT_MAX] = {
 };
 
 /** Array with position offset per tile around a structure layout. */
-const int16 g_table_structure_layoutTilesAround[STRUCTURE_LAYOUT_MAX][16] = {
+const int16 g_table_structure_layoutTilesAround[BSIZE_COUNT][16] = {
 	{-64, -64+1,     1,  64+1,  64+0,  64-1,    -1, -64-1,     0,     0,     0,     0,     0,     0,  0,     0}, /* STRUCTURE_LAYOUT_1x1 */
 	{-64, -64+1, -64+2,     2,  64+2,  64+1,  64+0,  64-1,    -1, -64-1,     0,     0,     0,     0,  0,     0}, /* STRUCTURE_LAYOUT_2x1 */
 	{-64, -64+1,     1,  64+1, 128+1, 128+0, 128-1,  64-1,    -1, -64-1,     0,     0,     0,     0,  0,     0}, /* STRUCTURE_LAYOUT_1x2 */

@@ -12,13 +12,13 @@
 #include "../file.h"
 #include "../string.h"
 
-Font *g_fontIntro = NULL;
-Font *g_fontNew6p = NULL;
-Font *g_fontNew8p = NULL;
+Font *IntroFontPtr = NULL;
+Font *FontNew6Ptr = NULL;
+Font *FontNew8Ptr = NULL;
 
 int8 g_fontCharOffset = -1;
 
-Font *g_fontCurrent = NULL;
+Font *FontPtr = NULL;
 
 /**
  * Get the width of a char in pixels.
@@ -26,9 +26,9 @@ Font *g_fontCurrent = NULL;
  * @param c The char to get the width of.
  * @return The width of the char in pixels.
  */
-uint16 Font_GetCharWidth(unsigned char c)
+uint16 Char_Pixel_Width(unsigned char c)
 {
-	return g_fontCurrent->chars[c].width + g_fontCharOffset;
+	return FontPtr->chars[c].width + g_fontCharOffset;
 }
 
 /**
@@ -37,14 +37,14 @@ uint16 Font_GetCharWidth(unsigned char c)
  * @param string The string to get the width of.
  * @return The width of the string in pixels.
  */
-uint16 Font_GetStringWidth(const char *string)
+uint16 String_Pixel_Width(const char *string)
 {
 	uint16 width = 0;
 
 	if (string == NULL) return 0;
 
 	while (*string != '\0') {
-		width += Font_GetCharWidth(*string++);
+		width += Char_Pixel_Width(*string++);
 	}
 
 	return width;
@@ -56,7 +56,7 @@ uint16 Font_GetStringWidth(const char *string)
  * @param filename The name of the font file.
  * @return The pointer of the allocated memory where the file has been read.
  */
-static Font *Font_LoadFile(const char *filename)
+static Font *Load_Font(const char *filename)
 {
 	uint8 *buf;
 	Font *f;
@@ -119,24 +119,24 @@ static Font *Font_LoadFile(const char *filename)
  *
  * @param font The pointer of the font to use.
  */
-void Font_Select(Font *f)
+void Set_Font(Font *f)
 {
 	if (f == NULL) return;
 
-	g_fontCurrent = f;
+	FontPtr = f;
 }
 
-bool Font_Init(void)
+bool Init_Fonts(void)
 {
-	g_fontIntro = Font_LoadFile("INTRO.FNT");
-	if ((g_config.language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
-		g_fontNew6p = Font_LoadFile("new6pg.fnt");
+	IntroFontPtr = Load_Font("INTRO.FNT");
+	if ((g_config.Language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
+		FontNew6Ptr = Load_Font("new6pg.fnt");
 	} else {
-		g_fontNew6p = Font_LoadFile("new6p.fnt");
+		FontNew6Ptr = Load_Font("new6p.fnt");
 	}
-	g_fontNew8p = Font_LoadFile("new8p.fnt");
+	FontNew8Ptr = Load_Font("new8p.fnt");
 
-	return g_fontNew8p != NULL;
+	return FontNew8Ptr != NULL;
 }
 
 static void Font_Unload(Font *f) {
@@ -149,7 +149,7 @@ static void Font_Unload(Font *f) {
 
 void Font_Uninit(void)
 {
-	Font_Unload(g_fontIntro); g_fontIntro = NULL;
-	Font_Unload(g_fontNew6p); g_fontNew6p = NULL;
-	Font_Unload(g_fontNew8p); g_fontNew8p = NULL;
+	Font_Unload(IntroFontPtr); IntroFontPtr = NULL;
+	Font_Unload(FontNew6Ptr); FontNew6Ptr = NULL;
+	Font_Unload(FontNew8Ptr); FontNew8Ptr = NULL;
 }

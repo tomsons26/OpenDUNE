@@ -29,7 +29,7 @@ Widget *g_widgetMentatScrollDown = NULL;
 Widget *g_widgetMentatScrollbar = NULL;
 
 /** Layout and other properties of the widgets. */
-WidgetProperties g_widgetProperties[22] = {
+WindowType WindowList[22] = {
 	/* x   y   w    h   p4  norm sel */
 	{ 0,   0, 40, 200,  15,  12,  0}, /*  0 */
 	{ 1,  75, 29,  70,  15,  15,  0}, /*  1 */
@@ -55,11 +55,11 @@ WidgetProperties g_widgetProperties[22] = {
 	{ 1,   6, 12,   3,   0,  15,  6}  /* 21 */
 };
 
-uint16 g_curWidgetIndex;          /*!< Index of the currently selected widget in #g_widgetProperties. */
-uint16 g_curWidgetXBase;          /*!< Horizontal base position of the currently selected widget. */
-uint16 g_curWidgetYBase;          /*!< Vertical base position of the currently selected widget. */
-uint16 g_curWidgetWidth;          /*!< Width of the currently selected widget. */
-uint16 g_curWidgetHeight;         /*!< Height of the currently selected widget. */
+uint16 Window;          /*!< Index of the currently selected widget in #g_widgetProperties. */
+uint16 WinX;          /*!< Horizontal base position of the currently selected widget. */
+uint16 WinY;          /*!< Vertical base position of the currently selected widget. */
+uint16 WinW;          /*!< Width of the currently selected widget. */
+uint16 WinH;         /*!< Height of the currently selected widget. */
 uint8  g_curWidgetFGColourBlink;  /*!< Blinking colour of the currently selected widget. */
 uint8  g_curWidgetFGColourNormal; /*!< Normal colour of the currently selected widget. */
 
@@ -99,15 +99,15 @@ Widget *GUI_Widget_Get_ByIndex(Widget *w, uint16 index)
 static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 {
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
+		Conditional_Hide_Mouse(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
 	}
 
-	GUI_DrawSprite(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
+	Draw_Shape(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
 
 	GUI_DrawBlockedRectangle(w->offsetX, w->offsetY, w->width, w->height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -180,28 +180,28 @@ void GUI_Widget_Draw(Widget *w)
 
 	offsetX = w->offsetX;
 	if (w->offsetX < 0) {
-		offsetX = (g_widgetProperties[w->parentID].width << 3) + w->offsetX;
+		offsetX = (WindowList[w->parentID].W << 3) + w->offsetX;
 	}
-	positionLeft = (g_widgetProperties[w->parentID].xBase << 3) + offsetX;
+	positionLeft = (WindowList[w->parentID].X << 3) + offsetX;
 	positionRight = positionLeft + w->width - 1;
 
 	offsetY = w->offsetY;
 	if (w->offsetY < 0) {
-		offsetY = g_widgetProperties[w->parentID].height + w->offsetY;
+		offsetY = WindowList[w->parentID].H + w->offsetY;
 	}
-	positionTop = g_widgetProperties[w->parentID].yBase + offsetY;
+	positionTop = WindowList[w->parentID].Y + offsetY;
 	positionBottom = positionTop + w->height - 1;
 
 	assert(drawMode < DRAW_MODE_MAX);
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(positionLeft, positionTop, positionRight, positionBottom);
+		Conditional_Hide_Mouse(positionLeft, positionTop, positionRight, positionBottom);
 	}
 
 	switch (drawMode) {
 		case DRAW_MODE_NONE: break;
 
 		case DRAW_MODE_SPRITE: {
-			GUI_DrawSprite(SCREEN_ACTIVE, drawParam.sprite, offsetX, offsetY, w->parentID, DRAWSPRITE_FLAG_REMAP | DRAWSPRITE_FLAG_WIDGETPOS, g_remap, 1);
+			Draw_Shape(SCREEN_ACTIVE, drawParam.sprite, offsetX, offsetY, w->parentID, DRAWSPRITE_FLAG_REMAP | DRAWSPRITE_FLAG_WIDGETPOS, g_remap, 1);
 		} break;
 
 		case DRAW_MODE_TEXT: {
@@ -209,7 +209,7 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_UNKNOWN3: {
-			GFX_DrawTile(drawParam.spriteID, positionLeft, positionTop, HOUSE_HARKONNEN);
+			Draw_Stamp(drawParam.spriteID, positionLeft, positionTop, HOUSE_HARKONNEN);
 		} break;
 
 		case DRAW_MODE_CUSTOM_PROC: {
@@ -218,16 +218,16 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_WIRED_RECTANGLE: {
-			GUI_DrawWiredRectangle(positionLeft, positionTop, positionRight, positionBottom, fgColour);
+			Draw_Rect(positionLeft, positionTop, positionRight, positionBottom, fgColour);
 		} break;
 
 		case DRAW_MODE_XORFILLED_RECTANGLE: {
-			GUI_DrawXorFilledRectangle(positionLeft, positionTop, positionRight, positionBottom, fgColour);
+			Eor_Region(positionLeft, positionTop, positionRight, positionBottom, fgColour);
 		} break;
 	}
 
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -254,7 +254,7 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 
 	/* Get the key from the buffer, if there was any key pressed */
 	key = 0;
-	if (Input_IsInputAvailable() != 0) {
+	if (Check_Key_Num() != 0) {
 		key = Input_Wait();
 	}
 
@@ -279,11 +279,11 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 		}
 	}
 
-	mouseX = g_mouseX;
-	mouseY = g_mouseY;
+	mouseX = MouseX;
+	mouseY = MouseY;
 
 	buttonState = 0;
-	if (g_mouseDisabled == 0) {
+	if (MDisabled == 0) {
 		uint16 buttonStateChange = 0;
 
 		/* See if the key was a mouse button action */
@@ -337,12 +337,12 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 		w->state.hover1Last = w->state.hover1;
 
 		positionX = w->offsetX;
-		if (w->offsetX < 0) positionX += g_widgetProperties[w->parentID].width << 3;
-		positionX += g_widgetProperties[w->parentID].xBase << 3;
+		if (w->offsetX < 0) positionX += WindowList[w->parentID].W << 3;
+		positionX += WindowList[w->parentID].X << 3;
 
 		positionY = w->offsetY;
-		if (w->offsetY < 0) positionY += g_widgetProperties[w->parentID].height;
-		positionY += g_widgetProperties[w->parentID].yBase;
+		if (w->offsetY < 0) positionY += WindowList[w->parentID].H;
+		positionY += WindowList[w->parentID].Y;
 
 		widgetHover = false;
 		w->state.keySelected = false;
@@ -598,7 +598,7 @@ Widget *GUI_Widget_Allocate(uint16 index, uint16 shortcut, uint16 offsetX, uint1
 
 			if (stringID == STR_NULL) break;
 
-			if (String_Get_ByIndex(stringID) != NULL) w->shortcut = GUI_Widget_GetShortcut(*String_Get_ByIndex(stringID));
+			if (Text_String(stringID) != NULL) w->shortcut = GUI_Widget_GetShortcut(*Text_String(stringID));
 			if (stringID == STR_CANCEL) w->shortcut2 = 'n';
 			break;
 
@@ -950,17 +950,17 @@ Widget *GUI_Widget_Insert(Widget *w1, Widget *w2)
  * @param index %Widget number to select.
  * @return Index of the previous selected widget.
  */
-uint16 Widget_SetCurrentWidget(uint16 index)
+uint16 Change_Window(uint16 index)
 {
-	uint16 oldIndex = g_curWidgetIndex;
-	g_curWidgetIndex = index;
+	uint16 oldIndex = Window;
+	Window = index;
 
-	g_curWidgetXBase          = g_widgetProperties[index].xBase;
-	g_curWidgetYBase          = g_widgetProperties[index].yBase;
-	g_curWidgetWidth          = g_widgetProperties[index].width;
-	g_curWidgetHeight         = g_widgetProperties[index].height;
-	g_curWidgetFGColourBlink  = g_widgetProperties[index].fgColourBlink;
-	g_curWidgetFGColourNormal = g_widgetProperties[index].fgColourNormal;
+	WinX = WindowList[index].X;
+	WinY = WindowList[index].Y;
+	WinW = WindowList[index].W;
+	WinH = WindowList[index].H;
+	g_curWidgetFGColourBlink = WindowList[index].fgColourBlink;
+	g_curWidgetFGColourNormal = WindowList[index].fgColourNormal;
 
 	return oldIndex;
 }
@@ -970,11 +970,11 @@ uint16 Widget_SetCurrentWidget(uint16 index)
  * @param index %Widget number to select.
  * @return Index of the previous selected widget.
  */
-uint16 Widget_SetAndPaintCurrentWidget(uint16 index)
+uint16 Change_New_Window(uint16 index)
 {
-	index = Widget_SetCurrentWidget(index);
+	index = Change_Window(index);
 
-	Widget_PaintCurrentWidget();
+	New_Window();
 
 	return index;
 }
@@ -982,7 +982,7 @@ uint16 Widget_SetAndPaintCurrentWidget(uint16 index)
 /**
  * Draw the exterior of the currently selected widget.
  */
-void Widget_PaintCurrentWidget(void)
+void New_Window(void)
 {
-	GUI_DrawFilledRectangle(g_curWidgetXBase << 3, g_curWidgetYBase, ((g_curWidgetXBase + g_curWidgetWidth) << 3) - 1, g_curWidgetYBase + g_curWidgetHeight - 1, g_curWidgetFGColourNormal);
+	Fill_Rect(WinX << 3, WinY, ((WinX + WinW) << 3) - 1, WinY + WinH - 1, g_curWidgetFGColourNormal);
 }

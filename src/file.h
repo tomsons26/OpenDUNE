@@ -39,13 +39,13 @@ extern bool File_Init(void);
 extern void File_Uninit(void);
 extern bool File_Exists_Ex(enum SearchDirectory dir, const char *filename, uint32 *fileSize);
 extern uint8 File_Open_Ex(enum SearchDirectory dir, const char *filename, uint8 mode);
-extern void File_Close(uint8 index);
-extern uint32 File_Read(uint8 index, void *buffer, uint32 length);
+extern void Close_File(uint8 index);
+extern uint32 Read_File(uint8 index, void *buffer, uint32 length);
 extern uint16 File_Read_LE16(uint8 index);
 extern uint32 File_Read_LE32(uint8 index);
 extern uint32 File_Write(uint8 index, void *buffer, uint32 length);
 extern bool File_Write_LE16(uint8 index, uint16 value);
-extern uint32 File_Seek(uint8 index, uint32 position, uint8 mode);
+extern uint32 Seek_File(uint8 index, uint32 position, uint8 mode);
 extern uint32 File_GetSize(uint8 index);
 extern void File_Delete_Personal(const char *filename);
 extern void File_Create_Personal(const char *filename);
@@ -53,10 +53,11 @@ extern uint32 File_ReadBlockFile_Ex(enum SearchDirectory dir, const char *filena
 extern void *File_ReadWholeFile(const char *filename);
 extern uint16 *File_ReadWholeFileLE16(const char *filename);
 extern uint32 File_ReadFile(const char *filename, void *buf);
-extern uint8 ChunkFile_Open_Ex(enum SearchDirectory dir, const char *filename);
-extern void ChunkFile_Close(uint8 index);
-extern uint32 ChunkFile_Seek(uint8 index, uint32 header);
-extern uint32 ChunkFile_Read(uint8 index, uint32 header, void *buffer, uint32 buflen);
+
+extern uint8 Open_Iff_File_Ex(enum SearchDirectory dir, const char *filename);
+extern void Close_Iff_File(uint8 index);
+extern uint32 Get_Iff_Chunk_Size(uint8 index, uint32 header);
+extern uint32 Read_Iff_Chunk(uint8 index, uint32 header, void *buffer, uint32 buflen);
 
 #define File_Exists(FILENAME)               File_Exists_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, NULL)
 #define File_Exists_GetSize(FILENAME, FILESIZE) File_Exists_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, FILESIZE)
@@ -65,8 +66,8 @@ extern uint32 ChunkFile_Read(uint8 index, uint32 header, void *buffer, uint32 bu
 #define File_Open_Personal(FILENAME,MODE)   File_Open_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, MODE)
 #define File_ReadBlockFile(FILENAME,BUFFER,LENGTH)          File_ReadBlockFile_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME, BUFFER, LENGTH)
 #define File_ReadBlockFile_Personal(FILENAME,BUFFER,LENGTH) File_ReadBlockFile_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME, BUFFER, LENGTH)
-#define ChunkFile_Open(FILENAME)            ChunkFile_Open_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME)
-#define ChunkFile_Open_Personal(FILENAME)   ChunkFile_Open_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME)
+#define Open_Iff_File(FILENAME)            Open_Iff_File_Ex(SEARCHDIR_GLOBAL_DATA_DIR,   FILENAME)
+#define ChunkFile_Open_Personal(FILENAME)   Open_Iff_File_Ex(SEARCHDIR_PERSONAL_DATA_DIR, FILENAME)
 
 extern FILE *fopendatadir(enum SearchDirectory dir, const char *name, const char *mode);
 extern bool fread_le_uint32(uint32 *value, FILE *stream);

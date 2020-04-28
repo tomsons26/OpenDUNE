@@ -785,7 +785,7 @@ void Video_Tick(void)
 			return;
 		}
 
-		Video_Mouse_SetPosition(g_mouseX, g_mouseY);
+		Video_Mouse_SetPosition(MouseX, MouseY);
 		ShowWindow(s_hwnd, SW_SHOWNORMAL);
 
 #ifdef VIDEO_STATS

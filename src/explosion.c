@@ -89,7 +89,7 @@ static void Explosion_Func_TileDamage(Explosion *e, uint16 parameter)
 		if (overlayTileID < 4) overlayTileID += 2;
 	} else {
 		/* Randomly pick 1 of the 2 possible craters */
-		overlayTileID = Tools_Random_256() & 1;
+		overlayTileID = Random() & 1;
 	}
 
 	/* Reduce spice if there is any */
@@ -97,7 +97,7 @@ static void Explosion_Func_TileDamage(Explosion *e, uint16 parameter)
 
 	/* Boom a bloom if there is one */
 	if (t->groundTileID == g_bloomTileID) {
-		Map_Bloom_ExplodeSpice(packed, g_playerHouseID);
+		Map_Bloom_ExplodeSpice(packed, Whom);
 		return;
 	}
 
@@ -164,7 +164,7 @@ static void Explosion_Func_BloomExplosion(Explosion *e, uint16 parameter)
 
 	if (g_map[packed].groundTileID != g_bloomTileID) return;
 
-	Map_Bloom_ExplodeSpice(packed, g_playerHouseID);
+	Map_Bloom_ExplodeSpice(packed, Whom);
 }
 
 /**
@@ -180,7 +180,7 @@ static void Explosion_Func_SetAnimation(Explosion *e, uint16 animationMapID)
 
 	if (Structure_Get_ByPackedTile(packed) != NULL) return;
 
-	animationMapID += Tools_Random_256() & 0x1;
+	animationMapID += Random() & 0x1;
 	animationMapID += g_table_landscapeInfo[Map_GetLandscapeType(packed)].isSand ? 0 : 2;
 
 	assert(animationMapID < 16);
@@ -230,7 +230,7 @@ static void Explosion_Func_SetTimeout(Explosion *e, uint16 value)
  */
 static void Explosion_Func_SetRandomTimeout(Explosion *e, uint16 value)
 {
-	e->timeOut = g_timerGUI + Tools_RandomLCG_Range(0, value);
+	e->timeOut = g_timerGUI + IRandom(0, value);
 }
 
 /**

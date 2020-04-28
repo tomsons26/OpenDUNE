@@ -126,7 +126,7 @@ static void Sprites_Load(const char *filename)
 						decoded_data += 16;
 						encoded_data += 16;
 					}
-					Format80_Decode(decoded_data, encoded_data, READ_LE_UINT16(src+8));
+					LCW_Uncomp(decoded_data, encoded_data, READ_LE_UINT16(src+8));
 				}
 			} else {
 				size = READ_LE_UINT16(src + 6);	/* "packed" size */
@@ -196,7 +196,7 @@ static uint32 Sprites_Decode(uint8 *source, uint8 *dest)
 			source += 6;
 			source += READ_LE_UINT16(source);
 			source += 2;
-			size = Format80_Decode(dest, source, 0xFFFF);
+			size = LCW_Uncomp(dest, source, 0xFFFF);
 			break;
 
 		default: break;
@@ -221,35 +221,35 @@ static void Tiles_LoadICNFile(const char *filename)
 	uint32 paletteLength;
 	int8   info[4];
 
-	fileIndex = ChunkFile_Open(filename);
+	fileIndex = Open_Iff_File(filename);
 
 	/* Get the length of the chunks */
-	tilesDataLength = ChunkFile_Seek(fileIndex, HTOBE32(CC_SSET));
-	tableLength     = ChunkFile_Seek(fileIndex, HTOBE32(CC_RTBL));
-	paletteLength   = ChunkFile_Seek(fileIndex, HTOBE32(CC_RPAL));
+	tilesDataLength = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_SSET));
+	tableLength     = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_RTBL));
+	paletteLength   = Get_Iff_Chunk_Size(fileIndex, HTOBE32(CC_RPAL));
 
 	/* Read the header information */
-	ChunkFile_Read(fileIndex, HTOBE32(CC_SINF), info, 4);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SINF), info, 4);
 	GFX_Init_TilesInfo(info[0], info[1]);
 
 	/* Get the SpritePixels chunk */
 	free(g_tilesPixels);
 	g_tilesPixels = calloc(1, tilesDataLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_SSET), g_tilesPixels, tilesDataLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_SSET), g_tilesPixels, tilesDataLength);
 	tilesDataLength = Sprites_Decode(g_tilesPixels, g_tilesPixels);
 	/*g_tilesPixels = realloc(g_tilesPixels, tilesDataLength);*/
 
 	/* Get the Table chunk */
 	free(g_iconRTBL);
 	g_iconRTBL = calloc(1, tableLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_RTBL), g_iconRTBL, tableLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_RTBL), g_iconRTBL, tableLength);
 
 	/* Get the Palette chunk */
 	free(g_iconRPAL);
 	g_iconRPAL = calloc(1, paletteLength);
-	ChunkFile_Read(fileIndex, HTOBE32(CC_RPAL), g_iconRPAL, paletteLength);
+	Read_Iff_Chunk(fileIndex, HTOBE32(CC_RPAL), g_iconRPAL, paletteLength);
 
-	ChunkFile_Close(fileIndex);
+	Close_Iff_File(fileIndex);
 }
 
 /**
@@ -272,7 +272,7 @@ void Sprites_LoadTiles(void)
 	g_landscapeTileID = g_iconMap[g_iconMap[ICM_ICONGROUP_LANDSCAPE]];
 	g_wallTileID      = g_iconMap[g_iconMap[ICM_ICONGROUP_WALLS]];
 
-	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, GFX_Screen_Get_ByIndex(SCREEN_2));
+	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, Get_Buff(SCREEN_2));
 }
 
 /**
@@ -299,35 +299,35 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	uint8 *buffer2;
 	uint16 paletteSize;
 
-	buffer = GFX_Screen_Get_ByIndex(screenID);
+	buffer = Get_Buff(screenID);
 
 	index = File_Open(filename, FILE_MODE_READ);
 
 	size = File_Read_LE16(index);
 
-	File_Read(index, buffer, 8);
+	Read_File(index, buffer, 8);
 
 	size -= 8;
 
 	paletteSize = READ_LE_UINT16(buffer + 6);
 
 	if (palette != NULL && paletteSize != 0) {
-		File_Read(index, palette, paletteSize);
+		Read_File(index, palette, paletteSize);
 	} else {
-		File_Seek(index, paletteSize, 1);
+		Seek_File(index, paletteSize, 1);
 	}
 
 	buffer[6] = 0;	/* dont read palette next time */
 	buffer[7] = 0;
 	size -= paletteSize;
 
-	buffer2 = GFX_Screen_Get_ByIndex(screenID);
+	buffer2 = Get_Buff(screenID);
 	buffer2 += GFX_Screen_GetSize_ByIndex(screenID) - size - 8;
 
 	memmove(buffer2, buffer, 8);
-	File_Read(index, buffer2 + 8, size);
+	Read_File(index, buffer2 + 8, size);
 
-	File_Close(index);
+	Close_File(index);
 
 	return Sprites_Decode(buffer2, buffer);
 }
@@ -341,7 +341,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
  * @param palette Where to store the palette, if any.
  * @return The size of the loaded image.
  */
-uint16 Sprites_LoadImage(const char *filename, Screen screenID, uint8 *palette)
+uint16 Load_Picture(const char *filename, Screen screenID, uint8 *palette)
 {
 #if 0
 	uint8 index;
@@ -350,8 +350,8 @@ uint16 Sprites_LoadImage(const char *filename, Screen screenID, uint8 *palette)
 	index = File_Open(filename, FILE_MODE_READ);
 	if (index == FILE_INVALID) return 0;
 
-	File_Read(index, &header, 4);
-	File_Close(index);
+	Read_File(index, &header, 4);
+	Close_File(index);
 #endif
 	return Sprites_LoadCPSFile(filename, screenID, palette) / 8000;
 }
@@ -360,13 +360,13 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, const uint8 *sprit
 {
 	uint16 size;
 
-	if (sprite == NULL || g_mouseDisabled != 0) return;
+	if (sprite == NULL || MDisabled != 0) return;
 
-	while (g_mouseLock != 0) sleepIdle();
+	while (MouseUpdate != 0) sleepIdle();
 
-	g_mouseLock++;
+	MouseUpdate++;
 
-	GUI_Mouse_Hide();
+	Low_Hide_Mouse();
 
 	size = GFX_GetSize(READ_LE_UINT16(sprite + 3) + 16, sprite[5]);
 
@@ -410,19 +410,19 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, const uint8 *sprit
 			sprite += 16;
 		}
 
-		Format80_Decode(dst, sprite, size);
+		LCW_Uncomp(dst, sprite, size);
 	}
 
-	g_mouseSpriteHotspotX = hotSpotX;
-	g_mouseSpriteHotspotY = hotSpotY;
+	MouseXHot = hotSpotX;
+	MouseYHot = hotSpotY;
 
 	sprite = g_mouseSprite;
-	g_mouseHeight = sprite[5];
-	g_mouseWidth = (READ_LE_UINT16(sprite + 3) >> 3) + 2;
+	MouseHeight = sprite[5];
+	MouseWidth = (READ_LE_UINT16(sprite + 3) >> 3) + 2;
 
-	GUI_Mouse_Show();
+	Low_Show_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 static void InitRegions(void)
@@ -444,7 +444,7 @@ void Sprites_CPS_LoadRegionClick(void)
 	uint8 i;
 	char filename[16];
 
-	buf = GFX_Screen_Get_ByIndex(SCREEN_2);
+	buf = Get_Buff(SCREEN_2);
 
 	g_fileRgnclkCPS = buf;
 	Sprites_LoadCPSFile("RGNCLK.CPS", SCREEN_2, NULL);
@@ -452,7 +452,7 @@ void Sprites_CPS_LoadRegionClick(void)
 	buf += 120 * 304;
 
 	g_fileRegionINI = buf;
-	snprintf(filename, sizeof(filename), "REGION%c.INI", g_table_houseInfo[g_playerHouseID].name[0]);
+	snprintf(filename, sizeof(filename), "REGION%c.INI", g_table_houseInfo[Whom].name[0]);
 	buf += File_ReadFile(filename, buf);
 
 	g_regions = (uint16 *)buf;
@@ -476,13 +476,13 @@ bool Tile_IsUnveiled(uint16 tileID)
 void Sprites_Init(void)
 {
 	Sprites_Load("MOUSE.SHP");                       /*   0 -   6 */
-	Sprites_Load(String_GenerateFilename("BTTN"));   /*   7 -  11 */
+	Sprites_Load(Language_Name("BTTN"));   /*   7 -  11 */
 	Sprites_Load("SHAPES.SHP");                      /*  12 - 110 */
 	Sprites_Load("UNITS2.SHP");                      /* 111 - 150 */
 	Sprites_Load("UNITS1.SHP");                      /* 151 - 237 */
 	Sprites_Load("UNITS.SHP");                       /* 238 - 354 */
-	Sprites_Load(String_GenerateFilename("CHOAM"));  /* 355 - 372 */
-	Sprites_Load(String_GenerateFilename("MENTAT")); /* 373 - 386 */
+	Sprites_Load(Language_Name("CHOAM"));  /* 355 - 372 */
+	Sprites_Load(Language_Name("MENTAT")); /* 373 - 386 */
 	Sprites_Load("MENSHPH.SHP");                     /* 387 - 401 */
 	Sprites_Load("MENSHPA.SHP");                     /* 402 - 416 */
 	Sprites_Load("MENSHPO.SHP");                     /* 417 - 431 */

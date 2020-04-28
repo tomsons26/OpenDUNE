@@ -52,7 +52,7 @@ uint16 Script_General_DelayRandom(ScriptEngine *script)
 {
 	uint16 delay;
 
-	delay = Tools_Random_256() * STACK_PEEK(1) / 256;
+	delay = Random() * STACK_PEEK(1) / 256;
 	delay /= 5;
 
 	script->delay = delay;
@@ -129,7 +129,7 @@ uint16 Script_General_DisplayText(ScriptEngine *script)
  */
 uint16 Script_General_RandomRange(ScriptEngine *script)
 {
-	return Tools_RandomLCG_Range(STACK_PEEK(1), STACK_PEEK(2));
+	return IRandom(STACK_PEEK(1), STACK_PEEK(2));
 }
 
 /**
@@ -181,7 +181,7 @@ uint16 Script_General_GetDistanceToObject(ScriptEngine *script)
 uint16 Script_General_Unknown0288(ScriptEngine *script)
 {
 	uint16 index;
-	Structure *s;
+	Building *s;
 
 	index = STACK_PEEK(1);
 	s = Tools_Index_GetStructure(index);
@@ -353,7 +353,7 @@ uint16 Script_General_IsFriendly(ScriptEngine *script)
 
 	o = Tools_Index_GetObject(index);
 
-	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.used) return 0;
+	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.IsActive) return 0;
 
 	res = Script_General_IsEnemy(script);
 
@@ -401,7 +401,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 {
 	uint8 houseID;
 	uint16 index;
-	Structure *s;
+	Building *s;
 	PoolFindStruct find;
 
 	index = STACK_PEEK(1);
@@ -414,7 +414,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 	if (Tools_Index_GetType(index) == IT_STRUCTURE) {
 		s = Tools_Index_GetStructure(index);
 		if (s->o.houseID != houseID) return 0;
-		if (s->state != STRUCTURE_STATE_IDLE) return 0;
+		if (s->state != BSTATE_IDLE) return 0;
 		return 1;
 	}
 
@@ -425,7 +425,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 	while (true) {
 		s = Structure_Find(&find);
 		if (s == NULL) return 0;
-		if (s->state != STRUCTURE_STATE_IDLE) continue;
+		if (s->state != BSTATE_IDLE) continue;
 		return Tools_Index_Encode(s->o.index, IT_STRUCTURE);
 	}
 }

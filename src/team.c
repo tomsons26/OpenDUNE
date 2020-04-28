@@ -24,7 +24,7 @@ void GameLoop_Team(void)
 	PoolFindStruct find;
 
 	if (s_tickTeamGameLoop > g_timerGame) return;
-	s_tickTeamGameLoop = g_timerGame + (Tools_Random_256() & 7) + 5;
+	s_tickTeamGameLoop = g_timerGame + (Random() & 7) + 5;
 
 	find.houseID = HOUSE_INVALID;
 	find.index   = 0xFFFF;
@@ -79,7 +79,7 @@ Team *Team_Create(uint8 houseID, uint8 teamActionType, uint8 movementType, uint1
 	t = Team_Allocate(0xFFFF);
 
 	if (t == NULL) return NULL;
-	t->flags.used  = true;
+	t->flags.IsActive  = true;
 	t->houseID     = houseID;
 	t->action      = teamActionType;
 	t->actionStart = teamActionType;

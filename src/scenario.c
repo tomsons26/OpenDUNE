@@ -73,7 +73,7 @@ static void Scenario_Load_House(uint8 houseID)
 
 	h->flags.human = true;
 
-	g_playerHouseID       = houseID;
+	Whom       = houseID;
 	g_playerHouse         = h;
 	g_playerCreditsNoSilo = h->credits;
 }
@@ -177,7 +177,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	if (u == NULL) return;
 	u->o.flags.s.byScenario = true;
 
-	u->o.hitpoints   = hitpoints * g_table_unitInfo[unitType].o.hitpoints / 256;
+	u->o.hitpoints   = hitpoints * g_table_unitInfo[unitType].ot.hitpoints / 256;
 	u->o.position    = position;
 	u->orientation[0].current = orientation;
 	u->actionID     = actionType;
@@ -203,7 +203,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 
 static void Scenario_Load_Structure(const char *key, char *settings)
 {
-	uint8 index, houseType, structureType;
+	uint8 index, houseType, StructType;
 	uint16 hitpoints, position;
 	char *split;
 
@@ -222,10 +222,10 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 
 		/* Second value is the Structure type */
 		settings = split + 1;
-		structureType = Structure_StringToType(settings);
-		if (structureType == STRUCTURE_INVALID) return;
+		StructType = Structure_StringToType(settings);
+		if (StructType == STRUCTURE_INVALID) return;
 
-		Structure_Create(STRUCTURE_INDEX_INVALID, structureType, houseType, position);
+		Structure_Create(STRUCTURE_INDEX_INVALID, StructType, houseType, position);
 		return;
 	}
 
@@ -248,8 +248,8 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	*split = '\0';
 
 	/* Second value is the Structure type */
-	structureType = Structure_StringToType(settings);
-	if (structureType == STRUCTURE_INVALID) return;
+	StructType = Structure_StringToType(settings);
+	if (StructType == STRUCTURE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
 	settings = split + 1;
@@ -267,7 +267,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	 * ID001=Ordos,Const Yard,8421,936
 	 * ID000=Ordos,Light Fctry,14058,1064     */
 
-	/* Fourth value is the position of the structure */
+	/* Fourth value is the position of the Building */
 	settings = split + 1;
 	position = atoi(settings);
 
@@ -276,14 +276,14 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	if (Structure_Get_ByPackedTile(position) != NULL) return;
 
 	{
-		Structure *s;
+		Building *s;
 
-		s = Structure_Create(index, structureType, houseType, position);
+		s = Structure_Create(index, StructType, houseType, position);
 		if (s == NULL) return;
 
-		s->o.hitpoints = hitpoints * g_table_structureInfo[s->o.type].o.hitpoints / 256;
+		s->o.hitpoints = hitpoints * g_table_BuildingType[s->o.type].ot.hitpoints / 256;
 		s->o.flags.s.degrades = false;
-		s->state = STRUCTURE_STATE_IDLE;
+		s->state = BSTATE_IDLE;
 	}
 }
 
@@ -330,7 +330,7 @@ static void Scenario_Load_Map_Field(uint16 packed, Tile *t)
 	Map_Bloom_ExplodeSpice(packed, HOUSE_INVALID);
 
 	/* Show where a field started in the preview mode by making it an odd looking sprite */
-	if (g_debugScenario) {
+	if (Debug_Map) {
 		t->groundTileID = 0x01FF;
 	}
 }
@@ -518,14 +518,14 @@ static void Scenario_Load_Chunk(const char *category, void (*ptr)(const char *ke
 	}
 }
 
-bool Scenario_Load(uint16 scenarioID, uint8 houseID)
+bool Read_Scenario_INI(uint16 scenarioID, uint8 houseID)
 {
 	char filename[14];
 	int i;
 
 	if (houseID >= HOUSE_MAX) return false;
 
-	g_scenarioID = scenarioID;
+	ScenarioIdx = scenarioID;
 
 	/* Load scenario file */
 	sprintf(filename, "SCEN%c%03hu.INI", g_table_houseInfo[houseID].name[0], scenarioID);
