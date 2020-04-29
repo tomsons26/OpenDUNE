@@ -39,11 +39,11 @@ extern uint16 Input_Flags_ClearBits(uint16 bits);
 extern uint16 Input_Flags_SetBits(uint16 bits);
 extern void Clear_KeyBuffer(void);
 extern void Input_HandleInput(uint16 input);
-extern uint16 Input_IsInputAvailable(void);
+extern uint16 Check_Key_Num(void);
 extern uint16 Input_Wait(void);
 extern uint16 Input_Test(uint16 value);
-extern uint16 Input_WaitForValidInput(void);
-extern uint16 Input_Keyboard_HandleKeys(uint16 value);
-extern uint16 Input_Keyboard_NextKey(void);
+extern uint16 Get_Key_Bits(void);
+extern uint16 Convert_Num_To_ASCII(uint16 value);
+extern uint16 Check_Key(void);
 
 #endif /* INTPUT_H */

@@ -32,9 +32,9 @@ static void GUI_Security_DrawText(char *text)
 
 	oldScreenID = Set_LogicPage(SCREEN_2);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 
 	Byte_Blit(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_2);
 
@@ -42,9 +42,9 @@ static void GUI_Security_DrawText(char *text)
 
 	Fancy_Text_Print(text, 4, 1, g_curWidgetFGColourBlink, 0, 0x32);
 
-	GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+	Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 
 	Set_LogicPage(oldScreenID);
 }
@@ -129,7 +129,7 @@ bool GUI_Security_Show(void)
 
 		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
-		GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+		GUI_Mouse_Hide_InWidget(Window);
 		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 
@@ -187,7 +187,7 @@ bool GUI_Security_Show(void)
 
 		/* ENHANCEMENT -- In Dune2, the + 120 is on the other side, causing the 'You are wrong! / Well done.' screen to appear very short (close to invisible, so to say) */
 		while (g_timerGUI + (g_dune2_enhanced ? 0 : 120) < tickWaitTill + (g_dune2_enhanced ? 120 : 0)) {
-			if (Input_Keyboard_NextKey() != 0) break;
+			if (Check_Key() != 0) break;
 
 			if (g_timerGUI < tickWaitTill) {
 				GUI_Mentat_Animation(1);

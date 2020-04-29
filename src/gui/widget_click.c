@@ -183,10 +183,10 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 		scrollbar->pressed = 0;
 
 		if (w->width > w->height) {
-			positionCurrent = g_mouseX;
+			positionCurrent = MouseX;
 			positionBegin = positionX + scrollbar->position + 1;
 		} else {
-			positionCurrent = g_mouseY;
+			positionCurrent = MouseY;
 			positionBegin = positionY + scrollbar->position + 1;
 		}
 
@@ -205,10 +205,10 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 
 		if (w->width > w->height) {
 			size = w->width - 2 - scrollbar->size;
-			position = g_mouseX - scrollbar->pressedPosition - positionX - 1;
+			position = MouseX - scrollbar->pressedPosition - positionX - 1;
 		} else {
 			size = w->height - 2 - scrollbar->size;
-			position = g_mouseY - scrollbar->pressedPosition - positionY - 1;
+			position = MouseY - scrollbar->pressedPosition - positionY - 1;
 		}
 
 		if (position < 0) {
@@ -432,13 +432,13 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 	height = w->height;
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(offsetX, offsetY, offsetX + width, offsetY + height);
+		Conditional_Hide_Mouse(offsetX, offsetY, offsetX + width, offsetY + height);
 	}
 
 	Fill_Rect(offsetX, offsetY, offsetX + width, offsetY + height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -454,7 +454,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 	Change_Window(desc->index);
 
-	GUI_Widget_DrawBorder(g_curWidgetIndex, 2, true);
+	GUI_Widget_DrawBorder(Window, 2, true);
 
 	if (GUI_String_Get_ByIndex(desc->stringID) != NULL) {
 		Fancy_Text_Print(GUI_String_Get_ByIndex(desc->stringID), (g_curWidgetXBase << 3) + (g_curWidgetWidth << 2), g_curWidgetYBase + 6 + ((desc == &g_yesNoWindowDesc) ? 2 : 0), 238, 0, 0x122);

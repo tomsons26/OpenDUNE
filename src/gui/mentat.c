@@ -577,9 +577,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[2][abs(otherSprite)];
 
-			GUI_Mouse_Hide_InRegion(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_otherLeft, s_otherTop, s_otherLeft + Sprite_GetWidth(sprite), s_otherTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_otherLeft, s_otherTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Show_Mouse();
 		}
 
 		switch (g_playerHouseID) {
@@ -608,9 +608,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 			movingMouthSprite = Tools_RandomLCG_Range(0, 4);
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			GUI_Mouse_Hide_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Show_Mouse();
 
 			switch (movingMouthSprite) {
 				case 0:
@@ -656,9 +656,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 			sprite = s_mentatSprites[1][movingMouthSprite];
 
-			GUI_Mouse_Hide_InRegion(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
+			Conditional_Hide_Mouse(s_mouthLeft, s_mouthTop, s_mouthLeft + Sprite_GetWidth(sprite), s_mouthTop + Sprite_GetHeight(sprite));
 			Draw_Shape(SCREEN_0, sprite, s_mouthLeft, s_mouthTop, 0, 0);
-			GUI_Mouse_Show_InRegion();
+			Conditional_Show_Mouse();
 		}
 	}
 
@@ -678,9 +678,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 				sprite = s_mentatSprites[0][movingEyesSprite];
 
-				GUI_Mouse_Hide_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+				Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
 				Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-				GUI_Mouse_Show_InRegion();
+				Conditional_Show_Mouse();
 			}
 
 			return;
@@ -786,9 +786,9 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 
 		sprite = s_mentatSprites[0][movingEyesSprite];
 
-		GUI_Mouse_Hide_InRegion(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
+		Conditional_Hide_Mouse(s_eyesLeft, s_eyesTop, s_eyesLeft + Sprite_GetWidth(sprite), s_eyesTop + Sprite_GetHeight(sprite));
 		Draw_Shape(SCREEN_0, sprite, s_eyesLeft, s_eyesTop, 0, 0);
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -1094,7 +1094,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 	step = 0;
 	if (wsa == NULL) {
-		Widget_PaintCurrentWidget();
+		New_Window();
 		step = 1;
 	}
 
@@ -1166,9 +1166,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				break;
 
 			case 2:
-				GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+				Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 				Byte_Blit(0, 0, 0, 160, SCREEN_WIDTH / 8, 40, SCREEN_0, SCREEN_2);
-				GUI_Mouse_Show_InRegion();
+				Conditional_Show_Mouse();
 
 				step = 3;
 				key = 1;
@@ -1178,9 +1178,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 				if (mentatSpeakingMode == 2 && textTick < g_timerGUI) key = 1;
 
 				if ((key != 0 && textDone) || result != 0) {
-					GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 					Byte_Blit(0, 160, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					GUI_Mouse_Show_InRegion();
+					Conditional_Show_Mouse();
 
 					step = 4;
 					mentatSpeakingMode = 0;
@@ -1206,9 +1206,9 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 						Set_LogicPage(SCREEN_0);
 					}
 
-					GUI_Mouse_Hide_InRegion(0, 0, SCREEN_WIDTH, 40);
+					Conditional_Hide_Mouse(0, 0, SCREEN_WIDTH, 40);
 					Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, 40, SCREEN_2, SCREEN_0);
-					GUI_Mouse_Show_InRegion();
+					Conditional_Show_Mouse();
 					break;
 				}
 
@@ -1257,7 +1257,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		GUI_Mentat_DrawInfo(pictureDetails, (g_curWidgetXBase << 3) + 5, g_curWidgetYBase + 3, 8, 0, lines, 0x31);
 
 		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-		GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+		GUI_Mouse_Hide_InWidget(Window);
 		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 		dirty = false;
@@ -1267,7 +1267,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 	Set_LogicPage(SCREEN_2);
 	Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
-	GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+	GUI_Mouse_Hide_InWidget(Window);
 	Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 	GUI_Mouse_Show_InWidget();
 	Change_Window(oldWidgetID);

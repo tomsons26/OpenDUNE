@@ -434,14 +434,14 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	fgColourSelected = props->fgColourSelected;
 
 	key = 0;
-	if (Input_IsInputAvailable() != 0) {
+	if (Check_Key_Num() != 0) {
 		key = Input_Wait() & 0x8FF;
 	}
 
-	if (g_mouseDisabled == 0) {
-		uint16 y = g_mouseY;
+	if (MDisabled == 0) {
+		uint16 y = MouseY;
 
-		if (GameLoop_IsInRange(g_mouseX, y, minX, minY, maxX, maxY)) {
+		if (GameLoop_IsInRange(MouseX, y, minX, minY, maxX, maxY)) {
 			current = (y - minY) / lineHeight;
 		}
 	}
@@ -467,8 +467,8 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 
 		case 0x41: /* MOUSE LEFT BUTTON */
 		case 0x42: /* MOUSE RIGHT BUTTON */
-			if (GameLoop_IsInRange(g_mouseClickX, g_mouseClickY, minX, minY, maxX, maxY)) {
-				current = (g_mouseClickY - minY) / lineHeight;
+			if (GameLoop_IsInRange(MouseQX, MouseQY, minX, minY, maxX, maxY)) {
+				current = (MouseQY - minY) / lineHeight;
 				result = current;
 			}
 			break;
@@ -487,7 +487,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 				char c2;
 
 				c1 = toupper(*strings[i]);
-				c2 = toupper(Input_Keyboard_HandleKeys(key & 0xFF));
+				c2 = toupper(Convert_Num_To_ASCII(key & 0xFF));
 
 				if (c1 == c2) {
 					result = i;
@@ -1166,7 +1166,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	Timer_Add(Timer_Tick, 1000000 / 60, false);
 	Timer_Add(Video_Tick, 1000000 / frame_rate, true);
 
-	g_mouseDisabled = -1;
+	MDisabled = -1;
 
 	GFX_Init();
 	GFX_ClearScreen(SCREEN_ACTIVE);
@@ -1313,7 +1313,7 @@ int main(int argc, char **argv)
 
 	if (!OpenDune_Init(scaling_factor, scale_filter, frame_rate)) exit(1);
 
-	g_mouseDisabled = 0;
+	MDisabled = 0;
 
 	GameLoop_Main();
 

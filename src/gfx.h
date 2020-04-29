@@ -31,7 +31,7 @@ extern void *Get_Buff(Screen screenID);
 
 #define GFX_Screen_GetActive() Get_Buff(SCREEN_ACTIVE)
 
-extern void GFX_DrawTile(uint16 spriteID, uint16 x, uint16 y, uint8 houseID);
+extern void Draw_Stamp(uint16 spriteID, uint16 x, uint16 y, uint8 houseID);
 extern void GFX_Init_TilesInfo(uint16 widthSize, uint16 heightSize);
 extern void GFX_PutPixel(uint16 x, uint16 y, uint8 colour);
 extern void GFX_Screen_Copy2(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst, bool skipNull);

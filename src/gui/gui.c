@@ -762,7 +762,7 @@ static void GUI_Widget_SetProperties(uint16 index, uint16 xpos, uint16 ypos, uin
 	WindowList[index].width  = width;
 	WindowList[index].height = height;
 
-	if (g_curWidgetIndex == index) Change_Window(index);
+	if (Window == index) Change_Window(index);
 }
 
 /**
@@ -830,7 +830,7 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 	do {
 		GUI_PaletteAnimate();
 
-		ret = Input_WaitForValidInput();
+		ret = Get_Key_Bits();
 		sleepIdle();
 	} while (ret == 0 || (ret & 0x800) != 0);
 
@@ -1743,7 +1743,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	for (;; sleepIdle()) {
 		GUI_HallOfFame_Tick();
-		if (Input_Keyboard_NextKey() != 0) break;
+		if (Check_Key() != 0) break;
 	}
 
 	Clear_KeyBuffer();
@@ -2308,8 +2308,8 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 
 		Change_Window(g_table_selectionType[selectionType].defaultWidget);
 
-		if (g_curWidgetIndex != 0) {
-			GUI_Widget_DrawBorder(g_curWidgetIndex, 0, false);
+		if (Window != 0) {
+			GUI_Widget_DrawBorder(Window, 0, false);
 		}
 
 		if (selectionType != SELECTIONTYPE_MENTAT) {
@@ -3066,19 +3066,19 @@ static int16 GUI_StrategicMap_ClickedRegion(void)
 
 	GUI_StrategicMap_AnimateArrows();
 
-	if (Input_Keyboard_NextKey() == 0) return 0;
+	if (Check_Key() == 0) return 0;
 
-	key = Input_WaitForValidInput();
+	key = Get_Key_Bits();
 	if (key != 0xC6 && key != 0xC7) return 0;
 
-	return g_fileRgnclkCPS[(g_mouseClickY - 24) * 304 + g_mouseClickX - 8];
+	return g_fileRgnclkCPS[(MouseQY - 24) * 304 + MouseQX - 8];
 }
 
 static bool GUI_StrategicMap_FastForwardToggleWithESC(void)
 {
-	if (Input_Keyboard_NextKey() == 0) return s_strategicMapFastForward;
+	if (Check_Key() == 0) return s_strategicMapFastForward;
 
-	if (Input_WaitForValidInput() != 0x1B) return s_strategicMapFastForward;
+	if (Get_Key_Bits() != 0x1B) return s_strategicMapFastForward;
 
 	s_strategicMapFastForward = !s_strategicMapFastForward;
 
@@ -3716,7 +3716,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	int x, y;
 
 	if (screenDst == SCREEN_0) {
-		GUI_Mouse_Hide_InRegion(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
+		Conditional_Hide_Mouse(xDst << 3, yDst, (xDst + width) << 3, yDst + height);
 	}
 
 	height /= 2;
@@ -3765,7 +3765,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 	}
 
 	if (screenDst == SCREEN_0) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -3830,7 +3830,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	assert(height <= SCREEN_HEIGHT);
 
 	if (screenDst == 0) {
-		GUI_Mouse_Hide_InRegion(x, y, x + width, y + height);
+		Conditional_Hide_Mouse(x, y, x + width, y + height);
 	}
 
 	for (i = 0; i < width; i++)  columns[i] = i;
@@ -3884,7 +3884,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 	}
 
 	if (screenDst == 0) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 
 	Set_LogicPage(oldScreenID);
@@ -3894,15 +3894,15 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
  * Show the mouse on the screen. Copy the screen behind the mouse in a safe
  *  buffer.
  */
-void GUI_Mouse_Show(void)
+void Low_Show_Mouse(void)
 {
 	int left, top;
 
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 	if (g_mouseHiddenDepth == 0 || --g_mouseHiddenDepth != 0) return;
 
-	left = g_mouseX - g_mouseSpriteHotspotX;
-	top  = g_mouseY - g_mouseSpriteHotspotY;
+	left = MouseX - g_mouseSpriteHotspotX;
+	top  = MouseY - g_mouseSpriteHotspotY;
 
 	s_mouseSpriteLeft = (left < 0) ? 0 : (left >> 3);
 	s_mouseSpriteTop = (top < 0) ? 0 : top;
@@ -3924,9 +3924,9 @@ void GUI_Mouse_Show(void)
  * Hide the mouse from the screen. Do this by copying the mouse buffer back to
  *  the screen.
  */
-void GUI_Mouse_Hide(void)
+void Low_Hide_Mouse(void)
 {
-	if (g_mouseDisabled == 1) return;
+	if (MDisabled == 1) return;
 
 	if (g_mouseHiddenDepth == 0 && s_mouseSpriteWidth != 0) {
 		if (g_mouseSpriteBuffer != NULL) {
@@ -3945,13 +3945,13 @@ void GUI_Mouse_Hide(void)
  */
 void Hide_Mouse(void)
 {
-	while (g_mouseLock != 0) sleepIdle();
-	if (g_mouseDisabled == 1) return;
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	if (MDisabled == 1) return;
+	MouseUpdate++;
 
-	GUI_Mouse_Hide();
+	Low_Hide_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
@@ -3960,39 +3960,39 @@ void Hide_Mouse(void)
  */
 void Show_Mouse(void)
 {
-	while (g_mouseLock != 0) sleepIdle();
-	if (g_mouseDisabled == 1) return;
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	if (MDisabled == 1) return;
+	MouseUpdate++;
 
-	GUI_Mouse_Show();
+	Low_Show_Mouse();
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
  * Show the mouse if needed. Should be used in combination with
  *  #GUI_Mouse_Hide_InRegion().
  */
-void GUI_Mouse_Show_InRegion(void)
+void Conditional_Show_Mouse(void)
 {
 	uint8 counter;
 
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
-	counter = g_regionFlags & 0xFF;
+	counter = MCState & 0xFF;
 	if (counter == 0 || --counter != 0) {
-		g_regionFlags = (g_regionFlags & 0xFF00) | (counter & 0xFF);
-		g_mouseLock--;
+		MCState = (MCState & 0xFF00) | (counter & 0xFF);
+		MouseUpdate--;
 		return;
 	}
 
-	if ((g_regionFlags & 0x4000) != 0) {
-		GUI_Mouse_Show();
+	if ((MCState & 0x4000) != 0) {
+		Low_Show_Mouse();
 	}
 
-	g_regionFlags = 0;
-	g_mouseLock--;
+	MCState = 0;
+	MouseUpdate--;
 }
 
 /**
@@ -4000,7 +4000,7 @@ void GUI_Mouse_Show_InRegion(void)
  *  #GUI_Mouse_Show_InRegion(), which only calls #GUI_Mouse_Show() when
  *  mouse was really hidden.
  */
-void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom)
+void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom)
 {
 	int minx, miny;
 	int maxx, maxy;
@@ -4017,10 +4017,10 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
 	maxy = bottom + g_mouseSpriteHotspotY;
 	if (maxy > SCREEN_HEIGHT - 1) maxy = SCREEN_HEIGHT - 1;
 
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
-	if (g_regionFlags == 0) {
+	if (MCState == 0) {
 		g_regionMinX = minx;
 		g_regionMinY = miny;
 		g_regionMaxX = maxx;
@@ -4032,20 +4032,20 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
 	if (maxx < g_regionMaxX) g_regionMaxX = maxx;
 	if (maxy < g_regionMaxY) g_regionMaxY = maxy;
 
-	if ((g_regionFlags & 0x4000) == 0 &&
-	     g_mouseX >= g_regionMinX &&
-	     g_mouseX <= g_regionMaxX &&
-	     g_mouseY >= g_regionMinY &&
-	     g_mouseY <= g_regionMaxY) {
-		GUI_Mouse_Hide();
+	if ((MCState & 0x4000) == 0 &&
+	     MouseX >= g_regionMinX &&
+	     MouseX <= g_regionMaxX &&
+	     MouseY >= g_regionMinY &&
+	     MouseY <= g_regionMaxY) {
+		Low_Hide_Mouse();
 
-		g_regionFlags |= 0x4000;
+		MCState |= 0x4000;
 	}
 
-	g_regionFlags |= 0x8000;
-	g_regionFlags = (g_regionFlags & 0xFF00) | (((g_regionFlags & 0x00FF) + 1) & 0xFF);
+	MCState |= 0x8000;
+	MCState = (MCState & 0xFF00) | (((MCState & 0x00FF) + 1) & 0xFF);
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**
@@ -4054,7 +4054,7 @@ void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 botto
  */
 void GUI_Mouse_Show_InWidget(void)
 {
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 }
 
 /**
@@ -4073,7 +4073,7 @@ void GUI_Mouse_Hide_InWidget(uint16 widgetIndex)
 	width  = WindowList[widgetIndex].width << 3;
 	height = WindowList[widgetIndex].height;
 
-	GUI_Mouse_Hide_InRegion(left, top, left + width - 1, top + height - 1);
+	Conditional_Hide_Mouse(left, top, left + width - 1, top + height - 1);
 }
 
 /**
@@ -4139,25 +4139,25 @@ void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, 
  */
 void GUI_Mouse_SetPosition(uint16 x, uint16 y)
 {
-	while (g_mouseLock != 0) sleepIdle();
-	g_mouseLock++;
+	while (MouseUpdate != 0) sleepIdle();
+	MouseUpdate++;
 
-	if (x < g_mouseRegionLeft)   x = g_mouseRegionLeft;
-	if (x > g_mouseRegionRight)  x = g_mouseRegionRight;
-	if (y < g_mouseRegionTop)    y = g_mouseRegionTop;
-	if (y > g_mouseRegionBottom) y = g_mouseRegionBottom;
+	if (x < MouseLeft)   x = MouseLeft;
+	if (x > MouseRight)  x = MouseRight;
+	if (y < MouseTop)    y = MouseTop;
+	if (y > MouseBottom) y = MouseBottom;
 
-	g_mouseX = x;
-	g_mouseY = y;
+	MouseX = x;
+	MouseY = y;
 
 	Video_Mouse_SetPosition(x, y);
 
-	if (g_mouseX != g_mousePrevX || g_mouseY != g_mousePrevY) {
-		GUI_Mouse_Hide();
-		GUI_Mouse_Show();
+	if (MouseX != MouseXOld || MouseY != MouseYOld) {
+		Low_Hide_Mouse();
+		Low_Show_Mouse();
 	}
 
-	g_mouseLock--;
+	MouseUpdate--;
 }
 
 /**

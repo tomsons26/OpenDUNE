@@ -207,7 +207,7 @@ void GFX_Uninit(void)
  * @param y The y-coordinate to draw the sprite.
  * @param houseID The house the sprite belongs (for recolouring).
  */
-void GFX_DrawTile(uint16 tileID, uint16 x, uint16 y, uint8 houseID)
+void Draw_Stamp(uint16 tileID, uint16 x, uint16 y, uint8 houseID)
 {
 	int i, j;
 	uint8 *icon_palette;

@@ -431,7 +431,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				frame--;
 			}
 
-			if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) {
+			if (Check_Key() != 0 && g_canSkipIntro) {
 				Close_Animation(wsa);
 				return;
 			}
@@ -620,7 +620,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 
 	Clear_KeyBuffer();
 
-	while ((!textEnd || stage != 0) && (Input_Keyboard_NextKey() == 0)) {
+	while ((!textEnd || stage != 0) && (Check_Key() == 0)) {
 
 		while (timetoWait > g_timerSleep) sleepIdle();
 
@@ -875,7 +875,7 @@ static void GameLoop_GameCredits(void)
 
 		GameCredits_Play(credits_buffer, 20, SCREEN_1, SCREEN_2, 6);
 
-		if (Input_Keyboard_NextKey() != 0) break;
+		if (Check_Key() != 0) break;
 
 		Music_Play(33);
 	}
@@ -966,11 +966,11 @@ static void Gameloop_Logos(void)
 	
 	Close_Animation(wsa);
 
-	if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+	if (Check_Key() != 0 && g_canSkipIntro) goto logos_exit;
 	Voice_LoadVoices(0xFFFF);
 
 	for (; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Check_Key() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
 	Fade_Palette_To(g_palette2, 60);
@@ -988,7 +988,7 @@ static void Gameloop_Logos(void)
 	Fade_Palette_To(g_palette_998A, 30);
 
 	for (g_timerTimeout = 60; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Check_Key() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
 	Fade_Palette_To(g_palette2, 30);
@@ -1002,7 +1002,7 @@ static void Gameloop_Logos(void)
 	Fade_Palette_To(g_palette_998A, 30);
 
 	for (g_timerTimeout = 180; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Check_Key() != 0 && g_canSkipIntro) goto logos_exit;
 	}
 
 logos_exit:
@@ -1022,7 +1022,7 @@ void GameLoop_GameIntroAnimation(void)
 
 	Gameloop_Logos();
 
-	if (Input_Keyboard_NextKey() == 0 || !g_canSkipIntro) {
+	if (Check_Key() == 0 || !g_canSkipIntro) {
 		const HouseAnimation_Animation   *animation   = g_table_houseAnimation_animation[HOUSEANIMATION_INTRO];
 		const HouseAnimation_Subtitle    *subtitle    = g_table_houseAnimation_subtitle[HOUSEANIMATION_INTRO];
 		const HouseAnimation_SoundEffect *soundEffect = g_table_houseAnimation_soundEffect[HOUSEANIMATION_INTRO];

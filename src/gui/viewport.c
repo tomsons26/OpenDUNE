@@ -114,11 +114,11 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 	}
 
 	if (click) {
-		x = g_mouseClickX;
-		y = g_mouseClickY;
+		x = MouseQX;
+		y = MouseQY;
 	} else {
-		x = g_mouseX;
-		y = g_mouseY;
+		x = MouseX;
+		y = MouseY;
 	}
 
 	if (w->index == 43) {
@@ -392,10 +392,10 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 					continue;
 				}
 
-				GFX_DrawTile(t->groundTileID, left, top, t->houseID);
+				Draw_Stamp(t->groundTileID, left, top, t->houseID);
 
 				if (t->overlayTileID != 0 && !g_debugScenario) {
-					GFX_DrawTile(t->overlayTileID, left, top, t->houseID);
+					Draw_Stamp(t->overlayTileID, left, top, t->houseID);
 				}
 			}
 		}
@@ -819,7 +819,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 	if (updateDisplay && !drawToMainScreen) {
 		if (g_viewport_fadein) {
-			GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+			GUI_Mouse_Hide_InWidget(Window);
 
 			/* ENHANCEMENT -- When fading in the game on start, you don't see the fade as it is against the already drawn screen. */
 			if (g_dune2_enhanced) {
@@ -852,7 +852,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				height = 16;
 
 				if (!init) {
-					GUI_Mouse_Hide_InWidget(g_curWidgetIndex);
+					GUI_Mouse_Hide_InWidget(Window);
 
 					init = true;
 				}

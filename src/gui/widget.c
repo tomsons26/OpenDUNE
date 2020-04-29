@@ -55,7 +55,7 @@ WindowType WindowList[22] = {
 	{ 1,   6, 12,   3,   0,  15,  6}  /* 21 */
 };
 
-uint16 g_curWidgetIndex;          /*!< Index of the currently selected widget in #g_widgetProperties. */
+uint16 Window;          /*!< Index of the currently selected widget in #g_widgetProperties. */
 uint16 g_curWidgetXBase;          /*!< Horizontal base position of the currently selected widget. */
 uint16 g_curWidgetYBase;          /*!< Vertical base position of the currently selected widget. */
 uint16 g_curWidgetWidth;          /*!< Width of the currently selected widget. */
@@ -99,7 +99,7 @@ Widget *GUI_Widget_Get_ByIndex(Widget *w, uint16 index)
 static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 {
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
+		Conditional_Hide_Mouse(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
 	}
 
 	Draw_Shape(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
@@ -107,7 +107,7 @@ static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 	GUI_DrawBlockedRectangle(w->offsetX, w->offsetY, w->width, w->height, colour);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -194,7 +194,7 @@ void GUI_Widget_Draw(Widget *w)
 
 	assert(drawMode < DRAW_MODE_MAX);
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(positionLeft, positionTop, positionRight, positionBottom);
+		Conditional_Hide_Mouse(positionLeft, positionTop, positionRight, positionBottom);
 	}
 
 	switch (drawMode) {
@@ -209,7 +209,7 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_UNKNOWN3: {
-			GFX_DrawTile(drawParam.spriteID, positionLeft, positionTop, HOUSE_HARKONNEN);
+			Draw_Stamp(drawParam.spriteID, positionLeft, positionTop, HOUSE_HARKONNEN);
 		} break;
 
 		case DRAW_MODE_CUSTOM_PROC: {
@@ -227,7 +227,7 @@ void GUI_Widget_Draw(Widget *w)
 	}
 
 	if (drawMode != DRAW_MODE_NONE && drawMode != DRAW_MODE_CUSTOM_PROC && GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 
@@ -254,7 +254,7 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 
 	/* Get the key from the buffer, if there was any key pressed */
 	key = 0;
-	if (Input_IsInputAvailable() != 0) {
+	if (Check_Key_Num() != 0) {
 		key = Input_Wait();
 	}
 
@@ -279,11 +279,11 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 		}
 	}
 
-	mouseX = g_mouseX;
-	mouseY = g_mouseY;
+	mouseX = MouseX;
+	mouseY = MouseY;
 
 	buttonState = 0;
-	if (g_mouseDisabled == 0) {
+	if (MDisabled == 0) {
 		uint16 buttonStateChange = 0;
 
 		/* See if the key was a mouse button action */
@@ -301,8 +301,8 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 		}
 
 		if (buttonStateChange != 0) {
-			mouseX = g_mouseClickX;
-			mouseY = g_mouseClickY;
+			mouseX = MouseQX;
+			mouseY = MouseQY;
 		}
 
 		/* Disable when release, enable when click */
@@ -952,8 +952,8 @@ Widget *GUI_Widget_Insert(Widget *w1, Widget *w2)
  */
 uint16 Change_Window(uint16 index)
 {
-	uint16 oldIndex = g_curWidgetIndex;
-	g_curWidgetIndex = index;
+	uint16 oldIndex = Window;
+	Window = index;
 
 	g_curWidgetXBase          = WindowList[index].xBase;
 	g_curWidgetYBase          = WindowList[index].yBase;
@@ -974,7 +974,7 @@ uint16 Change_New_Window(uint16 index)
 {
 	index = Change_Window(index);
 
-	Widget_PaintCurrentWidget();
+	New_Window();
 
 	return index;
 }
@@ -982,7 +982,7 @@ uint16 Change_New_Window(uint16 index)
 /**
  * Draw the exterior of the currently selected widget.
  */
-void Widget_PaintCurrentWidget(void)
+void New_Window(void)
 {
 	Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, ((g_curWidgetXBase + g_curWidgetWidth) << 3) - 1, g_curWidgetYBase + g_curWidgetHeight - 1, g_curWidgetFGColourNormal);
 }

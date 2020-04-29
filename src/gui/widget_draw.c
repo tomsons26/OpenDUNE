@@ -60,9 +60,9 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 	}
 
 	if (oldScreenID == SCREEN_0) {
-		GUI_Mouse_Hide_InRegion(positionX, positionY, positionX + width, positionY + height);
+		Conditional_Hide_Mouse(positionX, positionY, positionX + width, positionY + height);
 		Byte_Blit(positionX >> 3, positionY, positionX >> 3, positionY, width >> 3, height, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 
 	Set_LogicPage(oldScreenID);
@@ -121,9 +121,9 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 
 	if (oldScreenID != SCREEN_0) return;
 
-	GUI_Mouse_Hide_InRegion(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
+	Conditional_Hide_Mouse(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 
 	Set_LogicPage(SCREEN_0);
 }
@@ -281,9 +281,9 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 
 	if (oldScreenID != SCREEN_0) return;
 
-	GUI_Mouse_Hide_InRegion(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
+	Conditional_Hide_Mouse(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 
 	Set_LogicPage(SCREEN_0);
 }
@@ -347,9 +347,9 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 
 	if (oldScreenID != SCREEN_0) return;
 
-	GUI_Mouse_Hide_InRegion(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
+	Conditional_Hide_Mouse(positionX - 1, positionY - 1, positionX + width + 1, positionY + height + 1);
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
-	GUI_Mouse_Show_InRegion();
+	Conditional_Show_Mouse();
 
 	Set_LogicPage(SCREEN_0);
 }
@@ -396,7 +396,7 @@ void GUI_Widget_Scrollbar_Draw(Widget *w)
 	}
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(positionX, positionY, positionX + width - 1, positionY + height - 1);
+		Conditional_Hide_Mouse(positionX, positionY, positionX + width - 1, positionY + height - 1);
 	}
 
 	/* Draw background */
@@ -406,7 +406,7 @@ void GUI_Widget_Scrollbar_Draw(Widget *w)
 	Fill_Rect(positionX + scrollLeft, positionY + scrollTop, positionX + scrollRight, positionY + scrollBottom, (scrollbar->pressed == 0) ? w->fgColourNormal : w->fgColourSelected);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 
 	/* Call custom callback function if set */
@@ -632,7 +632,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 	}
 
 	oldScreenID = SCREEN_ACTIVE;
-	oldWidgetID = g_curWidgetIndex;
+	oldWidgetID = Window;
 
 	if (actionType != 0) {
 		Widget *w = g_widgetLinkedListHead;
@@ -662,7 +662,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 			GUI_Widget_MakeInvisible(buttons[i]);
 		}
 
-		GUI_Widget_DrawBorder(g_curWidgetIndex, 0, 0);
+		GUI_Widget_DrawBorder(Window, 0, 0);
 	}
 
 	if (actionType > 1) {
@@ -932,7 +932,7 @@ void GUI_Widget_DrawBorder(uint16 widgetIndex, uint16 borderType, bool pressed)
 	uint16 size;
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Hide_InRegion(left, top, left + width, top + height);
+		Conditional_Hide_Mouse(left, top, left + width, top + height);
 	}
 
 	GUI_DrawBorder(left, top, width, height, colourSchemaIndex + 1, true);
@@ -945,7 +945,7 @@ void GUI_Widget_DrawBorder(uint16 widgetIndex, uint16 borderType, bool pressed)
 	}
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		GUI_Mouse_Show_InRegion();
+		Conditional_Show_Mouse();
 	}
 }
 

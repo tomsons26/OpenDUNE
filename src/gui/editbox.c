@@ -90,7 +90,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 
 	Hide_Mouse();
 
-	if (paint) Widget_PaintCurrentWidget();
+	if (paint) New_Window();
 
 	Fancy_Text_Print(text, positionX, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal, 0);
 
@@ -141,7 +141,7 @@ uint16 GUI_EditBox(char *text, uint16 maxLength, uint16 widgetID, Widget *w, uin
 			continue;
 		}
 
-		key = Input_Keyboard_HandleKeys(key) & 0xFF;
+		key = Convert_Num_To_ASCII(key) & 0xFF;
 
 		/* Names can't start with a space, and should be alpha-numeric */
 		if ((key == 0x20 && textLength == 0) || key < 0x20 || key > 0x7E) continue;
