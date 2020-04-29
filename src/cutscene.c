@@ -77,7 +77,7 @@ static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, u
 	s_palettePartCount        = 0;
 	s_paletteAnimationTimeout = 0;
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	File_ReadBlockFile("INTRO.PAL", g_palette1, 256 * 3);
 
@@ -109,7 +109,7 @@ static void GameLoop_FinishAnimation(void)
 
 	Fade_Palette_To(g_palette2, 60);
 
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 
 	Clear_KeyBuffer();
 
@@ -339,7 +339,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			}
 
 			if ((animation->flags & (HOUSEANIM_FLAGS_FADEIN2 | HOUSEANIM_FLAGS_FADEIN)) != 0) {
-				GUI_ClearScreen(SCREEN_1);
+				Clear_Page(SCREEN_1);
 
 				wsa = Get_Buff(SCREEN_2);
 
@@ -689,9 +689,9 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 
 		switch (stage) {
 			case 0:	/* 0 : clear */
-				GUI_ClearScreen(spriteScreenID);
+				Clear_Page(spriteScreenID);
 
-				if (spriteID == 514) GUI_ClearScreen(backScreenID);
+				if (spriteID == 514) Clear_Page(backScreenID);
 
 				stage++;
 				counter = 2;
@@ -774,9 +774,9 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 	/* fade to black */
 	Fade_Palette_To(g_palette2, 120);
 
-	GUI_ClearScreen(SCREEN_0);
-	GUI_ClearScreen(spriteScreenID);
-	GUI_ClearScreen(backScreenID);
+	Clear_Page(SCREEN_0);
+	Clear_Page(spriteScreenID);
+	Clear_Page(backScreenID);
 }
 
 static void GameCredits_LoadPalette(void)
@@ -822,7 +822,7 @@ static void GameLoop_GameCredits(void)
 
 	Sprites_LoadImage("BIGPLAN.CPS", SCREEN_1, g_palette_998A);
 
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 
 	Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 
@@ -884,7 +884,7 @@ static void GameLoop_GameCredits(void)
 
 	Fade_Score();
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 }
 
 /**
@@ -948,7 +948,7 @@ static void Gameloop_Logos(void)
 	oldScreenID = Set_LogicPage(SCREEN_0);
 
 	Set_Palette(g_palette2);
-	GFX_ClearScreen(SCREEN_0);
+	Clear_Screen(SCREEN_0);
 
 	File_ReadBlockFile("WESTWOOD.PAL", g_palette_998A, 256 * 3);
 
@@ -979,7 +979,7 @@ static void Gameloop_Logos(void)
 
 	Fade_Palette_To(g_palette2, 60);
 
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	Sprites_LoadImage(String_GenerateFilename("AND"), SCREEN_1, g_palette_998A);
 
@@ -993,7 +993,7 @@ static void Gameloop_Logos(void)
 
 	Fade_Palette_To(g_palette2, 30);
 
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 
 	Sprites_LoadImage("VIRGIN.CPS", SCREEN_1, g_palette_998A);
 
@@ -1008,7 +1008,7 @@ static void Gameloop_Logos(void)
 logos_exit:
 	Fade_Palette_To(g_palette2, 30);
 
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 
 	Set_LogicPage(oldScreenID);
 }

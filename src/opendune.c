@@ -300,7 +300,7 @@ static void GameLoop_LevelEnd(void)
 				Hide_Mouse();
 
 				Fade_Palette_To(g_palette2, 15);
-				GUI_ClearScreen(SCREEN_0);
+				Clear_Page(SCREEN_0);
 				GameLoop_GameEndAnimation();
 				PrepareEnd();
 				exit(0);
@@ -745,7 +745,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		case STR_LOAD_GAME:
 			Hide_Mouse();
 			Fade_Palette_To(g_palette2, 30);
-			GUI_ClearScreen(SCREEN_0);
+			Clear_Page(SCREEN_0);
 			Show_Mouse();
 
 			Set_Palette(g_palette1);
@@ -801,7 +801,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		Hide_Mouse();
 
-		GUI_ClearScreen(SCREEN_0);
+		Clear_Page(SCREEN_0);
 
 		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
@@ -946,7 +946,7 @@ static void GameLoop_Main(void)
 
 	File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
 
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 
 	Video_SetPalette(g_palette1, 0, 256);
 
@@ -1014,7 +1014,7 @@ static void GameLoop_Main(void)
 			Music_Play(28);
 
 			g_playerHouseID = HOUSE_MERCENARY;
-			g_playerHouseID = GUI_PickHouse();
+			g_playerHouseID = Choose_House();
 
 			Hide_Mouse();
 
@@ -1133,7 +1133,7 @@ static void GameLoop_Main(void)
 
 	Set_LogicPage(SCREEN_1);
 
-	GFX_ClearScreen(SCREEN_1);
+	Clear_Screen(SCREEN_1);
 
 	GUI_Screen_FadeIn(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_1, SCREEN_0);
 }
@@ -1169,7 +1169,7 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	MDisabled = -1;
 
 	GFX_Init();
-	GFX_ClearScreen(SCREEN_ACTIVE);
+	Clear_Screen(SCREEN_ACTIVE);
 
 	Set_Font(FontNew8Ptr);
 

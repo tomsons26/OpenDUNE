@@ -413,12 +413,12 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, const uint8 *sprit
 		LCW_Uncomp(dst, sprite, size);
 	}
 
-	g_mouseSpriteHotspotX = hotSpotX;
-	g_mouseSpriteHotspotY = hotSpotY;
+	MouseXHot = hotSpotX;
+	MouseYHot = hotSpotY;
 
 	sprite = g_mouseSprite;
-	g_mouseHeight = sprite[5];
-	g_mouseWidth = (READ_LE_UINT16(sprite + 3) >> 3) + 2;
+	MouseHeight = sprite[5];
+	MouseWidth = (READ_LE_UINT16(sprite + 3) >> 3) + 2;
 
 	Low_Show_Mouse();
 

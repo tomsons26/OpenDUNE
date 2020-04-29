@@ -124,10 +124,10 @@ static uint16 s_mouseSpriteTop;
 static uint16 s_mouseSpriteWidth;
 static uint16 s_mouseSpriteHeight;
 
-uint16 g_mouseSpriteHotspotX;
-uint16 g_mouseSpriteHotspotY;
-uint16 g_mouseWidth;
-uint16 g_mouseHeight;
+uint16 MouseXHot;
+uint16 MouseYHot;
+uint16 MouseWidth;
+uint16 MouseHeight;
 
 uint16 g_cursorSpriteID;
 uint16 g_cursorDefaultSpriteID;
@@ -1760,7 +1760,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 /**
  * Show pick house screen.
  */
-uint8 GUI_PickHouse(void)
+uint8 Choose_House(void)
 {
 	Screen oldScreenID;
 	Widget *w = NULL;
@@ -1964,7 +1964,7 @@ void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colours, uint8 refer
  * @param colourSchemaIndex Index of the colourSchema used.
  * @param fill True if you want the border to be filled.
  */
-void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill)
+void Draw_Box(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill)
 {
 	uint16 *colourSchema;
 
@@ -2053,7 +2053,7 @@ void GUI_DrawProgressbar(uint16 current, uint16 max)
 	if (current != 0 && height == 0) height = 1;
 
 	if (height != 0) {
-		GUI_DrawBorder(l_info[0] - 1, l_info[1] - 1, l_info[2] + 2, l_info[3] + 2, 1, true);
+		Draw_Box(l_info[0] - 1, l_info[1] - 1, l_info[2] + 2, l_info[3] + 2, 1, true);
 	}
 
 	if (width != 0) {
@@ -3338,7 +3338,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	Mouse_SetRegion(8, 24, 311, 143);
 
-	GUI_Mouse_SetPosition(160, 84);
+	Set_Mouse_Pos(160, 84);
 
 	Sprites_LoadImage("MAPMACH.CPS", SCREEN_2, g_palette_998A);
 
@@ -3461,7 +3461,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	Fade_Palette_To(palette, 15);
 
 	Hide_Mouse();
-	GUI_ClearScreen(SCREEN_0);
+	Clear_Page(SCREEN_0);
 	Show_Mouse();
 
 	Set_Palette(g_palette1);
@@ -3901,17 +3901,17 @@ void Low_Show_Mouse(void)
 	if (MDisabled == 1) return;
 	if (g_mouseHiddenDepth == 0 || --g_mouseHiddenDepth != 0) return;
 
-	left = MouseX - g_mouseSpriteHotspotX;
-	top  = MouseY - g_mouseSpriteHotspotY;
+	left = MouseX - MouseXHot;
+	top  = MouseY - MouseYHot;
 
 	s_mouseSpriteLeft = (left < 0) ? 0 : (left >> 3);
 	s_mouseSpriteTop = (top < 0) ? 0 : top;
 
-	s_mouseSpriteWidth = g_mouseWidth;
-	if ((left >> 3) + g_mouseWidth >= SCREEN_WIDTH / 8) s_mouseSpriteWidth -= (left >> 3) + g_mouseWidth - SCREEN_WIDTH / 8;
+	s_mouseSpriteWidth = MouseWidth;
+	if ((left >> 3) + MouseWidth >= SCREEN_WIDTH / 8) s_mouseSpriteWidth -= (left >> 3) + MouseWidth - SCREEN_WIDTH / 8;
 
-	s_mouseSpriteHeight = g_mouseHeight;
-	if (top + g_mouseHeight >= SCREEN_HEIGHT) s_mouseSpriteHeight -= top + g_mouseHeight - SCREEN_HEIGHT;
+	s_mouseSpriteHeight = MouseHeight;
+	if (top + MouseHeight >= SCREEN_HEIGHT) s_mouseSpriteHeight -= top + MouseHeight - SCREEN_HEIGHT;
 
 	if (g_mouseSpriteBuffer != NULL) {
 		GFX_CopyToBuffer(s_mouseSpriteLeft * 8, s_mouseSpriteTop, s_mouseSpriteWidth * 8, s_mouseSpriteHeight, g_mouseSpriteBuffer);
@@ -4005,16 +4005,16 @@ void Conditional_Hide_Mouse(uint16 left, uint16 top, uint16 right, uint16 bottom
 	int minx, miny;
 	int maxx, maxy;
 
-	minx = left - ((g_mouseWidth - 1) << 3) + g_mouseSpriteHotspotX;
+	minx = left - ((MouseWidth - 1) << 3) + MouseXHot;
 	if (minx < 0) minx = 0;
 
-	miny = top - g_mouseHeight + g_mouseSpriteHotspotY;
+	miny = top - MouseHeight + MouseYHot;
 	if (miny < 0) miny = 0;
 
-	maxx = right + g_mouseSpriteHotspotX;
+	maxx = right + MouseXHot;
 	if (maxx > SCREEN_WIDTH - 1) maxx = SCREEN_WIDTH - 1;
 
-	maxy = bottom + g_mouseSpriteHotspotY;
+	maxy = bottom + MouseYHot;
 	if (maxy > SCREEN_HEIGHT - 1) maxy = SCREEN_HEIGHT - 1;
 
 	while (MouseUpdate != 0) sleepIdle();
@@ -4137,7 +4137,7 @@ void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, 
  * @param x The new X-position of the mouse.
  * @param y The new Y-position of the mouse.
  */
-void GUI_Mouse_SetPosition(uint16 x, uint16 y)
+void Set_Mouse_Pos(uint16 x, uint16 y)
 {
 	while (MouseUpdate != 0) sleepIdle();
 	MouseUpdate++;

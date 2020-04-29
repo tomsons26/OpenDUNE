@@ -36,7 +36,7 @@ extern void GFX_Init_TilesInfo(uint16 widthSize, uint16 heightSize);
 extern void GFX_PutPixel(uint16 x, uint16 y, uint8 colour);
 extern void GFX_Screen_Copy2(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst, bool skipNull);
 extern void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
-extern void GFX_ClearScreen(Screen screenID);
+extern void Clear_Screen(Screen screenID);
 extern void GFX_ClearBlock(Screen index);
 extern void Set_Palette(uint8 *palette);
 extern uint8 GFX_GetPixel(uint16 x, uint16 y);

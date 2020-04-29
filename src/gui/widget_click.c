@@ -878,7 +878,7 @@ static bool GUI_Widget_Savegame_Click(uint16 index)
 	Change_Window(15);
 
 	Hide_Mouse();
-	GUI_DrawBorder((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
+	Draw_Box((g_curWidgetXBase << 3) - 1, g_curWidgetYBase - 1, (g_curWidgetWidth << 3) + 2, g_curWidgetHeight + 2, 4, false);
 	Show_Mouse();
 
 	for (loop = true; loop; sleepIdle()) {

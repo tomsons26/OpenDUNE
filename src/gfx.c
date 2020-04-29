@@ -447,7 +447,7 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
 /**
  * Clears the screen.
  */
-void GFX_ClearScreen(Screen screenID)
+void Clear_Screen(Screen screenID)
 {
 	memset(Get_Buff(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 	GFX_Screen_SetDirty(screenID, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
