@@ -28,10 +28,10 @@ extern struct Unit *Tools_Index_GetUnit(uint16 encoded);
 extern struct Structure *Tools_Index_GetStructure(uint16 encoded);
 extern struct Object *Tools_Index_GetObject(uint16 encoded);
 
-extern uint8 Tools_Random_256(void);
+extern uint8 Random(void);
 extern void Tools_Random_Seed(uint32 seed);
 extern void Tools_RandomLCG_Seed(uint16 seed);
-extern uint16 Tools_RandomLCG_Range(uint16 min, uint16 max);
+extern uint16 IRandom(uint16 min, uint16 max);
 
 #define BITARRAY_MACROS
 

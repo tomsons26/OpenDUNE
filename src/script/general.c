@@ -52,7 +52,7 @@ uint16 Script_General_DelayRandom(ScriptEngine *script)
 {
 	uint16 delay;
 
-	delay = Tools_Random_256() * STACK_PEEK(1) / 256;
+	delay = Random() * STACK_PEEK(1) / 256;
 	delay /= 5;
 
 	script->delay = delay;
@@ -129,7 +129,7 @@ uint16 Script_General_DisplayText(ScriptEngine *script)
  */
 uint16 Script_General_RandomRange(ScriptEngine *script)
 {
-	return Tools_RandomLCG_Range(STACK_PEEK(1), STACK_PEEK(2));
+	return IRandom(STACK_PEEK(1), STACK_PEEK(2));
 }
 
 /**

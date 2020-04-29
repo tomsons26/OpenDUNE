@@ -1054,7 +1054,7 @@ static void GameLoop_Main(void)
 
 			GUI_ChangeSelectionType(g_debugScenario ? SELECTIONTYPE_DEBUG : SELECTIONTYPE_STRUCTURE);
 
-			Music_Play(Tools_RandomLCG_Range(0, 8) + 8);
+			Music_Play(IRandom(0, 8) + 8);
 			l_timerNext = g_timerGUI + 300;
 		}
 
@@ -1070,14 +1070,14 @@ static void GameLoop_Main(void)
 
 				g_musicInBattle = 0;
 			} else if (g_musicInBattle > 0) {
-				Music_Play(Tools_RandomLCG_Range(0, 5) + 17);
+				Music_Play(IRandom(0, 5) + 17);
 				l_timerNext = g_timerGUI + 300;
 				g_musicInBattle = -1;
 			} else {
 				g_musicInBattle = 0;
 				if (g_enableSoundMusic != 0 && g_timerGUI > l_timerNext) {
 					if (!Score_Status()) {
-						Music_Play(Tools_RandomLCG_Range(0, 8) + 8);
+						Music_Play(IRandom(0, 8) + 8);
 						l_timerNext = g_timerGUI + 300;
 					}
 				}

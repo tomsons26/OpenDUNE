@@ -102,7 +102,7 @@ void GameLoop_House(void)
 		uint16 type;
 
 		/* Pick a random unit to increase starport availability */
-		type = Tools_RandomLCG_Range(0, UNIT_MAX - 1);
+		type = IRandom(0, UNIT_MAX - 1);
 
 		/* Increase how many of this unit is available via starport by one */
 		if (g_starportAvailable[type] != 0 && g_starportAvailable[type] < 10) {
@@ -134,7 +134,7 @@ void GameLoop_House(void)
 
 			if (locationID >= 4) {
 				if (nu == NULL) {
-					nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_CARRYALL, u->o.houseID, Tile_UnpackTile(Map_FindLocationTile(Tools_Random_256() & 3, u->o.houseID)), 100);
+					nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_CARRYALL, u->o.houseID, Tile_UnpackTile(Map_FindLocationTile(Random() & 3, u->o.houseID)), 100);
 
 					if (nu != NULL) {
 						nu->o.flags.s.byScenario = true;

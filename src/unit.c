@@ -438,7 +438,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, in
 	u->o.flags.s.allocated = true;
 
 	if (ui->movementType == MOVEMENT_TRACKED) {
-		if (Tools_Random_256() < g_table_houseInfo[houseID].degradingChance) {
+		if (Random() < g_table_houseInfo[houseID].degradingChance) {
 			u->o.flags.s.degrades = true;
 		}
 	}
@@ -1256,7 +1256,7 @@ bool Unit_Deviate(Unit *unit, uint16 probability, uint8 houseID)
 		probability -= probability / 8;
 	}
 
-	if (Tools_Random_256() >= probability) return false;
+	if (Random() >= probability) return false;
 
 	unit->deviated = 120;
 	unit->deviatedHouse = houseID;
@@ -1314,12 +1314,12 @@ bool Unit_Move(Unit *unit, uint16 distance)
 		}
 
 		newPosition = unit->o.position;
-		Unit_SetOrientation(unit, unit->orientation[0].current + (Tools_Random_256() & 0xF), false, 0);
+		Unit_SetOrientation(unit, unit->orientation[0].current + (Random() & 0xF), false, 0);
 	}
 
 	unit->wobbleIndex = 0;
 	if (ui->flags.canWobble && unit->o.flags.s.isWobbling) {
-		unit->wobbleIndex = Tools_Random_256() & 7;
+		unit->wobbleIndex = Random() & 7;
 	}
 
 	d = Tile_GetDistance(newPosition, unit->currentDestination);
@@ -1384,7 +1384,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 				Structure_Damage(s, damage, 0);
 			} else {
-				if (Map_GetLandscapeType(packed) == LST_WALL && g_table_structureInfo[STRUCTURE_WALL].o.hitpoints > damage) Tools_Random_256();
+				if (Map_GetLandscapeType(packed) == LST_WALL && g_table_structureInfo[STRUCTURE_WALL].o.hitpoints > damage) Random();
 			}
 		}
 
@@ -1455,7 +1455,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 				unit->currentDestination.x = 0;
 				unit->currentDestination.y = 0;
 
-				if (unit->o.flags.s.degrades && (Tools_Random_256() & 3) == 0) {
+				if (unit->o.flags.s.degrades && (Random() & 3) == 0) {
 					Unit_Damage(unit, 1, 0);
 				}
 
@@ -1589,7 +1589,7 @@ bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 
 		Unit_UpdateMap(2, unit);
 
-		if (Tools_Random_256() < g_table_houseInfo[unit->o.houseID].toughness) {
+		if (Random() < g_table_houseInfo[unit->o.houseID].toughness) {
 			Unit_SetAction(unit, ACTION_RETREAT);
 		}
 	}
@@ -1766,7 +1766,7 @@ Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
 	Unit *unit;
 	Unit *carryall;
 
-	tile = Tile_UnpackTile(Map_FindLocationTile(Tools_Random_256() & 3, houseID));
+	tile = Tile_UnpackTile(Map_FindLocationTile(Random() & 3, houseID));
 
 	h = House_Get_ByIndex(houseID);
 
@@ -1983,7 +1983,7 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
 			bullet->currentDestination = tile;
 
 			if (ui->flags.notAccurate) {
-				bullet->currentDestination = Tile_MoveByRandom(tile, (Tools_Random_256() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Tools_Random_256() + 8, false);
+				bullet->currentDestination = Tile_MoveByRandom(tile, (Random() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Random() + 8, false);
 			}
 
 			bullet->fireDelay = ui->fireDistance & 0xFF;

@@ -504,7 +504,7 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 
 	if (Map_GetLandscapeType(positionPacked) == LST_WALL && hitpoints != 0) {
 		if ((g_table_structureInfo[STRUCTURE_WALL].o.hitpoints <= hitpoints) ||
-		    (Tools_Random_256() <= (hitpoints * 256 / g_table_structureInfo[STRUCTURE_WALL].o.hitpoints))) {
+		    (Random() <= (hitpoints * 256 / g_table_structureInfo[STRUCTURE_WALL].o.hitpoints))) {
 			Map_UpdateWall(positionPacked);
 		}
 	}
@@ -703,7 +703,7 @@ void Map_FillCircleWithSpice(uint16 packed, uint16 radius)
 
 			if (distance > radius) continue;
 
-			if (distance == radius && (Tools_Random_256() & 1) == 0) continue;
+			if (distance == radius && (Random() & 1) == 0) continue;
 
 			if (Map_GetLandscapeType(curPacked) == LST_SPICE) continue;
 
@@ -862,9 +862,9 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 		break;
 	}
 
-	switch (Tools_Random_256() & 0x3) {
+	switch (Random() & 0x3) {
 		case 0:
-			h->credits += Tools_RandomLCG_Range(150, 400);
+			h->credits += IRandom(150, 400);
 			break;
 
 		case 1: {
@@ -873,7 +873,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, houseID, position, Tools_Random_256());
+			Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, houseID, position, Random());
 			break;
 		}
 
@@ -884,7 +884,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, enemyHouseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_TRIKE, enemyHouseID, position, Random());
 
 			if (u != NULL) Unit_SetAction(u, ACTION_HUNT);
 			break;
@@ -897,7 +897,7 @@ void Map_Bloom_ExplodeSpecial(uint16 packed, uint8 houseID)
 			position = Tile_MoveByRandom(position, 16, true);
 
 			/* ENHANCEMENT -- Dune2 inverted houseID and typeID arguments. */
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_INFANTRY, enemyHouseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_INFANTRY, enemyHouseID, position, Random());
 
 			if (u != NULL) Unit_SetAction(u, ACTION_HUNT);
 			break;
@@ -947,28 +947,28 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 	while (ret == 0) {
 		switch (locationID) {
 			case 0: /* North */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX - 2), mapInfo->minY + mapOffset);
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX - 2), mapInfo->minY + mapOffset);
 				break;
 
 			case 1: /* East */
-				ret = Tile_PackXY(mapInfo->minX + mapInfo->sizeX - mapOffset, mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY - 2));
+				ret = Tile_PackXY(mapInfo->minX + mapInfo->sizeX - mapOffset, mapInfo->minY + IRandom(0, mapInfo->sizeY - 2));
 				break;
 
 			case 2: /* South */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX - 2), mapInfo->minY + mapInfo->sizeY - mapOffset);
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX - 2), mapInfo->minY + mapInfo->sizeY - mapOffset);
 				break;
 
 			case 3: /* West */
-				ret = Tile_PackXY(mapInfo->minX + mapOffset, mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY - 2));
+				ret = Tile_PackXY(mapInfo->minX + mapOffset, mapInfo->minY + IRandom(0, mapInfo->sizeY - 2));
 				break;
 
 			case 4: /* Air */
-				ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX), mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY));
+				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX), mapInfo->minY + IRandom(0, mapInfo->sizeY));
 				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
 			case 5: /* Visible */
-				ret = Tile_PackXY(Tile_GetPackedX(g_minimapPosition) + Tools_RandomLCG_Range(0, 14), Tile_GetPackedY(g_minimapPosition) + Tools_RandomLCG_Range(0, 9));
+				ret = Tile_PackXY(Tile_GetPackedX(g_minimapPosition) + IRandom(0, 14), Tile_GetPackedY(g_minimapPosition) + IRandom(0, 9));
 				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
@@ -999,7 +999,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 						tile32 unpacked = Tile_MoveByRandom(u->o.position, 120, true);
 						ret = Tile_PackTile(unpacked);
 					} else {
-						ret = Tile_PackXY(mapInfo->minX + Tools_RandomLCG_Range(0, mapInfo->sizeX), mapInfo->minY + Tools_RandomLCG_Range(0, mapInfo->sizeY));
+						ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX), mapInfo->minY + IRandom(0, mapInfo->sizeY));
 					}
 				}
 
@@ -1456,29 +1456,29 @@ void Map_CreateLandscape(uint32 seed)
 
 	/* Place random data on a 4x4 grid. */
 	for (i = 0; i < 272; i++) {
-		memory[i] = Tools_Random_256() & 0xF;
+		memory[i] = Random() & 0xF;
 		if (memory[i] > 0xA) memory[i] = 0xA;
 	}
 
-	i = (Tools_Random_256() & 0xF) + 1;
+	i = (Random() & 0xF) + 1;
 	while (i-- != 0) {
-		int16 base = Tools_Random_256();
+		int16 base = Random();
 
 		for (j = 0; j < lengthof(around); j++) {
 			int16 index = min(max(0, base + around[j]), 272);
 
-			memory[index] = (memory[index] + (Tools_Random_256() & 0xF)) & 0xF;
+			memory[index] = (memory[index] + (Random() & 0xF)) & 0xF;
 		}
 	}
 
-	i = (Tools_Random_256() & 0x3) + 1;
+	i = (Random() & 0x3) + 1;
 	while (i-- != 0) {
-		int16 base = Tools_Random_256();
+		int16 base = Random();
 
 		for (j = 0; j < lengthof(around); j++) {
 			int16 index = min(max(0, base + around[j]), 272);
 
-			memory[index] = Tools_Random_256() & 0x3;
+			memory[index] = Random() & 0x3;
 		}
 	}
 
@@ -1549,11 +1549,11 @@ void Map_CreateLandscape(uint32 seed)
 	}
 
 	/* Filter each tile to determine its final type. */
-	spriteID1 = Tools_Random_256() & 0xF;
+	spriteID1 = Random() & 0xF;
 	if (spriteID1 < 0x8) spriteID1 = 0x8;
 	if (spriteID1 > 0xC) spriteID1 = 0xC;
 
-	spriteID2 = (Tools_Random_256() & 0x3) - 1;
+	spriteID2 = (Random() & 0x3) - 1;
 	if (spriteID2 > spriteID1 - 3) spriteID2 = spriteID1 - 3;
 
 	for (i = 0; i < 4096; i++) {
@@ -1573,24 +1573,24 @@ void Map_CreateLandscape(uint32 seed)
 	}
 
 	/* Add some spice. */
-	i = Tools_Random_256() & 0x2F;
+	i = Random() & 0x2F;
 	while (i-- != 0) {
 		tile32 tile;
 		uint16 packed;
 
 		while (true) {
-			packed = Tools_Random_256() & 0x3F;
-			packed = Tile_PackXY(Tools_Random_256() & 0x3F, packed);
+			packed = Random() & 0x3F;
+			packed = Tile_PackXY(Random() & 0x3F, packed);
 
 			if (g_table_landscapeInfo[g_map[packed].groundTileID].canBecomeSpice) break;
 		}
 
 		tile = Tile_UnpackTile(packed);
 
-		j = Tools_Random_256() & 0x1F;
+		j = Random() & 0x1F;
 		while (j-- != 0) {
 			while (true) {
-				tile32 unpacked = Tile_MoveByRandom(tile, Tools_Random_256() & 0x3F, true);
+				tile32 unpacked = Tile_MoveByRandom(tile, Random() & 0x3F, true);
 				packed = Tile_PackTile(unpacked);
 
 				if (!Tile_IsOutOfMap(packed)) break;

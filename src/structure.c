@@ -838,7 +838,7 @@ void Structure_ActivateSpecial(Structure *s)
 			position.y = 0xFFFF;
 
 			g_validateStrictIfZero++;
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_MISSILE_HOUSE, s->o.houseID, position, Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_MISSILE_HOUSE, s->o.houseID, position, Random());
 			g_validateStrictIfZero--;
 
 			g_unitHouseMissile = u;
@@ -894,12 +894,12 @@ void Structure_ActivateSpecial(Structure *s)
 				uint16 orientation;
 				uint16 unitType;
 
-				Tools_Random_256();
+				Random();
 
 				position = Tile_UnpackTile(location);
 				position = Tile_MoveByRandom(position, 32, true);
 
-				orientation = Tools_RandomLCG_Range(0, 3);
+				orientation = IRandom(0, 3);
 				unitType = (orientation == 1) ? UNIT_TROOPER : UNIT_TROOPERS;
 
 				g_validateStrictIfZero++;
@@ -928,7 +928,7 @@ void Structure_ActivateSpecial(Structure *s)
 			}
 
 			g_validateStrictIfZero++;
-			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SABOTEUR, s->o.houseID, Tile_UnpackTile(position), Tools_Random_256());
+			u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SABOTEUR, s->o.houseID, Tile_UnpackTile(position), Random());
 			g_validateStrictIfZero--;
 
 			if (u == NULL) return;
@@ -1268,7 +1268,7 @@ uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice)
 	bestPacked = 0;
 	bestDistance = 0;
 
-	i = Tools_Random_256() & 0xF;
+	i = Random() & 0xF;
 	for (j = 0; j < 16; j++, i = (i + 1) & 0xF) {
 		uint16 offset;
 		uint16 curPacked;
@@ -2027,7 +2027,7 @@ uint16 Structure_AI_PickNextToBuild(Structure *s)
 	for (i = 0; i < UNIT_MAX; i++) {
 		if ((buildable & (1 << i)) == 0) continue;
 
-		if ((Tools_Random_256() % 4) == 0) type = i;
+		if ((Random() % 4) == 0) type = i;
 
 		if (type != 0xFFFF) {
 			if (g_table_unitInfo[i].o.priorityBuild <= g_table_unitInfo[type].o.priorityBuild) continue;

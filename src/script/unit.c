@@ -53,11 +53,11 @@ uint16 Script_Unit_RandomSoldier(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	if (Tools_Random_256() >= g_table_unitInfo[u->o.type].o.spawnChance) return 0;
+	if (Random() >= g_table_unitInfo[u->o.type].o.spawnChance) return 0;
 
 	position = Tile_MoveByRandom(u->o.position, 20, true);
 
-	nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, u->o.houseID, position, Tools_Random_256());
+	nu = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, u->o.houseID, position, Random());
 
 	if (nu == NULL) return 0;
 
@@ -557,10 +557,10 @@ uint16 Script_Unit_ExplosionMultiple(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	Map_MakeExplosion(EXPLOSION_DEATH_HAND, u->o.position, Tools_RandomLCG_Range(25, 50), 0);
+	Map_MakeExplosion(EXPLOSION_DEATH_HAND, u->o.position, IRandom(25, 50), 0);
 
 	for (i = 0; i < 7; i++) {
-		Map_MakeExplosion(EXPLOSION_DEATH_HAND, Tile_MoveByRandom(u->o.position, STACK_PEEK(1), false), Tools_RandomLCG_Range(75, 150), 0);
+		Map_MakeExplosion(EXPLOSION_DEATH_HAND, Tile_MoveByRandom(u->o.position, STACK_PEEK(1), false), IRandom(75, 150), 0);
 	}
 
 	return 0;
@@ -689,7 +689,7 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 		u->o.flags.s.fireTwiceFlip = false;
 	}
 
-	u->fireDelay += Tools_Random_256() & 1;
+	u->fireDelay += Random() & 1;
 
 	Unit_UpdateMap(2, u);
 
@@ -1655,14 +1655,14 @@ uint16 Script_Unit_Harvest(ScriptEngine *script)
 	type = Map_GetLandscapeType(packed);
 	if (type != LST_SPICE && type != LST_THICK_SPICE) return 0;
 
-	u->amount += Tools_Random_256() & 1;
+	u->amount += Random() & 1;
 	u->o.flags.s.inTransport = true;
 
 	Unit_UpdateMap(2, u);
 
 	if (u->amount > 100) u->amount = 100;
 
-	if ((Tools_Random_256() & 0x1F) != 0) return 1;
+	if ((Random() & 0x1F) != 0) return 1;
 
 	Map_ChangeSpiceAmount(packed, -1);
 
@@ -1756,21 +1756,21 @@ uint16 Script_Unit_IdleAction(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	random = Tools_RandomLCG_Range(0, 10);
+	random = IRandom(0, 10);
 	movementType = g_table_unitInfo[u->o.type].movementType;
 
 	if (movementType != MOVEMENT_FOOT && movementType != MOVEMENT_TRACKED && movementType != MOVEMENT_WHEELED) return 0;
 
 	if (movementType == MOVEMENT_FOOT && random > 8) {
-		u->spriteOffset = Tools_Random_256() & 0x3F;
+		u->spriteOffset = Random() & 0x3F;
 		Unit_UpdateMap(2, u);
 	}
 
 	if (random > 2) return 0;
 
 	/* Ensure the order of Tools_Random_256() calls. */
-	i = (Tools_Random_256() & 1) == 0 ? 1 : 0;
-	Unit_SetOrientation(u, Tools_Random_256(), false, i);
+	i = (Random() & 1) == 0 ? 1 : 0;
+	Unit_SetOrientation(u, Random(), false, i);
 
 	return 0;
 }

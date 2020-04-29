@@ -24,7 +24,7 @@ void GameLoop_Team(void)
 	PoolFindStruct find;
 
 	if (s_tickTeamGameLoop > g_timerGame) return;
-	s_tickTeamGameLoop = g_timerGame + (Tools_Random_256() & 7) + 5;
+	s_tickTeamGameLoop = g_timerGame + (Random() & 7) + 5;
 
 	find.houseID = HOUSE_INVALID;
 	find.index   = 0xFFFF;

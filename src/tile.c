@@ -169,9 +169,9 @@ uint16 Tile_GetTileInDirectionOf(uint16 packed_from, uint16 packed_to)
 		tile32 position;
 		uint16 packed;
 
-		dir = 31 + (Tools_Random_256() & 0x3F);
+		dir = 31 + (Random() & 0x3F);
 
-		if ((Tools_Random_256() & 1) != 0) dir = -dir;
+		if ((Random() & 1) != 0) dir = -dir;
 
 		position = Tile_UnpackTile(packed_to);
 		position = Tile_MoveByDirection(position, direction + dir, min(distance, 20) << 8);
@@ -316,11 +316,11 @@ tile32 Tile_MoveByRandom(tile32 tile, uint16 distance, bool center)
 	x = Tile_GetX(tile);
 	y = Tile_GetY(tile);
 
-	newDistance = Tools_Random_256();
+	newDistance = Random();
 	while (newDistance > distance) newDistance /= 2;
 	distance = newDistance;
 
-	orientation = Tools_Random_256();
+	orientation = Random();
 	x += ((_stepX[orientation] * distance) / 128) * 16;
 	y -= ((_stepY[orientation] * distance) / 128) * 16;
 

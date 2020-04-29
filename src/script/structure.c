@@ -130,7 +130,7 @@ uint16 Script_Structure_RefineSpice(ScriptEngine *script)
 
 	creditsStep = 7;
 	if (u->o.houseID != g_playerHouseID) {
-		creditsStep += (Tools_Random_256() % 4) - 1;
+		creditsStep += (Random() % 4) - 1;
 	}
 
 	creditsStep *= harvesterStep;
@@ -607,12 +607,12 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 
 		tile = Tile_UnpackTile(position + g_table_structure_layoutTiles[layout][i]);
 
-		if (g_table_structureInfo[s->o.type].o.spawnChance < Tools_Random_256()) continue;
+		if (g_table_structureInfo[s->o.type].o.spawnChance < Random()) continue;
 
-		u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, s->o.houseID, tile, Tools_Random_256());
+		u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, s->o.houseID, tile, Random());
 		if (u == NULL) continue;
 
-		u->o.hitpoints = g_table_unitInfo[UNIT_SOLDIER].o.hitpoints * (Tools_Random_256() & 3) / 256;
+		u->o.hitpoints = g_table_unitInfo[UNIT_SOLDIER].o.hitpoints * (Random() & 3) / 256;
 
 		if (s->o.houseID != g_playerHouseID) {
 			Unit_SetAction(u, ACTION_ATTACK);

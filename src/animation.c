@@ -91,7 +91,7 @@ static void Animation_Func_Pause(Animation *animation, int16 parameter)
 {
 	assert(parameter >= 0);
 
-	animation->tickNext = g_timerGUI + parameter + (Tools_Random_256() % 4);
+	animation->tickNext = g_timerGUI + parameter + (Random() % 4);
 }
 
 /**
