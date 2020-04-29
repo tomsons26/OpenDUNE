@@ -120,7 +120,7 @@ static void Unit_MovementTick(Unit *unit)
 /**
  * Loop over all units, performing various of tasks.
  */
-void GameLoop_Unit(void)
+void Unit_AI(void)
 {
 	PoolFindStruct find;
 	bool tickMovement  = false;
@@ -666,7 +666,7 @@ uint16 Unit_IsValidMovementIntoStructure(Unit *unit, Building *s)
 
 	if (unit == NULL || s == NULL) return 0;
 
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingTypes[s->o.type];
 	ui = &g_table_unitTypes[unit->o.type];
 
 	unitEnc = Tools_Index_Encode(unit->o.index, IT_UNIT);
@@ -809,7 +809,7 @@ uint16 Unit_FindClosestRefinery(Unit *unit)
 	while (true) {
 		s2 = Structure_Find(&find);
 		if (s2 == NULL) break;
-		if (s2->state != STRUCTURE_STATE_BUSY) continue;
+		if (s2->State != BSTATE_BUSY) continue;
 		d = Tile_GetDistance(unit->o.position, s2->o.position);
 		if (mind != 0 && d >= mind) continue;
 		mind = d;
@@ -1384,7 +1384,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 				Structure_Damage(s, damage, 0);
 			} else {
-				if (Map_GetLandscapeType(packed) == LST_WALL && g_table_structureInfo[STRUCTURE_WALL].o.hitpoints > damage) Random();
+				if (Map_GetLandscapeType(packed) == LST_WALL && g_table_BuildingTypes[STRUCTURE_WALL].o.hitpoints > damage) Random();
 			}
 		}
 
@@ -2051,7 +2051,7 @@ void Unit_DisplayStatusText(Unit *unit)
 		snprintf(buffer, sizeof(buffer), "%s", Text_String(ui->o.stringID_abbrev));
 	} else {
 		const char *houseName = g_table_houseTypes[Unit_GetHouseID(unit)].name;
-		if (g_config.language == LANGUAGE_FRENCH) {
+		if (g_config.Language == LANGUAGE_FRENCH) {
 			snprintf(buffer, sizeof(buffer), "%s %s", Text_String(ui->o.stringID_abbrev), houseName);
 		} else {
 			snprintf(buffer, sizeof(buffer), "%s %s", houseName, Text_String(ui->o.stringID_abbrev));
@@ -2191,7 +2191,7 @@ void Unit_EnterStructure(Unit *unit, Building *s)
 	}
 
 	ui = &g_table_unitTypes[unit->o.type];
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingTypes[s->o.type];
 
 	if (!unit->o.flags.s.allocated || s->o.hitpoints == 0) {
 		Unit_Remove(unit);
@@ -2202,7 +2202,7 @@ void Unit_EnterStructure(Unit *unit, Building *s)
 	Unit_Hide(unit);
 
 	if (House_Is_Ally(s->o.houseID, Unit_GetHouseID(unit))) {
-		Structure_SetState(s, si->o.flags.busyStateIsIncoming ? STRUCTURE_STATE_READY : STRUCTURE_STATE_BUSY);
+		Structure_SetState(s, si->o.flags.busyStateIsIncoming ? BSTATE_READY : BSTATE_BUSY);
 
 		if (s->o.type == STRUCTURE_REPAIR) {
 			uint16 countDown;
@@ -2298,8 +2298,8 @@ static Building *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 		if (s == NULL) break;
 		if (s->o.type == STRUCTURE_SLAB_1x1 || s->o.type == STRUCTURE_SLAB_2x2 || s->o.type == STRUCTURE_WALL) continue;
 
-		curPosition.x = s->o.position.x + g_table_structure_layoutTileDiff[g_table_structureInfo[s->o.type].layout].x;
-		curPosition.y = s->o.position.y + g_table_structure_layoutTileDiff[g_table_structureInfo[s->o.type].layout].y;
+		curPosition.x = s->o.position.x + g_table_structure_layoutTileDiff[g_table_BuildingTypes[s->o.type].layout].x;
+		curPosition.y = s->o.position.y + g_table_structure_layoutTileDiff[g_table_BuildingTypes[s->o.type].layout].y;
 
 		if (mode != 0 && mode != 4) {
 			if (mode == 1) {
@@ -2570,7 +2570,7 @@ uint16 Unit_GetTargetStructurePriority(Unit *unit, Building *target)
 	if (House_Is_Ally(Unit_GetHouseID(unit), target->o.houseID)) return 0;
 	if ((target->o.seenByHouses & (1 << Unit_GetHouseID(unit))) == 0) return 0;
 
-	si = &g_table_structureInfo[target->o.type];
+	si = &g_table_BuildingTypes[target->o.type];
 	priority = si->o.Risk + si->o.Reward;
 	distance = Tile_GetDistanceRoundedUp(unit->o.position, target->o.position);
 	if (distance != 0) priority /= distance;
@@ -2703,7 +2703,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 
 				Sound_Output_Feedback(37);
 
-				if (g_config.language == LANGUAGE_ENGLISH) {
+				if (g_config.Language == LANGUAGE_ENGLISH) {
 					GUI_DisplayHint(STR_WARNING_SANDWORMS_SHAIHULUD_ROAM_DUNE_DEVOURING_ANYTHING_ON_THE_SAND, 105);
 				}
 
@@ -2718,7 +2718,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 				if (unit->o.type == UNIT_SABOTEUR) {
 					Sound_Output_Feedback(12);
 				} else {
-					if (g_scenarioID < 3) {
+					if (ScenarioIdx < 3) {
 						PoolFindStruct find;
 						Building *s;
 						uint16 feedbackID;

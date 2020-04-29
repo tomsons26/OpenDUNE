@@ -8,7 +8,7 @@
 /**
  * Types of Structures available in the game.
  */
-typedef enum StructureType {
+typedef enum StructType {
 	STRUCTURE_SLAB_1x1          = 0,
 	STRUCTURE_SLAB_2x2          = 1,
 	STRUCTURE_PALACE            = 2,
@@ -31,7 +31,7 @@ typedef enum StructureType {
 
 	STRUCTURE_MAX               = 19,
 	STRUCTURE_INVALID           = 0xFF
-} StructureType;
+} StructType;
 
 /**
  * Flags used to indicate structures in a bitmask.
@@ -62,26 +62,26 @@ typedef enum StructureFlag {
 } StructureFlag;
 
 /** Available structure layouts. */
-typedef enum StructureLayout {
-	STRUCTURE_LAYOUT_1x1 = 0,
-	STRUCTURE_LAYOUT_2x1 = 1,
-	STRUCTURE_LAYOUT_1x2 = 2,
-	STRUCTURE_LAYOUT_2x2 = 3,
-	STRUCTURE_LAYOUT_2x3 = 4,
-	STRUCTURE_LAYOUT_3x2 = 5,
-	STRUCTURE_LAYOUT_3x3 = 6,
+typedef enum BSizeType {
+	BSIZE_1x1 = 0,
+	BSIZE_2x1 = 1,
+	BSIZE_1x2 = 2,
+	BSIZE_2x2 = 3,
+	BSIZE_2x3 = 4,
+	BSIZE_3x2 = 5,
+	BSIZE_3x3 = 6,
 
-	STRUCTURE_LAYOUT_MAX = 7
-} StructureLayout;
+	BSIZE_COUNT = 7
+} BSizeType;
 
 /** States a structure can be in */
-typedef enum StructureState {
-	STRUCTURE_STATE_DETECT    = -2,                        /*!< Used when setting state, meaning to detect which state it has by looking at other properties. */
-	STRUCTURE_STATE_JUSTBUILT = -1,                        /*!< This shows you the building animation etc. */
-	STRUCTURE_STATE_IDLE      = 0,                         /*!< Structure is doing nothing. */
-	STRUCTURE_STATE_BUSY      = 1,                         /*!< Structure is busy (harvester in refinery, unit in repair, .. */
-	STRUCTURE_STATE_READY     = 2                          /*!< Structure is ready and unit will be deployed soon. */
-} StructureState;
+typedef enum BStateType {
+	BSTATE_DETECT    = -2,                        /*!< Used when setting state, meaning to detect which state it has by looking at other properties. */
+	BSTATE_JUSTBUILT = -1,                        /*!< This shows you the building animation etc. */
+	BSTATE_IDLE      = 0,                         /*!< Structure is doing nothing. */
+	BSTATE_BUSY      = 1,                         /*!< Structure is busy (harvester in refinery, unit in repair, .. */
+	BSTATE_READY     = 2                          /*!< Structure is ready and unit will be deployed soon. */
+} BStateType;
 
 /**
  * A Structure as stored in the memory.
@@ -95,7 +95,7 @@ typedef struct Building {
 	uint8  upgradeTimeLeft;                                 /*!< Time left before upgrade is complete, or 0 if no upgrade available. */
 	uint16 countDown;                                       /*!< General countdown for various of functions. */
 	uint16 buildCostRemainder;                              /*!< The remainder of the buildCost for next tick. */
-	 int16 state;                                           /*!< The state of the structure. @see StructureState. */
+	 int16 State;                                           /*!< The state of the structure. @see BStateType. */
 	uint16 hitpointsMax;                                    /*!< Max amount of hitpoints. */
 }  Building;
 
@@ -123,13 +123,13 @@ typedef struct XYSize {
 struct House;
 struct Widget;
 
-extern BuildingType g_table_structureInfo[STRUCTURE_MAX];
-extern const uint16  g_table_structure_layoutTiles[STRUCTURE_LAYOUT_MAX][9];
-extern const uint16  g_table_structure_layoutEdgeTiles[STRUCTURE_LAYOUT_MAX][8];
-extern const uint16  g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX];
-extern const tile32  g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX];
-extern const XYSize  g_table_structure_layoutSize[STRUCTURE_LAYOUT_MAX];
-extern const int16   g_table_structure_layoutTilesAround[STRUCTURE_LAYOUT_MAX][16];
+extern BuildingType g_table_BuildingTypes[STRUCTURE_MAX];
+extern const uint16  g_table_structure_layoutTiles[BSIZE_COUNT][9];
+extern const uint16  g_table_structure_layoutEdgeTiles[BSIZE_COUNT][8];
+extern const uint16  g_table_structure_layoutTileCount[BSIZE_COUNT];
+extern const tile32  g_table_structure_layoutTileDiff[BSIZE_COUNT];
+extern const XYSize  g_table_structure_layoutSize[BSIZE_COUNT];
+extern const int16   g_table_structure_layoutTilesAround[BSIZE_COUNT][16];
 
 extern Building *g_structureActive;
 extern uint16 g_structureActivePosition;
@@ -137,7 +137,7 @@ extern uint16 g_structureActiveType;
 
 extern uint16 g_structureIndex;
 
-extern void GameLoop_Structure(void);
+extern void Building_AI(void);
 extern uint8 Structure_StringToType(const char *name);
 extern Building *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 position);
 extern bool Structure_Place(Building *s, uint16 position);
@@ -145,7 +145,7 @@ extern void Structure_CalculateHitpointsMax(struct House *h);
 extern void Structure_SetState(Building *s, int16 animation);
 extern Building *Structure_Get_ByPackedTile(uint16 packed);
 extern uint32 Structure_GetStructuresBuilt(struct House *h);
-extern int16 Structure_IsValidBuildLocation(uint16 position, StructureType type);
+extern int16 Structure_IsValidBuildLocation(uint16 position, StructType type);
 extern bool Structure_Save(FILE *fp);
 extern bool Structure_Load(FILE *fp, uint32 length);
 extern void Structure_ActivateSpecial(Building *s);

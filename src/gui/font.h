@@ -25,7 +25,7 @@ extern int8 g_fontCharOffset;
 
 extern Font *FontPtr;
 
-extern bool Font_Init(void);
+extern bool Init_Fonts(void);
 extern void Font_Uninit(void);
 extern uint16 Char_Pixel_Width(unsigned char c);
 extern uint16 String_Pixel_Width(const char *string);

@@ -202,7 +202,7 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 	Fill_Rect(0, subtitle->top == 85 ? 0 : subtitle->top, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, 0);
 
-	if (g_enableVoices != 0 && s_feedback_base_index != 0xFFFF && s_houseAnimation_currentSubtitle != 0 && g_config.language == LANGUAGE_ENGLISH) {
+	if (g_enableVoices != 0 && s_feedback_base_index != 0xFFFF && s_houseAnimation_currentSubtitle != 0 && g_config.Language == LANGUAGE_ENGLISH) {
 		/* specific code for Intro
 		 * @see GameLoop_GameIntroAnimation() */
 		uint16 feedback_index = s_feedback_base_index + s_houseAnimation_currentSubtitle;
@@ -871,7 +871,7 @@ static void GameLoop_GameCredits(void)
 	Set_Palette(g_palette1);
 
 	for (;; sleepIdle()) {
-		File_ReadBlockFile(String_GenerateFilename("CREDITS"), credits_buffer, GFX_Screen_GetSize_ByIndex(SCREEN_3));
+		File_ReadBlockFile(Language_Name("CREDITS"), credits_buffer, GFX_Screen_GetSize_ByIndex(SCREEN_3));
 
 		GameCredits_Play(credits_buffer, 20, SCREEN_1, SCREEN_2, 6);
 
@@ -981,7 +981,7 @@ static void Gameloop_Logos(void)
 
 	Clear_Screen(SCREEN_ACTIVE);
 
-	Sprites_LoadImage(String_GenerateFilename("AND"), SCREEN_1, g_palette_998A);
+	Sprites_LoadImage(Language_Name("AND"), SCREEN_1, g_palette_998A);
 
 	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 

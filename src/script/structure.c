@@ -40,7 +40,7 @@ uint16 Script_Structure_GetState(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	s = g_scriptCurrentStructure;
-	return s->state;
+	return s->State;
 }
 
 /**
@@ -59,14 +59,14 @@ uint16 Script_Structure_SetState(ScriptEngine *script)
 	s = g_scriptCurrentStructure;
 	state = STACK_PEEK(1);
 
-	if (state == STRUCTURE_STATE_DETECT) {
+	if (state == BSTATE_DETECT) {
 		if (s->o.linkedID == 0xFF) {
-			state = STRUCTURE_STATE_IDLE;
+			state = BSTATE_IDLE;
 		} else {
 			if (s->countDown == 0) {
-				state = STRUCTURE_STATE_READY;
+				state = BSTATE_READY;
 			} else {
-				state = STRUCTURE_STATE_BUSY;
+				state = BSTATE_BUSY;
 			}
 		}
 	}
@@ -115,12 +115,12 @@ uint16 Script_Structure_RefineSpice(ScriptEngine *script)
 	s = g_scriptCurrentStructure;
 
 	if (s->o.linkedID == 0xFF) {
-		Structure_SetState(s, STRUCTURE_STATE_IDLE);
+		Structure_SetState(s, BSTATE_IDLE);
 		return 0;
 	}
 
 	u = Unit_Get_ByIndex(s->o.linkedID);
-	si = &g_table_structureInfo[s->o.type];
+	si = &g_table_BuildingTypes[s->o.type];
 
 	harvesterStep = (s->o.hitpoints * 256 / si->o.hitpoints) * 3 / 256;
 
@@ -203,7 +203,7 @@ uint16 Script_Structure_FindUnitByType(ScriptEngine *script)
 
 	s = g_scriptCurrentStructure;
 
-	if (s->state != STRUCTURE_STATE_READY) return IT_NONE;
+	if (s->State != BSTATE_READY) return IT_NONE;
 	if (s->o.linkedID == 0xFF) return IT_NONE;
 
 	type = STACK_PEEK(1);
@@ -253,7 +253,7 @@ uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 		s->o.linkedID = u->o.linkedID;
 		u->o.linkedID = 0xFF;
 
-		if (s->o.linkedID == 0xFF) Structure_SetState(s, STRUCTURE_STATE_IDLE);
+		if (s->o.linkedID == 0xFF) Structure_SetState(s, BSTATE_IDLE);
 		Object_Script_Variable4_Clear(&s->o);
 
 		if (s->o.houseID == Whom) Sound_Output_Feedback(Whom + 49);
@@ -280,7 +280,7 @@ uint16 Script_Structure_Unknown0C5A(ScriptEngine *script)
 		GUI_DisplayHint(STR_SEARCH_FOR_SPICE_FIELDS_TO_HARVEST, 0x6A);
 	}
 
-	if (s->o.linkedID == 0xFF) Structure_SetState(s, STRUCTURE_STATE_IDLE);
+	if (s->o.linkedID == 0xFF) Structure_SetState(s, BSTATE_IDLE);
 	Object_Script_Variable4_Clear(&s->o);
 
 	if (s->o.houseID != Whom) return 1;
@@ -564,7 +564,7 @@ uint16 Script_Structure_Explode(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	s = g_scriptCurrentStructure;
-	layout = g_table_structureInfo[s->o.type].layout;
+	layout = g_table_BuildingTypes[s->o.type].layout;
 	position = Tile_PackTile(s->o.position);
 
 	for (i = 0; i < g_table_structure_layoutTileCount[layout]; i++) {
@@ -596,7 +596,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	s = g_scriptCurrentStructure;
-	layout = g_table_structureInfo[s->o.type].layout;
+	layout = g_table_BuildingTypes[s->o.type].layout;
 	position = Tile_PackTile(s->o.position);
 
 	Structure_Remove(s);
@@ -607,7 +607,7 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 
 		tile = Tile_UnpackTile(position + g_table_structure_layoutTiles[layout][i]);
 
-		if (g_table_structureInfo[s->o.type].o.spawnChance < Random()) continue;
+		if (g_table_BuildingTypes[s->o.type].o.spawnChance < Random()) continue;
 
 		u = Unit_Create(UNIT_INDEX_INVALID, UNIT_SOLDIER, s->o.houseID, tile, Random());
 		if (u == NULL) continue;
@@ -629,10 +629,10 @@ uint16 Script_Structure_Destroy(ScriptEngine *script)
 	if (Debug_Map) return 0;
 	if (s->o.houseID != Whom) return 0;
 
-	if (g_config.language == LANGUAGE_FRENCH) {
-		GUI_DisplayText("%s %s %s", 0, Text_String(g_table_structureInfo[s->o.type].o.stringID_full), g_table_houseTypes[s->o.houseID].name, Text_String(STR_IS_DESTROYED));
+	if (g_config.Language == LANGUAGE_FRENCH) {
+		GUI_DisplayText("%s %s %s", 0, Text_String(g_table_BuildingTypes[s->o.type].o.stringID_full), g_table_houseTypes[s->o.houseID].name, Text_String(STR_IS_DESTROYED));
 	} else {
-		GUI_DisplayText("%s %s %s", 0, g_table_houseTypes[s->o.houseID].name, Text_String(g_table_structureInfo[s->o.type].o.stringID_full), Text_String(STR_IS_DESTROYED));
+		GUI_DisplayText("%s %s %s", 0, g_table_houseTypes[s->o.houseID].name, Text_String(g_table_BuildingTypes[s->o.type].o.stringID_full), Text_String(STR_IS_DESTROYED));
 	}
 
 	return 0;

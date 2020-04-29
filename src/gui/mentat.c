@@ -210,7 +210,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 		s_selectedHelpSubject = 0;
 
 		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseTypes[Whom].name[0]);
-		strncpy(s_mentatFilename, String_GenerateFilename(s_mentatFilename), sizeof(s_mentatFilename));
+		strncpy(s_mentatFilename, Language_Name(s_mentatFilename), sizeof(s_mentatFilename));
 	}
 
 	fileID = ChunkFile_Open(s_mentatFilename);
@@ -942,8 +942,8 @@ static void GUI_Mentat_ShowHelp(void)
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
 	File_Seek(fileID, offset, 0);
 	File_Read(fileID, compressedText, info.length);
-	String_Decompress(compressedText, text, g_readBufferSize);
-	String_TranslateSpecial(text);
+	UnDip_Text(compressedText, text, g_readBufferSize);
+	Fixup_Text(text);
 	File_Close(fileID);
 
 	/* skip WSA file name (or string index) */

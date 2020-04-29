@@ -19,7 +19,7 @@ static uint32 s_randomLCG;
 
 uint16 Tools_AdjustToGameSpeed(uint16 normal, uint16 minimum, uint16 maximum, bool inverseSpeed)
 {
-	uint16 gameSpeed = g_gameConfig.gameSpeed;
+	uint16 gameSpeed = g_gameConfig.GameSpeed;
 
 	if (gameSpeed == 2) return normal;
 	if (gameSpeed > 4) return normal;
@@ -168,7 +168,7 @@ tile32 Tools_Index_GetTile(uint16 encoded)
 			if (index >= STRUCTURE_INDEX_MAX_HARD) return tile;
 
 			s = Structure_Get_ByIndex(index);
-			si = &g_table_structureInfo[s->o.type];
+			si = &g_table_BuildingTypes[s->o.type];
 
 			return Tile_AddTileDiff(s->o.position, g_table_structure_layoutTileDiff[si->layout]);
 		}

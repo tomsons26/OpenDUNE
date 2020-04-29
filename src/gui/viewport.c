@@ -104,7 +104,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 			/* Wait for either one of the timers */
 			if (s_tickMapScroll + 10 >= g_timerGame || s_tickCursor + 20 >= g_timerGame) return true;
 			/* Don't scroll if we have a structure/unit selected and don't want to autoscroll */
-			if (g_gameConfig.autoScroll == 0 && (g_selectionType == SELECTIONTYPE_STRUCTURE || g_selectionType == SELECTIONTYPE_UNIT)) return true;
+			if (g_gameConfig.AutoScroll == 0 && (g_selectionType == SELECTIONTYPE_STRUCTURE || g_selectionType == SELECTIONTYPE_UNIT)) return true;
 		}
 
 		s_tickMapScroll = g_timerGame;
@@ -199,7 +199,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		House *h;
 
 		s = g_structureActive;
-		si = &g_table_structureInfo[g_structureActiveType];
+		si = &g_table_BuildingTypes[g_structureActiveType];
 		h = PlayerPtr;
 
 		if (Structure_Place(s, g_selectionPosition)) {

@@ -140,24 +140,24 @@ void Free_IniFile(void)
  * @param config dune config to modify
  * @return False in case of error
  */
-bool SetLanguage_From_IniFile(DuneCfg *config)
+bool SetLanguage_From_IniFile(ConfigType *config)
 {
-	char language[16];
+	char Language[16];
 
 	if (config == NULL || g_openduneini == NULL) return false;
-	if (IniFile_GetString("language", NULL, language, sizeof(language)) == NULL) {
+	if (IniFile_GetString("language", NULL, Language, sizeof(Language)) == NULL) {
 		return false;
 	}
-	if (strcasecmp(language, "ENGLISH") == 0)
-		config->language = LANGUAGE_ENGLISH;
-	else if(strcasecmp(language, "FRENCH") == 0)
-		config->language = LANGUAGE_FRENCH;
-	else if(strcasecmp(language, "GERMAN") == 0)
-		config->language = LANGUAGE_GERMAN;
-	else if(strcasecmp(language, "ITALIAN") == 0)
-		config->language = LANGUAGE_ITALIAN;
-	else if(strcasecmp(language, "SPANISH") == 0)
-		config->language = LANGUAGE_SPANISH;
+	if (strcasecmp(Language, "ENGLISH") == 0)
+		config->Language = LANGUAGE_ENGLISH;
+	else if(strcasecmp(Language, "FRENCH") == 0)
+		config->Language = LANGUAGE_FRENCH;
+	else if(strcasecmp(Language, "GERMAN") == 0)
+		config->Language = LANGUAGE_GERMAN;
+	else if(strcasecmp(Language, "ITALIAN") == 0)
+		config->Language = LANGUAGE_ITALIAN;
+	else if(strcasecmp(Language, "SPANISH") == 0)
+		config->Language = LANGUAGE_SPANISH;
 	return true;
 }
 

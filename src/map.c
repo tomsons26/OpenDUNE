@@ -113,7 +113,7 @@ void Map_SetSelection(uint16 packed)
 		if (s != NULL) {
 			const BuildingType *si;
 
-			si = &g_table_structureInfo[s->o.type];
+			si = &g_table_BuildingTypes[s->o.type];
 			if (s->o.houseID == Whom && g_selectionType != SELECTIONTYPE_MENTAT) {
 				GUI_DisplayHint(si->o.hintStringID, si->o.spriteID);
 			}
@@ -124,7 +124,7 @@ void Map_SetSelection(uint16 packed)
 
 			Structure_UpdateMap(s);
 		} else {
-			Map_SetSelectionSize(STRUCTURE_LAYOUT_1x1);
+			Map_SetSelectionSize(BSIZE_1x1);
 		}
 
 		if (g_selectionType != SELECTIONTYPE_TARGET) {
@@ -145,7 +145,7 @@ void Map_SetSelection(uint16 packed)
 		return;
 	}
 
-	Map_SetSelectionSize(STRUCTURE_LAYOUT_1x1);
+	Map_SetSelectionSize(BSIZE_1x1);
 	g_selectionPosition = packed;
 	return;
 }
@@ -490,7 +490,7 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 
 		if (s != NULL) {
 			if (type == EXPLOSION_IMPACT_LARGE) {
-				const BuildingType *si = &g_table_structureInfo[s->o.type];
+				const BuildingType *si = &g_table_BuildingTypes[s->o.type];
 
 				if (si->o.hitpoints / 2 > s->o.hitpoints) {
 					type = EXPLOSION_SMOKE_PLUME;
@@ -503,8 +503,8 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 	}
 
 	if (Map_GetLandscapeType(positionPacked) == LST_WALL && hitpoints != 0) {
-		if ((g_table_structureInfo[STRUCTURE_WALL].o.hitpoints <= hitpoints) ||
-		    (Random() <= (hitpoints * 256 / g_table_structureInfo[STRUCTURE_WALL].o.hitpoints))) {
+		if ((g_table_BuildingTypes[STRUCTURE_WALL].o.hitpoints <= hitpoints) ||
+		    (Random() <= (hitpoints * 256 / g_table_BuildingTypes[STRUCTURE_WALL].o.hitpoints))) {
 			Map_UpdateWall(positionPacked);
 		}
 	}

@@ -414,7 +414,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 	if (Tools_Index_GetType(index) == IT_STRUCTURE) {
 		s = Tools_Index_GetStructure(index);
 		if (s->o.houseID != houseID) return 0;
-		if (s->state != STRUCTURE_STATE_IDLE) return 0;
+		if (s->State != BSTATE_IDLE) return 0;
 		return 1;
 	}
 
@@ -425,7 +425,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 	while (true) {
 		s = Structure_Find(&find);
 		if (s == NULL) return 0;
-		if (s->state != STRUCTURE_STATE_IDLE) continue;
+		if (s->State != BSTATE_IDLE) continue;
 		return Tools_Index_Encode(s->o.index, IT_STRUCTURE);
 	}
 }

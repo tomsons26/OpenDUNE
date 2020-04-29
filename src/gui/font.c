@@ -126,10 +126,10 @@ void Set_Font(Font *f)
 	FontPtr = f;
 }
 
-bool Font_Init(void)
+bool Init_Fonts(void)
 {
 	g_fontIntro = Font_LoadFile("INTRO.FNT");
-	if ((g_config.language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
+	if ((g_config.Language == LANGUAGE_GERMAN) && File_Exists("new6pg.fnt")) {
 		FontNew6Ptr = Font_LoadFile("new6pg.fnt");
 	} else {
 		FontNew6Ptr = Font_LoadFile("new6p.fnt");

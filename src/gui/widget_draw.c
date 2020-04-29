@@ -96,7 +96,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 
 		s = Structure_Get_ByPackedTile(g_selectionPosition);
 		if (s == NULL) return;
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingTypes[s->o.type];
 
 		spriteID = si->o.spriteID;
 	}
@@ -202,7 +202,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 				sprite = g_sprites[24];
 				spriteWidth = Sprite_GetWidth(sprite) + 1;
 
-				si = &g_table_structureInfo[s->objectType];
+				si = &g_table_BuildingTypes[s->objectType];
 
 				for (y = 0; y < g_table_structure_layoutSize[si->layout].height; y++) {
 					for (x = 0; x < g_table_structure_layoutSize[si->layout].width; x++) {
@@ -229,7 +229,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 		if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
 			const BuildingType *si;
 
-			si = &g_table_structureInfo[s->objectType];
+			si = &g_table_BuildingTypes[s->objectType];
 			buildTime = si->o.Time;
 		} else if (s->o.type == STRUCTURE_REPAIR) {
 			const UnitType *ui;
@@ -481,7 +481,7 @@ static uint16 GUI_Widget_ActionPanel_GetActionType(bool forceDraw)
 				|| s->o.houseID         != displayedHouseID
 				|| House_Get_ByIndex(s->o.houseID)->starportTimeLeft != displayedStarportTime
 				|| s->o.flags.all       != displayedStructureFlags) {
-					g_structureHighHealth = (s->o.hitpoints > (g_table_structureInfo[s->o.type].o.hitpoints / 2));
+					g_structureHighHealth = (s->o.hitpoints > (g_table_BuildingTypes[s->o.type].o.hitpoints / 2));
 					actionType = 3; /* Structure */
 			}
 		} else {
@@ -587,7 +587,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 
 		case 3: { /* Structure */
 			s  = Structure_Get_ByPackedTile(g_selectionPosition);
-			si = &g_table_structureInfo[s->o.type];
+			si = &g_table_BuildingTypes[s->o.type];
 
 			o  = &s->o;
 			oi = &si->o;
@@ -601,7 +601,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		} break;
 
 		case 7: { /* Placement */
-			si = &g_table_structureInfo[g_structureActiveType];
+			si = &g_table_BuildingTypes[g_structureActiveType];
 
 			o = NULL;
 			oi = &si->o;
@@ -746,10 +746,10 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 						buttons[i]->stringID = g_table_actionInfo[actions[i]].stringID;
 						buttons[i]->shortcut = GUI_Widget_GetShortcut(Text_String(buttons[i]->stringID)[0]);
 
-						if (g_config.language == LANGUAGE_FRENCH) {
+						if (g_config.Language == LANGUAGE_FRENCH) {
 							if (buttons[i]->stringID == STR_MOVE) buttons[i]->shortcut2 = 0x27;	/* L key */
 							else if (buttons[i]->stringID == STR_RETURN) buttons[i]->shortcut2 = 0x13;	/* E key */
-						} else if (g_config.language == LANGUAGE_GERMAN) {
+						} else if (g_config.Language == LANGUAGE_GERMAN) {
 							if (buttons[i]->stringID == STR_GUARD) buttons[i]->shortcut2 = 0x17;	/* U key */
 						}
 

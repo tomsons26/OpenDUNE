@@ -137,12 +137,12 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 		Building *s;
 
 		s = Tools_Index_GetStructure(u->NavCom);
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingTypes[s->o.type];
 
 		if (s->o.type == STRUCTURE_STARPORT) {
 			uint16 ret = 0;
 
-			if (s->state == STRUCTURE_STATE_BUSY) {
+			if (s->State == BSTATE_BUSY) {
 				s->o.linkedID = u->o.linkedID;
 				u->o.linkedID = 0xFF;
 				u->o.flags.s.inTransport = false;
@@ -152,7 +152,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 
 				Voice_PlayAtTile(24, u->o.position);
 
-				Structure_SetState(s, STRUCTURE_STATE_READY);
+				Structure_SetState(s, BSTATE_READY);
 
 				ret = 1;
 			}
@@ -163,7 +163,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 			return ret;
 		}
 
-		if ((s->state == STRUCTURE_STATE_IDLE || (si->o.flags.busyStateIsIncoming && s->state == STRUCTURE_STATE_BUSY)) && s->o.linkedID == 0xFF) {
+		if ((s->State == BSTATE_IDLE || (si->o.flags.busyStateIsIncoming && s->State == BSTATE_BUSY)) && s->o.linkedID == 0xFF) {
 			Voice_PlayAtTile(24, u->o.position);
 
 			Unit_EnterStructure(Unit_Get_ByIndex(u->o.linkedID), s);
@@ -240,7 +240,7 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 			s = Tools_Index_GetStructure(u->NavCom);
 
 			/* There was nothing to pickup here */
-			if (s->state != STRUCTURE_STATE_READY) {
+			if (s->State != BSTATE_READY) {
 				Object_Script_Variable4_Clear(&u->o);
 				u->NavCom = 0;
 				return 0;
@@ -258,7 +258,7 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 			s->o.linkedID = u2->o.linkedID;
 			u2->o.linkedID = 0xFF;
 
-			if (s->o.linkedID == 0xFF) Structure_SetState(s, STRUCTURE_STATE_IDLE);
+			if (s->o.linkedID == 0xFF) Structure_SetState(s, BSTATE_IDLE);
 
 			/* Check if the unit has a return-to position or try to find spice in case of a harvester */
 			if (u2->targetLast.x != 0 || u2->targetLast.y != 0) {
@@ -297,14 +297,14 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 				distance = Tile_GetDistanceRoundedUp(s2->o.position, u->o.position);
 
 				if (u2->o.type == UNIT_HARVESTER) {
-					if (s2->o.type != STRUCTURE_REFINERY || s2->state != STRUCTURE_STATE_IDLE || s2->o.script.variables[4] != 0) continue;
+					if (s2->o.type != STRUCTURE_REFINERY || s2->State != BSTATE_IDLE || s2->o.script.variables[4] != 0) continue;
 					if (minDistance != 0 && distance >= minDistance) break;
 					minDistance = distance;
 					s = s2;
 					break;
 				}
 
-				if (s2->o.type != STRUCTURE_REPAIR || s2->state != STRUCTURE_STATE_IDLE || s2->o.script.variables[4] != 0) continue;
+				if (s2->o.type != STRUCTURE_REPAIR || s2->State != BSTATE_IDLE || s2->o.script.variables[4] != 0) continue;
 
 				if (minDistance != 0 && distance >= minDistance) continue;
 				minDistance = distance;
@@ -1373,7 +1373,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 
 		s = Tools_Index_GetStructure(Unit_Get_ByIndex(u->o.linkedID)->originEncoded);
 
-		if (s != NULL && s->state == STRUCTURE_STATE_IDLE && s->o.script.variables[4] == 0) {
+		if (s != NULL && s->State == BSTATE_IDLE && s->o.script.variables[4] == 0) {
 			uint16 encoded;
 
 			encoded = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
@@ -1397,7 +1397,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 
-		if (s->state != STRUCTURE_STATE_IDLE) continue;
+		if (s->State != BSTATE_IDLE) continue;
 		if (s->o.script.variables[4] != 0) continue;
 
 		encoded = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
@@ -1573,7 +1573,7 @@ uint16 Script_Unit_FindStructure(ScriptEngine *script)
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
-		if (s->state != STRUCTURE_STATE_IDLE) continue;
+		if (s->State != BSTATE_IDLE) continue;
 		if (s->o.linkedID != 0xFF) continue;
 		if (s->o.script.variables[4] != 0) continue;
 
@@ -1601,7 +1601,7 @@ uint16 Script_Unit_DisplayDestroyedText(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 	ui = &g_table_unitTypes[u->o.type];
 
-	if (g_config.language == LANGUAGE_FRENCH) {
+	if (g_config.Language == LANGUAGE_FRENCH) {
 		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, Text_String(ui->o.stringID_abbrev), g_table_houseTypes[Unit_GetHouseID(u)].name);
 	} else {
 		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, g_table_houseTypes[Unit_GetHouseID(u)].name, Text_String(ui->o.stringID_abbrev));
@@ -1803,7 +1803,7 @@ uint16 Script_Unit_GoToClosestStructure(ScriptEngine *script)
 		s2 = Structure_Find(&find);
 
 		if (s2 == NULL) break;
-		if (s2->state != STRUCTURE_STATE_IDLE) continue;
+		if (s2->State != BSTATE_IDLE) continue;
 		if (s2->o.linkedID != 0xFF) continue;
 		if (s2->o.script.variables[4] != 0) continue;
 

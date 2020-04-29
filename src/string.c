@@ -16,7 +16,7 @@
 #include "file.h"
 #include "table/strings.h"
 
-static char **s_strings = NULL;
+static char **SystemStrings = NULL;
 static uint16 s_stringsCount = 0;
 
 const char * const g_languageSuffixes[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "ITA", "SPA" };
@@ -32,7 +32,7 @@ const char * const g_languageSuffixes[LANGUAGE_MAX] = { "ENG", "FRE", "GER", "IT
  * @param dest The decompressed string.
  * @return The length of decompressed string.
  */
-uint16 String_Decompress(const char *s, char *dest, uint16 destLen)
+uint16 UnDip_Text(const char *s, char *dest, uint16 destLen)
 {
 	static const char couples[] =
 		" etainosrlhcdupm"	/* 1st char */
@@ -63,7 +63,7 @@ uint16 String_Decompress(const char *s, char *dest, uint16 destLen)
 		}
 		dest[count++] = c;
 		if (count >= destLen - 1) {
-			Warning("String_Decompress() : truncating output !\n");
+			Warning("UnDip_Text() : truncating output !\n");
 			break;
 		}
 	}
@@ -77,14 +77,14 @@ uint16 String_Decompress(const char *s, char *dest, uint16 destLen)
  * @param name The string to append extension to.
  * @return The new string.
  */
-const char *String_GenerateFilename(const char *name)
+const char *Language_Name(const char *name)
 {
-	static char filename[14];
+	static char fullname[14];
 
-	assert(g_config.language < lengthof(g_languageSuffixes));
+	assert(g_config.Language < lengthof(g_languageSuffixes));
 
-	snprintf(filename, sizeof(filename), "%s.%s", name, g_languageSuffixes[g_config.language]);
-	return filename;
+	snprintf(fullname, sizeof(fullname), "%s.%s", name, g_languageSuffixes[g_config.Language]);
+	return fullname;
 }
 
 /**
@@ -95,7 +95,7 @@ const char *String_GenerateFilename(const char *name)
  */
 char *Text_String(uint16 stringID)
 {
-	return s_strings[stringID];
+	return SystemStrings[stringID];
 }
 
 /**
@@ -104,7 +104,7 @@ char *Text_String(uint16 stringID)
  * @param source The untranslated string.
  * @param dest The translated string.
  */
-void String_TranslateSpecial(char *string)
+void Fixup_Text(char *string)
 {
 	char * dest;
 	if (string == NULL) return;
@@ -127,13 +127,13 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 	uint16 i;
 	char decomp_buffer[1024];
 
-	buf = File_ReadWholeFile(String_GenerateFilename(filename));
+	buf = File_ReadWholeFile(Language_Name(filename));
 	count = READ_LE_UINT16(buf) / 2;
 
 	if (end < 0) end = start + count - 1;
 
-	s_strings = (char **)realloc(s_strings, (end + 1) * sizeof(char *));
-	s_strings[s_stringsCount] = NULL;
+	SystemStrings = (char **)realloc(SystemStrings, (end + 1) * sizeof(char *));
+	SystemStrings[s_stringsCount] = NULL;
 
 	for (i = 0; i < count && s_stringsCount <= end; i++) {
 		char *src = (char *)buf + READ_LE_UINT16(buf + i * 2);
@@ -141,8 +141,8 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 
 		if (compressed) {
 			uint16 len;
-			len = String_Decompress(src, decomp_buffer, (uint16)sizeof(decomp_buffer));
-			String_TranslateSpecial(decomp_buffer);
+			len = UnDip_Text(src, decomp_buffer, (uint16)sizeof(decomp_buffer));
+			Fixup_Text(decomp_buffer);
 			String_Trim(decomp_buffer);
 			dst = strdup(decomp_buffer);
 		} else {
@@ -150,18 +150,18 @@ static void String_Load(const char *filename, bool compressed, int start, int en
 			String_Trim(dst);
 		}
 
-		if (strlen(dst) == 0 && s_strings[0] != NULL) {
+		if (strlen(dst) == 0 && SystemStrings[0] != NULL) {
 			free(dst);
 		} else {
-			s_strings[s_stringsCount++] = dst;
+			SystemStrings[s_stringsCount++] = dst;
 		}
 	}
 
 	/* EU version has one more string in DUNE langfile. */
-	if (s_stringsCount == STR_LOAD_GAME) s_strings[s_stringsCount++] = strdup(s_strings[STR_LOAD_A_GAME]);
+	if (s_stringsCount == STR_LOAD_GAME) SystemStrings[s_stringsCount++] = strdup(SystemStrings[STR_LOAD_A_GAME]);
 
 	while (s_stringsCount <= end) {
-		s_strings[s_stringsCount++] = NULL;
+		SystemStrings[s_stringsCount++] = NULL;
 	}
 
 	free(buf);
@@ -188,9 +188,9 @@ void String_Uninit(void)
 {
 	uint16 i;
 
-	for (i = 0; i < s_stringsCount; i++) free(s_strings[i]);
-	free(s_strings);
-	s_strings = NULL;
+	for (i = 0; i < s_stringsCount; i++) free(SystemStrings[i]);
+	free(SystemStrings);
+	SystemStrings = NULL;
 }
 
 /**

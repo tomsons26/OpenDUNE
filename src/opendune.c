@@ -86,7 +86,7 @@ uint32 g_hintsShown1 = 0;          /*!< A bit-array to indicate which hints has 
 uint32 g_hintsShown2 = 0;          /*!< A bit-array to indicate which hints has been show already (32-63). */
 GameMode g_gameMode = GM_MENU;
 uint16 g_campaignID = 0;
-uint16 g_scenarioID = 1;
+uint16 ScenarioIdx = 1;
 uint16 g_activeAction = 0xFFFF;      /*!< Action the controlled unit will do. */
 uint32 g_tickScenarioStart = 0;      /*!< The tick the scenario started in. */
 static uint32 s_tickGameTimeout = 0; /*!< The tick the game will timeout. */
@@ -312,7 +312,7 @@ static void GameLoop_LevelEnd(void)
 
 			File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
 
-			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, true);
+			ScenarioIdx = GUI_StrategicMap_Show(g_campaignID, true);
 
 			Fade_Palette_To(g_palette2, 15);
 
@@ -331,7 +331,7 @@ static void GameLoop_LevelEnd(void)
 
 			Sprites_UnloadTiles();
 
-			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, false);
+			ScenarioIdx = GUI_StrategicMap_Show(g_campaignID, false);
 		}
 
 		PlayerPtr->flags.doneFullScaleAttack = false;
@@ -345,7 +345,7 @@ static void GameLoop_LevelEnd(void)
 	levelEndTimer = g_timerGame + 300;
 }
 
-static void GameLoop_DrawMenu(const char **strings)
+static void Setup_Menu(const char **strings)
 {
 	WindowType *props;
 	uint16 left;
@@ -373,7 +373,7 @@ static void GameLoop_DrawMenu(const char **strings)
 	Clear_KeyBuffer();
 }
 
-static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint8 fgColourNormal, uint8 fgColourSelected, uint8 bgColour)
+static void Flash_Line(const char *string, uint16 left, uint16 top, uint8 fgColourNormal, uint8 fgColourSelected, uint8 bgColour)
 {
 	uint8 i;
 
@@ -389,12 +389,12 @@ static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint
 	}
 }
 
-static bool GameLoop_IsInRange(uint16 x, uint16 y, uint16 minX, uint16 minY, uint16 maxX, uint16 maxY)
+static bool Coordinates_In_Region(uint16 x, uint16 y, uint16 minX, uint16 minY, uint16 maxX, uint16 maxY)
 {
 	return x >= minX && x <= maxX && y >= minY && y <= maxY;
 }
 
-static uint16 GameLoop_HandleEvents(const char **strings)
+static uint16 Check_Menu(const char **strings)
 {
 	uint8 last;
 	uint16 result;
@@ -441,7 +441,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	if (MDisabled == 0) {
 		uint16 y = MouseY;
 
-		if (GameLoop_IsInRange(MouseX, y, minX, minY, maxX, maxY)) {
+		if (Coordinates_In_Region(MouseX, y, minX, minY, maxX, maxY)) {
 			current = (y - minY) / lineHeight;
 		}
 	}
@@ -467,7 +467,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 
 		case 0x41: /* MOUSE LEFT BUTTON */
 		case 0x42: /* MOUSE RIGHT BUTTON */
-			if (GameLoop_IsInRange(MouseQX, MouseQY, minX, minY, maxX, maxY)) {
+			if (Coordinates_In_Region(MouseQX, MouseQY, minX, minY, maxX, maxY)) {
 				current = (MouseQY - minY) / lineHeight;
 				result = current;
 			}
@@ -510,7 +510,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	if (result == 0xFFFF) return 0xFFFF;
 
 	Hide_Mouse();
-	GameLoop_DrawText2(strings[result], left, top + (current * lineHeight), fgColourNormal, fgColourSelected, 0);
+	Flash_Line(strings[result], left, top + (current * lineHeight), fgColourNormal, fgColourSelected, 0);
 	Show_Mouse();
 
 	return result;
@@ -585,7 +585,7 @@ static void ReadProfileIni(const char *filename)
 			oi = &g_table_unitTypes[type].o;
 		} else {
 			type = Structure_StringToType(key);
-			if (type != STRUCTURE_INVALID) oi = &g_table_structureInfo[type].o;
+			if (type != STRUCTURE_INVALID) oi = &g_table_BuildingTypes[type].o;
 		}
 
 		if (oi == NULL) continue;
@@ -615,7 +615,7 @@ static void ReadProfileIni(const char *filename)
 		}
 
 		for (locsi = 0; locsi < STRUCTURE_MAX; locsi++) {
-			ObjectType *oi = &g_table_structureInfo[locsi].o;
+			ObjectType *oi = &g_table_BuildingTypes[locsi].o;
 
 			sprintf(buffer, "%*s%4d,%4d,%4d,%4d,%4d,%4d,%4d,%4d",
 				15 - (int)strlen(oi->name), "", oi->Cost, oi->Time, oi->hitpoints, oi->Sight,
@@ -797,7 +797,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		WindowList[13].yBase  = 160 - ((WindowList[21].height * FontPtr->height) >> 1);
 		WindowList[13].height = (WindowList[21].height * FontPtr->height) + 11;
 
-		Sprites_LoadImage(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
+		Sprites_LoadImage(Language_Name("TITLE"), SCREEN_1, NULL);
 
 		Hide_Mouse();
 
@@ -814,7 +814,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		GUI_Widget_DrawBorder(13, 2, 1);
 
-		GameLoop_DrawMenu(strings);
+		Setup_Menu(strings);
 
 		Show_Mouse();
 
@@ -823,7 +823,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 	if (loadGame) return;
 
-	stringID = GameLoop_HandleEvents(strings);
+	stringID = Check_Menu(strings);
 
 	if (stringID != 0xFFFF) stringID = mainMenuStrings[index][stringID];
 
@@ -900,7 +900,7 @@ static void InGame_Numpad_Move(uint16 key)
 /**
  * Main game loop.
  */
-static void GameLoop_Main(void)
+static void Main_Game(void)
 {
 	static uint32 l_timerNext = 0;
 	static uint32 l_timerUnitStatus = 0;
@@ -927,7 +927,7 @@ static void GameLoop_Main(void)
 	Timer_SetTimer(TIMER_GUI, true);
 
 	g_campaignID = 0;
-	g_scenarioID = 1;
+	ScenarioIdx = 1;
 	Whom = HOUSE_INVALID;
 	g_selectionType = SELECTIONTYPE_MENTAT;
 	g_selectionTypeNew = SELECTIONTYPE_MENTAT;
@@ -1029,7 +1029,7 @@ static void GameLoop_Main(void)
 			Show_Mouse();
 
 			g_gameMode = GM_RESTART;
-			g_scenarioID = 1;
+			ScenarioIdx = 1;
 			g_campaignID = 0;
 			g_strategicRegionBits = 0;
 		}
@@ -1043,7 +1043,7 @@ static void GameLoop_Main(void)
 		if (g_gameMode == GM_RESTART) {
 			GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
-			Game_LoadScenario(Whom, g_scenarioID);
+			Game_LoadScenario(Whom, ScenarioIdx);
 			if (!Debug_Map && !g_debugSkipDialogs) {
 				GUI_Mentat_ShowBriefing();
 			} else {
@@ -1106,9 +1106,9 @@ static void GameLoop_Main(void)
 
 			GUI_DrawCredits(Whom, 0);
 
-			GameLoop_Team();
-			GameLoop_Unit();
-			GameLoop_Structure();
+			Team_AI();
+			Unit_AI();
+			Building_AI();
 			House_AI();
 
 			GUI_DrawScreen(SCREEN_0);
@@ -1144,7 +1144,7 @@ static void GameLoop_Main(void)
  */
 static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int frame_rate)
 {
-	if (!Font_Init()) {
+	if (!Init_Fonts()) {
 		Error(
 			"--------------------------\n"
 			"ERROR LOADING DATA FILE\n"
@@ -1279,7 +1279,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Loading config from dune.cfg */
-	if (!Config_Read("dune.cfg", &g_config)) {
+	if (!Read_Config_Struct("dune.cfg", &g_config)) {
 		Config_Default(&g_config);
 		commit_dune_cfg = true;
 	}
@@ -1287,7 +1287,7 @@ int main(int argc, char **argv)
 	SetLanguage_From_IniFile(&g_config);
 
 	/* Writing config to dune.cfg */
-	if (commit_dune_cfg && !Config_Write("dune.cfg", &g_config)) {
+	if (commit_dune_cfg && !Write_Config_Struct("dune.cfg", &g_config)) {
 		Error("Error writing to dune.cfg file.\n");
 		return 1;
 	}
@@ -1315,7 +1315,7 @@ int main(int argc, char **argv)
 
 	MDisabled = 0;
 
-	GameLoop_Main();
+	Main_Game();
 
 	printf("%s\n", Text_String(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
 
@@ -1396,7 +1396,7 @@ void Game_Prepare(void)
 				s->o.linkedID = 0xFF;
 				s->countDown = 0;
 			} else {
-				Structure_SetState(s, STRUCTURE_STATE_READY);
+				Structure_SetState(s, BSTATE_READY);
 			}
 		}
 
@@ -1430,11 +1430,11 @@ void Game_Prepare(void)
 	Map_SetSelection(g_selectionPosition);
 
 	if (g_structureActiveType != 0xFFFF) {
-		Map_SetSelectionSize(g_table_structureInfo[g_structureActiveType].layout);
+		Map_SetSelectionSize(g_table_BuildingTypes[g_structureActiveType].layout);
 	} else {
 		Building *s = Structure_Get_ByPackedTile(g_selectionPosition);
 
-		if (s != NULL) Map_SetSelectionSize(g_table_structureInfo[s->o.type].layout);
+		if (s != NULL) Map_SetSelectionSize(g_table_BuildingTypes[s->o.type].layout);
 	}
 
 	Voice_LoadVoices(Whom);
@@ -1503,7 +1503,7 @@ void Game_LoadScenario(uint8 houseID, uint16 scenarioID)
 
 	g_validateStrictIfZero++;
 
-	if (!Scenario_Load(scenarioID, houseID)) {
+	if (!Read_Scenario_INI(scenarioID, houseID)) {
 		GUI_DisplayModalMessage("No more scenarios!", 0xFFFF);
 
 		PrepareEnd();

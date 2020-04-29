@@ -451,7 +451,7 @@ void House_UpdateCreditsStorage(uint8 houseID)
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingTypes[s->o.type];
 		creditsStorage += si->creditsStorage;
 	}
 
@@ -490,7 +490,7 @@ void House_CalculatePowerAndCredit(House *h)
 		/* ENHANCEMENT -- Only count structures that are placed on the map, not ones we are building. */
 		if (g_dune2_enhanced && s->o.flags.s.isNotOnMap) continue;
 
-		si = &g_table_structureInfo[s->o.type];
+		si = &g_table_BuildingTypes[s->o.type];
 
 		h->creditsStorage += si->creditsStorage;
 

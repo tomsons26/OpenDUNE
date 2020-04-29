@@ -281,9 +281,9 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 		s = Structure_Create(index, structureType, houseType, position);
 		if (s == NULL) return;
 
-		s->o.hitpoints = hitpoints * g_table_structureInfo[s->o.type].o.hitpoints / 256;
+		s->o.hitpoints = hitpoints * g_table_BuildingTypes[s->o.type].o.hitpoints / 256;
 		s->o.flags.s.degrades = false;
-		s->state = STRUCTURE_STATE_IDLE;
+		s->State = BSTATE_IDLE;
 	}
 }
 
@@ -518,14 +518,14 @@ static void Scenario_Load_Chunk(const char *category, void (*ptr)(const char *ke
 	}
 }
 
-bool Scenario_Load(uint16 scenarioID, uint8 houseID)
+bool Read_Scenario_INI(uint16 scenarioID, uint8 houseID)
 {
 	char filename[14];
 	int i;
 
 	if (houseID >= HOUSE_MAX) return false;
 
-	g_scenarioID = scenarioID;
+	ScenarioIdx = scenarioID;
 
 	/* Load scenario file */
 	sprintf(filename, "SCEN%c%03hu.INI", g_table_houseTypes[houseID].name[0], scenarioID);

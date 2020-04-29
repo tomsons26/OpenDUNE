@@ -722,7 +722,7 @@ void GUI_UpdateProductionStringID(void)
 
 	if (s == NULL) return;
 
-	if (!g_table_structureInfo[s->o.type].o.flags.factory) {
+	if (!g_table_BuildingTypes[s->o.type].o.flags.factory) {
 		if (s->o.type == STRUCTURE_PALACE) g_productionStringID = STR_LAUNCH + g_table_houseTypes[s->o.houseID].specialWeapon - 1;
 		return;
 	}
@@ -1442,7 +1442,7 @@ static uint16 Update_Score(int16 score, uint16 *harvestedAllied, uint16 *harvest
 		if (s == NULL) break;
 		if (s->o.type == STRUCTURE_SLAB_1x1 || s->o.type == STRUCTURE_SLAB_2x2 || s->o.type == STRUCTURE_WALL) continue;
 
-		score += g_table_structureInfo[s->o.type].o.Cost / 100;
+		score += g_table_BuildingTypes[s->o.type].o.Cost / 100;
 	}
 
 	g_validateStrictIfZero++;
@@ -1553,7 +1553,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		if (score != 0xFFFF) GUI_HallOfFame_DrawRank(score, false);
 	} else {
 		GFX_Screen_Copy2(8, 80, 8, 116, 304, 36, SCREEN_1, SCREEN_1, false);
-		if (g_scenarioID != 1) GFX_Screen_Copy2(8, 80, 8, 152, 304, 36, SCREEN_1, SCREEN_1, false);
+		if (ScenarioIdx != 1) GFX_Screen_Copy2(8, 80, 8, 152, 304, 36, SCREEN_1, SCREEN_1, false);
 	}
 
 	if (score != 0xFFFF) {
@@ -1633,7 +1633,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	score = Update_Score(score, &harvestedAllied, &harvestedEnemy, houseID);
 
 	/* 1st scenario doesn't have the "Building destroyed" stats */
-	statsBoxCount = (g_scenarioID == 1) ? 2 : 3;
+	statsBoxCount = (ScenarioIdx == 1) ? 2 : 3;
 
 	Hide_Mouse();
 
@@ -1645,7 +1645,7 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 
 	GUI_DrawTextOnFilledRectangle(Text_String(STR_SPICE_HARVESTED_BY), 83);
 	GUI_DrawTextOnFilledRectangle(Text_String(STR_UNITS_DESTROYED_BY), 119);
-	if (g_scenarioID != 1) GUI_DrawTextOnFilledRectangle(Text_String(STR_BUILDINGS_DESTROYED_BY), 155);
+	if (ScenarioIdx != 1) GUI_DrawTextOnFilledRectangle(Text_String(STR_BUILDINGS_DESTROYED_BY), 155);
 
 	textLeft = 19 + max(String_Pixel_Width(Text_String(STR_YOU)), String_Pixel_Width(Text_String(STR_ENEMY)));
 	statsBarWidth = 261 - textLeft;
@@ -1800,7 +1800,7 @@ uint8 Choose_House(void)
 			w = GUI_Widget_Link(w, w2);
 		}
 
-		Sprites_LoadImage(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
+		Sprites_LoadImage(Language_Name("HERALD"), SCREEN_1, NULL);
 
 		Hide_Mouse();
 		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -1857,7 +1857,7 @@ uint8 Choose_House(void)
 		strncpy(g_readBuffer, Text_String(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
-		Sprites_LoadImage(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
+		Sprites_LoadImage(Language_Name("MISC"), SCREEN_1, g_palette1);
 
 		Hide_Mouse();
 
@@ -2360,7 +2360,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 				Unit_Select(NULL);
 				GUI_Widget_ActionPanel_Draw(true);
 
-				Map_SetSelectionSize(g_table_structureInfo[g_structureActiveType].layout);
+				Map_SetSelectionSize(g_table_BuildingTypes[g_structureActiveType].layout);
 
 				Timer_SetTimer(TIMER_GAME, true);
 				break;
@@ -2743,7 +2743,7 @@ static void GUI_FactoryWindow_InitItems(void)
 
 	if (g_factoryWindowStarport) {
 		uint16 seconds = (g_timerGame - g_tickScenarioStart) / 60;
-		uint16 seed = (seconds / 60) + g_scenarioID + Whom;
+		uint16 seed = (seconds / 60) + ScenarioIdx + Whom;
 		seed *= seed;
 
 		Tools_RandomLCG_Seed(seed);
@@ -2774,7 +2774,7 @@ static void GUI_FactoryWindow_InitItems(void)
 		uint16 i;
 
 		for (i = 0; i < STRUCTURE_MAX; i++) {
-			ObjectType *oi = &g_table_structureInfo[i].o;
+			ObjectType *oi = &g_table_BuildingTypes[i].o;
 
 			if (oi->available == 0) continue;
 
@@ -2945,7 +2945,7 @@ char *GUI_String_Get_ByIndex(int16 stringID)
 				STR_FASTEST
 			};
 
-			stringID = gameSpeedStrings[g_gameConfig.gameSpeed];
+			stringID = gameSpeedStrings[g_gameConfig.GameSpeed];
 		} break;
 
 		case -13:
@@ -2953,7 +2953,7 @@ char *GUI_String_Get_ByIndex(int16 stringID)
 			break;
 
 		case -14:
-			stringID = (g_gameConfig.autoScroll != 0) ? STR_ON : STR_OFF;
+			stringID = (g_gameConfig.AutoScroll != 0) ? STR_ON : STR_OFF;
 			break;
 
 		default: break;
@@ -3296,7 +3296,7 @@ static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 			if (region != 0) {
 				char buffer[81];
 
-				sprintf(key, "%sTXT%d", g_languageSuffixes[g_config.language], region);
+				sprintf(key, "%sTXT%d", g_languageSuffixes[g_config.Language], region);
 
 				if (Ini_GetString(category, key, NULL, buffer, sizeof(buffer), g_fileRegionINI) != NULL) {
 					GUI_StrategicMap_DrawText(buffer);
@@ -3371,7 +3371,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	Byte_Blit(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
 	Byte_Blit(x, y, 33, 152, 7, 40, SCREEN_2, SCREEN_2);
 
-	switch (g_config.language) {
+	switch (g_config.Language) {
 		case LANGUAGE_GERMAN:
 			Byte_Blit(1, 120, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
 			break;
@@ -3534,7 +3534,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 
 		sprite = g_sprites[24];
 		width = Sprite_GetWidth(sprite) + 1;
-		si = &g_table_structureInfo[item->objectType];
+		si = &g_table_BuildingTypes[item->objectType];
 
 		for (j = 0; j < g_table_structure_layoutSize[si->layout].height; j++) {
 			for (i = 0; i < g_table_structure_layoutSize[si->layout].width; i++) {
@@ -4449,7 +4449,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 		if (data[i].score == 0) break;
 
-		if (g_config.language == LANGUAGE_FRENCH) {
+		if (g_config.Language == LANGUAGE_FRENCH) {
 			p1 = Text_String(_rankScores[data[i].rank].rankString);
 			p2 = g_table_houseTypes[data[i].houseID].name;
 		} else {

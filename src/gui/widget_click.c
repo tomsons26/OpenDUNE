@@ -392,7 +392,7 @@ bool GUI_Widget_Picture_Click(Widget *w)
 
 	s = Structure_Get_ByPackedTile(g_selectionPosition);
 
-	if (s == NULL || !g_table_structureInfo[s->o.type].o.flags.factory) return false;
+	if (s == NULL || !g_table_BuildingTypes[s->o.type].o.flags.factory) return false;
 
 	Structure_BuildObject(s, 0xFFFF);
 
@@ -508,7 +508,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 
 		if (desc->widgets[i].labelStringId == STR_NULL) continue;
 
-		if (g_config.language == LANGUAGE_FRENCH) {
+		if (g_config.Language == LANGUAGE_FRENCH) {
 			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (WindowList[w->parentID].xBase << 3) + 40, w->offsetY + WindowList[w->parentID].yBase + 3, 232, 0, 0x22);
 		} else {
 			Fancy_Text_Print(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (WindowList[w->parentID].xBase << 3) - 10, w->offsetY + WindowList[w->parentID].yBase + 3, 232, 0, 0x222);
@@ -607,7 +607,7 @@ static void GUI_Widget_GameControls_Click(Widget *w)
 					break;
 
 				case 2:
-					if (++g_gameConfig.gameSpeed >= 5) g_gameConfig.gameSpeed = 0;
+					if (++g_gameConfig.GameSpeed >= 5) g_gameConfig.GameSpeed = 0;
 					break;
 
 				case 3:
@@ -615,7 +615,7 @@ static void GUI_Widget_GameControls_Click(Widget *w)
 					break;
 
 				case 4:
-					g_gameConfig.autoScroll ^= 0x1;
+					g_gameConfig.AutoScroll ^= 0x1;
 					break;
 
 				case 5:

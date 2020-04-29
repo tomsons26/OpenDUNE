@@ -189,7 +189,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 	for (voice = 0; voice < NUM_VOICES; voice++) {
 		switch (g_table_voices[voice].string[0]) {
 			case '%':
-				if (g_config.language != LANGUAGE_ENGLISH || currentVoiceSet == voiceSet) {
+				if (g_config.Language != LANGUAGE_ENGLISH || currentVoiceSet == voiceSet) {
 					if (voiceSet != 0xFFFF && voiceSet != 0xFFFE) break;
 				}
 
@@ -241,7 +241,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 				if (g_voiceData[voice] != NULL ||
 						currentVoiceSet == voiceSet || voiceSet == 0xFFFF || voiceSet == 0xFFFE) break;
 
-				switch (g_config.language) {
+				switch (g_config.Language) {
 					case LANGUAGE_FRENCH: prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN: prefixChar = 'G'; break;
 					default: prefixChar = g_table_houseTypes[voiceSet].prefixChar;
@@ -254,7 +254,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 			case '+':
 				if (voiceSet == 0xFFFF || g_voiceData[voice] != NULL) break;
 
-				switch (g_config.language) {
+				switch (g_config.Language) {
 					case LANGUAGE_FRENCH:  prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN:  prefixChar = 'G'; break;
 					default: prefixChar = 'Z'; break;
@@ -393,7 +393,7 @@ void Sound_Output_Feedback(uint16 index)
 		uint8 i;
 
 		for (i = 0; i < lengthof(s_spokenWords); i++) {
-			s_spokenWords[i] = (g_config.language == LANGUAGE_ENGLISH) ? g_feedback[index].voiceId[i] : g_translatedVoice[index][i];
+			s_spokenWords[i] = (g_config.Language == LANGUAGE_ENGLISH) ? g_feedback[index].voiceId[i] : g_translatedVoice[index][i];
 		}
 	}
 

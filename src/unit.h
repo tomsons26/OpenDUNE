@@ -239,7 +239,7 @@ extern uint16 g_dirtyUnitCount;
 extern uint16 g_dirtyAirUnitCount;
 
 
-extern void GameLoop_Unit(void);
+extern void Unit_AI(void);
 extern uint8 Unit_GetHouseID(Unit *u);
 extern uint8 Unit_StringToType(const char *name);
 extern uint8 Unit_ActionStringToType(const char *name);

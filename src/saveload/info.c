@@ -134,7 +134,7 @@ static const SaveLoadDesc s_saveInfo[] = {
 	SLD_GCALLB (SLDT_UINT16, g_unitActive, &SaveLoad_UnitActive),
 	SLD_GENTRY (SLDT_UINT16, g_activeAction),
 	SLD_GENTRY (SLDT_UINT32, g_strategicRegionBits),
-	SLD_GENTRY (SLDT_UINT16, g_scenarioID),
+	SLD_GENTRY (SLDT_UINT16, ScenarioIdx),
 	SLD_GENTRY (SLDT_UINT16, g_campaignID),
 	SLD_GENTRY (SLDT_UINT32, g_hintsShown1),
 	SLD_GENTRY (SLDT_UINT32, g_hintsShown2),
@@ -149,7 +149,7 @@ static const SaveLoadDesc s_saveInfo[] = {
 
 static const SaveLoadDesc s_saveInfoOld[] = {
 	SLD_EMPTY2(SLDT_UINT8,  250),
-	SLD_GENTRY(SLDT_UINT16, g_scenarioID),
+	SLD_GENTRY(SLDT_UINT16, ScenarioIdx),
 	SLD_GENTRY(SLDT_UINT16, g_campaignID),
 	SLD_END
 };

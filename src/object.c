@@ -62,13 +62,13 @@ void Object_Script_Variable4_Set(Object *o, uint16 encoded)
 
 	if (o->flags.s.isUnit) return;
 
-	si = &g_table_structureInfo[o->type];
+	si = &g_table_BuildingTypes[o->type];
 	if (!si->o.flags.busyStateIsIncoming) return;
 
 	s = (Building *)o;
 	if (Structure_GetLinkedUnit(s) != NULL) return;
 
-	Structure_SetState(s, (encoded == 0) ? STRUCTURE_STATE_IDLE : STRUCTURE_STATE_BUSY);
+	Structure_SetState(s, (encoded == 0) ? BSTATE_IDLE : BSTATE_BUSY);
 }
 
 /**
@@ -125,7 +125,7 @@ uint16 Object_GetDistanceToEncoded(Object *o, uint16 encoded)
 		packed = Tile_PackTile(position);
 
 		/* ENHANCEMENT -- Originally this was o->type, where 'o' refers to a unit. */
-		packed += g_table_structure_layoutEdgeTiles[g_table_structureInfo[s->o.type].layout][(Orientation_Orientation256ToOrientation8(Tile_GetDirection(o->position, position)) + 4) & 7];
+		packed += g_table_structure_layoutEdgeTiles[g_table_BuildingTypes[s->o.type].layout][(Orientation_Orientation256ToOrientation8(Tile_GetDirection(o->position, position)) + 4) & 7];
 
 		position = Tile_UnpackTile(packed);
 	} else {
