@@ -73,7 +73,7 @@ void Team_Recount(void)
 
 	for (index = 0; index < TEAM_INDEX_MAX; index++) {
 		Team *t = Team_Get_ByIndex(index);
-		if (t->flags.used) g_teamFindArray[g_teamFindCount++] = t;
+		if (t->flags.IsActive) g_teamFindArray[g_teamFindCount++] = t;
 	}
 }
 
@@ -91,19 +91,19 @@ Team *Team_Allocate(uint16 index)
 		/* Find the first unused index */
 		for (index = 0; index < TEAM_INDEX_MAX; index++) {
 			t = Team_Get_ByIndex(index);
-			if (!t->flags.used) break;
+			if (!t->flags.IsActive) break;
 		}
 		if (index == TEAM_INDEX_MAX) return NULL;
 	} else {
 		t = Team_Get_ByIndex(index);
-		if (t->flags.used) return NULL;
+		if (t->flags.IsActive) return NULL;
 	}
 	assert(t != NULL);
 
 	/* Initialize the Team */
 	memset(t, 0, sizeof(Team));
 	t->index      = index;
-	t->flags.used = true;
+	t->flags.IsActive = true;
 
 	g_teamFindArray[g_teamFindCount++] = t;
 

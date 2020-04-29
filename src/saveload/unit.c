@@ -27,8 +27,8 @@ static const SaveLoadDesc s_saveUnit[] = {
 	SLD_ENTRY (Unit, SLDT_UINT8,  nextActionID),
 	SLD_ENTRY2(Unit, SLDT_UINT8,  fireDelay, SLDT_UINT16),
 	SLD_ENTRY (Unit, SLDT_UINT16, distanceToDestination),
-	SLD_ENTRY (Unit, SLDT_UINT16, targetAttack),
-	SLD_ENTRY (Unit, SLDT_UINT16, targetMove),
+	SLD_ENTRY (Unit, SLDT_UINT16, TarCom),
+	SLD_ENTRY (Unit, SLDT_UINT16, NavCom),
 	SLD_ENTRY (Unit, SLDT_UINT8,  amount),
 	SLD_ENTRY (Unit, SLDT_UINT8,  deviated),
 	SLD_ENTRY (Unit, SLDT_UINT16, targetLast.x),
@@ -43,9 +43,9 @@ static const SaveLoadDesc s_saveUnit[] = {
 	SLD_ENTRY (Unit, SLDT_UINT8,  wobbleIndex),
 	SLD_ENTRY (Unit,  SLDT_INT8,  spriteOffset),
 	SLD_ENTRY (Unit, SLDT_UINT8,  blinkCounter),
-	SLD_ENTRY (Unit, SLDT_UINT8,  team),
+	SLD_ENTRY (Unit, SLDT_UINT8,  Team),
 	SLD_ENTRY (Unit, SLDT_UINT16, timer),
-	SLD_ARRAY (Unit, SLDT_UINT8,  route, 14),
+	SLD_ARRAY (Unit, SLDT_UINT8,  Path, 14),
 	SLD_END
 };
 

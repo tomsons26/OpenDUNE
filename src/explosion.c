@@ -97,7 +97,7 @@ static void Explosion_Func_TileDamage(Explosion *e, uint16 parameter)
 
 	/* Boom a bloom if there is one */
 	if (t->groundTileID == g_bloomTileID) {
-		Map_Bloom_ExplodeSpice(packed, g_playerHouseID);
+		Map_Bloom_ExplodeSpice(packed, Whom);
 		return;
 	}
 
@@ -164,7 +164,7 @@ static void Explosion_Func_BloomExplosion(Explosion *e, uint16 parameter)
 
 	if (g_map[packed].groundTileID != g_bloomTileID) return;
 
-	Map_Bloom_ExplodeSpice(packed, g_playerHouseID);
+	Map_Bloom_ExplodeSpice(packed, Whom);
 }
 
 /**

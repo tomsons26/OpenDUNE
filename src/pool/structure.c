@@ -13,8 +13,8 @@
 #include "../opendune.h"
 #include "../structure.h"
 
-static struct Structure g_structureArray[STRUCTURE_INDEX_MAX_HARD];
-static struct Structure *g_structureFindArray[STRUCTURE_INDEX_MAX_SOFT];
+static struct Building g_structureArray[STRUCTURE_INDEX_MAX_HARD];
+static struct Building *g_structureFindArray[STRUCTURE_INDEX_MAX_SOFT];
 static uint16 g_structureFindCount;
 
 /**
@@ -23,7 +23,7 @@ static uint16 g_structureFindCount;
  * @param index The index of the Structure to get.
  * @return The Structure.
  */
-Structure *Structure_Get_ByIndex(uint16 index)
+Building *Structure_Get_ByIndex(uint16 index)
 {
 	assert(index < STRUCTURE_INDEX_MAX_HARD);
 	return &g_structureArray[index];
@@ -37,14 +37,14 @@ Structure *Structure_Get_ByIndex(uint16 index)
  *   same 'find' parameter walks over all possible values matching the filter.
  * @return The Structure, or NULL if nothing matches (anymore).
  */
-Structure *Structure_Find(PoolFindStruct *find)
+Building *Structure_Find(PoolFindStruct *find)
 {
 	if (find->index >= g_structureFindCount + 3 && find->index != 0xFFFF) return NULL;
 	find->index++; /* First, we always go to the next index */
 
 	assert(g_structureFindCount <= STRUCTURE_INDEX_MAX_SOFT);
 	for (; find->index < g_structureFindCount + 3; find->index++) {
-		Structure *s = NULL;
+		Building *s = NULL;
 
 		if (find->index < g_structureFindCount) {
 			s = g_structureFindArray[find->index];
@@ -110,8 +110,8 @@ void Structure_Recount(void)
 	g_structureFindCount = 0;
 
 	for (index = 0; index < STRUCTURE_INDEX_MAX_SOFT; index++) {
-		Structure *s = Structure_Get_ByIndex(index);
-		if (s->o.flags.s.used) g_structureFindArray[g_structureFindCount++] = s;
+		Building *s = Structure_Get_ByIndex(index);
+		if (s->o.flags.s.IsActive) g_structureFindArray[g_structureFindCount++] = s;
 	}
 }
 
@@ -122,9 +122,9 @@ void Structure_Recount(void)
  * @param typeID The type of the new Structure.
  * @return The Structure allocated, or NULL on failure.
  */
-Structure *Structure_Allocate(uint16 index, uint8 type)
+Building *Structure_Allocate(uint16 index, uint8 type)
 {
-	Structure *s = NULL;
+	Building *s = NULL;
 
 	switch (type) {
 		case STRUCTURE_SLAB_1x1:
@@ -147,12 +147,12 @@ Structure *Structure_Allocate(uint16 index, uint8 type)
 				/* Find the first unused index */
 				for (index = 0; index < STRUCTURE_INDEX_MAX_SOFT; index++) {
 					s = Structure_Get_ByIndex(index);
-					if (!s->o.flags.s.used) break;
+					if (!s->o.flags.s.IsActive) break;
 				}
 				if (index == STRUCTURE_INDEX_MAX_SOFT) return NULL;
 			} else {
 				s = Structure_Get_ByIndex(index);
-				if (s->o.flags.s.used) return NULL;
+				if (s->o.flags.s.IsActive) return NULL;
 			}
 
 			g_structureFindArray[g_structureFindCount++] = s;
@@ -161,11 +161,11 @@ Structure *Structure_Allocate(uint16 index, uint8 type)
 	assert(s != NULL);
 
 	/* Initialize the Structure */
-	memset(s, 0, sizeof(Structure));
+	memset(s, 0, sizeof(Building));
 	s->o.index             = index;
 	s->o.type              = type;
 	s->o.linkedID          = 0xFF;
-	s->o.flags.s.used      = true;
+	s->o.flags.s.IsActive      = true;
 	s->o.flags.s.allocated = true;
 	s->o.script.delay = 0;
 
@@ -177,7 +177,7 @@ Structure *Structure_Allocate(uint16 index, uint8 type)
  *
  * @param address The address of the Structure to free.
  */
-void Structure_Free(Structure *s)
+void Structure_Free(Building *s)
 {
 	int i;
 

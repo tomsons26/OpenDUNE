@@ -140,7 +140,7 @@ void Tile_RemoveFogInRadius(tile32 tile, uint16 radius)
 
 			if (Tile_GetDistanceRoundedUp(tile, t) > radius) continue;
 
-			Map_UnveilTile(packed, g_playerHouseID);
+			Map_UnveilTile(packed, Whom);
 		}
 	}
 }

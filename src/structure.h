@@ -86,7 +86,7 @@ typedef enum StructureState {
 /**
  * A Structure as stored in the memory.
  */
-typedef struct Structure {
+typedef struct Building {
 	Object o;                                               /*!< Common to Unit and Structures. */
 	uint16 creatorHouseID;                                  /*!< The Index of the House who created this Structure. Required in case of take-overs. */
 	uint16 rotationSpriteDiff;                              /*!< Which sprite to show for the current rotation of Turrets etc. */
@@ -97,13 +97,13 @@ typedef struct Structure {
 	uint16 buildCostRemainder;                              /*!< The remainder of the buildCost for next tick. */
 	 int16 state;                                           /*!< The state of the structure. @see StructureState. */
 	uint16 hitpointsMax;                                    /*!< Max amount of hitpoints. */
-}  Structure;
+}  Building;
 
 /**
  * Static information per Structure type.
  */
-typedef struct StructureInfo {
-	ObjectInfo o;                                           /*!< Common to UnitInfo and StructureInfo. */
+typedef struct BuildingType {
+	ObjectType o;                                           /*!< Common to UnitInfo and StructureInfo. */
 	uint32 enterFilter;                                     /*!< Bitfield determining which unit is allowed to enter the structure. If bit n is set, then units of type n may enter */
 	uint16 creditsStorage;                                  /*!< How many credits this Structure can store. */
 	 int16 powerUsage;                                      /*!< How much power this Structure uses (positive value) or produces (negative value). */
@@ -112,7 +112,7 @@ typedef struct StructureInfo {
 	uint8  animationIndex[3];                               /*!< The index inside g_table_animation_structure for the Animation of the Structure. */
 	uint8  buildableUnits[8];                               /*!< Which units this structure can produce. */
 	uint16 upgradeCampaign[3];                              /*!< Minimum campaign for upgrades. */
-} StructureInfo;
+} BuildingType;
 
 /** X/Y pair defining a 2D size. */
 typedef struct XYSize {
@@ -123,7 +123,7 @@ typedef struct XYSize {
 struct House;
 struct Widget;
 
-extern StructureInfo g_table_structureInfo[STRUCTURE_MAX];
+extern BuildingType g_table_structureInfo[STRUCTURE_MAX];
 extern const uint16  g_table_structure_layoutTiles[STRUCTURE_LAYOUT_MAX][9];
 extern const uint16  g_table_structure_layoutEdgeTiles[STRUCTURE_LAYOUT_MAX][8];
 extern const uint16  g_table_structure_layoutTileCount[STRUCTURE_LAYOUT_MAX];
@@ -131,7 +131,7 @@ extern const tile32  g_table_structure_layoutTileDiff[STRUCTURE_LAYOUT_MAX];
 extern const XYSize  g_table_structure_layoutSize[STRUCTURE_LAYOUT_MAX];
 extern const int16   g_table_structure_layoutTilesAround[STRUCTURE_LAYOUT_MAX][16];
 
-extern Structure *g_structureActive;
+extern Building *g_structureActive;
 extern uint16 g_structureActivePosition;
 extern uint16 g_structureActiveType;
 
@@ -139,30 +139,30 @@ extern uint16 g_structureIndex;
 
 extern void GameLoop_Structure(void);
 extern uint8 Structure_StringToType(const char *name);
-extern Structure *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 position);
-extern bool Structure_Place(Structure *s, uint16 position);
+extern Building *Structure_Create(uint16 index, uint8 typeID, uint8 houseID, uint16 position);
+extern bool Structure_Place(Building *s, uint16 position);
 extern void Structure_CalculateHitpointsMax(struct House *h);
-extern void Structure_SetState(Structure *s, int16 animation);
-extern Structure *Structure_Get_ByPackedTile(uint16 packed);
+extern void Structure_SetState(Building *s, int16 animation);
+extern Building *Structure_Get_ByPackedTile(uint16 packed);
 extern uint32 Structure_GetStructuresBuilt(struct House *h);
 extern int16 Structure_IsValidBuildLocation(uint16 position, StructureType type);
 extern bool Structure_Save(FILE *fp);
 extern bool Structure_Load(FILE *fp, uint32 length);
-extern void Structure_ActivateSpecial(Structure *s);
-extern void Structure_RemoveFog(Structure *s);
-extern bool Structure_Damage(Structure *s, uint16 damage, uint16 range);
-extern bool Structure_IsUpgradable(Structure *s);
+extern void Structure_ActivateSpecial(Building *s);
+extern void Structure_RemoveFog(Building *s);
+extern bool Structure_Damage(Building *s, uint16 damage, uint16 range);
+extern bool Structure_IsUpgradable(Building *s);
 extern bool Structure_ConnectWall(uint16 position, bool recurse);
-extern struct Unit *Structure_GetLinkedUnit(Structure *s);
-extern void Structure_UntargetMe(Structure *s);
-extern uint16 Structure_FindFreePosition(Structure *s, bool checkForSpice);
-extern void Structure_Remove(Structure *s);
-extern bool Structure_BuildObject(Structure *s, uint16 objectType);
-extern bool Structure_SetUpgradingState(Structure *s, int8 value, struct Widget *w);
-extern bool Structure_SetRepairingState(Structure *s, int8 value, struct Widget *w);
-extern void Structure_UpdateMap(Structure *s);
-extern uint32 Structure_GetBuildable(Structure *s);
+extern struct Unit *Structure_GetLinkedUnit(Building *s);
+extern void Structure_UntargetMe(Building *s);
+extern uint16 Structure_FindFreePosition(Building *s, bool checkForSpice);
+extern void Structure_Remove(Building *s);
+extern bool Structure_BuildObject(Building *s, uint16 objectType);
+extern bool Structure_SetUpgradingState(Building *s, int8 value, struct Widget *w);
+extern bool Structure_SetRepairingState(Building *s, int8 value, struct Widget *w);
+extern void Structure_UpdateMap(Building *s);
+extern uint32 Structure_GetBuildable(Building *s);
 extern void Structure_HouseUnderAttack(uint8 houseID);
-extern uint16 Structure_AI_PickNextToBuild(Structure *s);
+extern uint16 Structure_AI_PickNextToBuild(Building *s);
 
 #endif /* STRUCTURE_H */

@@ -53,7 +53,7 @@ uint16 Script_Unit_RandomSoldier(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	if (Random() >= g_table_unitInfo[u->o.type].o.spawnChance) return 0;
+	if (Random() >= g_table_unitTypes[u->o.type].o.spawnChance) return 0;
 
 	position = Tile_MoveByRandom(u->o.position, 20, true);
 
@@ -97,7 +97,7 @@ uint16 Script_Unit_GetTargetPriority(ScriptEngine *script)
 {
 	Unit *u;
 	Unit *target;
-	Structure *s;
+	Building *s;
 	uint16 encoded;
 
 	u = g_scriptCurrentUnit;
@@ -130,13 +130,13 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 
 	if (u->o.linkedID == 0xFF) return 0;
-	if (Tools_Index_GetType(u->targetMove) == IT_UNIT) return 0;
+	if (Tools_Index_GetType(u->NavCom) == IT_UNIT) return 0;
 
-	if (Tools_Index_GetType(u->targetMove) == IT_STRUCTURE) {
-		const StructureInfo *si;
-		Structure *s;
+	if (Tools_Index_GetType(u->NavCom) == IT_STRUCTURE) {
+		const BuildingType *si;
+		Building *s;
 
-		s = Tools_Index_GetStructure(u->targetMove);
+		s = Tools_Index_GetStructure(u->NavCom);
 		si = &g_table_structureInfo[s->o.type];
 
 		if (s->o.type == STRUCTURE_STARPORT) {
@@ -158,7 +158,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 			}
 
 			Object_Script_Variable4_Clear(&u->o);
-			u->targetMove = 0;
+			u->NavCom = 0;
 
 			return ret;
 		}
@@ -169,7 +169,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 			Unit_EnterStructure(Unit_Get_ByIndex(u->o.linkedID), s);
 
 			Object_Script_Variable4_Clear(&u->o);
-			u->targetMove = 0;
+			u->NavCom = 0;
 
 			u->o.linkedID = 0xFF;
 			u->o.flags.s.inTransport = false;
@@ -181,7 +181,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 		}
 
 		Object_Script_Variable4_Clear(&u->o);
-		u->targetMove = 0;
+		u->NavCom = 0;
 
 		return 0;
 	}
@@ -192,7 +192,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 
 	if (!Unit_SetPosition(u2, Tile_Center(u->o.position))) return 0;
 
-	if (u2->o.houseID == g_playerHouseID) {
+	if (u2->o.houseID == Whom) {
 		Voice_PlayAtTile(24, u->o.position);
 	}
 
@@ -208,7 +208,7 @@ uint16 Script_Unit_TransportDeliver(ScriptEngine *script)
 	u->o.flags.s.inTransport = false;
 
 	Object_Script_Variable4_Clear(&u->o);
-	u->targetMove = 0;
+	u->NavCom = 0;
 
 	return 1;
 }
@@ -232,24 +232,24 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 
 	if (u->o.linkedID != 0xFF) return 0;
 
-	switch (Tools_Index_GetType(u->targetMove)) {
+	switch (Tools_Index_GetType(u->NavCom)) {
 		case IT_STRUCTURE: {
-			Structure *s;
+			Building *s;
 			Unit *u2;
 
-			s = Tools_Index_GetStructure(u->targetMove);
+			s = Tools_Index_GetStructure(u->NavCom);
 
 			/* There was nothing to pickup here */
 			if (s->state != STRUCTURE_STATE_READY) {
 				Object_Script_Variable4_Clear(&u->o);
-				u->targetMove = 0;
+				u->NavCom = 0;
 				return 0;
 			}
 
 			u->o.flags.s.inTransport = true;
 
 			Object_Script_Variable4_Clear(&u->o);
-			u->targetMove = 0;
+			u->NavCom = 0;
 
 			u2 = Unit_Get_ByIndex(s->o.linkedID);
 
@@ -262,9 +262,9 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 
 			/* Check if the unit has a return-to position or try to find spice in case of a harvester */
 			if (u2->targetLast.x != 0 || u2->targetLast.y != 0) {
-				u->targetMove = Tools_Index_Encode(Tile_PackTile(u2->targetLast), IT_TILE);
-			} else if (u2->o.type == UNIT_HARVESTER && Unit_GetHouseID(u2) != g_playerHouseID) {
-				u->targetMove = Tools_Index_Encode(Map_SearchSpice(Tile_PackTile(u->o.position), 20), IT_TILE);
+				u->NavCom = Tools_Index_Encode(Tile_PackTile(u2->targetLast), IT_TILE);
+			} else if (u2->o.type == UNIT_HARVESTER && Unit_GetHouseID(u2) != Whom) {
+				u->NavCom = Tools_Index_Encode(Map_SearchSpice(Tile_PackTile(u->o.position), 20), IT_TILE);
 			}
 
 			Unit_UpdateMap(2, u);
@@ -274,11 +274,11 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 
 		case IT_UNIT: {
 			Unit *u2;
-			Structure *s = NULL;
+			Building *s = NULL;
 			PoolFindStruct find;
 			int16 minDistance = 0;
 
-			u2 = Tools_Index_GetUnit(u->targetMove);
+			u2 = Tools_Index_GetUnit(u->NavCom);
 
 			if (!u2->o.flags.s.allocated) return 0;
 
@@ -288,7 +288,7 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 
 			/* Find closest refinery / repair station */
 			while (true) {
-				Structure *s2;
+				Building *s2;
 				int16 distance;
 
 				s2 = Structure_Find(&find);
@@ -326,7 +326,7 @@ uint16 Script_Unit_Pickup(ScriptEngine *script)
 
 			/* Set where we are going to */
 			Object_Script_Variable4_Link(Tools_Index_Encode(u->o.index, IT_UNIT), Tools_Index_Encode(s->o.index, IT_STRUCTURE));
-			u->targetMove = u->o.script.variables[4];
+			u->NavCom = u->o.script.variables[4];
 
 			Unit_UpdateMap(2, u);
 
@@ -435,9 +435,9 @@ uint16 Script_Unit_MoveToTarget(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	if (u->targetMove == 0) return 0;
+	if (u->NavCom == 0) return 0;
 
-	tile = Tools_Index_GetTile(u->targetMove);
+	tile = Tools_Index_GetTile(u->NavCom);
 
 	distance = Tile_GetDistance(u->o.position, tile);
 
@@ -489,22 +489,22 @@ uint16 Script_Unit_MoveToTarget(ScriptEngine *script)
  */
 uint16 Script_Unit_Die(ScriptEngine *script)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 
 	VARIABLE_NOT_USED(script);
 
 	u = g_scriptCurrentUnit;
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	Unit_Remove(u);
 
 	if (ui->movementType != MOVEMENT_WINGER) {
 		uint16 credits;
 
-		credits = max(ui->o.buildCredits / 100, 1);
+		credits = max(ui->o.Cost / 100, 1);
 
-		if (u->o.houseID == g_playerHouseID) {
+		if (u->o.houseID == Whom) {
 			g_scenario.killedAllied++;
 			g_scenario.score -= credits;
 		} else {
@@ -536,7 +536,7 @@ uint16 Script_Unit_ExplosionSingle(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	Map_MakeExplosion(STACK_PEEK(1), u->o.position, g_table_unitInfo[u->o.type].o.hitpoints, Tools_Index_Encode(u->o.index, IT_UNIT));
+	Map_MakeExplosion(STACK_PEEK(1), u->o.position, g_table_unitTypes[u->o.type].o.hitpoints, Tools_Index_Encode(u->o.index, IT_UNIT));
 	return 0;
 }
 
@@ -576,27 +576,27 @@ uint16 Script_Unit_ExplosionMultiple(ScriptEngine *script)
  */
 uint16 Script_Unit_Fire(ScriptEngine *script)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 	uint16 target;
-	UnitType typeID;
+	UnitsType typeID;
 	uint16 distance;
 	bool fireTwice;
 	uint16 damage;
 
 	u = g_scriptCurrentUnit;
 
-	target = u->targetAttack;
+	target = u->TarCom;
 	if (target == 0 || !Tools_Index_IsValid(target)) return 0;
 
-	if (u->o.type != UNIT_SANDWORM && target == Tools_Index_Encode(Tile_PackTile(u->o.position), IT_TILE)) u->targetAttack = 0;
+	if (u->o.type != UNIT_SANDWORM && target == Tools_Index_Encode(Tile_PackTile(u->o.position), IT_TILE)) u->TarCom = 0;
 
-	if (u->targetAttack != target) {
+	if (u->TarCom != target) {
 		Unit_SetTarget(u, target);
 		return 0;
 	}
 
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	if (u->o.type != UNIT_SANDWORM && u->orientation[ui->o.flags.hasTurret ? 1 : 0].speed != 0) return 0;
 
@@ -606,9 +606,9 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 
 	distance = Object_GetDistanceToEncoded(&u->o, target);
 
-	if ((int16)(ui->fireDistance << 8) < (int16)distance) return 0;
+	if ((int16)(ui->Range << 8) < (int16)distance) return 0;
 
-	if (u->o.type != UNIT_SANDWORM && (Tools_Index_GetType(target) != IT_UNIT || g_table_unitInfo[Tools_Index_GetUnit(target)->o.type].movementType != MOVEMENT_WINGER)) {
+	if (u->o.type != UNIT_SANDWORM && (Tools_Index_GetType(target) != IT_UNIT || g_table_unitTypes[Tools_Index_GetUnit(target)->o.type].movementType != MOVEMENT_WINGER)) {
 		int16 diff = 0;
 		int8 orientation;
 
@@ -620,10 +620,10 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 		if (diff >= 8) return 0;
 	}
 
-	damage = ui->damage;
+	damage = ui->Damage;
 	typeID = ui->bulletType;
 
-	fireTwice = ui->flags.firesTwice && u->o.hitpoints > ui->o.hitpoints / 2;
+	fireTwice = ui->flags.IsTwoShooter && u->o.hitpoints > ui->o.hitpoints / 2;
 
 	if ((u->o.type == UNIT_TROOPERS || u->o.type == UNIT_TROOPER) && (int16)distance > 512) typeID = UNIT_MISSILE_TROOPER;
 
@@ -680,7 +680,7 @@ uint16 Script_Unit_Fire(ScriptEngine *script)
 		default: break;
 	}
 
-	u->fireDelay = Tools_AdjustToGameSpeed(ui->fireDelay * 2, 1, 0xFFFF, true);
+	u->fireDelay = Tools_AdjustToGameSpeed(ui->ROF * 2, 1, 0xFFFF, true);
 
 	if (fireTwice) {
 		u->o.flags.s.fireTwiceFlip = !u->o.flags.s.fireTwiceFlip;
@@ -725,7 +725,7 @@ uint16 Script_Unit_SetOrientation(ScriptEngine *script)
  */
 uint16 Script_Unit_Rotate(ScriptEngine *script)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 	uint16 index;
 	int8 current;
@@ -735,7 +735,7 @@ uint16 Script_Unit_Rotate(ScriptEngine *script)
 	VARIABLE_NOT_USED(script);
 
 	u = g_scriptCurrentUnit;
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	if (ui->movementType != MOVEMENT_WINGER && (u->currentDestination.x != 0 || u->currentDestination.y != 0)) return 1;
 
@@ -745,10 +745,10 @@ uint16 Script_Unit_Rotate(ScriptEngine *script)
 	if (u->orientation[index].speed != 0) return 1;
 	current = u->orientation[index].current;
 
-	if (!Tools_Index_IsValid(u->targetAttack)) return 0;
+	if (!Tools_Index_IsValid(u->TarCom)) return 0;
 
 	/* Check where we should rotate to */
-	tile = Tools_Index_GetTile(u->targetAttack);
+	tile = Tools_Index_GetTile(u->TarCom);
 	orientation = Tile_GetDirection(u->o.position, tile);
 
 	/* If we aren't already looking at it, rotate */
@@ -802,17 +802,17 @@ uint16 Script_Unit_SetDestination(ScriptEngine *script)
 	encoded = STACK_PEEK(1);
 
 	if (encoded == 0 || !Tools_Index_IsValid(encoded)) {
-		u->targetMove = 0;
+		u->NavCom = 0;
 		return 0;
 	}
 
 	if (u->o.type == UNIT_HARVESTER) {
-		Structure *s;
+		Building *s;
 
 		s = Tools_Index_GetStructure(encoded);
 		if (s == NULL) {
-			u->targetMove = encoded;
-			u->route[0] = 0xFF;
+			u->NavCom = encoded;
+			u->Path[0] = 0xFF;
 			return 0;
 		}
 
@@ -843,7 +843,7 @@ uint16 Script_Unit_SetTarget(ScriptEngine *script)
 	target = STACK_PEEK(1);
 
 	if (target == 0 || !Tools_Index_IsValid(target)) {
-		u->targetAttack = 0;
+		u->TarCom = 0;
 		return 0;
 	}
 
@@ -851,14 +851,14 @@ uint16 Script_Unit_SetTarget(ScriptEngine *script)
 
 	orientation = Tile_GetDirection(u->o.position, tile);
 
-	u->targetAttack = target;
-	if (!g_table_unitInfo[u->o.type].o.flags.hasTurret) {
-		u->targetMove = target;
+	u->TarCom = target;
+	if (!g_table_unitTypes[u->o.type].o.flags.hasTurret) {
+		u->NavCom = target;
 		Unit_SetOrientation(u, orientation, false, 0);
 	}
 	Unit_SetOrientation(u, orientation, false, 1);
 
-	return u->targetAttack;
+	return u->TarCom;
 }
 
 /**
@@ -878,7 +878,7 @@ uint16 Script_Unit_SetAction(ScriptEngine *script)
 
 	action = STACK_PEEK(1);
 
-	if (u->o.houseID == g_playerHouseID && action == ACTION_HARVEST && u->nextActionID != ACTION_INVALID) return 0;
+	if (u->o.houseID == Whom && action == ACTION_HARVEST && u->nextActionID != ACTION_INVALID) return 0;
 
 	Unit_SetAction(u, action);
 
@@ -901,7 +901,7 @@ uint16 Script_Unit_SetActionDefault(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	Unit_SetAction(u, g_table_unitInfo[u->o.type].o.actionsPlayer[3]);
+	Unit_SetAction(u, g_table_unitTypes[u->o.type].o.actionsPlayer[3]);
 
 	return 0;
 }
@@ -926,7 +926,7 @@ uint16 Script_Unit_SetDestinationDirect(ScriptEngine *script)
 
 	u = g_scriptCurrentUnit;
 
-	if ((u->currentDestination.x == 0 && u->currentDestination.y == 0) || g_table_unitInfo[u->o.type].flags.isNormalUnit) {
+	if ((u->currentDestination.x == 0 && u->currentDestination.y == 0) || g_table_unitTypes[u->o.type].flags.isNormalUnit) {
 		u->currentDestination = Tools_Index_GetTile(encoded);
 	}
 
@@ -945,19 +945,19 @@ uint16 Script_Unit_SetDestinationDirect(ScriptEngine *script)
  */
 uint16 Script_Unit_GetInfo(ScriptEngine *script)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 
 	u = g_scriptCurrentUnit;
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	switch (STACK_PEEK(1)) {
 		case 0x00: return u->o.hitpoints * 256 / ui->o.hitpoints;
-		case 0x01: return Tools_Index_IsValid(u->targetMove) ? u->targetMove : 0;
-		case 0x02: return ui->fireDistance << 8;
+		case 0x01: return Tools_Index_IsValid(u->NavCom) ? u->NavCom : 0;
+		case 0x02: return ui->Range << 8;
 		case 0x03: return u->o.index;
 		case 0x04: return u->orientation[0].current;
-		case 0x05: return u->targetAttack;
+		case 0x05: return u->TarCom;
 		case 0x06:
 			if (u->originEncoded == 0 || u->o.type == UNIT_HARVESTER) Unit_FindClosestRefinery(u);
 			return u->originEncoded;
@@ -973,7 +973,7 @@ uint16 Script_Unit_GetInfo(ScriptEngine *script)
 		case 0x10: return u->orientation[ui->o.flags.hasTurret ? 1 : 0].current;
 		case 0x11: return abs(u->orientation[ui->o.flags.hasTurret ? 1 : 0].target - u->orientation[ui->o.flags.hasTurret ? 1 : 0].current);
 		case 0x12: return (ui->movementType & 0x40) == 0 ? 0 : 1;
-		case 0x13: return (u->o.seenByHouses & (1 << g_playerHouseID)) == 0 ? 0 : 1;
+		case 0x13: return (u->o.seenByHouses & (1 << Whom)) == 0 ? 0 : 1;
 		default:   return 0;
 	}
 }
@@ -1309,21 +1309,21 @@ uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
 	packedDst = Tools_Index_GetPackedTile(encoded);
 
 	if (packedDst == packedSrc) {
-		u->route[0] = 0xFF;
-		u->targetMove = 0;
+		u->Path[0] = 0xFF;
+		u->NavCom = 0;
 		return 0;
 	}
 
-	if (u->route[0] == 0xFF) {
+	if (u->Path[0] == 0xFF) {
 		Pathfinder_Data res;
 		uint8 buffer[42];
 
 		res = Script_Unit_Pathfinder(packedSrc, packedDst, buffer, 40);
 
-		memcpy(u->route, res.buffer, min(res.routeSize, 14));
+		memcpy(u->Path, res.buffer, min(res.routeSize, 14));
 
-		if (u->route[0] == 0xFF) {
-			u->targetMove = 0;
+		if (u->Path[0] == 0xFF) {
+			u->NavCom = 0;
 			if (u->o.type == UNIT_SANDWORM) {
 				script->delay = 720;
 			}
@@ -1332,23 +1332,23 @@ uint16 Script_Unit_CalculateRoute(ScriptEngine *script)
 		uint16 distance;
 
 		distance = Tile_GetDistancePacked(packedDst, packedSrc);
-		if (distance < 14) u->route[distance] = 0xFF;
+		if (distance < 14) u->Path[distance] = 0xFF;
 	}
 
-	if (u->route[0] == 0xFF) return 1;
+	if (u->Path[0] == 0xFF) return 1;
 
-	if (u->orientation[0].current != (int8)(u->route[0] * 32)) {
-		Unit_SetOrientation(u, (int8)(u->route[0] * 32), false, 0);
+	if (u->orientation[0].current != (int8)(u->Path[0] * 32)) {
+		Unit_SetOrientation(u, (int8)(u->Path[0] * 32), false, 0);
 		return 1;
 	}
 
 	if (!Unit_StartMovement(u)) {
-		u->route[0] = 0xFF;
+		u->Path[0] = 0xFF;
 		return 0;
 	}
 
-	memmove(&u->route[0], &u->route[1], 13);
-	u->route[13] = 0xFF;
+	memmove(&u->Path[0], &u->Path[1], 13);
+	u->Path[13] = 0xFF;
 	return 1;
 }
 
@@ -1369,7 +1369,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 
 	if (u->o.linkedID != 0xFF) {
-		Structure *s;
+		Building *s;
 
 		s = Tools_Index_GetStructure(Unit_Get_ByIndex(u->o.linkedID)->originEncoded);
 
@@ -1380,7 +1380,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 
 			Object_Script_Variable4_Link(Tools_Index_Encode(u->o.index, IT_UNIT), encoded);
 
-			u->targetMove = u->o.script.variables[4];
+			u->NavCom = u->o.script.variables[4];
 
 			return encoded;
 		}
@@ -1391,7 +1391,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 	find.type    = STACK_PEEK(1);
 
 	while (true) {
-		Structure *s;
+		Building *s;
 		uint16 encoded;
 
 		s = Structure_Find(&find);
@@ -1404,7 +1404,7 @@ uint16 Script_Unit_MoveToStructure(ScriptEngine *script)
 
 		Object_Script_Variable4_Link(Tools_Index_Encode(u->o.index, IT_UNIT), encoded);
 
-		u->targetMove = encoded;
+		u->NavCom = encoded;
 
 		return encoded;
 	}
@@ -1479,7 +1479,7 @@ uint16 Script_Unit_StartAnimation(ScriptEngine *script)
 	g_map[position].houseID = Unit_GetHouseID(u);
 
 	assert(animationUnitID < 4);
-	if (g_table_unitInfo[u->o.type].displayMode == DISPLAYMODE_INFANTRY_3_FRAMES) {
+	if (g_table_unitTypes[u->o.type].displayMode == DISPLAYMODE_INFANTRY_3_FRAMES) {
 		Animation_Start(g_table_animation_unitScript1[animationUnitID], u->o.position, 0, Unit_GetHouseID(u), 4);
 	} else {
 		Animation_Start(g_table_animation_unitScript2[animationUnitID], u->o.position, 0, Unit_GetHouseID(u), 4);
@@ -1507,7 +1507,7 @@ uint16 Script_Unit_CallUnitByType(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 
 	if (u->o.script.variables[4] != 0) return u->o.script.variables[4];
-	if (!g_table_unitInfo[u->o.type].o.flags.canBePickedUp || u->deviated != 0) return 0;
+	if (!g_table_unitTypes[u->o.type].o.flags.canBePickedUp || u->deviated != 0) return 0;
 
 	encoded = Tools_Index_Encode(u->o.index, IT_UNIT);
 
@@ -1517,7 +1517,7 @@ uint16 Script_Unit_CallUnitByType(ScriptEngine *script)
 	encoded2 = Tools_Index_Encode(u2->o.index, IT_UNIT);
 
 	Object_Script_Variable4_Link(encoded, encoded2);
-	u2->targetMove = encoded;
+	u2->NavCom = encoded;
 
 	return encoded2;
 }
@@ -1544,7 +1544,7 @@ uint16 Script_Unit_Unknown2552(ScriptEngine *script)
 	if (u2 == NULL || u2->o.type != UNIT_CARRYALL) return 0;
 
 	Object_Script_Variable4_Clear(&u->o);
-	u2->targetMove = 0;
+	u2->NavCom = 0;
 
 	return 0;
 }
@@ -1569,7 +1569,7 @@ uint16 Script_Unit_FindStructure(ScriptEngine *script)
 	find.type    = STACK_PEEK(1);
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -1593,18 +1593,18 @@ uint16 Script_Unit_FindStructure(ScriptEngine *script)
  */
 uint16 Script_Unit_DisplayDestroyedText(ScriptEngine *script)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 
 	VARIABLE_NOT_USED(script);
 
 	u = g_scriptCurrentUnit;
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	if (g_config.language == LANGUAGE_FRENCH) {
-		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, Text_String(ui->o.stringID_abbrev), g_table_houseInfo[Unit_GetHouseID(u)].name);
+		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, Text_String(ui->o.stringID_abbrev), g_table_houseTypes[Unit_GetHouseID(u)].name);
 	} else {
-		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, g_table_houseInfo[Unit_GetHouseID(u)].name, Text_String(ui->o.stringID_abbrev));
+		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, g_table_houseTypes[Unit_GetHouseID(u)].name, Text_String(ui->o.stringID_abbrev));
 	}
 
 	return 0;
@@ -1702,7 +1702,7 @@ uint16 Script_Unit_IsValidDestination(ScriptEngine *script)
 			return 1;
 
 		case IT_STRUCTURE: {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Get_ByIndex(index);
 			if (s->o.houseID == Unit_GetHouseID(u)) return 0;
@@ -1757,7 +1757,7 @@ uint16 Script_Unit_IdleAction(ScriptEngine *script)
 	u = g_scriptCurrentUnit;
 
 	random = IRandom(0, 10);
-	movementType = g_table_unitInfo[u->o.type].movementType;
+	movementType = g_table_unitTypes[u->o.type].movementType;
 
 	if (movementType != MOVEMENT_FOOT && movementType != MOVEMENT_TRACKED && movementType != MOVEMENT_WHEELED) return 0;
 
@@ -1786,7 +1786,7 @@ uint16 Script_Unit_IdleAction(ScriptEngine *script)
 uint16 Script_Unit_GoToClosestStructure(ScriptEngine *script)
 {
 	Unit *u;
-	Structure *s = NULL;
+	Building *s = NULL;
 	PoolFindStruct find;
 	uint16 distanceMin =0;
 
@@ -1797,7 +1797,7 @@ uint16 Script_Unit_GoToClosestStructure(ScriptEngine *script)
 	find.type    = STACK_PEEK(1);
 
 	while (true) {
-		Structure *s2;
+		Building *s2;
 		uint16 distance;
 
 		s2 = Structure_Find(&find);
@@ -1834,7 +1834,7 @@ uint16 Script_Unit_GoToClosestStructure(ScriptEngine *script)
 uint16 Script_Unit_MCVDeploy(ScriptEngine *script)
 {
 	Unit *u;
-	Structure *s = NULL;
+	Building *s = NULL;
 	uint16 i;
 
 	VARIABLE_NOT_USED(script);
@@ -1854,7 +1854,7 @@ uint16 Script_Unit_MCVDeploy(ScriptEngine *script)
 		}
 	}
 
-	if (Unit_GetHouseID(u) == g_playerHouseID) {
+	if (Unit_GetHouseID(u) == Whom) {
 		GUI_DisplayText(Text_String(STR_UNIT_IS_UNABLE_TO_DEPLOY_HERE), 0);
 	}
 
@@ -1910,11 +1910,11 @@ uint16 Script_Unit_Unknown2BD5(ScriptEngine *script)
 
 			if (Tools_Index_Encode(u->o.index, IT_UNIT) == u2->o.script.variables[4] && u2->o.houseID == u->o.houseID) return 1;
 
-			u2->targetMove = 0;
+			u2->NavCom = 0;
 		} break;
 
 		case IT_STRUCTURE: {
-			Structure *s;
+			Building *s;
 
 			s = Tools_Index_GetStructure(u->o.script.variables[4]);
 			if (Tools_Index_Encode(u->o.index, IT_UNIT) == s->o.script.variables[4] && s->o.houseID == u->o.houseID) return 1;

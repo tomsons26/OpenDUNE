@@ -154,9 +154,9 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		action = g_activeAction;
 
 		Object_Script_Variable4_Clear(&u->o);
-		u->targetAttack   = 0;
-		u->targetMove     = 0;
-		u->route[0] = 0xFF;
+		u->TarCom   = 0;
+		u->NavCom     = 0;
+		u->Path[0] = 0xFF;
 
 		if (action != ACTION_MOVE && action != ACTION_HARVEST) {
 			encoded = Tools_Index_Encode(Unit_FindTargetAround(packed), IT_TILE);
@@ -169,18 +169,18 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 		if (action == ACTION_MOVE) {
 			Unit_SetDestination(u, encoded);
 		} else if (action == ACTION_HARVEST) {
-			u->targetMove = encoded;
+			u->NavCom = encoded;
 		} else {
 			Unit *target;
 
 			Unit_SetTarget(u, encoded);
-			target = Tools_Index_GetUnit(u->targetAttack);
+			target = Tools_Index_GetUnit(u->TarCom);
 			if (target != NULL) target->blinkCounter = 8;
 		}
 
 		if (g_enableVoices == 0) {
 			Driver_Sound_Play(36, 0xFF);
-		} else if (g_table_unitInfo[u->o.type].movementType == MOVEMENT_FOOT) {
+		} else if (g_table_unitTypes[u->o.type].movementType == MOVEMENT_FOOT) {
 			Sound_StartSound(g_table_actionInfo[action].soundID);
 		} else {
 			Sound_StartSound(((Random() & 0x1) == 0) ? 20 : 17);
@@ -194,13 +194,13 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 	}
 
 	if (click && g_selectionType == SELECTIONTYPE_PLACE) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 		House *h;
 
 		s = g_structureActive;
 		si = &g_table_structureInfo[g_structureActiveType];
-		h = g_playerHouse;
+		h = PlayerPtr;
 
 		if (Structure_Place(s, g_selectionPosition)) {
 			Voice_Play(20);
@@ -211,7 +211,7 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 				Unit *u;
 
 				g_validateStrictIfZero++;
-				u = Unit_CreateWrapper(g_playerHouseID, UNIT_HARVESTER, Tools_Index_Encode(s->o.index, IT_STRUCTURE));
+				u = Unit_CreateWrapper(Whom, UNIT_HARVESTER, Tools_Index_Encode(s->o.index, IT_STRUCTURE));
 				g_validateStrictIfZero--;
 
 				if (u == NULL) {
@@ -258,14 +258,14 @@ bool GUI_Widget_Viewport_Click(Widget *w)
 	if (click && w->index == 43) {
 		uint16 position;
 
-		if (g_debugScenario) {
+		if (Debug_Map) {
 			position = packed;
 		} else {
 			position = Unit_FindTargetAround(packed);
 		}
 
-		if (g_map[position].overlayTileID != g_veiledTileID || g_debugScenario) {
-			if (Object_GetByPackedTile(position) != NULL || g_debugScenario) {
+		if (g_map[position].overlayTileID != g_veiledTileID || Debug_Map) {
+			if (Object_GetByPackedTile(position) != NULL || Debug_Map) {
 				Map_SetSelection(position);
 				Unit_DisplayStatusText(g_unitSelected);
 			}
@@ -386,7 +386,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 				t = &g_map[curPos];
 				left = x << 4;
 
-				if (!g_debugScenario && g_veiledTileID == t->overlayTileID) {
+				if (!Debug_Map && g_veiledTileID == t->overlayTileID) {
 					/* draw a black rectangle */
 					Fill_Rect(left, top, left + 15, top + 15, 12);
 					continue;
@@ -394,7 +394,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 				Draw_Stamp(t->groundTileID, left, top, t->houseID);
 
-				if (t->overlayTileID != 0 && !g_debugScenario) {
+				if (t->overlayTileID != 0 && !Debug_Map) {
 					Draw_Stamp(t->overlayTileID, left, top, t->houseID);
 				}
 			}
@@ -418,9 +418,9 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 		if (!u->o.flags.s.isDirty && !forceRedraw) continue;
 		u->o.flags.s.isDirty = false;
 
-		if (!g_map[Tile_PackTile(u->o.position)].isUnveiled && !g_debugScenario) continue;
+		if (!g_map[Tile_PackTile(u->o.position)].isUnveiled && !Debug_Map) continue;
 
-		sprite = g_sprites[g_table_unitInfo[u->o.type].groundSpriteID];
+		sprite = g_sprites[g_table_unitTypes[u->o.type].groundSpriteID];
 		GUI_Widget_Viewport_GetSprite_HousePalette(sprite, Unit_GetHouseID(u), paletteHouse);
 
 		if (Map_IsPositionInViewport(u->o.position, &x, &y)) {
@@ -437,7 +437,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 		}
 	}
 
-	if (g_unitSelected == NULL && (g_selectionRectangleNeedRepaint || hasScrolled) && (Structure_Get_ByPackedTile(g_selectionRectanglePosition) != NULL || g_selectionType == SELECTIONTYPE_PLACE || g_debugScenario)) {
+	if (g_unitSelected == NULL && (g_selectionRectangleNeedRepaint || hasScrolled) && (Structure_Get_ByPackedTile(g_selectionRectanglePosition) != NULL || g_selectionType == SELECTIONTYPE_PLACE || Debug_Map)) {
 		uint16 x1 = (Tile_GetPackedX(g_selectionRectanglePosition) - Tile_GetPackedX(g_minimapPosition)) << 4;
 		uint16 y1 = ((Tile_GetPackedY(g_selectionRectanglePosition) - Tile_GetPackedY(g_minimapPosition)) << 4) + 0x28;
 		uint16 x2 = x1 + (g_selectionWidth << 4) - 1;
@@ -464,7 +464,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 		while (true) {
 			Unit *u;
-			UnitInfo *ui;
+			UnitType *ui;
 			uint16 packed;
 			uint8 orientation;
 			uint16 index;
@@ -481,9 +481,9 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			if ((!u->o.flags.s.isDirty || u->o.flags.s.isNotOnMap) && !forceRedraw && !BitArray_Test(g_dirtyViewport, packed)) continue;
 			u->o.flags.s.isDirty = false;
 
-			if (!g_map[packed].isUnveiled && !g_debugScenario) continue;
+			if (!g_map[packed].isUnveiled && !Debug_Map) continue;
 
-			ui = &g_table_unitInfo[u->o.type];
+			ui = &g_table_unitTypes[u->o.type];
 
 			if (!Map_IsPositionInViewport(u->o.position, &x, &y)) continue;
 
@@ -641,7 +641,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 
 		e->isDirty = false;
 
-		if (!g_map[curPos].isUnveiled && !g_debugScenario) continue;
+		if (!g_map[curPos].isUnveiled && !Debug_Map) continue;
 		if (!Map_IsPositionInViewport(e->position, &x, &y)) continue;
 
 		/*GUI_Widget_Viewport_GetSprite_HousePalette(g_sprites[e->spriteID], e->houseID, paletteHouse);*/
@@ -661,7 +661,7 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			};
 
 			Unit *u;
-			UnitInfo *ui;
+			UnitType *ui;
 			uint8 orientation;
 			uint8 *sprite;
 			uint16 index;
@@ -678,9 +678,9 @@ void GUI_Widget_Viewport_Draw(bool forceRedraw, bool hasScrolled, bool drawToMai
 			if ((!u->o.flags.s.isDirty || u->o.flags.s.isNotOnMap) && !forceRedraw && !BitArray_Test(g_dirtyViewport, curPos)) continue;
 			u->o.flags.s.isDirty = false;
 
-			if (!g_map[curPos].isUnveiled && !g_debugScenario) continue;
+			if (!g_map[curPos].isUnveiled && !Debug_Map) continue;
 
-			ui = &g_table_unitInfo[u->o.type];
+			ui = &g_table_unitTypes[u->o.type];
 
 			if (!Map_IsPositionInViewport(u->o.position, &x, &y)) continue;
 
@@ -891,7 +891,7 @@ bool GUI_Widget_Viewport_DrawTile(uint16 packed)
 
 	if (mapScale == 0 || BitArray_Test(g_displayedMinimap, packed)) return false;
 
-	if ((g_map[packed].isUnveiled && g_playerHouse->flags.radarActivated) || g_debugScenario) {
+	if ((g_map[packed].isUnveiled && PlayerPtr->flags.radarActivated) || Debug_Map) {
 		uint16 type = Map_GetLandscapeType(packed);
 		Unit *u;
 
@@ -905,7 +905,7 @@ bool GUI_Widget_Viewport_DrawTile(uint16 packed)
 			if (mapScale > 1) {
 				spriteID = mapScale + g_map[packed].houseID * 2 + 29;
 			} else {
-				colour = g_table_houseInfo[g_map[packed].houseID].minimapColor;
+				colour = g_table_houseTypes[g_map[packed].houseID].minimapColor;
 			}
 		}
 
@@ -922,20 +922,20 @@ bool GUI_Widget_Viewport_DrawTile(uint16 packed)
 				if (u->o.type == UNIT_SANDWORM) {
 					colour = 255;
 				} else {
-					colour = g_table_houseInfo[Unit_GetHouseID(u)].minimapColor;
+					colour = g_table_houseTypes[Unit_GetHouseID(u)].minimapColor;
 				}
 			}
 		}
 	} else {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(packed);
 
-		if (s != NULL && s->o.houseID == g_playerHouseID) {
+		if (s != NULL && s->o.houseID == Whom) {
 			if (mapScale > 1) {
 				spriteID = mapScale + s->o.houseID * 2 + 29;
 			} else {
-				colour = g_table_houseInfo[s->o.houseID].minimapColor;
+				colour = g_table_houseTypes[s->o.houseID].minimapColor;
 			}
 		} else {
 			if (mapScale > 1) {

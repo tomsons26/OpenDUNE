@@ -106,15 +106,15 @@ void Map_SetSelection(uint16 packed)
 		return;
 	}
 
-	if ((packed != 0xFFFF && g_map[packed].overlayTileID != g_veiledTileID) || g_debugScenario) {
-		Structure *s;
+	if ((packed != 0xFFFF && g_map[packed].overlayTileID != g_veiledTileID) || Debug_Map) {
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(packed);
 		if (s != NULL) {
-			const StructureInfo *si;
+			const BuildingType *si;
 
 			si = &g_table_structureInfo[s->o.type];
-			if (s->o.houseID == g_playerHouseID && g_selectionType != SELECTIONTYPE_MENTAT) {
+			if (s->o.houseID == Whom && g_selectionType != SELECTIONTYPE_MENTAT) {
 				GUI_DisplayHint(si->o.hintStringID, si->o.spriteID);
 			}
 
@@ -342,7 +342,7 @@ bool Map_IsPositionUnveiled(uint16 position)
 {
 	Tile *t;
 
-	if (g_debugScenario) return true;
+	if (Debug_Map) return true;
 
 	t = &g_map[position];
 
@@ -412,7 +412,7 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 		find.type    = 0xFFFF;
 
 		while (true) {
-			const UnitInfo *ui;
+			const UnitType *ui;
 			uint16 distance;
 			Team *t;
 			Unit *u;
@@ -422,7 +422,7 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 			u = Unit_Find(&find);
 			if (u == NULL) break;
 
-			ui = &g_table_unitInfo[u->o.type];
+			ui = &g_table_unitTypes[u->o.type];
 
 			distance = Tile_GetDistance(position, u->o.position) >> 4;
 			if (distance >= reactionDistance) continue;
@@ -431,16 +431,16 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 				Unit_Damage(u, hitpoints >> (distance >> 2), 0);
 			}
 
-			if (u->o.houseID == g_playerHouseID) continue;
+			if (u->o.houseID == Whom) continue;
 
 			us = Tools_Index_GetUnit(unitOriginEncoded);
 			if (us == NULL) continue;
 			if (us == u) continue;
-			if (House_AreAllied(Unit_GetHouseID(u), Unit_GetHouseID(us))) continue;
+			if (House_Is_Ally(Unit_GetHouseID(u), Unit_GetHouseID(us))) continue;
 
 			t = Unit_GetTeam(u);
 			if (t != NULL) {
-				const UnitInfo *targetInfo;
+				const UnitType *targetInfo;
 				Unit *target;
 
 				if (t->action == TEAM_ACTION_STAGING) {
@@ -452,17 +452,17 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 				target = Tools_Index_GetUnit(t->target);
 				if (target == NULL) continue;
 
-				targetInfo = &g_table_unitInfo[target->o.type];
+				targetInfo = &g_table_unitTypes[target->o.type];
 				if (targetInfo->bulletType == UNIT_INVALID) t->target = unitOriginEncoded;
 				continue;
 			}
 
 			if (u->o.type == UNIT_HARVESTER) {
-				const UnitInfo *uis = &g_table_unitInfo[us->o.type];
+				const UnitType *uis = &g_table_unitTypes[us->o.type];
 
-				if (uis->movementType == MOVEMENT_FOOT && u->targetMove == 0) {
+				if (uis->movementType == MOVEMENT_FOOT && u->NavCom == 0) {
 					if (u->actionID != ACTION_MOVE) Unit_SetAction(u, ACTION_MOVE);
-					u->targetMove = unitOriginEncoded;
+					u->NavCom = unitOriginEncoded;
 					continue;
 				}
 			}
@@ -473,12 +473,12 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 				Unit_SetAction(u, ACTION_HUNT);
 			}
 
-			if (u->targetAttack != 0 && u->actionID != ACTION_HUNT) continue;
+			if (u->TarCom != 0 && u->actionID != ACTION_HUNT) continue;
 
-			attack = Tools_Index_GetUnit(u->targetAttack);
+			attack = Tools_Index_GetUnit(u->TarCom);
 			if (attack != NULL) {
 				uint16 packed = Tile_PackTile(u->o.position);
-				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->targetAttack), packed) <= ui->fireDistance) continue;
+				if (Tile_GetDistancePacked(Tools_Index_GetPackedTile(u->TarCom), packed) <= ui->Range) continue;
 			}
 
 			Unit_SetTarget(u, unitOriginEncoded);
@@ -486,11 +486,11 @@ void Map_MakeExplosion(uint16 type, tile32 position, uint16 hitpoints, uint16 un
 	}
 
 	if (!s_debugNoExplosionDamage && hitpoints != 0) {
-		Structure *s = Structure_Get_ByPackedTile(positionPacked);
+		Building *s = Structure_Get_ByPackedTile(positionPacked);
 
 		if (s != NULL) {
 			if (type == EXPLOSION_IMPACT_LARGE) {
-				const StructureInfo *si = &g_table_structureInfo[s->o.type];
+				const BuildingType *si = &g_table_structureInfo[s->o.type];
 
 				if (si->o.hitpoints / 2 > s->o.hitpoints) {
 					type = EXPLOSION_SMOKE_PLUME;
@@ -674,7 +674,7 @@ void Map_Bloom_ExplodeSpice(uint16 packed, uint8 houseID)
 		Map_MakeExplosion(EXPLOSION_SPICE_BLOOM_TREMOR, Tile_UnpackTile(packed), 0, 0);
 	}
 
-	if (houseID == g_playerHouseID) Sound_Output_Feedback(36);
+	if (houseID == Whom) Sound_Output_Feedback(36);
 
 	Map_FillCircleWithSpice(packed, 5);
 }
@@ -709,7 +709,7 @@ void Map_FillCircleWithSpice(uint16 packed, uint16 radius)
 
 			Map_ChangeSpiceAmount(curPacked, 1);
 
-			if (g_debugScenario) {
+			if (Debug_Map) {
 				Map_MarkTileDirty(curPacked);
 			}
 		}
@@ -931,7 +931,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 
 		/* Find the house of an enemy */
 		while (true) {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Find(&find);
 			if (s == NULL) break;
@@ -964,18 +964,18 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 
 			case 4: /* Air */
 				ret = Tile_PackXY(mapInfo->minX + IRandom(0, mapInfo->sizeX), mapInfo->minY + IRandom(0, mapInfo->sizeY));
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
 			case 5: /* Visible */
 				ret = Tile_PackXY(Tile_GetPackedX(g_minimapPosition) + IRandom(0, 14), Tile_GetPackedY(g_minimapPosition) + IRandom(0, 9));
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 
 			case 6: /* Enemy Base */
 			case 7: { /* Home Base */
 				PoolFindStruct find;
-				Structure *s;
+				Building *s;
 
 				find.houseID = houseID;
 				find.index   = 0xFFFF;
@@ -1003,7 +1003,7 @@ uint16 Map_FindLocationTile(uint16 locationID, uint8 houseID)
 					}
 				}
 
-				if (houseID == g_playerHouseID && !Map_IsValidPosition(ret)) ret = 0;
+				if (houseID == Whom && !Map_IsValidPosition(ret)) ret = 0;
 				break;
 			}
 
@@ -1195,7 +1195,7 @@ void Map_SelectNext(bool getNext)
 	if (g_unitSelected != NULL) {
 		if (Map_IsTileVisible(Tile_PackTile(g_unitSelected->o.position))) selected = &g_unitSelected->o;
 	} else {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -1212,11 +1212,11 @@ void Map_SelectNext(bool getNext)
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		if (!g_table_unitInfo[u->o.type].o.flags.tabSelectable) continue;
+		if (!g_table_unitTypes[u->o.type].o.flags.tabSelectable) continue;
 
 		if (!Map_IsTileVisible(Tile_PackTile(u->o.position))) continue;
 
-		if ((u->o.seenByHouses & (1 << g_playerHouseID)) == 0) continue;
+		if ((u->o.seenByHouses & (1 << Whom)) == 0) continue;
 
 		if (first == NULL) first = &u->o;
 		last = &u->o;
@@ -1243,7 +1243,7 @@ void Map_SelectNext(bool getNext)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -1252,7 +1252,7 @@ void Map_SelectNext(bool getNext)
 
 		if (!Map_IsTileVisible(Tile_PackTile(s->o.position))) continue;
 
-		if ((s->o.seenByHouses & (1 << g_playerHouseID)) == 0) continue;
+		if ((s->o.seenByHouses & (1 << Whom)) == 0) continue;
 
 		if (first == NULL) first = &s->o;
 		last = &s->o;
@@ -1319,7 +1319,7 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
 	if (tileID != 0) {
 		if (tileID != 15) {
 			Unit *u = Unit_Get_ByPackedTile(packed);
-			if (u != NULL) Unit_HouseUnitCount_Add(u, g_playerHouseID);
+			if (u != NULL) Unit_HouseUnitCount_Add(u, Whom);
 		}
 
 		tileID = g_iconMap[g_iconMap[ICM_ICONGROUP_FOG_OF_WAR] + tileID];
@@ -1338,11 +1338,11 @@ static void Map_UnveilTile_Neighbour(uint16 packed)
  */
 bool Map_UnveilTile(uint16 packed, uint8 houseID)
 {
-	Structure *s;
+	Building *s;
 	Unit *u;
 	Tile *t;
 
-	if (houseID != g_playerHouseID) return false;
+	if (houseID != Whom) return false;
 	if (Tile_IsOutOfMap(packed)) return false;
 
 	t = &g_map[packed];

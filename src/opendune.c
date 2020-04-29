@@ -92,7 +92,7 @@ uint32 g_tickScenarioStart = 0;      /*!< The tick the scenario started in. */
 static uint32 s_tickGameTimeout = 0; /*!< The tick the game will timeout. */
 
 bool   g_debugGame = false;        /*!< When true, you can control the AI. */
-bool   g_debugScenario = false;    /*!< When true, you can review the scenario. There is no fog. The game is not running (no unit-movement, no structure-building, etc). You can click on individual tiles. */
+bool   Debug_Map = false;    /*!< When true, you can review the scenario. There is no fog. The game is not running (no unit-movement, no structure-building, etc). You can click on individual tiles. */
 bool   g_debugSkipDialogs = false; /*!< When non-zero, you immediately go to house selection, and skip all intros. */
 
 void *g_readBuffer = NULL;
@@ -137,7 +137,7 @@ static bool GameLoop_IsLevelFinished(void)
 
 		/* Calculate how many structures are left on the map */
 		while (true) {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Find(&find);
 			if (s == NULL) break;
@@ -146,7 +146,7 @@ static bool GameLoop_IsLevelFinished(void)
 			if (s->o.type == STRUCTURE_TURRET) continue;
 			if (s->o.type == STRUCTURE_ROCKET_TURRET) continue;
 
-			if (s->o.houseID == g_playerHouseID) {
+			if (s->o.houseID == Whom) {
 				countStructureFriendly++;
 			} else {
 				countStructureEnemy++;
@@ -163,7 +163,7 @@ static bool GameLoop_IsLevelFinished(void)
 
 	/* Check for reaching spice quota */
 	if ((g_scenario.winFlags & 0x4) != 0 && g_playerCredits != 0xFFFF) {
-		if (g_playerCredits >= g_playerHouse->creditsQuota) {
+		if (g_playerCredits >= PlayerPtr->creditsQuota) {
 			finish = true;
 		}
 	}
@@ -204,7 +204,7 @@ static bool GameLoop_IsLevelWon(void)
 
 		/* Calculate how many structures are left on the map */
 		while (true) {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Find(&find);
 			if (s == NULL) break;
@@ -213,7 +213,7 @@ static bool GameLoop_IsLevelWon(void)
 			if (s->o.type == STRUCTURE_TURRET) continue;
 			if (s->o.type == STRUCTURE_ROCKET_TURRET) continue;
 
-			if (s->o.houseID == g_playerHouseID) {
+			if (s->o.houseID == Whom) {
 				countStructureFriendly++;
 			} else {
 				countStructureEnemy++;
@@ -231,7 +231,7 @@ static bool GameLoop_IsLevelWon(void)
 
 	/* Check for reaching spice quota */
 	if (!win && (g_scenario.loseFlags & 0x4) != 0 && g_playerCredits != 0xFFFF) {
-		win = (g_playerCredits >= g_playerHouse->creditsQuota);
+		win = (g_playerCredits >= PlayerPtr->creditsQuota);
 	}
 
 	/* Check for reaching timeout */
@@ -294,7 +294,7 @@ static void GameLoop_LevelEnd(void)
 
 			g_campaignID++;
 
-			GUI_EndStats_Show(g_scenario.killedAllied, g_scenario.killedEnemy, g_scenario.destroyedAllied, g_scenario.destroyedEnemy, g_scenario.harvestedAllied, g_scenario.harvestedEnemy, g_scenario.score, g_playerHouseID);
+			GUI_EndStats_Show(g_scenario.killedAllied, g_scenario.killedEnemy, g_scenario.destroyedAllied, g_scenario.destroyedEnemy, g_scenario.harvestedAllied, g_scenario.harvestedEnemy, g_scenario.score, Whom);
 
 			if (g_campaignID == 9) {
 				Hide_Mouse();
@@ -334,7 +334,7 @@ static void GameLoop_LevelEnd(void)
 			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, false);
 		}
 
-		g_playerHouse->flags.doneFullScaleAttack = false;
+		PlayerPtr->flags.doneFullScaleAttack = false;
 
 		Sprites_LoadTiles();
 
@@ -568,21 +568,21 @@ static void ReadProfileIni(const char *filename)
 	Ini_GetString("construct", NULL, keys, keys, 2000, source);
 
 	for (key = keys; *key != '\0'; key += strlen(key) + 1) {
-		ObjectInfo *oi = NULL;
+		ObjectType *oi = NULL;
 		uint16 count;
 		uint8 type;
-		uint16 buildCredits;
-		uint16 buildTime;
-		uint16 fogUncoverRadius;
+		uint16 cost;
+		uint16 time;
+		uint16 sight;
 		uint16 availableCampaign;
-		uint16 sortPriority;
-		uint16 priorityBuild;
-		uint16 priorityTarget;
+		uint16 sort;
+		uint16 risk;
+		uint16 reward;
 		uint16 hitpoints;
 
 		type = Unit_StringToType(key);
 		if (type != UNIT_INVALID) {
-			oi = &g_table_unitInfo[type].o;
+			oi = &g_table_unitTypes[type].o;
 		} else {
 			type = Structure_StringToType(key);
 			if (type != STRUCTURE_INVALID) oi = &g_table_structureInfo[type].o;
@@ -591,35 +591,35 @@ static void ReadProfileIni(const char *filename)
 		if (oi == NULL) continue;
 
 		Ini_GetString("construct", key, buffer, buffer, 120, source);
-		count = sscanf(buffer, "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu", &buildCredits, &buildTime, &hitpoints, &fogUncoverRadius, &availableCampaign, &priorityBuild, &priorityTarget, &sortPriority);
-		oi->buildCredits      = buildCredits;
-		oi->buildTime         = buildTime;
+		count = sscanf(buffer, "%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu", &cost, &time, &hitpoints, &sight, &availableCampaign, &risk, &reward, &sort);
+		oi->Cost      = cost;
+		oi->Time         = time;
 		oi->hitpoints         = hitpoints;
-		oi->fogUncoverRadius  = fogUncoverRadius;
+		oi->Sight  = sight;
 		oi->availableCampaign = availableCampaign;
-		oi->priorityBuild     = priorityBuild;
-		oi->priorityTarget    = priorityTarget;
+		oi->Risk     = risk;
+		oi->Reward    = reward;
 		if (count <= 7) continue;
-		oi->sortPriority = (uint8)sortPriority;
+		oi->sortPriority = (uint8)sort;
 	}
 
 	if (g_debugGame) {
 		for (locsi = 0; locsi < UNIT_MAX; locsi++) {
-			ObjectInfo *oi = &g_table_unitInfo[locsi].o;
+			ObjectType *oi = &g_table_unitTypes[locsi].o;
 
 			sprintf(buffer, "%*s%4d,%4d,%4d,%4d,%4d,%4d,%4d,%4d",
-				15 - (int)strlen(oi->name), "", oi->buildCredits, oi->buildTime, oi->hitpoints, oi->fogUncoverRadius,
-				oi->availableCampaign, oi->priorityBuild, oi->priorityTarget, oi->sortPriority);
+				15 - (int)strlen(oi->name), "", oi->Cost, oi->Time, oi->hitpoints, oi->Sight,
+				oi->availableCampaign, oi->Risk, oi->Reward, oi->sortPriority);
 
 			Ini_SetString("construct", oi->name, buffer, source);
 		}
 
 		for (locsi = 0; locsi < STRUCTURE_MAX; locsi++) {
-			ObjectInfo *oi = &g_table_structureInfo[locsi].o;
+			ObjectType *oi = &g_table_structureInfo[locsi].o;
 
 			sprintf(buffer, "%*s%4d,%4d,%4d,%4d,%4d,%4d,%4d,%4d",
-				15 - (int)strlen(oi->name), "", oi->buildCredits, oi->buildTime, oi->hitpoints, oi->fogUncoverRadius,
-				oi->availableCampaign, oi->priorityBuild, oi->priorityTarget, oi->sortPriority);
+				15 - (int)strlen(oi->name), "", oi->Cost, oi->Time, oi->hitpoints, oi->Sight,
+				oi->availableCampaign, oi->Risk, oi->Reward, oi->sortPriority);
 
 			Ini_SetString("construct", oi->name, buffer, source);
 		}
@@ -632,22 +632,22 @@ static void ReadProfileIni(const char *filename)
 	for (key = keys; *key != '\0'; key += strlen(key) + 1) {
 		uint16 damage;
 		uint16 movingSpeedFactor;
-		uint16 fireDelay;
-		uint16 fireDistance;
+		uint16 rateoffire;
+		uint16 range;
 
 		Ini_GetString("combat", key, buffer, buffer, 120, source);
 		String_Trim(buffer);
-		if (sscanf(buffer, "%hu,%hu,%hu,%hu", &fireDistance, &damage, &fireDelay, &movingSpeedFactor) < 4) continue;
+		if (sscanf(buffer, "%hu,%hu,%hu,%hu", &range, &damage, &rateoffire, &movingSpeedFactor) < 4) continue;
 
 		for (locsi = 0; locsi < UNIT_MAX; locsi++) {
-			UnitInfo *ui = &g_table_unitInfo[locsi];
+			UnitType *ui = &g_table_unitTypes[locsi];
 
 			if (strcasecmp(ui->o.name, key) != 0) continue;
 
-			ui->damage            = damage;
+			ui->Damage            = damage;
 			ui->movingSpeedFactor = movingSpeedFactor;
-			ui->fireDelay         = fireDelay;
-			ui->fireDistance      = fireDistance;
+			ui->ROF         = rateoffire;
+			ui->Range      = range;
 			break;
 		}
 	}
@@ -655,9 +655,9 @@ static void ReadProfileIni(const char *filename)
 	if (!g_debugGame) return;
 
 	for (locsi = 0; locsi < UNIT_MAX; locsi++) {
-		const UnitInfo *ui = &g_table_unitInfo[locsi];
+		const UnitType *ui = &g_table_unitTypes[locsi];
 
-		sprintf(buffer, "%*s%4d,%4d,%4d,%4d", 15 - (int)strlen(ui->o.name), "", ui->fireDistance, ui->damage, ui->fireDelay, ui->movingSpeedFactor);
+		sprintf(buffer, "%*s%4d,%4d,%4d,%4d", 15 - (int)strlen(ui->o.name), "", ui->Range, ui->Damage, ui->ROF, ui->movingSpeedFactor);
 		Ini_SetString("combat", ui->o.name, buffer, source);
 	}
 }
@@ -928,7 +928,7 @@ static void GameLoop_Main(void)
 
 	g_campaignID = 0;
 	g_scenarioID = 1;
-	g_playerHouseID = HOUSE_INVALID;
+	Whom = HOUSE_INVALID;
 	g_selectionType = SELECTIONTYPE_MENTAT;
 	g_selectionTypeNew = SELECTIONTYPE_MENTAT;
 
@@ -1013,8 +1013,8 @@ static void GameLoop_Main(void)
 		if (g_gameMode == GM_PICKHOUSE) {
 			Music_Play(28);
 
-			g_playerHouseID = HOUSE_MERCENARY;
-			g_playerHouseID = Choose_House();
+			Whom = HOUSE_MERCENARY;
+			Whom = Choose_House();
 
 			Hide_Mouse();
 
@@ -1022,9 +1022,9 @@ static void GameLoop_Main(void)
 
 			Sprites_LoadTiles();
 
-			GUI_Palette_CreateRemap(g_playerHouseID);
+			GUI_Palette_CreateRemap(Whom);
 
-			Voice_LoadVoices(g_playerHouseID);
+			Voice_LoadVoices(Whom);
 
 			Show_Mouse();
 
@@ -1043,8 +1043,8 @@ static void GameLoop_Main(void)
 		if (g_gameMode == GM_RESTART) {
 			GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
-			Game_LoadScenario(g_playerHouseID, g_scenarioID);
-			if (!g_debugScenario && !g_debugSkipDialogs) {
+			Game_LoadScenario(Whom, g_scenarioID);
+			if (!Debug_Map && !g_debugSkipDialogs) {
 				GUI_Mentat_ShowBriefing();
 			} else {
 				Debug("Skipping GUI_Mentat_ShowBriefing()\n");
@@ -1052,7 +1052,7 @@ static void GameLoop_Main(void)
 
 			g_gameMode = GM_NORMAL;
 
-			GUI_ChangeSelectionType(g_debugScenario ? SELECTIONTYPE_DEBUG : SELECTIONTYPE_STRUCTURE);
+			GUI_ChangeSelectionType(Debug_Map ? SELECTIONTYPE_DEBUG : SELECTIONTYPE_STRUCTURE);
 
 			Music_Play(IRandom(0, 8) + 8);
 			l_timerNext = g_timerGUI + 300;
@@ -1104,19 +1104,19 @@ static void GameLoop_Main(void)
 
 			InGame_Numpad_Move(key);
 
-			GUI_DrawCredits(g_playerHouseID, 0);
+			GUI_DrawCredits(Whom, 0);
 
 			GameLoop_Team();
 			GameLoop_Unit();
 			GameLoop_Structure();
-			GameLoop_House();
+			House_AI();
 
 			GUI_DrawScreen(SCREEN_0);
 		}
 
 		GUI_DisplayText(NULL, 0);
 
-		if (g_running && !g_debugScenario) {
+		if (g_running && !Debug_Map) {
 			GameLoop_LevelEnd();
 		}
 
@@ -1261,7 +1261,7 @@ int main(int argc, char **argv)
 	/* set globals according to opendune.ini */
 	g_dune2_enhanced = (IniFile_GetInteger("dune2_enhanced", 1) != 0) ? true : false;
 	g_debugGame = (IniFile_GetInteger("debug_game", 0) != 0) ? true : false;
-	g_debugScenario = (IniFile_GetInteger("debug_scenario", 0) != 0) ? true : false;
+	Debug_Map = (IniFile_GetInteger("debug_scenario", 0) != 0) ? true : false;
 	g_debugSkipDialogs = (IniFile_GetInteger("debug_skip_dialogs", 0) != 0) ? true : false;
 	s_enableLog = (uint8)IniFile_GetInteger("debug_log_game", 0);
 	g_starPortEnforceUnitLimit = (IniFile_GetInteger("startport_unit_cap", 0) != 0) ? true : false;
@@ -1269,7 +1269,7 @@ int main(int argc, char **argv)
 	Debug("Globals :\n");
 	Debug("  g_dune2_enhanced = %d\n", (int)g_dune2_enhanced);
 	Debug("  g_debugGame = %d\n", (int)g_debugGame);
-	Debug("  g_debugScenario = %d\n", (int)g_debugScenario);
+	Debug("  g_debugScenario = %d\n", (int)Debug_Map);
 	Debug("  g_debugSkipDialogs = %d\n", (int)g_debugSkipDialogs);
 	Debug("  s_enableLog = %d\n", (int)s_enableLog);
 	Debug("  g_starPortEnforceUnitLimit = %d\n", (int)g_starPortEnforceUnitLimit);
@@ -1347,15 +1347,15 @@ void Game_Prepare(void)
 
 	t = &g_map[0];
 	for (i = 0; i < 64 * 64; i++, t++) {
-		Structure *s;
+		Building *s;
 		Unit *u;
 
 		u = Unit_Get_ByPackedTile(i);
 		s = Structure_Get_ByPackedTile(i);
 
-		if (u == NULL || !u->o.flags.s.used) t->hasUnit = false;
-		if (s == NULL || !s->o.flags.s.used) t->hasStructure = false;
-		if (t->isUnveiled) Map_UnveilTile(i, g_playerHouseID);
+		if (u == NULL || !u->o.flags.s.IsActive) t->hasUnit = false;
+		if (s == NULL || !s->o.flags.s.IsActive) t->hasStructure = false;
+		if (t->isUnveiled) Map_UnveilTile(i, Whom);
 	}
 
 	find.houseID = HOUSE_INVALID;
@@ -1379,7 +1379,7 @@ void Game_Prepare(void)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -1392,7 +1392,7 @@ void Game_Prepare(void)
 		if (s->o.type == STRUCTURE_STARPORT && s->o.linkedID != 0xFF) {
 			Unit *u = Unit_Get_ByIndex(s->o.linkedID);
 
-			if (!u->o.flags.s.used || !u->o.flags.s.isNotOnMap) {
+			if (!u->o.flags.s.IsActive || !u->o.flags.s.isNotOnMap) {
 				s->o.linkedID = 0xFF;
 				s->countDown = 0;
 			} else {
@@ -1425,19 +1425,19 @@ void Game_Prepare(void)
 		House_CalculatePowerAndCredit(h);
 	}
 
-	GUI_Palette_CreateRemap(g_playerHouseID);
+	GUI_Palette_CreateRemap(Whom);
 
 	Map_SetSelection(g_selectionPosition);
 
 	if (g_structureActiveType != 0xFFFF) {
 		Map_SetSelectionSize(g_table_structureInfo[g_structureActiveType].layout);
 	} else {
-		Structure *s = Structure_Get_ByPackedTile(g_selectionPosition);
+		Building *s = Structure_Get_ByPackedTile(g_selectionPosition);
 
 		if (s != NULL) Map_SetSelectionSize(g_table_structureInfo[s->o.type].layout);
 	}
 
-	Voice_LoadVoices(g_playerHouseID);
+	Voice_LoadVoices(Whom);
 
 	g_tickHousePowerMaintenance = max(g_timerGame + 70, g_tickHousePowerMaintenance);
 	g_viewport_forceRedraw = true;

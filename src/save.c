@@ -129,7 +129,7 @@ bool SaveGame_SaveFile(char *filename, char *description)
 	/* In debug-scenario mode, the whole map is uncovered. Cover it now in
 	 *  the savegame based on the current position of the units and
 	 *  structures. */
-	if (g_debugScenario) {
+	if (Debug_Map) {
 		PoolFindStruct find;
 		uint16 i;
 
@@ -160,7 +160,7 @@ bool SaveGame_SaveFile(char *filename, char *description)
 
 		/* Remove the fog of war for all structures */
 		while (true) {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Find(&find);
 			if (s == NULL) break;

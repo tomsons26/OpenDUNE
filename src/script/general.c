@@ -181,7 +181,7 @@ uint16 Script_General_GetDistanceToObject(ScriptEngine *script)
 uint16 Script_General_Unknown0288(ScriptEngine *script)
 {
 	uint16 index;
-	Structure *s;
+	Building *s;
 
 	index = STACK_PEEK(1);
 	s = Tools_Index_GetStructure(index);
@@ -353,7 +353,7 @@ uint16 Script_General_IsFriendly(ScriptEngine *script)
 
 	o = Tools_Index_GetObject(index);
 
-	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.used) return 0;
+	if (o == NULL || o->flags.s.isNotOnMap || !o->flags.s.IsActive) return 0;
 
 	res = Script_General_IsEnemy(script);
 
@@ -401,7 +401,7 @@ uint16 Script_General_FindIdle(ScriptEngine *script)
 {
 	uint8 houseID;
 	uint16 index;
-	Structure *s;
+	Building *s;
 	PoolFindStruct find;
 
 	index = STACK_PEEK(1);

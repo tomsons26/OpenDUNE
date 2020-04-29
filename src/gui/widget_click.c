@@ -76,7 +76,7 @@ static void GUI_Widget_Scrollbar_Scroll(WidgetScrollbar *scrollbar, uint16 scrol
  */
 bool GUI_Widget_SpriteTextButton_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	VARIABLE_NOT_USED(w);
 
@@ -87,7 +87,7 @@ bool GUI_Widget_SpriteTextButton_Click(Widget *w)
 
 		case STR_PLACE_IT:
 			if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-				Structure *ns;
+				Building *ns;
 
 				ns = Structure_Get_ByIndex(s->o.linkedID);
 				g_structureActive = ns;
@@ -238,7 +238,7 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
  */
 bool GUI_Widget_TextButton_Click(Widget *w)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	const ActionInfo *ai;
 	const uint16 *actions;
 	ActionType action;
@@ -247,10 +247,10 @@ bool GUI_Widget_TextButton_Click(Widget *w)
 	ActionType unitAction;
 
 	u = g_unitSelected;
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 
 	actions = ui->o.actionsPlayer;
-	if (Unit_GetHouseID(u) != g_playerHouseID && u->o.type != UNIT_HARVESTER) {
+	if (Unit_GetHouseID(u) != Whom && u->o.type != UNIT_HARVESTER) {
 		actions = g_table_actionsAI;
 	}
 
@@ -289,9 +289,9 @@ bool GUI_Widget_TextButton_Click(Widget *w)
 	}
 
 	Object_Script_Variable4_Clear(&u->o);
-	u->targetAttack = 0;
-	u->targetMove = 0;
-	u->route[0] = 0xFF;
+	u->TarCom = 0;
+	u->NavCom = 0;
+	u->Path[0] = 0xFF;
 
 	Unit_SetAction(u, action);
 
@@ -341,8 +341,8 @@ bool GUI_Widget_Cancel_Click(Widget *w)
 	VARIABLE_NOT_USED(w);
 
 	if (g_structureActiveType != 0xFFFF) {
-		Structure *s  = Structure_Get_ByPackedTile(g_structureActivePosition);
-		Structure *s2 = g_structureActive;
+		Building *s  = Structure_Get_ByPackedTile(g_structureActivePosition);
+		Building *s2 = g_structureActive;
 
 		assert(s2 != NULL);
 
@@ -380,7 +380,7 @@ bool GUI_Widget_Cancel_Click(Widget *w)
  */
 bool GUI_Widget_Picture_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	VARIABLE_NOT_USED(w);
 
@@ -407,7 +407,7 @@ bool GUI_Widget_Picture_Click(Widget *w)
  */
 bool GUI_Widget_RepairUpgrade_Click(Widget *w)
 {
-	Structure *s;
+	Building *s;
 
 	s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -1103,7 +1103,7 @@ bool GUI_Production_ResumeGame_Click(Widget *w)
 
 	if (g_factoryWindowStarport) {
 		uint8 i = 0;
-		House *h = g_playerHouse;
+		House *h = PlayerPtr;
 		while (g_factoryWindowOrdered != 0) {
 			if (g_factoryWindowItems[i].amount != 0) {
 				h->credits += g_factoryWindowItems[i].amount * g_factoryWindowItems[i].credits;
@@ -1113,7 +1113,7 @@ bool GUI_Production_ResumeGame_Click(Widget *w)
 
 			i++;
 
-			GUI_DrawCredits(g_playerHouseID, 0);
+			GUI_DrawCredits(Whom, 0);
 		}
 	}
 
@@ -1296,7 +1296,7 @@ static void GUI_Purchase_ShowInvoice(void)
 		uint16 i;
 
 		for (i = 0; i < g_factoryWindowTotal; i++) {
-			ObjectInfo *oi;
+			ObjectType *oi;
 			uint16 amount;
 
 			if (g_factoryWindowItems[i].amount == 0) continue;
@@ -1339,7 +1339,7 @@ static void GUI_Purchase_ShowInvoice(void)
 	Clear_KeyBuffer();
 
 	for (; GUI_Widget_HandleEvents(w) == 0; sleepIdle()) {
-		GUI_DrawCredits(g_playerHouseID, 0);
+		GUI_DrawCredits(Whom, 0);
 
 		GUI_FactoryWindow_UpdateSelection(false);
 
@@ -1389,7 +1389,7 @@ bool GUI_Production_BuildThis_Click(Widget *w)
 		}
 	} else {
 		FactoryWindowItem *item;
-		ObjectInfo *oi;
+		ObjectType *oi;
 
 		item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
 		oi = item->objectInfo;
@@ -1413,14 +1413,14 @@ bool GUI_Production_BuildThis_Click(Widget *w)
 bool GUI_Purchase_Plus_Click(Widget *w)
 {
 	FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
-	ObjectInfo *oi = item->objectInfo;
-	House *h = g_playerHouse;
+	ObjectType *oi = item->objectInfo;
+	House *h = PlayerPtr;
 	bool canCreateMore = true;
 	uint16 type = item->objectType;
 
 	GUI_Widget_MakeNormal(w, false);
 
-	if (g_table_unitInfo[type].movementType != MOVEMENT_WINGER && g_table_unitInfo[type].movementType != MOVEMENT_SLITHER) {
+	if (g_table_unitTypes[type].movementType != MOVEMENT_WINGER && g_table_unitTypes[type].movementType != MOVEMENT_SLITHER) {
 		if (g_starPortEnforceUnitLimit && h->unitCount >= h->unitCountMax) canCreateMore = false;
 	}
 
@@ -1447,7 +1447,7 @@ bool GUI_Purchase_Plus_Click(Widget *w)
 bool GUI_Purchase_Minus_Click(Widget *w)
 {
 	FactoryWindowItem *item;
-	House *h = g_playerHouse;
+	House *h = PlayerPtr;
 
 	GUI_Widget_MakeNormal(w, false);
 

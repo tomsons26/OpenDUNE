@@ -8,7 +8,8 @@
 /**
  * Types of Units available in the game.
  */
-typedef enum UnitType {
+// technically Unit_Type but yea...
+typedef enum UnitsType {
 	UNIT_CARRYALL         = 0,
 	UNIT_ORNITHOPTER      = 1,
 	UNIT_INFANTRY         = 2,
@@ -39,7 +40,7 @@ typedef enum UnitType {
 
 	UNIT_MAX              = 27,
 	UNIT_INVALID          = 0xFF
-} UnitType;
+} UnitsType;
 
 /**
  * Flags used to indicate units in a bitmask.
@@ -146,8 +147,8 @@ typedef struct Unit {
 	uint8  nextActionID;                                    /*!< Next action. */
 	uint16 fireDelay;                                       /*!< Delay between firing. In Dune2 this is an uint8. */
 	uint16 distanceToDestination;                           /*!< How much distance between where we are now and where currentDestination is. */
-	uint16 targetAttack;                                    /*!< Target to attack (encoded index). */
-	uint16 targetMove;                                      /*!< Target to move to (encoded index). */
+	uint16 TarCom;                                    /*!< Target to attack (encoded index). */
+	uint16 NavCom;                                      /*!< Target to move to (encoded index). */
 	uint8  amount;                                          /*!< Meaning depends on type:
 	                                                         * - Sandworm : units to eat before disappearing.
 	                                                         * - Harvester : harvested spice.
@@ -164,16 +165,16 @@ typedef struct Unit {
 	uint8  wobbleIndex;                                     /*!< At which wobble index the Unit currently is. */
 	 int8  spriteOffset;                                    /*!< Offset of the current sprite for Unit. */
 	uint8  blinkCounter;                                    /*!< If non-zero, it indicates how many more ticks this unit is blinking. */
-	uint8  team;                                            /*!< If non-zero, unit is part of team. Value 1 means team 0, etc. */
+	uint8  Team;                                            /*!< If non-zero, unit is part of team. Value 1 means team 0, etc. */
 	uint16 timer;                                           /*!< Timer used in animation, to count down when to do the next step. */
-	uint8  route[14];                                       /*!< The current route the Unit is following. */
+	uint8  Path[14];                                       /*!< The current route the Unit is following. */
 } Unit;
 
 /**
  * Static information per Unit type.
  */
-typedef struct UnitInfo {
-	ObjectInfo o;                                           /*!< Common to UnitInfo and StructureInfo. */
+typedef struct UnitType {
+	ObjectType o;                                           /*!< Common to UnitInfo and StructureInfo. */
 	uint16 indexStart;                                      /*!< At Unit create, between this and indexEnd (including) a free index is picked. */
 	uint16 indexEnd;                                        /*!< At Unit create, between indexStart and this (including) a free index is picked. */
 	struct {
@@ -184,11 +185,11 @@ typedef struct UnitInfo {
 		BIT_U8 isTracked:1;                                 /*!< If true, Unit is tracked-based (and leaves marks in sand). */
 		BIT_U8 isGroundUnit:1;                              /*!< If true, Unit is ground-based. */
 		BIT_U8 mustStayInMap:1;                             /*!< Unit cannot leave the map and bounces off the border (air-based units). */
-		BIT_U8 firesTwice:1;                                /*!< If true, Unit fires twice. */
+		BIT_U8 IsTwoShooter:1;                                /*!< If true, Unit fires twice. */
 		BIT_U8 impactOnSand:1;                              /*!< If true, hitting sand (as bullet / missile) makes an impact (crater-like). */
 		BIT_U8 isNotDeviatable:1;                           /*!< If true, Unit can't be deviated. */
 		BIT_U8 hasAnimationSet:1;                           /*!< If true, the Unit has two set of sprites for animation. */
-		BIT_U8 notAccurate:1;                               /*!< If true, Unit is a bullet and is not very accurate at hitting the target (rockets). */
+		BIT_U8 Inaccurate:1;                               /*!< If true, Unit is a bullet and is not very accurate at hitting the target (rockets). */
 		BIT_U8 isNormalUnit:1;                              /*!< If true, Unit is a normal unit (not a bullet / missile, nor a sandworm / frigate). */
 	} flags;                                                /*!< General flags of the UnitInfo. */
 	uint16 dimension;                                       /*!< The dimension of the Unit Sprite. */
@@ -198,16 +199,16 @@ typedef struct UnitInfo {
 	uint8  turningSpeed;                                    /*!< Speed of orientation change of Unit. */
 	uint16 groundSpriteID;                                  /*!< SpriteID for north direction. */
 	uint16 turretSpriteID;                                  /*!< SpriteID of the turret for north direction. */
-	uint16 actionAI;                                        /*!< Default action for AI units. */
+	uint16 InitialMission;                                        /*!< Default action for AI units. */
 	uint16 displayMode;                                     /*!< How to draw the Unit. */
 	uint16 destroyedSpriteID;                               /*!< SpriteID of burning Unit for north direction. Can be zero if no such animation. */
-	uint16 fireDelay;                                       /*!< Time between firing at Normal speed. */
-	uint16 fireDistance;                                    /*!< Maximal distance this Unit can fire from. */
-	uint16 damage;                                          /*!< Damage this Unit does to other Units. */
+	uint16 ROF;                                       /*!< Time between firing at Normal speed. */
+	uint16 Range;                                    /*!< Maximal distance this Unit can fire from. */
+	uint16 Damage;                                          /*!< Damage this Unit does to other Units. */
 	uint16 explosionType;                                   /*!< Type of the explosion of Unit. */
 	uint8  bulletType;                                      /*!< Type of the bullets of Unit. */
 	uint16 bulletSound;                                     /*!< Sound for the bullets. */
-} UnitInfo;
+} UnitType;
 
 /**
  * Static information per Action type.
@@ -221,13 +222,13 @@ typedef struct ActionInfo {
 } ActionInfo;
 
 struct Team;
-struct Structure;
+struct Building;
 
 extern const char * const g_table_movementTypeName[MOVEMENT_MAX];
 
 extern const uint16 g_table_actionsAI[4];
 extern const ActionInfo g_table_actionInfo[ACTION_MAX];
-extern UnitInfo g_table_unitInfo[UNIT_MAX];
+extern UnitType g_table_unitTypes[UNIT_MAX];
 
 extern Unit *g_unitActive;
 extern Unit *g_unitHouseMissile;
@@ -251,7 +252,7 @@ extern uint16 Unit_RemoveFromTeam(Unit *u);
 extern struct Team *Unit_GetTeam(Unit *u);
 extern void Unit_Sort(void);
 extern Unit *Unit_Get_ByPackedTile(uint16 packed);
-extern uint16 Unit_IsValidMovementIntoStructure(Unit *unit, struct Structure *s);
+extern uint16 Unit_IsValidMovementIntoStructure(Unit *unit, struct Building *s);
 extern void Unit_SetDestination(Unit *u, uint16 destination);
 extern uint16 Unit_FindClosestRefinery(Unit *unit);
 extern bool Unit_SetPosition(Unit *u, tile32 position);
@@ -266,15 +267,15 @@ extern bool Unit_Damage(Unit *unit, uint16 damage, uint16 range);
 extern void Unit_UntargetMe(Unit *unit);
 extern void Unit_SetOrientation(Unit *unit, int8 orientation, bool rotateInstantly, uint16 level);
 extern void Unit_Select(Unit *unit);
-extern Unit *Unit_CreateWrapper(uint8 houseID, UnitType type, uint16 location);
+extern Unit *Unit_CreateWrapper(uint8 houseID, UnitsType type, uint16 location);
 extern uint16 Unit_FindTargetAround(uint16 packed);
 extern bool Unit_IsTileOccupied(Unit *unit);
 extern void Unit_SetSpeed(Unit *unit, uint16 speed);
-extern Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 damage, uint16 target);
+extern Unit *Unit_CreateBullet(tile32 position, UnitsType type, uint8 houseID, uint16 damage, uint16 target);
 extern void Unit_DisplayStatusText(Unit *unit);
 extern void Unit_Hide(Unit *unit);
-extern Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool createCarryall);
-extern void Unit_EnterStructure(Unit *unit, struct Structure *s);
+extern Unit *Unit_CallUnitByType(UnitsType type, uint8 houseID, uint16 target, bool createCarryall);
+extern void Unit_EnterStructure(Unit *unit, struct Building *s);
 extern int16 Unit_GetTileEnterScore(Unit *unit, uint16 packed, uint16 orient8);
 extern void Unit_RemovePlayer(Unit *unit);
 extern void Unit_UpdateMap(uint16 type, Unit *unit);
@@ -285,7 +286,7 @@ extern void Unit_HouseUnitCount_Remove(Unit *unit);
 extern void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID);
 
 extern uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target);
-extern uint16 Unit_GetTargetStructurePriority(Unit *unit, struct Structure *s);
+extern uint16 Unit_GetTargetStructurePriority(Unit *unit, struct Building *s);
 extern uint16 Unit_FindBestTargetEncoded(Unit *unit, uint16 mode);
 extern Unit *Unit_FindBestTargetUnit(Unit *u, uint16 mode);
 extern Unit *Unit_Sandworm_FindBestTarget(Unit *unit);

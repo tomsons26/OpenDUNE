@@ -85,14 +85,14 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 
 	spriteID = 0;
 	if (g_unitSelected != NULL) {
-		const UnitInfo *ui;
+		const UnitType *ui;
 
-		ui = &g_table_unitInfo[g_unitSelected->o.type];
+		ui = &g_table_unitTypes[g_unitSelected->o.type];
 
 		spriteID = ui->o.spriteID;
 	} else {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Get_ByPackedTile(g_selectionPosition);
 		if (s == NULL) return;
@@ -136,7 +136,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 {
 	Screen oldScreenID;
-	Structure *s;
+	Building *s;
 	uint16 positionX, positionY;
 	uint16 width, height;
 	uint16 spriteID;
@@ -192,7 +192,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 		case STR_BUILD_IT:
 		case STR_D_DONE:
 			if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-				const StructureInfo *si;
+				const BuildingType *si;
 				uint16 spriteWidth;
 				uint16 x, y;
 				uint8 *sprite;
@@ -212,9 +212,9 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 
 				spriteID = si->o.spriteID;
 			} else {
-				const UnitInfo *ui;
+				const UnitType *ui;
 
-				ui = &g_table_unitInfo[s->objectType];
+				ui = &g_table_unitTypes[s->objectType];
 				spriteID = ui->o.spriteID;
 			}
 			break;
@@ -227,22 +227,22 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 		uint16 timeLeft;
 
 		if (s->o.type == STRUCTURE_CONSTRUCTION_YARD) {
-			const StructureInfo *si;
+			const BuildingType *si;
 
 			si = &g_table_structureInfo[s->objectType];
-			buildTime = si->o.buildTime;
+			buildTime = si->o.Time;
 		} else if (s->o.type == STRUCTURE_REPAIR) {
-			const UnitInfo *ui;
+			const UnitType *ui;
 
 			if (s->o.linkedID == 0xFF) return;
 
-			ui = &g_table_unitInfo[Unit_Get_ByIndex(s->o.linkedID)->o.type];
-			buildTime = ui->o.buildTime;
+			ui = &g_table_unitTypes[Unit_Get_ByIndex(s->o.linkedID)->o.type];
+			buildTime = ui->o.Time;
 		} else {
-			const UnitInfo *ui;
+			const UnitType *ui;
 
-			ui = &g_table_unitInfo[s->objectType];
-			buildTime = ui->o.buildTime;
+			ui = &g_table_unitTypes[s->objectType];
+			buildTime = ui->o.Time;
 		}
 
 		timeLeft = buildTime - (s->countDown + 255) / 256;
@@ -436,7 +436,7 @@ static uint16 GUI_Widget_ActionPanel_GetActionType(bool forceDraw)
 	static uint16 displayedStarportTime     = 0xFFFF;
 
 	uint16 actionType = 0;
-	Structure *s = NULL;
+	Building *s = NULL;
 	Unit *u = NULL;
 
 	if (g_selectionType == SELECTIONTYPE_PLACE) {
@@ -467,7 +467,7 @@ static uint16 GUI_Widget_ActionPanel_GetActionType(bool forceDraw)
 					actionType = 2; /* Unit */
 			}
 		}
-	} else if (!Tile_IsOutOfMap(g_selectionPosition) && (g_map[g_selectionPosition].isUnveiled || g_debugScenario)) {
+	} else if (!Tile_IsOutOfMap(g_selectionPosition) && (g_map[g_selectionPosition].isUnveiled || Debug_Map)) {
 		if (Map_GetLandscapeType(g_selectionPosition) == LST_STRUCTURE) {
 			s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -546,16 +546,16 @@ static uint16 GUI_Widget_ActionPanel_GetActionType(bool forceDraw)
  */
 void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 {
-	const StructureInfo *si;
-	const ObjectInfo *oi;
-	const UnitInfo *ui;
+	const BuildingType *si;
+	const ObjectType *oi;
+	const UnitType *ui;
 	uint16 actionType;
 	Screen oldScreenID;
 	uint16 oldWidgetID;
 	bool isNotPlayerOwned;
 	Object *o;
 	Unit *u;
-	Structure *s;
+	Building *s;
 	House *h;
 	Widget *buttons[4];
 	Widget *widget24, *widget28, *widget2C, *widget30, *widget34;
@@ -575,12 +575,12 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 	switch (actionType) {
 		case 2: { /* Unit */
 			u  = g_unitSelected;
-			ui = &g_table_unitInfo[u->o.type];
+			ui = &g_table_unitTypes[u->o.type];
 
 			o  = &u->o;
 			oi = &ui->o;
 
-			isNotPlayerOwned = (g_playerHouseID == Unit_GetHouseID(u)) ? false : true;
+			isNotPlayerOwned = (Whom == Unit_GetHouseID(u)) ? false : true;
 
 			h = House_Get_ByIndex(u->o.houseID);
 		} break;
@@ -592,7 +592,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 			o  = &s->o;
 			oi = &si->o;
 
-			isNotPlayerOwned = (g_playerHouseID == s->o.houseID) ? false : true;
+			isNotPlayerOwned = (Whom == s->o.houseID) ? false : true;
 
 			h = House_Get_ByIndex(s->o.houseID);
 
@@ -608,19 +608,19 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 
 			isNotPlayerOwned = false;
 
-			h = House_Get_ByIndex(g_playerHouseID);
+			h = House_Get_ByIndex(Whom);
 		} break;
 
 		case 8: { /* House Missile */
 			u  = g_unitHouseMissile;
-			ui = &g_table_unitInfo[u->o.type];
+			ui = &g_table_unitTypes[u->o.type];
 
 			o  = &u->o;
 			oi = &ui->o;
 
-			isNotPlayerOwned = (g_playerHouseID == Unit_GetHouseID(u)) ? false : true;
+			isNotPlayerOwned = (Whom == Unit_GetHouseID(u)) ? false : true;
 
-			h = House_Get_ByIndex(g_playerHouseID);
+			h = House_Get_ByIndex(Whom);
 		} break;
 
 		case 4: /* Attack */
@@ -821,9 +821,9 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							u2 = Structure_GetLinkedUnit(s);
 							if (u2 == NULL) break;
 
-							Draw_Shape(SCREEN_ACTIVE, g_sprites[g_table_unitInfo[u2->o.type].o.spriteID], 260, 89, 0, 0);
+							Draw_Shape(SCREEN_ACTIVE, g_sprites[g_table_unitTypes[u2->o.type].o.spriteID], 260, 89, 0, 0);
 
-							steps = g_table_unitInfo[u2->o.type].o.buildTime / 4;
+							steps = g_table_unitTypes[u2->o.type].o.Time / 4;
 							percent = (steps - (s->countDown >> 8)) * 100 / steps;
 
 							Fancy_Text_Print(Text_String(STR_D_DONE), 258, 116, 29, 0, 0x11, percent);

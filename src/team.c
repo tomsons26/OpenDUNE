@@ -79,7 +79,7 @@ Team *Team_Create(uint8 houseID, uint8 teamActionType, uint8 movementType, uint1
 	t = Team_Allocate(0xFFFF);
 
 	if (t == NULL) return NULL;
-	t->flags.used  = true;
+	t->flags.IsActive  = true;
 	t->houseID     = houseID;
 	t->action      = teamActionType;
 	t->actionStart = teamActionType;

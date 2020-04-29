@@ -9,7 +9,7 @@
 #include "../unit.h"
 #include "strings.h"
 
-StructureInfo g_table_structureInfo[STRUCTURE_MAX] = {
+BuildingType g_table_structureInfo[STRUCTURE_MAX] = {
 	{ /* 0 */
 		{ /* objectInfo */
 		/* stringID_abbrev      */ STR_CONCRETE,

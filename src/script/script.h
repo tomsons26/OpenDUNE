@@ -75,7 +75,7 @@ typedef struct ScriptInfo {
 #endif
 
 extern struct Object *g_scriptCurrentObject;
-extern struct Structure *g_scriptCurrentStructure;
+extern struct Building *g_scriptCurrentStructure;
 extern struct Unit *g_scriptCurrentUnit;
 extern struct Team *g_scriptCurrentTeam;
 

@@ -49,7 +49,7 @@ static void Scenario_Load_General(void)
 
 static void Scenario_Load_House(uint8 houseID)
 {
-	const char *houseName = g_table_houseInfo[houseID].name;
+	const char *houseName = g_table_houseTypes[houseID].name;
 	char *houseType;
 	char buf[128];
 	char *b;
@@ -73,8 +73,8 @@ static void Scenario_Load_House(uint8 houseID)
 
 	h->flags.human = true;
 
-	g_playerHouseID       = houseID;
-	g_playerHouse         = h;
+	Whom       = houseID;
+	PlayerPtr         = h;
 	g_playerCreditsNoSilo = h->credits;
 }
 
@@ -87,7 +87,7 @@ static void Scenario_Load_Houses(void)
 		Scenario_Load_House(houseID);
 	}
 
-	h = g_playerHouse;
+	h = PlayerPtr;
 	/* In case there was no unitCountMax in the scenario, calculate
 	 *  it based on values used for the AI controlled houses. */
 	if (h->unitCountMax == 0) {
@@ -127,7 +127,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HousesType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -177,7 +177,7 @@ static void Scenario_Load_Unit(const char *key, char *settings)
 	if (u == NULL) return;
 	u->o.flags.s.byScenario = true;
 
-	u->o.hitpoints   = hitpoints * g_table_unitInfo[unitType].o.hitpoints / 256;
+	u->o.hitpoints   = hitpoints * g_table_unitTypes[unitType].o.hitpoints / 256;
 	u->o.position    = position;
 	u->orientation[0].current = orientation;
 	u->actionID     = actionType;
@@ -217,7 +217,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 		if (split == NULL) return;
 		*split = '\0';
 		/* First value is the House type */
-		houseType = House_StringToType(settings);
+		houseType = HousesType_From_Name(settings);
 		if (houseType == HOUSE_INVALID) return;
 
 		/* Second value is the Structure type */
@@ -238,7 +238,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HousesType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -276,7 +276,7 @@ static void Scenario_Load_Structure(const char *key, char *settings)
 	if (Structure_Get_ByPackedTile(position) != NULL) return;
 
 	{
-		Structure *s;
+		Building *s;
 
 		s = Structure_Create(index, structureType, houseType, position);
 		if (s == NULL) return;
@@ -330,7 +330,7 @@ static void Scenario_Load_Map_Field(uint16 packed, Tile *t)
 	Map_Bloom_ExplodeSpice(packed, HOUSE_INVALID);
 
 	/* Show where a field started in the preview mode by making it an odd looking sprite */
-	if (g_debugScenario) {
+	if (Debug_Map) {
 		t->groundTileID = 0x01FF;
 	}
 }
@@ -358,7 +358,7 @@ static void Scenario_Load_Reinforcement(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HousesType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -421,7 +421,7 @@ static void Scenario_Load_Team(const char *key, char *settings)
 	*split = '\0';
 
 	/* First value is the House type */
-	houseType = House_StringToType(settings);
+	houseType = HousesType_From_Name(settings);
 	if (houseType == HOUSE_INVALID) return;
 
 	/* Find the next value in the ',' separated list */
@@ -528,7 +528,7 @@ bool Scenario_Load(uint16 scenarioID, uint8 houseID)
 	g_scenarioID = scenarioID;
 
 	/* Load scenario file */
-	sprintf(filename, "SCEN%c%03hu.INI", g_table_houseInfo[houseID].name[0], scenarioID);
+	sprintf(filename, "SCEN%c%03hu.INI", g_table_houseTypes[houseID].name[0], scenarioID);
 	if (!File_Exists(filename)) return false;
 	s_scenarioBuffer = File_ReadWholeFile(filename);
 

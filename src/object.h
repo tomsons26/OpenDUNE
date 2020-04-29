@@ -10,7 +10,7 @@
  */
 typedef union {
 	struct {
-		BIT_U8 used:1;                                  /*!< The Object is in use (no longer free in the pool). */
+		BIT_U8 IsActive:1;                                  /*!< The Object is in use (no longer free in the pool). */
 		BIT_U8 allocated:1;                             /*!< The Object is allocated (created, and ready to be put on the map). */
 		BIT_U8 isNotOnMap:1;                            /*!< The Object is not on the map (under construction, in refinery, etc). */
 		BIT_U8 isSmoking:1;                             /*!< The Object has a smoke cloud coming out of it. */
@@ -52,7 +52,7 @@ typedef struct Object {
 /**
  * Data common to StructureInfo and UnitInfo.
  */
-typedef struct ObjectInfo {
+typedef struct ObjectType {
 	uint16 stringID_abbrev;                                 /*!< StringID of abbreviated name of Structure / Unit. */
 	const char *name;                                       /*!< Pointer to name of Structure / Unit. */
 	uint16 stringID_full;                                   /*!< StringID of full name of Structure / Unit. */
@@ -74,10 +74,10 @@ typedef struct ObjectInfo {
 	} flags;                                                /*!< General flags of the ObjectInfo. */
 	uint16 spawnChance;                                     /*!< Chance of spawning a Unit (if Structure: on destroying of Structure). */
 	uint16 hitpoints;                                       /*!< Default hitpoints for this Structure / Unit. */
-	uint16 fogUncoverRadius;                                /*!< Radius of fog to uncover. */
+	uint16 Sight;                                /*!< Radius of fog to uncover. */
 	uint16 spriteID;                                        /*!< SpriteID of Structure / Unit. */
-	uint16 buildCredits;                                    /*!< How much credits it cost to build this Structure / Unit. Upgrading is 50% of this value. */
-	uint16 buildTime;                                       /*!< Time required to build this Structure / Unit. */
+	uint16 Cost;                                    /*!< How much credits it cost to build this Structure / Unit. Upgrading is 50% of this value. */
+	uint16 Time;                                       /*!< Time required to build this Structure / Unit. */
 	uint16 availableCampaign;                               /*!< In which campaign (starting at 1) this Structure / Unit is available. */
 	uint32 structuresRequired;                              /*!< Which structures are required before this Structure / Unit is available. */
 	uint8  sortPriority;                                    /*!< ?? */
@@ -85,10 +85,10 @@ typedef struct ObjectInfo {
 	uint16 actionsPlayer[4];                                /*!< Actions for player Structure / Unit. */
 	 int8  available;                                       /*!< If this Structure / Unit is ordered (Starport) / available (Rest). 1+=yes (volume), 0=no, -1=upgrade-first. */
 	uint16 hintStringID;                                    /*!< StringID of the hint shown for this Structure / Unit. */
-	uint16 priorityBuild;                                   /*!< The amount of priority a Structure / Unit has when a new Structure / Unit has to be build. */
-	uint16 priorityTarget;                                  /*!< The amount of priority a Structure / Unit has when being targetted. */
+	uint16 Risk;                                   /*!< The amount of priority a Structure / Unit has when a new Structure / Unit has to be build. */
+	uint16 Reward;                                  /*!< The amount of priority a Structure / Unit has when being targetted. */
 	uint8  availableHouse;                                  /*!< To which house this Structure / Unit is available. */
-} ObjectInfo;
+} ObjectType;
 
 extern void Object_Script_Variable4_Link(uint16 encodedFrom, uint16 encodedTo);
 extern void Object_Script_Variable4_Set(Object *o, uint16 index);

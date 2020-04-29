@@ -91,12 +91,12 @@ bool GUI_Security_Show(void)
 	g_disableOtherMovement = true;
 	g_interrogation = true;
 
-	wsaHouseFilename = House_GetWSAHouseFilename(g_playerHouseID);
+	wsaHouseFilename = House_GetWSAHouseFilename(Whom);
 	if (wsaHouseFilename == NULL) return true;
 
 	Fade_Palette_To(g_palette2, 15);
 
-	GUI_Mentat_Display(wsaHouseFilename, g_playerHouseID);
+	GUI_Mentat_Display(wsaHouseFilename, Whom);
 
 	Hide_Mouse();
 	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -104,7 +104,7 @@ bool GUI_Security_Show(void)
 
 	Fade_Palette_To(g_palette1, 15);
 
-	strncpy(g_readBuffer, Text_String(STR_SECURITY_TEXT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+	strncpy(g_readBuffer, Text_String(STR_SECURITY_TEXT_HARKONNEN + Whom * 3), g_readBufferSize);
 	GUI_Mentat_Loop(wsaHouseFilename, NULL, g_readBuffer, true, NULL);
 
 	questionsCount = atoi(Text_String(STR_SECURITY_COUNT));
@@ -127,7 +127,7 @@ bool GUI_Security_Show(void)
 		Animate_Frame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
 		Close_Animation(wsa);
 
-		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+		Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
 		GUI_Mouse_Hide_InWidget(Window);
 		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
@@ -172,9 +172,9 @@ bool GUI_Security_Show(void)
 		GUI_Security_NormaliseText(g_readBuffer);
 
 		if (strcasecmp(g_readBuffer, buffer) != 0) {
-			strncpy(g_readBuffer, Text_String(STR_SECURITY_WRONG_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_WRONG_HARKONNEN + Whom * 3), g_readBufferSize);
 		} else {
-			strncpy(g_readBuffer, Text_String(STR_SECURITY_CORRECT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_CORRECT_HARKONNEN + Whom * 3), g_readBufferSize);
 
 			valid = true;
 		}

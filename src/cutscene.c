@@ -233,7 +233,7 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 		s_palettePartCount = 1;
 	}
 
-	if (g_playerHouseID != HOUSE_INVALID || s_houseAnimation_currentSubtitle != 2) return;
+	if (Whom != HOUSE_INVALID || s_houseAnimation_currentSubtitle != 2) return;
 
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x21);
 
@@ -488,7 +488,7 @@ void GameLoop_LevelEndAnimation(void)
 
 	switch (g_campaignID) {
 		case 4:
-			switch (g_playerHouseID) {
+			switch (Whom) {
 				case HOUSE_HARKONNEN:
 					animation   = g_table_houseAnimation_animation[HOUSEANIMATION_LEVEL4_HARKONNEN];
 					subtitle    = g_table_houseAnimation_subtitle[HOUSEANIMATION_LEVEL4_HARKONNEN];
@@ -511,7 +511,7 @@ void GameLoop_LevelEndAnimation(void)
 			} break;
 
 		case 8:
-			switch (g_playerHouseID) {
+			switch (Whom) {
 				case HOUSE_HARKONNEN:
 					animation   = g_table_houseAnimation_animation[HOUSEANIMATION_LEVEL8_HARKONNEN];
 					subtitle    = g_table_houseAnimation_subtitle[HOUSEANIMATION_LEVEL8_HARKONNEN];
@@ -846,7 +846,7 @@ static void GameLoop_GameCredits(void)
 
 		/* map colors 144-150 to the one of the player House */
 		if (high == 9 && low <= 6) {
-			remap[i] = ((g_playerHouseID + 9) << 4) + low;
+			remap[i] = ((Whom + 9) << 4) + low;
 			Debug("GameLoop_GameCredits() remap color %d to %d\n", i, remap[i]);
 		}
 	}
@@ -899,7 +899,7 @@ void GameLoop_GameEndAnimation(void)
 
 	Voice_LoadVoices(0xFFFE);
 
-	switch (g_playerHouseID) {
+	switch (Whom) {
 		case HOUSE_HARKONNEN:
 			animation   = g_table_houseAnimation_animation[HOUSEANIMATION_LEVEL9_HARKONNEN];
 			subtitle    = g_table_houseAnimation_subtitle[HOUSEANIMATION_LEVEL9_HARKONNEN];

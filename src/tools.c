@@ -111,11 +111,11 @@ bool Tools_Index_IsValid(uint16 encoded)
 	switch (Tools_Index_GetType(encoded)) {
 		case IT_UNIT:
 			if (index >= UNIT_INDEX_MAX) return false;
-			return Unit_Get_ByIndex(index)->o.flags.s.used && Unit_Get_ByIndex(index)->o.flags.s.allocated;
+			return Unit_Get_ByIndex(index)->o.flags.s.IsActive && Unit_Get_ByIndex(index)->o.flags.s.allocated;
 
 		case IT_STRUCTURE:
 			if (index >= STRUCTURE_INDEX_MAX_HARD) return false;
-			return Structure_Get_ByIndex(index)->o.flags.s.used;
+			return Structure_Get_ByIndex(index)->o.flags.s.IsActive;
 
 		case IT_TILE : return true;
 
@@ -162,8 +162,8 @@ tile32 Tools_Index_GetTile(uint16 encoded)
 		case IT_TILE: return Tile_UnpackTile(index);
 		case IT_UNIT: return (index < UNIT_INDEX_MAX) ? Unit_Get_ByIndex(index)->o.position : tile;
 		case IT_STRUCTURE: {
-			const StructureInfo *si;
-			Structure *s;
+			const BuildingType *si;
+			Building *s;
 
 			if (index >= STRUCTURE_INDEX_MAX_HARD) return tile;
 
@@ -198,7 +198,7 @@ Unit *Tools_Index_GetUnit(uint16 encoded)
  * @param id The encoded index to get the Structure of.
  * @return The Structure.
  */
-Structure *Tools_Index_GetStructure(uint16 encoded)
+Building *Tools_Index_GetStructure(uint16 encoded)
 {
 	uint16 index;
 

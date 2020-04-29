@@ -14,7 +14,7 @@ typedef enum IndexType {
 } IndexType;
 
 struct Unit;
-struct Structure;
+struct Building;
 struct Object;
 
 extern uint16 Tools_AdjustToGameSpeed(uint16 normal, uint16 minimum, uint16 maximum, bool inverseSpeed);
@@ -25,7 +25,7 @@ extern bool Tools_Index_IsValid(uint16 encoded);
 extern uint16 Tools_Index_GetPackedTile(uint16 encoded);
 extern tile32 Tools_Index_GetTile(uint16 encoded);
 extern struct Unit *Tools_Index_GetUnit(uint16 encoded);
-extern struct Structure *Tools_Index_GetStructure(uint16 encoded);
+extern struct Building *Tools_Index_GetStructure(uint16 encoded);
 extern struct Object *Tools_Index_GetObject(uint16 encoded);
 
 extern uint8 Random(void);

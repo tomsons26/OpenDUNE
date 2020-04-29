@@ -30,8 +30,8 @@
 #include "wsa.h"
 
 
-House *g_playerHouse = NULL;
-HouseType g_playerHouseID = HOUSE_INVALID;
+House *PlayerPtr = NULL;
+HousesType Whom = HOUSE_INVALID;
 uint16 g_houseMissileCountdown = 0;
 uint16 g_playerCreditsNoSilo = 0;
 uint16 g_playerCredits = 0; /*!< Credits shown to player as 'current'. */
@@ -48,7 +48,7 @@ static void House_EnsureHarvesterAvailable(uint8 houseID);
 /**
  * Loop over all houses, preforming various of tasks.
  */
-void GameLoop_House(void)
+void House_AI(void)
 {
 	PoolFindStruct find;
 	House *h = NULL;
@@ -59,7 +59,7 @@ void GameLoop_House(void)
 	bool tickMissileCountdown     = false;
 	bool tickStarportAvailability = false;
 
-	if (g_debugScenario) return;
+	if (Debug_Map) return;
 
 	if (s_tickHouseHouse <= g_timerGame) {
 		tickHouse = true;
@@ -95,7 +95,7 @@ void GameLoop_House(void)
 		g_houseMissileCountdown--;
 		Sound_Output_Feedback(g_houseMissileCountdown + 41);
 
-		if (g_houseMissileCountdown == 0) Unit_LaunchHouseMissile(Map_FindLocationTile(4, g_playerHouseID));
+		if (g_houseMissileCountdown == 0) Unit_LaunchHouseMissile(Map_FindLocationTile(4, Whom));
 	}
 
 	if (tickStarportAvailability) {
@@ -184,7 +184,7 @@ void GameLoop_House(void)
 		if (tickHouse) {
 			/* ENHANCEMENT -- Originally this code was outside the house loop, which seems very odd.
 			 *  This problem is considered to be so bad, that the original code has been removed. */
-			if (h->index != g_playerHouseID) {
+			if (h->index != Whom) {
 				if (h->creditsStorage < h->credits) {
 					h->credits = h->creditsStorage;
 				}
@@ -197,7 +197,7 @@ void GameLoop_House(void)
 				}
 			}
 
-			if (h->index == g_playerHouseID) {
+			if (h->index == Whom) {
 				if (h->creditsStorage > g_playerCreditsNoSilo) {
 					g_playerCreditsNoSilo = 0;
 				}
@@ -223,7 +223,7 @@ void GameLoop_House(void)
 			if ((int16)h->starportTimeLeft < 0) h->starportTimeLeft = 0;
 
 			if (h->starportTimeLeft == 0) {
-				Structure *s;
+				Building *s;
 
 				s = Structure_Get_ByIndex(g_structureIndex);
 				if (s->o.type == STRUCTURE_STARPORT && s->o.houseID == h->index) {
@@ -253,7 +253,7 @@ void GameLoop_House(void)
 					Sound_Output_Feedback(38);
 				}
 
-				h->starportTimeLeft = (u != NULL) ? g_table_houseInfo[h->index].starportDeliveryTime : 1;
+				h->starportTimeLeft = (u != NULL) ? g_table_houseTypes[h->index].starportDeliveryTime : 1;
 			}
 		}
 
@@ -278,13 +278,13 @@ void GameLoop_House(void)
  * Convert the name of a house to the type value of that house, or
  *  HOUSE_INVALID if not found.
  */
-uint8 House_StringToType(const char *name)
+uint8 HousesType_From_Name(const char *name)
 {
 	uint8 index;
 	if (name == NULL) return HOUSE_INVALID;
 
 	for (index = 0; index < 6; index++) {
-		if (strcasecmp(g_table_houseInfo[index].name, name) == 0) return index;
+		if (strcasecmp(g_table_houseTypes[index].name, name) == 0) return index;
 	}
 
 	return HOUSE_INVALID;
@@ -298,7 +298,7 @@ uint8 House_StringToType(const char *name)
 static void House_EnsureHarvesterAvailable(uint8 houseID)
 {
 	PoolFindStruct find;
-	Structure *s;
+	Building *s;
 
 	find.houseID = houseID;
 	find.type    = 0xFFFF;
@@ -338,7 +338,7 @@ static void House_EnsureHarvesterAvailable(uint8 houseID)
 
 	if (Unit_CreateWrapper(houseID, UNIT_HARVESTER, Tools_Index_Encode(s->o.index, IT_STRUCTURE)) == NULL) return;
 
-	if (houseID != g_playerHouseID) return;
+	if (houseID != Whom) return;
 
 	GUI_DisplayText(Text_String(STR_HARVESTER_IS_HEADING_TO_REFINERY), 0);
 }
@@ -350,7 +350,7 @@ static void House_EnsureHarvesterAvailable(uint8 houseID)
  * @param houseID2 The index of the second house.
  * @return True if and only if the two houses are allies of eachother.
  */
-bool House_AreAllied(uint8 houseID1, uint8 houseID2)
+bool House_Is_Ally(uint8 houseID1, uint8 houseID2)
 {
 	if (houseID1 == HOUSE_INVALID || houseID2 == HOUSE_INVALID) return false;
 
@@ -360,7 +360,7 @@ bool House_AreAllied(uint8 houseID1, uint8 houseID2)
 		return (houseID1 == HOUSE_ATREIDES || houseID2 == HOUSE_ATREIDES);
 	}
 
-	return (houseID1 != g_playerHouseID && houseID2 != g_playerHouseID);
+	return (houseID1 != Whom && houseID2 != Whom);
 }
 
 /**
@@ -375,7 +375,7 @@ bool House_UpdateRadarState(House *h)
 	uint16 frameCount;
 	bool activate;
 
-	if (h == NULL || h->index != g_playerHouseID) return false;
+	if (h == NULL || h->index != Whom) return false;
 
 	wsa = NULL;
 
@@ -445,8 +445,8 @@ void House_UpdateCreditsStorage(uint8 houseID)
 
 	creditsStorage = 0;
 	while (true) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -482,8 +482,8 @@ void House_CalculatePowerAndCredit(House *h)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		const StructureInfo *si;
-		Structure *s;
+		const BuildingType *si;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -516,12 +516,12 @@ void House_CalculatePowerAndCredit(House *h)
 	}
 
 	/* Check if we are low on power */
-	if (h->index == g_playerHouseID && h->powerUsage > h->powerProduction) {
+	if (h->index == Whom && h->powerUsage > h->powerProduction) {
 		GUI_DisplayText(Text_String(STR_INSUFFICIENT_POWER_WINDTRAP_IS_NEEDED), 1);
 	}
 
 	/* If there are no buildings left, you lose your right on 'credits without storage' */
-	if (h->index == g_playerHouseID && h->structuresBuilt == 0 && g_validateStrictIfZero == 0) {
+	if (h->index == Whom && h->structuresBuilt == 0 && g_validateStrictIfZero == 0) {
 		g_playerCreditsNoSilo = 0;
 	}
 }

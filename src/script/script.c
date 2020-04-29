@@ -16,7 +16,7 @@
 #include "../object.h"
 
 struct Object *g_scriptCurrentObject;
-struct Structure *g_scriptCurrentStructure;
+struct Building *g_scriptCurrentStructure;
 struct Unit *g_scriptCurrentUnit;
 struct Team *g_scriptCurrentTeam;
 

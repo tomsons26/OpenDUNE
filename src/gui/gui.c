@@ -714,7 +714,7 @@ void GUI_PaletteAnimate(void)
  */
 void GUI_UpdateProductionStringID(void)
 {
-	Structure *s = NULL;
+	Building *s = NULL;
 
 	s = Structure_Get_ByPackedTile(g_selectionPosition);
 
@@ -723,7 +723,7 @@ void GUI_UpdateProductionStringID(void)
 	if (s == NULL) return;
 
 	if (!g_table_structureInfo[s->o.type].o.flags.factory) {
-		if (s->o.type == STRUCTURE_PALACE) g_productionStringID = STR_LAUNCH + g_table_houseInfo[s->o.houseID].specialWeapon - 1;
+		if (s->o.type == STRUCTURE_PALACE) g_productionStringID = STR_LAUNCH + g_table_houseTypes[s->o.houseID].specialWeapon - 1;
 		return;
 	}
 
@@ -1436,13 +1436,13 @@ static uint16 Update_Score(int16 score, uint16 *harvestedAllied, uint16 *harvest
 	find.index   = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
 		if (s->o.type == STRUCTURE_SLAB_1x1 || s->o.type == STRUCTURE_SLAB_2x2 || s->o.type == STRUCTURE_WALL) continue;
 
-		score += g_table_structureInfo[s->o.type].o.buildCredits / 100;
+		score += g_table_structureInfo[s->o.type].o.Cost / 100;
 	}
 
 	g_validateStrictIfZero++;
@@ -1457,7 +1457,7 @@ static uint16 Update_Score(int16 score, uint16 *harvestedAllied, uint16 *harvest
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		if (House_AreAllied(Unit_GetHouseID(u), g_playerHouseID)) {
+		if (House_Is_Ally(Unit_GetHouseID(u), Whom)) {
 			sumHarvestedAllied += u->amount * 7;
 		} else {
 			sumHarvestedEnnemy += u->amount * 7;
@@ -1534,13 +1534,13 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 	Sprites_LoadImage("FAME.CPS", SCREEN_1, g_palette_998A);
 
 	xSrc = 1;
-	if (g_playerHouseID <= HOUSE_ORDOS) {
-		xSrc = (g_playerHouseID * 56 + 8) / 8;
+	if (Whom <= HOUSE_ORDOS) {
+		xSrc = (Whom * 56 + 8) / 8;
 	}
 
 	Byte_Blit(xSrc, 136, 0, 8, 7, 56, SCREEN_1, SCREEN_1);
 
-	if (g_playerHouseID > HOUSE_ORDOS) {
+	if (Whom > HOUSE_ORDOS) {
 		xSrc += 7;
 	}
 
@@ -1575,7 +1575,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		Fancy_Text_Print(Text_String(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
 	}
 
-	switch (g_playerHouseID) {
+	switch (Whom) {
 		case HOUSE_HARKONNEN:
 			colour = 149;
 			offset = 0;
@@ -1766,7 +1766,7 @@ uint8 Choose_House(void)
 	Widget *w = NULL;
 	uint8 palette[3 * 256];
 	uint16 i;
-	HouseType houseID;
+	HousesType houseID;
 
 	houseID = HOUSE_MERCENARY;
 
@@ -1840,7 +1840,7 @@ uint8 Choose_House(void)
 
 		Fade_Palette_To(palette, 15);
 
-		if (g_debugSkipDialogs || g_debugScenario) {
+		if (g_debugSkipDialogs || Debug_Map) {
 			Debug("Skipping House selection confirmation.\n");
 			break;
 		}
@@ -1848,7 +1848,7 @@ uint8 Choose_House(void)
 		w = GUI_Widget_Link(w, GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(Text_String(STR_YES)[0]), 168, 168, 373, 0));
 		w = GUI_Widget_Link(w, GUI_Widget_Allocate(2, GUI_Widget_GetShortcut(Text_String(STR_NO)[0]), 240, 168, 375, 0));
 
-		g_playerHouseID = HOUSE_MERCENARY;
+		Whom = HOUSE_MERCENARY;
 
 		oldScreenID = Set_LogicPage(SCREEN_0);
 
@@ -2100,7 +2100,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -2128,7 +2128,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 		Hide_Mouse();
 
 		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-		GUI_DrawCredits(g_playerHouseID, (g_playerCredits == 0xFFFF) ? 2 : 1);
+		GUI_DrawCredits(Whom, (g_playerCredits == 0xFFFF) ? 2 : 1);
 		Fade_Palette_To(g_palette1, 15);
 
 		Show_Mouse();
@@ -2136,7 +2136,7 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 
 	Set_LogicPage(oldScreenID);
 
-	GUI_DrawCredits(g_playerHouseID, 2);
+	GUI_DrawCredits(Whom, 2);
 
 	Clear_KeyBuffer();
 }
@@ -2743,7 +2743,7 @@ static void GUI_FactoryWindow_InitItems(void)
 
 	if (g_factoryWindowStarport) {
 		uint16 seconds = (g_timerGame - g_tickScenarioStart) / 60;
-		uint16 seed = (seconds / 60) + g_scenarioID + g_playerHouseID;
+		uint16 seed = (seconds / 60) + g_scenarioID + Whom;
 		seed *= seed;
 
 		Tools_RandomLCG_Seed(seed);
@@ -2753,7 +2753,7 @@ static void GUI_FactoryWindow_InitItems(void)
 		uint16 i;
 
 		for (i = 0; i < UNIT_MAX; i++) {
-			ObjectInfo *oi = &g_table_unitInfo[i].o;
+			ObjectType *oi = &g_table_unitTypes[i].o;
 
 			if (oi->available == 0) continue;
 
@@ -2761,9 +2761,9 @@ static void GUI_FactoryWindow_InitItems(void)
 			g_factoryWindowItems[g_factoryWindowTotal].objectType = i;
 
 			if (g_factoryWindowStarport) {
-				g_factoryWindowItems[g_factoryWindowTotal].credits = GUI_FactoryWindow_CalculateStarportPrice(oi->buildCredits);
+				g_factoryWindowItems[g_factoryWindowTotal].credits = GUI_FactoryWindow_CalculateStarportPrice(oi->Cost);
 			} else {
-				g_factoryWindowItems[g_factoryWindowTotal].credits = oi->buildCredits;
+				g_factoryWindowItems[g_factoryWindowTotal].credits = oi->Cost;
 			}
 
 			g_factoryWindowItems[g_factoryWindowTotal].sortPriority = oi->sortPriority;
@@ -2774,13 +2774,13 @@ static void GUI_FactoryWindow_InitItems(void)
 		uint16 i;
 
 		for (i = 0; i < STRUCTURE_MAX; i++) {
-			ObjectInfo *oi = &g_table_structureInfo[i].o;
+			ObjectType *oi = &g_table_structureInfo[i].o;
 
 			if (oi->available == 0) continue;
 
 			g_factoryWindowItems[g_factoryWindowTotal].objectInfo    = oi;
 			g_factoryWindowItems[g_factoryWindowTotal].objectType    = i;
-			g_factoryWindowItems[g_factoryWindowTotal].credits       = oi->buildCredits;
+			g_factoryWindowItems[g_factoryWindowTotal].credits       = oi->Cost;
 			g_factoryWindowItems[g_factoryWindowTotal].sortPriority  = oi->sortPriority;
 
 			if (i == 0 || i == 1) g_factoryWindowItems[g_factoryWindowTotal].sortPriority = 0x64;
@@ -2805,7 +2805,7 @@ static void GUI_FactoryWindow_Init(void)
 	Screen oldScreenID;
 	void *wsa;
 	int16 i;
-	ObjectInfo *oi;
+	ObjectType *oi;
 
 	oldScreenID = Set_LogicPage(SCREEN_1);
 
@@ -2814,8 +2814,8 @@ static void GUI_FactoryWindow_Init(void)
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
 
-	Byte_Blit(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 8, 7, 40, SCREEN_1, SCREEN_1);
-	Byte_Blit(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 152, 7, 40, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc[Whom], ySrc[Whom], 0, 8, 7, 40, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc[Whom], ySrc[Whom], 0, 152, 7, 40, SCREEN_1, SCREEN_1);
 
 	GUI_FactoryWindow_CreateWidgets();
 	GUI_FactoryWindow_LoadGraymapTbl();
@@ -2857,7 +2857,7 @@ static void GUI_FactoryWindow_Init(void)
 
 	GUI_FactoryWindow_DrawDetails();
 
-	GUI_DrawCredits(g_playerHouseID, 1);
+	GUI_DrawCredits(Whom, 1);
 
 	Set_LogicPage(oldScreenID);
 }
@@ -2890,7 +2890,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 	for (g_factoryWindowResult = FACTORY_CONTINUE; g_factoryWindowResult == FACTORY_CONTINUE; sleepIdle()) {
 		uint16 event;
 
-		GUI_DrawCredits(g_playerHouseID, 0);
+		GUI_DrawCredits(Whom, 0);
 
 		GUI_FactoryWindow_UpdateSelection(false);
 
@@ -2901,7 +2901,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 		GUI_PaletteAnimate();
 	}
 
-	GUI_DrawCredits(g_playerHouseID, 1);
+	GUI_DrawCredits(Whom, 1);
 
 	Set_LogicPage(oldScreenID);
 
@@ -2985,7 +2985,7 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 	uint16 height;
 	uint16 i;
 
-	GUI_Palette_CreateRemap(g_playerHouseID);
+	GUI_Palette_CreateRemap(Whom);
 
 	for (i = 0; i < 20; i++) {
 		GUI_StrategicMap_AnimateArrows();
@@ -3128,7 +3128,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 	uint16 region;
 	uint16 i;
 
-	GUI_Palette_CreateRemap(g_playerHouseID);
+	GUI_Palette_CreateRemap(Whom);
 
 	sprintf(category, "GROUP%hu", campaignID);
 
@@ -3212,7 +3212,7 @@ static void GUI_StrategicMap_ReadHouseRegions(uint8 houseID, uint16 campaignID)
 	char groupText[16];
 	char *s = buffer;
 
-	strncpy(key, g_table_houseInfo[houseID].name, 3);
+	strncpy(key, g_table_houseTypes[houseID].name, 3);
 	key[3] = '\0';
 
 	snprintf(groupText, sizeof(groupText), "GROUP%d", campaignID);
@@ -3282,10 +3282,10 @@ static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 	sprintf(category, "GROUP%hu", campaignID);
 
 	for (i = 0; i < 6; i++) {
-		uint8 houseID = (g_playerHouseID + i) % 6;
+		uint8 houseID = (Whom + i) % 6;
 		const char *s = buf;
 
-		strncpy(key, g_table_houseInfo[houseID].name, 3);
+		strncpy(key, g_table_houseTypes[houseID].name, 3);
 		key[3] = '\0';
 
 		if (Ini_GetString(category, key, NULL, buf, 99, g_fileRegionINI) == NULL) continue;
@@ -3347,7 +3347,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	x = 0;
 	y = 0;
 
-	switch (g_playerHouseID) {
+	switch (Whom) {
 		case HOUSE_HARKONNEN:
 			x = 0;
 			y = 152;
@@ -3365,7 +3365,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	}
 
 	memcpy(loc316, g_palette1 + 251 * 3, 12);
-	memcpy(s_strategicMapArrowColors, g_palette1 + (144 + (g_playerHouseID * 16)) * 3, 4 * 3);
+	memcpy(s_strategicMapArrowColors, g_palette1 + (144 + (Whom * 16)) * 3, 4 * 3);
 	memcpy(s_strategicMapArrowColors + 4 * 3, s_strategicMapArrowColors, 4 * 3);
 
 	Byte_Blit(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
@@ -3510,7 +3510,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 {
 	Screen oldScreenID;
 	FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
-	ObjectInfo *oi = item->objectInfo;
+	ObjectType *oi = item->objectInfo;
 	void *wsa;
 
 	oldScreenID = Set_LogicPage(SCREEN_1);
@@ -3520,7 +3520,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 	Close_Animation(wsa);
 
 	if (g_factoryWindowConstructionYard) {
-		const StructureInfo *si;
+		const BuildingType *si;
 		int16 x = 288;
 		int16 y = 136;
 		uint8 *sprite;
@@ -3590,7 +3590,7 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 		Fancy_Text_Print(caption, 128, 23, 12, 0, 0x12);
 	} else {
 		FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
-		ObjectInfo *oi = item->objectInfo;
+		ObjectType *oi = item->objectInfo;
 		uint16 width;
 
 		Fancy_Text_Print(Text_String(oi->stringID_full), 128, 23, 12, 0, 0x12);
@@ -3614,7 +3614,7 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 void GUI_FactoryWindow_UpdateDetails(const FactoryWindowItem *item)
 {
 	int16 y;
-	const ObjectInfo *oi = item->objectInfo;
+	const ObjectType *oi = item->objectInfo;
 	uint16 type = item->objectType;
 
 	/* check the available units and unit count limit */
@@ -3622,8 +3622,8 @@ void GUI_FactoryWindow_UpdateDetails(const FactoryWindowItem *item)
 
 	y = 160;
 	if (oi->available <= item->amount) y = 169;
-	else if (g_starPortEnforceUnitLimit && g_table_unitInfo[type].movementType != MOVEMENT_WINGER && g_table_unitInfo[type].movementType != MOVEMENT_SLITHER) {
-		House *h = g_playerHouse;
+	else if (g_starPortEnforceUnitLimit && g_table_unitTypes[type].movementType != MOVEMENT_WINGER && g_table_unitTypes[type].movementType != MOVEMENT_SLITHER) {
+		House *h = PlayerPtr;
 		if (h->unitCount >= h->unitCountMax) y = 178;
 	}
 	Hide_Mouse();
@@ -3676,7 +3676,7 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 		return;
 	}
 
-	switch (g_playerHouseID) {
+	switch (Whom) {
 		case HOUSE_HARKONNEN:
 			*(g_palette1 + 255 * 3 + 1) = paletteColour;
 			*(g_palette1 + 255 * 3 + 2) = paletteColour;
@@ -3780,7 +3780,7 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 	item = GUI_FactoryWindow_GetItem(-1);
 
 	if (item != NULL) {
-		ObjectInfo *oi = item->objectInfo;
+		ObjectType *oi = item->objectInfo;
 
 		if (oi->available == -1) {
 			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
@@ -3794,7 +3794,7 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 	item = GUI_FactoryWindow_GetItem(4);
 
 	if (item != NULL) {
-		ObjectInfo *oi = item->objectInfo;
+		ObjectType *oi = item->objectInfo;
 
 		if (oi->available == -1) {
 			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
@@ -4290,7 +4290,7 @@ static uint16 GUI_HallOfFame_InsertScore(HallOfFameStruct *data, uint16 score)
 		memmove(data + 1, data, 128);
 		memset(data->name, 0, 6);
 		data->score = score;
-		data->houseID = g_playerHouseID;
+		data->houseID = Whom;
 		data->rank = GUI_HallOfFame_GetRank(score);
 		data->campaignID = g_campaignID;
 
@@ -4451,9 +4451,9 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 
 		if (g_config.language == LANGUAGE_FRENCH) {
 			p1 = Text_String(_rankScores[data[i].rank].rankString);
-			p2 = g_table_houseInfo[data[i].houseID].name;
+			p2 = g_table_houseTypes[data[i].houseID].name;
 		} else {
-			p1 = g_table_houseInfo[data[i].houseID].name;
+			p1 = g_table_houseTypes[data[i].houseID].name;
 			p2 = Text_String(_rankScores[data[i].rank].rankString);
 		}
 		snprintf(buffer, sizeof(buffer), "%s, %s %s", data[i].name, p1, p2);

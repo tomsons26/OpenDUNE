@@ -64,8 +64,8 @@ bool House_Load(FILE *fp, uint32 length)
 
 		/* See if it is a human house */
 		if (h->flags.human) {
-			g_playerHouseID = h->index;
-			g_playerHouse = h;
+			Whom = h->index;
+			PlayerPtr = h;
 
 			if (h->starportLinkedID != 0xFFFF && h->starportTimeLeft == 0) h->starportTimeLeft = 1;
 		}
@@ -91,7 +91,7 @@ bool House_LoadOld(FILE *fp, uint32 length)
 
 		/* See if it is a human house */
 		if (hl.flags.human) {
-			g_playerHouseID = hl.index;
+			Whom = hl.index;
 			break;
 		}
 

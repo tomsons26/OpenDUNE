@@ -244,7 +244,7 @@ void Voice_LoadVoices(uint16 voiceSet)
 				switch (g_config.language) {
 					case LANGUAGE_FRENCH: prefixChar = 'F'; break;
 					case LANGUAGE_GERMAN: prefixChar = 'G'; break;
-					default: prefixChar = g_table_houseInfo[voiceSet].prefixChar;
+					default: prefixChar = g_table_houseTypes[voiceSet].prefixChar;
 				}
 				snprintf(filename, sizeof(filename), str, prefixChar);
 
@@ -336,7 +336,7 @@ void Sound_StartSound(uint16 index)
 
 		filename = g_table_voices[index].string;
 		if (filename[0] == '?') {
-			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, g_playerHouseID < HOUSE_MAX ? g_table_houseInfo[g_playerHouseID].prefixChar : ' ');
+			snprintf(filenameBuffer, sizeof(filenameBuffer), filename + 1, Whom < HOUSE_MAX ? g_table_houseTypes[Whom].prefixChar : ' ');
 
 			Driver_Voice_LoadFile(filenameBuffer, g_readBuffer, g_readBufferSize);
 

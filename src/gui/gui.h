@@ -53,7 +53,7 @@ typedef struct FactoryWindowItem {
 	int8   amount;                                          /*!< How many are available. */
 	uint16 credits;                                         /*!< What is the current price. */
 	uint16 sortPriority;                                    /*!< The sorting priority. */
-	struct ObjectInfo *objectInfo;                          /*!< The ObjectInfo of the item. */
+	struct ObjectType *objectInfo;                          /*!< The ObjectInfo of the item. */
 } FactoryWindowItem;
 
 /**

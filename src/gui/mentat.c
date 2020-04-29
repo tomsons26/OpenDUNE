@@ -209,7 +209,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 		s_topHelpList = 0;
 		s_selectedHelpSubject = 0;
 
-		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseInfo[g_playerHouseID].name[0]);
+		sprintf(s_mentatFilename, "MENTAT%c", g_table_houseTypes[Whom].name[0]);
 		strncpy(s_mentatFilename, String_GenerateFilename(s_mentatFilename), sizeof(s_mentatFilename));
 	}
 
@@ -263,7 +263,7 @@ static void GUI_Mentat_Draw(bool force)
 
 	Change_New_Window(8);
 
-	Draw_Shape(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Draw_Shape(SCREEN_1, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 
 	Fancy_Text_Print(Text_String(STR_SELECT_SUBJECT), (g_curWidgetXBase << 3) + 16, g_curWidgetYBase + 2, 12, 0, 0x12);
 	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x11);
@@ -321,7 +321,7 @@ static void GUI_Mentat_ShowHelpList(bool proceed)
 	if (!g_dune2_enhanced) Input_Flags_SetBits(INPUT_FLAG_KEY_REPEAT);
 	Clear_KeyBuffer();
 
-	GUI_Mentat_Display(NULL, g_playerHouseID);
+	GUI_Mentat_Display(NULL, Whom);
 
 	g_widgetMentatFirst = GUI_Widget_Allocate(1, GUI_Widget_GetShortcut(*Text_String(STR_EXIT)), 200, 168, proceed ? 379 : 377, 5);
 	g_widgetMentatFirst->shortcut2 = 'n';
@@ -372,7 +372,7 @@ bool GUI_Widget_Mentat_Click(Widget *w)
 
 	Driver_Voice_Play(NULL, 0xFF);
 
-	Music_Play(g_table_houseInfo[g_playerHouseID].musicBriefing);
+	Music_Play(g_table_houseTypes[Whom].musicBriefing);
 
 	Sprites_UnloadTiles();
 
@@ -408,7 +408,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 
 	Sprites_UnloadTiles();
 
-	GUI_Mentat_Display(wsaFilename, g_playerHouseID);
+	GUI_Mentat_Display(wsaFilename, Whom);
 
 	Set_LogicPage(SCREEN_1);
 
@@ -422,7 +422,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 		Close_Animation(wsa);
 	}
 
-	Draw_Shape(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Draw_Shape(SCREEN_1, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 	Set_LogicPage(SCREEN_0);
 
 	Hide_Mouse();
@@ -461,7 +461,7 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
  */
 void GUI_Mentat_ShowBriefing(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_houseInfo[g_playerHouseID].musicBriefing);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 4, g_scenario.pictureBriefing, g_table_houseTypes[Whom].musicBriefing);
 }
 
 /**
@@ -469,7 +469,7 @@ void GUI_Mentat_ShowBriefing(void)
  */
 void GUI_Mentat_ShowWin(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_houseInfo[g_playerHouseID].musicWin);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 5, g_scenario.pictureWin, g_table_houseTypes[Whom].musicWin);
 }
 
 /**
@@ -477,7 +477,7 @@ void GUI_Mentat_ShowWin(void)
  */
 void GUI_Mentat_ShowLose(void)
 {
-	GUI_Mentat_ShowDialog(g_playerHouseID, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_houseInfo[g_playerHouseID].musicLose);
+	GUI_Mentat_ShowDialog(Whom, g_campaignID * 4 + 6, g_scenario.pictureLose, g_table_houseTypes[Whom].musicLose);
 }
 
 /**
@@ -491,7 +491,7 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	Screen oldScreenID;
 	int i;
 
-	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_houseInfo[houseID].name[0]);
+	snprintf(textBuffer, sizeof(textBuffer), "MENTAT%c.CPS", g_table_houseTypes[houseID].name[0]);
 	Sprites_LoadImage(textBuffer, SCREEN_1, g_palette_998A);
 
 	oldScreenID = Set_LogicPage(SCREEN_1);
@@ -582,7 +582,7 @@ void GUI_Mentat_Animation(uint16 speakingMode)
 			Conditional_Show_Mouse();
 		}
 
-		switch (g_playerHouseID) {
+		switch (Whom) {
 			case HOUSE_HARKONNEN:
 				movingOtherTimer = g_timerGUI + 300 * 60;
 				break;
@@ -960,7 +960,7 @@ static void GUI_Mentat_ShowHelp(void)
 		desc    = NULL;
 		text    = (char *)g_readBuffer;
 
-		index = *text - 44 + g_campaignID * 4 + STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + g_playerHouseID * 40;
+		index = *text - 44 + g_campaignID * 4 + STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + Whom * 40;
 
 		strncpy(g_readBuffer, Text_String(index), g_readBufferSize);
 	} else {
@@ -1256,7 +1256,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 
 		GUI_Mentat_DrawInfo(pictureDetails, (g_curWidgetXBase << 3) + 5, g_curWidgetYBase + 3, 8, 0, lines, 0x31);
 
-		Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+		Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 		GUI_Mouse_Hide_InWidget(Window);
 		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
@@ -1266,7 +1266,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	if (wsa != NULL) Close_Animation(wsa);
 
 	Set_LogicPage(SCREEN_2);
-	Draw_Shape(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
+	Draw_Shape(SCREEN_2, g_sprites[397 + Whom * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
 	GUI_Mouse_Hide_InWidget(Window);
 	Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 	GUI_Mouse_Show_InWidget();

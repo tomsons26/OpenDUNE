@@ -104,7 +104,7 @@ static void Unit_MovementTick(Unit *unit)
 	speed = unit->speedRemainder;
 
 	/* Units in the air don't feel the effect of gameSpeed */
-	if (g_table_unitInfo[unit->o.type].movementType != MOVEMENT_WINGER) {
+	if (g_table_unitTypes[unit->o.type].movementType != MOVEMENT_WINGER) {
 		speed += Tools_AdjustToGameSpeed(unit->speedPerTick, 1, 255, false);
 	} else {
 		speed += unit->speedPerTick;
@@ -131,7 +131,7 @@ void GameLoop_Unit(void)
 	bool tickUnknown5  = false;
 	bool tickDeviation = false;
 
-	if (g_debugScenario) return;
+	if (Debug_Map) return;
 
 	if (s_tickUnitMovement <= g_timerGame) {
 		tickMovement = true;
@@ -173,13 +173,13 @@ void GameLoop_Unit(void)
 	find.type    = 0xFFFF;
 
 	while (true) {
-		const UnitInfo *ui;
+		const UnitType *ui;
 		Unit *u;
 
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		ui = &g_table_unitInfo[u->o.type];
+		ui = &g_table_unitTypes[u->o.type];
 
 		g_scriptCurrentObject    = &u->o;
 		g_scriptCurrentStructure = NULL;
@@ -188,10 +188,10 @@ void GameLoop_Unit(void)
 
 		if (u->o.flags.s.isNotOnMap) continue;
 
-		if (tickUnknown4 && u->targetAttack != 0 && ui->o.flags.hasTurret) {
+		if (tickUnknown4 && u->TarCom != 0 && ui->o.flags.hasTurret) {
 			tile32 tile;
 
-			tile = Tools_Index_GetTile(u->targetAttack);
+			tile = Tools_Index_GetTile(u->TarCom);
 
 			Unit_SetOrientation(u, Tile_GetDirection(u->o.position, tile), false, 1);
 		}
@@ -205,8 +205,8 @@ void GameLoop_Unit(void)
 
 					tile = u->currentDestination;
 
-					if (Tools_Index_GetType(u->targetAttack) == IT_UNIT && g_table_unitInfo[Tools_Index_GetUnit(u->targetAttack)->o.type].movementType == MOVEMENT_WINGER) {
-						tile = Tools_Index_GetTile(u->targetAttack);
+					if (Tools_Index_GetType(u->TarCom) == IT_UNIT && g_table_unitTypes[Tools_Index_GetUnit(u->TarCom)->o.type].movementType == MOVEMENT_WINGER) {
+						tile = Tools_Index_GetTile(u->TarCom);
 					}
 
 					Unit_SetOrientation(u, Tile_GetDirection(u->o.position, tile), false, 0);
@@ -294,7 +294,7 @@ void GameLoop_Unit(void)
 						opcodesLeft = 3;
 					}
 
-					u->o.script.variables[3] = g_playerHouseID;
+					u->o.script.variables[3] = Whom;
 
 					for (; opcodesLeft > 0 && u->o.script.delay == 0; opcodesLeft--) {
 						if (!Script_Run(&u->o.script)) break;
@@ -340,7 +340,7 @@ uint8 Unit_StringToType(const char *name)
 	if (name == NULL) return UNIT_INVALID;
 
 	for (type = 0; type < UNIT_MAX; type++) {
-		if (strcasecmp(g_table_unitInfo[type].o.name, name) == 0) return type;
+		if (strcasecmp(g_table_unitTypes[type].o.name, name) == 0) return type;
 	}
 
 	return UNIT_INVALID;
@@ -390,13 +390,13 @@ uint8 Unit_MovementStringToType(const char *name)
  */
 Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, int8 orientation)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
 
 	if (houseID >= HOUSE_MAX) return NULL;
 	if (typeID >= UNIT_MAX) return NULL;
 
-	ui = &g_table_unitInfo[typeID];
+	ui = &g_table_unitTypes[typeID];
 	u = Unit_Allocate(index, typeID, houseID);
 	if (u == NULL) return NULL;
 
@@ -412,7 +412,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, in
 	u->currentDestination.x = 0;
 	u->currentDestination.y = 0;
 	u->originEncoded    = 0x0000;
-	u->route[0]         = 0xFF;
+	u->Path[0]         = 0xFF;
 
 	if (position.x != 0xFFFF || position.y != 0xFFFF) {
 		u->originEncoded = Unit_FindClosestRefinery(u);
@@ -426,7 +426,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, in
 	u->nextActionID  = ACTION_INVALID;
 	u->fireDelay     = 0;
 	u->distanceToDestination = 0x7FFF;
-	u->targetMove    = 0x0000;
+	u->NavCom    = 0x0000;
 	u->amount        = 0;
 	u->wobbleIndex   = 0;
 	u->spriteOffset  = 0;
@@ -438,7 +438,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, in
 	u->o.flags.s.allocated = true;
 
 	if (ui->movementType == MOVEMENT_TRACKED) {
-		if (Random() < g_table_houseInfo[houseID].degradingChance) {
+		if (Random() < g_table_houseTypes[houseID].degradingChance) {
 			u->o.flags.s.degrades = true;
 		}
 	}
@@ -459,7 +459,7 @@ Unit *Unit_Create(uint16 index, uint8 typeID, uint8 houseID, tile32 position, in
 
 	Unit_UpdateMap(1, u);
 
-	Unit_SetAction(u, (houseID == g_playerHouseID) ? ui->o.actionsPlayer[3] : ui->actionAI);
+	Unit_SetAction(u, (houseID == Whom) ? ui->o.actionsPlayer[3] : ui->InitialMission);
 
 	return u;
 }
@@ -541,7 +541,7 @@ uint16 Unit_AddToTeam(Unit *u, Team *t)
 {
 	if (t == NULL || u == NULL) return 0;
 
-	u->team = t->index + 1;
+	u->Team = t->index + 1;
 	t->members++;
 
 	return t->maxMembers - t->members;
@@ -558,12 +558,12 @@ uint16 Unit_RemoveFromTeam(Unit *u)
 	Team *t;
 
 	if (u == NULL) return 0;
-	if (u->team == 0) return 0;
+	if (u->Team == 0) return 0;
 
-	t = Team_Get_ByIndex(u->team - 1);
+	t = Team_Get_ByIndex(u->Team - 1);
 
 	t->members--;
-	u->team = 0;
+	u->Team = 0;
 
 	return t->maxMembers - t->members;
 }
@@ -577,8 +577,8 @@ uint16 Unit_RemoveFromTeam(Unit *u)
 Team *Unit_GetTeam(Unit *u)
 {
 	if (u == NULL) return NULL;
-	if (u->team == 0) return NULL;
-	return Team_Get_ByIndex(u->team - 1);
+	if (u->Team == 0) return NULL;
+	return Team_Get_ByIndex(u->Team - 1);
 }
 
 /**
@@ -589,7 +589,7 @@ void Unit_Sort(void)
 	House *h;
 	uint16 i;
 
-	h = g_playerHouse;
+	h = PlayerPtr;
 	h->unitCountEnemy = 0;
 	h->unitCountAllied = 0;
 
@@ -603,8 +603,8 @@ void Unit_Sort(void)
 		u2 = g_unitFindArray[i + 1];
 		y1 = Tile_GetY(u1->o.position);
 		y2 = Tile_GetY(u2->o.position);
-		if (g_table_unitInfo[u1->o.type].movementType == MOVEMENT_FOOT) y1 -= 0x100;
-		if (g_table_unitInfo[u2->o.type].movementType == MOVEMENT_FOOT) y2 -= 0x100;
+		if (g_table_unitTypes[u1->o.type].movementType == MOVEMENT_FOOT) y1 -= 0x100;
+		if (g_table_unitTypes[u2->o.type].movementType == MOVEMENT_FOOT) y2 -= 0x100;
 
 		if ((int16)y1 > (int16)y2) {
 			g_unitFindArray[i] = u2;
@@ -616,8 +616,8 @@ void Unit_Sort(void)
 		Unit *u;
 
 		u = g_unitFindArray[i];
-		if ((u->o.seenByHouses & (1 << g_playerHouseID)) != 0 && !u->o.flags.s.isNotOnMap) {
-			if (House_AreAllied(u->o.houseID, g_playerHouseID)) {
+		if ((u->o.seenByHouses & (1 << Whom)) != 0 && !u->o.flags.s.isNotOnMap) {
+			if (House_Is_Ally(u->o.houseID, Whom)) {
 				h->unitCountAllied++;
 			} else {
 				h->unitCountEnemy++;
@@ -657,17 +657,17 @@ Unit *Unit_Get_ByPackedTile(uint16 packed)
  * 1 - valid movement, will try to get close to the structure
  * 2 - valid movement, will attempt to damage/conquer the structure
  */
-uint16 Unit_IsValidMovementIntoStructure(Unit *unit, Structure *s)
+uint16 Unit_IsValidMovementIntoStructure(Unit *unit, Building *s)
 {
-	const StructureInfo *si;
-	const UnitInfo *ui;
+	const BuildingType *si;
+	const UnitType *ui;
 	uint16 unitEnc;
 	uint16 structEnc;
 
 	if (unit == NULL || s == NULL) return 0;
 
 	si = &g_table_structureInfo[s->o.type];
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	unitEnc = Tools_Index_Encode(unit->o.index, IT_UNIT);
 	structEnc = Tools_Index_Encode(s->o.index, IT_STRUCTURE);
@@ -675,10 +675,10 @@ uint16 Unit_IsValidMovementIntoStructure(Unit *unit, Structure *s)
 	/* Movement into structure of other owner. */
 	if (Unit_GetHouseID(unit) != s->o.houseID) {
 		/* Saboteur can always enter houses */
-		if (unit->o.type == UNIT_SABOTEUR && unit->targetMove == structEnc) return 2;
+		if (unit->o.type == UNIT_SABOTEUR && unit->NavCom == structEnc) return 2;
 		/* Entering houses is only possible for foot-units and if the structure is conquerable.
 		 * Everyone else can only move close to the building. */
-		if (ui->movementType == MOVEMENT_FOOT && si->o.flags.conquerable) return unit->targetMove == structEnc ? 2 : 1;
+		if (ui->movementType == MOVEMENT_FOOT && si->o.flags.conquerable) return unit->NavCom == structEnc ? 2 : 1;
 		return 0;
 	}
 
@@ -700,11 +700,11 @@ uint16 Unit_IsValidMovementIntoStructure(Unit *unit, Structure *s)
  */
 void Unit_SetDestination(Unit *u, uint16 destination)
 {
-	Structure *s;
+	Building *s;
 
 	if (u == NULL) return;
 	if (!Tools_Index_IsValid(destination)) return;
-	if (u->targetMove == destination) return;
+	if (u->NavCom == destination) return;
 
 	if (Tools_Index_GetType(destination) == IT_TILE) {
 		Unit *u2;
@@ -723,13 +723,13 @@ void Unit_SetDestination(Unit *u, uint16 destination)
 
 	s = Tools_Index_GetStructure(destination);
 	if (s != NULL && s->o.houseID == Unit_GetHouseID(u)) {
-		if (Unit_IsValidMovementIntoStructure(u, s) == 1 || g_table_unitInfo[u->o.type].movementType == MOVEMENT_WINGER) {
+		if (Unit_IsValidMovementIntoStructure(u, s) == 1 || g_table_unitTypes[u->o.type].movementType == MOVEMENT_WINGER) {
 			Object_Script_Variable4_Link(Tools_Index_Encode(u->o.index, IT_UNIT), destination);
 		}
 	}
 
-	u->targetMove = destination;
-	u->route[0]   = 0xFF;
+	u->NavCom = destination;
+	u->Path[0]   = 0xFF;
 }
 
 /**
@@ -742,8 +742,8 @@ void Unit_SetDestination(Unit *u, uint16 destination)
  */
 uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target)
 {
-	const UnitInfo *targetInfo;
-	const UnitInfo *unitInfo;
+	const UnitType *targetInfo;
+	const UnitType *unitInfo;
 	uint16 distance;
 	uint16 priority;
 
@@ -753,16 +753,16 @@ uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target)
 	if (!target->o.flags.s.allocated) return 0;
 	if ((target->o.seenByHouses & (1 << Unit_GetHouseID(unit))) == 0) return 0;
 
-	if (House_AreAllied(Unit_GetHouseID(unit), Unit_GetHouseID(target))) return 0;
+	if (House_Is_Ally(Unit_GetHouseID(unit), Unit_GetHouseID(target))) return 0;
 
-	unitInfo   = &g_table_unitInfo[unit->o.type];
-	targetInfo = &g_table_unitInfo[target->o.type];
+	unitInfo   = &g_table_unitTypes[unit->o.type];
+	targetInfo = &g_table_unitTypes[target->o.type];
 
 	if (!targetInfo->o.flags.priority) return 0;
 
 	if (targetInfo->movementType == MOVEMENT_WINGER) {
 		if (!unitInfo->o.flags.targetAir) return 0;
-		if (target->o.houseID == g_playerHouseID && !Map_IsPositionUnveiled(Tile_PackTile(target->o.position))) return 0;
+		if (target->o.houseID == Whom && !Map_IsPositionUnveiled(Tile_PackTile(target->o.position))) return 0;
 	}
 
 	if (!Map_IsValidPosition(Tile_PackTile(target->o.position))) return 0;
@@ -770,10 +770,10 @@ uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target)
 	distance = Tile_GetDistanceRoundedUp(unit->o.position, target->o.position);
 
 	if (!Map_IsValidPosition(Tile_PackTile(unit->o.position))) {
-		if (targetInfo->fireDistance >= distance) return 0;
+		if (targetInfo->Range >= distance) return 0;
 	}
 
-	priority = targetInfo->o.priorityTarget + targetInfo->o.priorityBuild;
+	priority = targetInfo->o.Reward + targetInfo->o.Risk;
 	if (distance != 0) priority = (priority / distance) + 1;
 
 	if (priority > 0x7D00) return 0x7D00;
@@ -789,9 +789,9 @@ uint16 Unit_GetTargetUnitPriority(Unit *unit, Unit *target)
 uint16 Unit_FindClosestRefinery(Unit *unit)
 {
 	uint16 res;
-	Structure *s = NULL;
+	Building *s = NULL;
 	uint16 mind = 0;
-	Structure *s2;
+	Building *s2;
 	uint16 d;
 	PoolFindStruct find;
 
@@ -845,11 +845,11 @@ uint16 Unit_FindClosestRefinery(Unit *unit)
  */
 bool Unit_SetPosition(Unit *u, tile32 position)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 
 	if (u == NULL) return false;
 
-	ui = &g_table_unitInfo[u->o.type];
+	ui = &g_table_unitTypes[u->o.type];
 	u->o.flags.s.isNotOnMap = false;
 
 	u->o.position = Tile_Center(position);
@@ -865,18 +865,18 @@ bool Unit_SetPosition(Unit *u, tile32 position)
 
 	u->currentDestination.x = 0;
 	u->currentDestination.y = 0;
-	u->targetMove = 0;
-	u->targetAttack = 0;
+	u->NavCom = 0;
+	u->TarCom = 0;
 
 	if (g_map[Tile_PackTile(u->o.position)].isUnveiled) {
 		/* A new unit being delivered fresh from the factory; force a seenByHouses
 		 *  update and add it to the statistics etc. */
 		u->o.seenByHouses &= ~(1 << u->o.houseID);
-		Unit_HouseUnitCount_Add(u, g_playerHouseID);
+		Unit_HouseUnitCount_Add(u, Whom);
 	}
 
-	if (u->o.houseID != g_playerHouseID || u->o.type == UNIT_HARVESTER || u->o.type == UNIT_SABOTEUR) {
-		Unit_SetAction(u, ui->actionAI);
+	if (u->o.houseID != Whom || u->o.type == UNIT_HARVESTER || u->o.type == UNIT_SABOTEUR) {
+		Unit_SetAction(u, ui->InitialMission);
 	} else {
 		Unit_SetAction(u, ui->o.actionsPlayer[3]);
 	}
@@ -937,7 +937,7 @@ Unit *Unit_FindBestTargetUnit(Unit *u, uint16 mode)
 		position = Tools_Index_GetTile(u->originEncoded);
 	}
 
-	distance = g_table_unitInfo[u->o.type].fireDistance << 8;
+	distance = g_table_unitTypes[u->o.type].Range << 8;
 	if (mode == 2) distance <<= 1;
 
 	find.houseID = HOUSE_INVALID;
@@ -993,7 +993,7 @@ static uint16 Unit_Sandworm_GetTargetPriority(Unit *unit, Unit *target)
 	if (!Map_IsPositionUnveiled(Tile_PackTile(target->o.position))) return 0;
 	if (!g_table_landscapeInfo[Map_GetLandscapeType(Tile_PackTile(target->o.position))].isSand) return 0;
 
-	switch(g_table_unitInfo[target->o.type].movementType) {
+	switch(g_table_unitTypes[target->o.type].movementType) {
 		case MOVEMENT_FOOT:      res = 0x64;   break;
 		case MOVEMENT_TRACKED:   res = 0x3E8;  break;
 		case MOVEMENT_HARVESTER: res = 0x3E8;  break;
@@ -1058,7 +1058,7 @@ Unit *Unit_Sandworm_FindBestTarget(Unit *unit)
  */
 bool Unit_StartMovement(Unit *unit)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	int8 orientation;
 	uint16 packed;
 	uint16 type;
@@ -1068,7 +1068,7 @@ bool Unit_StartMovement(Unit *unit)
 
 	if (unit == NULL) return false;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	orientation = (int8)((unit->orientation[0].current + 16) & 0xE0);
 
@@ -1131,7 +1131,7 @@ bool Unit_StartMovement(Unit *unit)
 void Unit_SetTarget(Unit *unit, uint16 encoded)
 {
 	if (unit == NULL || !Tools_Index_IsValid(encoded)) return;
-	if (unit->targetAttack == encoded) return;
+	if (unit->TarCom == encoded) return;
 
 	if (Tools_Index_GetType(encoded) == IT_TILE) {
 		uint16 packed;
@@ -1143,7 +1143,7 @@ void Unit_SetTarget(Unit *unit, uint16 encoded)
 		if (u != NULL) {
 			encoded = Tools_Index_Encode(u->o.index, IT_UNIT);
 		} else {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Get_ByPackedTile(packed);
 			if (s != NULL) {
@@ -1156,11 +1156,11 @@ void Unit_SetTarget(Unit *unit, uint16 encoded)
 		encoded = Tools_Index_Encode(Tile_PackTile(unit->o.position), IT_TILE);
 	}
 
-	unit->targetAttack = encoded;
+	unit->TarCom = encoded;
 
-	if (!g_table_unitInfo[unit->o.type].o.flags.hasTurret) {
-		unit->targetMove = encoded;
-		unit->route[0] = 0xFF;
+	if (!g_table_unitTypes[unit->o.type].o.flags.hasTurret) {
+		unit->NavCom = encoded;
+		unit->Path[0] = 0xFF;
 	}
 }
 
@@ -1173,16 +1173,16 @@ void Unit_SetTarget(Unit *unit, uint16 encoded)
  */
 bool Unit_Deviation_Decrease(Unit *unit, uint16 amount)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 
 	if (unit == NULL || unit->deviated == 0) return false;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (!ui->flags.isNormalUnit) return false;
 
 	if (amount == 0) {
-		amount = g_table_houseInfo[unit->o.houseID].toughness;
+		amount = g_table_houseTypes[unit->o.houseID].toughness;
 	}
 
 	if (unit->deviated > amount) {
@@ -1196,15 +1196,15 @@ bool Unit_Deviation_Decrease(Unit *unit, uint16 amount)
 	Unit_UpdateMap(2, unit);
 	unit->o.flags.s.bulletIsBig = false;
 
-	if (unit->o.houseID == g_playerHouseID) {
+	if (unit->o.houseID == Whom) {
 		Unit_SetAction(unit, ui->o.actionsPlayer[3]);
 	} else {
-		Unit_SetAction(unit, ui->actionAI);
+		Unit_SetAction(unit, ui->InitialMission);
 	}
 
 	Unit_UntargetMe(unit);
-	unit->targetAttack = 0;
-	unit->targetMove = 0;
+	unit->TarCom = 0;
+	unit->NavCom = 0;
 
 	return true;
 }
@@ -1216,18 +1216,18 @@ bool Unit_Deviation_Decrease(Unit *unit, uint16 amount)
  */
 void Unit_RemoveFog(Unit *unit)
 {
-	uint16 fogUncoverRadius;
+	uint16 sight;
 
 	if (unit == NULL) return;
 	if (unit->o.flags.s.isNotOnMap) return;
 	if ((unit->o.position.x == 0xFFFF && unit->o.position.y == 0xFFFF) || (unit->o.position.x == 0 && unit->o.position.y == 0)) return;
-	if (!House_AreAllied(Unit_GetHouseID(unit), g_playerHouseID)) return;
+	if (!House_Is_Ally(Unit_GetHouseID(unit), Whom)) return;
 
-	fogUncoverRadius = g_table_unitInfo[unit->o.type].o.fogUncoverRadius;
+	sight = g_table_unitTypes[unit->o.type].o.Sight;
 
-	if (fogUncoverRadius == 0) return;
+	if (sight == 0) return;
 
-	Tile_RemoveFogInRadius(unit->o.position, fogUncoverRadius);
+	Tile_RemoveFogInRadius(unit->o.position, sight);
 }
 
 /**
@@ -1240,19 +1240,19 @@ void Unit_RemoveFog(Unit *unit)
  */
 bool Unit_Deviate(Unit *unit, uint16 probability, uint8 houseID)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 
 	if (unit == NULL) return false;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (!ui->flags.isNormalUnit) return false;
 	if (unit->deviated != 0) return false;
 	if (ui->flags.isNotDeviatable) return false;
 
-	if (probability == 0) probability = g_table_houseInfo[unit->o.houseID].toughness;
+	if (probability == 0) probability = g_table_houseTypes[unit->o.houseID].toughness;
 
-	if (unit->o.houseID != g_playerHouseID) {
+	if (unit->o.houseID != Whom) {
 		probability -= probability / 8;
 	}
 
@@ -1263,15 +1263,15 @@ bool Unit_Deviate(Unit *unit, uint16 probability, uint8 houseID)
 
 	Unit_UpdateMap(2, unit);
 
-	if (g_playerHouseID == unit->deviatedHouse) {
+	if (Whom == unit->deviatedHouse) {
 		Unit_SetAction(unit, ui->o.actionsPlayer[3]);
 	} else {
-		Unit_SetAction(unit, ui->actionAI);
+		Unit_SetAction(unit, ui->InitialMission);
 	}
 
 	Unit_UntargetMe(unit);
-	unit->targetAttack = 0;
-	unit->targetMove = 0;
+	unit->TarCom = 0;
+	unit->NavCom = 0;
 
 	return true;
 }
@@ -1285,7 +1285,7 @@ bool Unit_Deviate(Unit *unit, uint16 probability, uint8 houseID)
  */
 bool Unit_Move(Unit *unit, uint16 distance)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	uint16 d;
 	uint16 packed;
 	tile32 newPosition;
@@ -1294,9 +1294,9 @@ bool Unit_Move(Unit *unit, uint16 distance)
 	bool isSpiceBloom = false;
 	bool isSpecialBloom = false;
 
-	if (unit == NULL || !unit->o.flags.s.used) return false;
+	if (unit == NULL || !unit->o.flags.s.IsActive) return false;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	newPosition = Tile_MoveByDirection(unit->o.position, unit->orientation[0].current, distance);
 
@@ -1330,7 +1330,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 		u = Unit_Get_ByPackedTile(packed);
 
 		/* Driving over a foot unit */
-		if (u != NULL && g_table_unitInfo[u->o.type].movementType == MOVEMENT_FOOT && u->o.flags.s.allocated) {
+		if (u != NULL && g_table_unitTypes[u->o.type].movementType == MOVEMENT_FOOT && u->o.flags.s.allocated) {
 			if (u == g_unitSelected) Unit_Select(NULL);
 
 			Unit_UntargetMe(u);
@@ -1367,18 +1367,18 @@ bool Unit_Move(Unit *unit, uint16 distance)
 		u = Unit_Get_ByPackedTile(packed);
 
 		if (u != NULL) {
-			if (!g_table_unitInfo[u->o.type].flags.sonicProtection) {
+			if (!g_table_unitTypes[u->o.type].flags.sonicProtection) {
 				Unit_Damage(u, damage, 0);
 			}
 		} else {
-			Structure *s;
+			Building *s;
 
 			s = Structure_Get_ByPackedTile(packed);
 
 			if (s != NULL) {
 				/* ENHANCEMENT -- make sonic blast trigger counter attack, but
 				 * do not warn about base under attack (original behaviour). */
-				if (g_dune2_enhanced && s->o.houseID != g_playerHouseID && !House_AreAllied(unit->o.houseID, s->o.houseID)) {
+				if (g_dune2_enhanced && s->o.houseID != Whom && !House_Is_Ally(unit->o.houseID, s->o.houseID)) {
 					Structure_HouseUnderAttack(s->o.houseID);
 				}
 
@@ -1388,7 +1388,7 @@ bool Unit_Move(Unit *unit, uint16 distance)
 			}
 		}
 
-		if (unit->o.hitpoints < (ui->damage / 2)) {
+		if (unit->o.hitpoints < (ui->Damage / 2)) {
 			unit->o.flags.s.bulletIsBig = true;
 		}
 
@@ -1465,9 +1465,9 @@ bool Unit_Move(Unit *unit, uint16 distance)
 					if (!detonate) {
 						/* ENHANCEMENT -- Saboteurs tend to forget their goal, depending on terrain and game speed: to blow up on reaching their destination. */
 						if (g_dune2_enhanced) {
-							detonate = (unit->targetMove != 0 && Tile_GetDistance(newPosition, Tools_Index_GetTile(unit->targetMove)) < 16);
+							detonate = (unit->NavCom != 0 && Tile_GetDistance(newPosition, Tools_Index_GetTile(unit->NavCom)) < 16);
 						} else {
-							detonate = (unit->targetMove != 0 && Tile_GetDistance(unit->o.position, Tools_Index_GetTile(unit->targetMove)) < 32);
+							detonate = (unit->NavCom != 0 && Tile_GetDistance(unit->o.position, Tools_Index_GetTile(unit->NavCom)) < 32);
 						}
 					}
 					
@@ -1481,12 +1481,12 @@ bool Unit_Move(Unit *unit, uint16 distance)
 
 				Unit_SetSpeed(unit, 0);
 
-				if (unit->targetMove == Tools_Index_Encode(packed, IT_TILE)) {
-					unit->targetMove = 0;
+				if (unit->NavCom == Tools_Index_Encode(packed, IT_TILE)) {
+					unit->NavCom = 0;
 				}
 
 				{
-					Structure *s;
+					Building *s;
 
 					s = Structure_Get_ByPackedTile(packed);
 					if (s != NULL) {
@@ -1529,13 +1529,13 @@ bool Unit_Move(Unit *unit, uint16 distance)
  */
 bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	bool alive = false;
 	uint8 houseID;
 
 	if (unit == NULL || !unit->o.flags.s.allocated) return false;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (!ui->flags.isNormalUnit && unit->o.type != UNIT_SANDWORM) return false;
 
@@ -1560,7 +1560,7 @@ bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 			Sound_Output_Feedback(20);
 		} else {
 			if (!ui->o.flags.noMessageOnDeath && alive) {
-				Sound_Output_Feedback((houseID == g_playerHouseID || g_campaignID > 3) ? houseID + 14 : 13);
+				Sound_Output_Feedback((houseID == Whom || g_campaignID > 3) ? houseID + 14 : 13);
 			}
 		}
 
@@ -1572,7 +1572,7 @@ bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 		Map_MakeExplosion((damage < 25) ? EXPLOSION_IMPACT_SMALL : EXPLOSION_IMPACT_MEDIUM, unit->o.position, 0, 0);
 	}
 
-	if (houseID != g_playerHouseID && unit->actionID == ACTION_AMBUSH && unit->o.type != UNIT_HARVESTER) {
+	if (houseID != Whom && unit->actionID == ACTION_AMBUSH && unit->o.type != UNIT_HARVESTER) {
 		Unit_SetAction(unit, ACTION_ATTACK);
 	}
 
@@ -1584,12 +1584,12 @@ bool Unit_Damage(Unit *unit, uint16 damage, uint16 range)
 
 	if (unit->o.type == UNIT_TROOPERS || unit->o.type == UNIT_INFANTRY) {
 		unit->o.type += 2;
-		ui = &g_table_unitInfo[unit->o.type];
+		ui = &g_table_unitTypes[unit->o.type];
 		unit->o.hitpoints = ui->o.hitpoints;
 
 		Unit_UpdateMap(2, unit);
 
-		if (Random() < g_table_houseInfo[unit->o.houseID].toughness) {
+		if (Random() < g_table_houseTypes[unit->o.houseID].toughness) {
 			Unit_SetAction(unit, ACTION_RETREAT);
 		}
 	}
@@ -1625,8 +1625,8 @@ void Unit_UntargetMe(Unit *unit)
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 
-		if (u->targetMove == encoded) u->targetMove = 0;
-		if (u->targetAttack == encoded) u->targetAttack = 0;
+		if (u->NavCom == encoded) u->NavCom = 0;
+		if (u->TarCom == encoded) u->TarCom = 0;
 		if (u->o.script.variables[4] == encoded) Object_Script_Variable4_Clear(&u->o);
 	}
 
@@ -1635,7 +1635,7 @@ void Unit_UntargetMe(Unit *unit)
 	find.index   = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 
 		s = Structure_Find(&find);
 		if (s == NULL) break;
@@ -1686,7 +1686,7 @@ void Unit_SetOrientation(Unit *unit, int8 orientation, bool rotateInstantly, uin
 
 	if (unit->orientation[level].current == orientation) return;
 
-	unit->orientation[level].speed = g_table_unitInfo[unit->o.type].turningSpeed * 4;
+	unit->orientation[level].speed = g_table_unitTypes[unit->o.type].turningSpeed * 4;
 
 	diff = orientation - unit->orientation[level].current;
 
@@ -1708,7 +1708,7 @@ void Unit_Select(Unit *unit)
 		unit = NULL;
 	}
 
-	if (unit != NULL && (unit->o.seenByHouses & (1 << g_playerHouseID)) == 0 && !g_debugGame) {
+	if (unit != NULL && (unit->o.seenByHouses & (1 << Whom)) == 0 && !g_debugGame) {
 		unit = NULL;
 	}
 
@@ -1721,10 +1721,10 @@ void Unit_Select(Unit *unit)
 		return;
 	}
 
-	if (Unit_GetHouseID(unit) == g_playerHouseID) {
-		const UnitInfo *ui;
+	if (Unit_GetHouseID(unit) == Whom) {
+		const UnitType *ui;
 
-		ui = &g_table_unitInfo[unit->o.type];
+		ui = &g_table_unitTypes[unit->o.type];
 
 		/* Plays the 'reporting' sound file. */
 		Sound_StartSound(ui->movementType == MOVEMENT_FOOT ? 18 : 19);
@@ -1758,7 +1758,7 @@ void Unit_Select(Unit *unit)
  * @param destination To where on the map this Unit should move.
  * @return The new created Unit, or NULL if something failed.
  */
-Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
+Unit *Unit_CreateWrapper(uint8 houseID, UnitsType typeID, uint16 destination)
 {
 	tile32 tile;
 	House *h;
@@ -1777,7 +1777,7 @@ Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
 		orientation = Tile_GetDirection(tile, t);
 	}
 
-	if (g_table_unitInfo[typeID].movementType == MOVEMENT_WINGER) {
+	if (g_table_unitTypes[typeID].movementType == MOVEMENT_WINGER) {
 		g_validateStrictIfZero++;
 		unit = Unit_Create(UNIT_INDEX_INVALID, typeID, houseID, tile, orientation);
 		g_validateStrictIfZero--;
@@ -1802,7 +1802,7 @@ Unit *Unit_CreateWrapper(uint8 houseID, UnitType typeID, uint16 destination)
 		return NULL;
 	}
 
-	if (House_AreAllied(houseID, g_playerHouseID) || Unit_IsTypeOnMap(houseID, UNIT_CARRYALL)) {
+	if (House_Is_Ally(houseID, Whom) || Unit_IsTypeOnMap(houseID, UNIT_CARRYALL)) {
 		carryall->o.flags.s.byScenario = true;
 	}
 
@@ -1868,14 +1868,14 @@ uint16 Unit_FindTargetAround(uint16 packed)
  */
 bool Unit_IsTileOccupied(Unit *unit)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	uint16 packed;
 	Unit *unit2;
 	uint16 speed;
 
 	if (unit == NULL) return true;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 	packed = Tile_PackTile(unit->o.position);
 
 	speed = g_table_landscapeInfo[Map_GetLandscapeType(packed)].movementSpeed[ui->movementType];
@@ -1885,9 +1885,9 @@ bool Unit_IsTileOccupied(Unit *unit)
 
 	unit2 = Unit_Get_ByPackedTile(packed);
 	if (unit2 != NULL && unit2 != unit) {
-		if (House_AreAllied(Unit_GetHouseID(unit2), Unit_GetHouseID(unit))) return true;
+		if (House_Is_Ally(Unit_GetHouseID(unit2), Unit_GetHouseID(unit))) return true;
 		if (ui->movementType != MOVEMENT_TRACKED) return true;
-		if (g_table_unitInfo[unit2->o.type].movementType != MOVEMENT_FOOT) return true;
+		if (g_table_unitTypes[unit2->o.type].movementType != MOVEMENT_FOOT) return true;
 	}
 
 	return (Structure_Get_ByPackedTile(packed) != NULL);
@@ -1921,10 +1921,10 @@ void Unit_SetSpeed(Unit *unit, uint16 speed)
 	}
 
 	unit->movingSpeed = speed & 0xFF;
-	speed = g_table_unitInfo[unit->o.type].movingSpeedFactor * speed / 256;
+	speed = g_table_unitTypes[unit->o.type].movingSpeedFactor * speed / 256;
 
 	/* Units in the air don't feel the effect of gameSpeed */
-	if (g_table_unitInfo[unit->o.type].movementType != MOVEMENT_WINGER) {
+	if (g_table_unitTypes[unit->o.type].movementType != MOVEMENT_WINGER) {
 		speed = Tools_AdjustToGameSpeed(speed, 1, 255, false);
 	}
 
@@ -1951,14 +1951,14 @@ void Unit_SetSpeed(Unit *unit, uint16 speed)
  * @param target The target of the new bullet Unit.
  * @return The new created Unit, or NULL if something failed.
  */
-Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 damage, uint16 target)
+Unit *Unit_CreateBullet(tile32 position, UnitsType type, uint8 houseID, uint16 damage, uint16 target)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	tile32 tile;
 
 	if (!Tools_Index_IsValid(target)) return NULL;
 
-	ui = &g_table_unitInfo[type];
+	ui = &g_table_unitTypes[type];
 	tile = Tools_Index_GetTile(target);
 
 	switch (type) {
@@ -1978,22 +1978,22 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
 
 			Voice_PlayAtTile(ui->bulletSound, position);
 
-			bullet->targetAttack = target;
+			bullet->TarCom = target;
 			bullet->o.hitpoints = damage;
 			bullet->currentDestination = tile;
 
-			if (ui->flags.notAccurate) {
+			if (ui->flags.Inaccurate) {
 				bullet->currentDestination = Tile_MoveByRandom(tile, (Random() & 0xF) != 0 ? Tile_GetDistance(position, tile) / 256 + 8 : Random() + 8, false);
 			}
 
-			bullet->fireDelay = ui->fireDistance & 0xFF;
+			bullet->fireDelay = ui->Range & 0xFF;
 
 			u = Tools_Index_GetUnit(target);
-			if (u != NULL && g_table_unitInfo[u->o.type].movementType == MOVEMENT_WINGER) {
+			if (u != NULL && g_table_unitTypes[u->o.type].movementType == MOVEMENT_WINGER) {
 				bullet->fireDelay <<= 1;
 			}
 
-			if (type == UNIT_MISSILE_HOUSE || (bullet->o.seenByHouses & (1 << g_playerHouseID)) != 0) return bullet;
+			if (type == UNIT_MISSILE_HOUSE || (bullet->o.seenByHouses & (1 << Whom)) != 0) return bullet;
 
 			Tile_RemoveFogInRadius(bullet->o.position, 2);
 
@@ -2014,7 +2014,7 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
 			if (bullet == NULL) return NULL;
 
 			if (type == UNIT_SONIC_BLAST) {
-				bullet->fireDelay = ui->fireDistance & 0xFF;
+				bullet->fireDelay = ui->Range & 0xFF;
 			}
 
 			bullet->currentDestination = tile;
@@ -2022,7 +2022,7 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
 
 			if (damage > 15) bullet->o.flags.s.bulletIsBig = true;
 
-			if ((bullet->o.seenByHouses & (1 << g_playerHouseID)) != 0) return bullet;
+			if ((bullet->o.seenByHouses & (1 << Whom)) != 0) return bullet;
 
 			Tile_RemoveFogInRadius(bullet->o.position, 2);
 
@@ -2040,17 +2040,17 @@ Unit *Unit_CreateBullet(tile32 position, UnitType type, uint8 houseID, uint16 da
  */
 void Unit_DisplayStatusText(Unit *unit)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	char buffer[81];
 
 	if (unit == NULL) return;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (unit->o.type == UNIT_SANDWORM) {
 		snprintf(buffer, sizeof(buffer), "%s", Text_String(ui->o.stringID_abbrev));
 	} else {
-		const char *houseName = g_table_houseInfo[Unit_GetHouseID(unit)].name;
+		const char *houseName = g_table_houseTypes[Unit_GetHouseID(unit)].name;
 		if (g_config.language == LANGUAGE_FRENCH) {
 			snprintf(buffer, sizeof(buffer), "%s %s", Text_String(ui->o.stringID_abbrev), houseName);
 		} else {
@@ -2069,7 +2069,7 @@ void Unit_DisplayStatusText(Unit *unit)
 			if (type == LST_SPICE || type == LST_THICK_SPICE) stringID = STR_IS_D_PERCENT_FULL_AND_HARVESTING;
 		}
 
-		if (unit->actionID == ACTION_MOVE && Tools_Index_GetStructure(unit->targetMove) != NULL) {
+		if (unit->actionID == ACTION_MOVE && Tools_Index_GetStructure(unit->NavCom) != NULL) {
 			stringID = STR_IS_D_PERCENT_FULL_AND_HEADING_BACK;
 		} else {
 			if (unit->o.script.variables[4] != 0) {
@@ -2128,7 +2128,7 @@ void Unit_Hide(Unit *unit)
  * @param createCarryall Create a carryall if none found.
  * @return The found Unit, or NULL if none found.
  */
-Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool createCarryall)
+Unit *Unit_CallUnitByType(UnitsType type, uint8 houseID, uint16 target, bool createCarryall)
 {
 	PoolFindStruct find;
 	Unit *unit = NULL;
@@ -2143,7 +2143,7 @@ Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool crea
 		u = Unit_Find(&find);
 		if (u == NULL) break;
 		if (u->o.linkedID != 0xFF) continue;
-		if (u->targetMove != 0) continue;
+		if (u->NavCom != 0) continue;
 		unit = u;
 	}
 
@@ -2160,7 +2160,7 @@ Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool crea
 	}
 
 	if (unit != NULL) {
-		unit->targetMove = target;
+		unit->NavCom = target;
 
 		Object_Script_Variable4_Set(&unit->o, target);
 	}
@@ -2174,10 +2174,10 @@ Unit *Unit_CallUnitByType(UnitType type, uint8 houseID, uint16 target, bool crea
  * @param unit The Unit.
  * @param s The Structure.
  */
-void Unit_EnterStructure(Unit *unit, Structure *s)
+void Unit_EnterStructure(Unit *unit, Building *s)
 {
-	const StructureInfo *si;
-	const UnitInfo *ui;
+	const BuildingType *si;
+	const UnitType *ui;
 
 	if (unit == NULL || s == NULL) return;
 
@@ -2190,7 +2190,7 @@ void Unit_EnterStructure(Unit *unit, Structure *s)
 		}
 	}
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 	si = &g_table_structureInfo[s->o.type];
 
 	if (!unit->o.flags.s.allocated || s->o.hitpoints == 0) {
@@ -2201,13 +2201,13 @@ void Unit_EnterStructure(Unit *unit, Structure *s)
 	unit->o.seenByHouses |= s->o.seenByHouses;
 	Unit_Hide(unit);
 
-	if (House_AreAllied(s->o.houseID, Unit_GetHouseID(unit))) {
+	if (House_Is_Ally(s->o.houseID, Unit_GetHouseID(unit))) {
 		Structure_SetState(s, si->o.flags.busyStateIsIncoming ? STRUCTURE_STATE_READY : STRUCTURE_STATE_BUSY);
 
 		if (s->o.type == STRUCTURE_REPAIR) {
 			uint16 countDown;
 
-			countDown = ((ui->o.hitpoints - unit->o.hitpoints) * 256 / ui->o.hitpoints) * (ui->o.buildTime << 6) / 256;
+			countDown = ((ui->o.hitpoints - unit->o.hitpoints) * 256 / ui->o.hitpoints) * (ui->o.Time << 6) / 256;
 
 			if (countDown > 1) {
 				s->countDown = countDown;
@@ -2272,9 +2272,9 @@ void Unit_EnterStructure(Unit *unit, Structure *s)
  * @param mode How to determine the best target.
  * @return The best target or NULL if none found.
  */
-static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
+static Building *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 {
-	Structure *best = NULL;
+	Building *best = NULL;
 	uint16 bestPriority = 0;
 	tile32 position;
 	uint16 distance;
@@ -2283,14 +2283,14 @@ static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
 	if (unit == NULL) return NULL;
 
 	position = Tools_Index_GetTile(unit->originEncoded);
-	distance = g_table_unitInfo[unit->o.type].fireDistance << 8;
+	distance = g_table_unitTypes[unit->o.type].Range << 8;
 
 	find.houseID = HOUSE_INVALID;
 	find.index   = 0xFFFF;
 	find.type    = 0xFFFF;
 
 	while (true) {
-		Structure *s;
+		Building *s;
 		tile32 curPosition;
 		uint16 priority;
 
@@ -2334,24 +2334,24 @@ static Structure *Unit_FindBestTargetStructure(Unit *unit, uint16 mode)
  */
 int16 Unit_GetTileEnterScore(Unit *unit, uint16 packed, uint16 orient8)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	Unit *u;
-	Structure *s;
+	Building *s;
 	uint16 type;
 	uint16 res;
 
 	if (unit == NULL) return 0;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (!Map_IsValidPosition(packed) && ui->movementType != MOVEMENT_WINGER) return 256;
 
 	u = Unit_Get_ByPackedTile(packed);
 	if (u != NULL && u != unit && unit->o.type != UNIT_SANDWORM) {
-		if (unit->o.type == UNIT_SABOTEUR && unit->targetMove == Tools_Index_Encode(u->o.index, IT_UNIT)) return 0;
+		if (unit->o.type == UNIT_SABOTEUR && unit->NavCom == Tools_Index_Encode(u->o.index, IT_UNIT)) return 0;
 
-		if (House_AreAllied(Unit_GetHouseID(u), Unit_GetHouseID(unit))) return 256;
-		if (g_table_unitInfo[u->o.type].movementType != MOVEMENT_FOOT || (ui->movementType != MOVEMENT_TRACKED && ui->movementType != MOVEMENT_HARVESTER)) return 256;
+		if (House_Is_Ally(Unit_GetHouseID(u), Unit_GetHouseID(unit))) return 256;
+		if (g_table_unitTypes[u->o.type].movementType != MOVEMENT_FOOT || (ui->movementType != MOVEMENT_TRACKED && ui->movementType != MOVEMENT_HARVESTER)) return 256;
 	}
 
 	s = Structure_Get_ByPackedTile(packed);
@@ -2370,7 +2370,7 @@ int16 Unit_GetTileEnterScore(Unit *unit, uint16 packed, uint16 orient8)
 	}
 
 	if (unit->o.type == UNIT_SABOTEUR && type == LST_WALL) {
-		if (!House_AreAllied(g_map[packed].houseID, Unit_GetHouseID(unit))) res = 255;
+		if (!House_Is_Ally(g_map[packed].houseID, Unit_GetHouseID(unit))) res = 255;
 	}
 
 	if (res == 0) return 256;
@@ -2395,7 +2395,7 @@ int16 Unit_GetTileEnterScore(Unit *unit, uint16 packed, uint16 orient8)
  */
 uint16 Unit_FindBestTargetEncoded(Unit *unit, uint16 mode)
 {
-	Structure *s;
+	Building *s;
 	Unit *target;
 
 	if (unit == NULL) return 0;
@@ -2440,7 +2440,7 @@ uint16 Unit_FindBestTargetEncoded(Unit *unit, uint16 mode)
 void Unit_RemovePlayer(Unit *unit)
 {
 	if (unit == NULL) return;
-	if (Unit_GetHouseID(unit) != g_playerHouseID) return;
+	if (Unit_GetHouseID(unit) != Whom) return;
 	if (!unit->o.flags.s.allocated) return;
 
 	unit->o.flags.s.allocated = false;
@@ -2465,15 +2465,15 @@ void Unit_RemovePlayer(Unit *unit)
  */
 void Unit_UpdateMap(uint16 type, Unit *unit)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	tile32 position;
 	uint16 packed;
 	Tile *t;
 	uint16 radius;
 
-	if (unit == NULL || unit->o.flags.s.isNotOnMap || !unit->o.flags.s.used) return;
+	if (unit == NULL || unit->o.flags.s.isNotOnMap || !unit->o.flags.s.IsActive) return;
 
-	ui = &g_table_unitInfo[unit->o.type];
+	ui = &g_table_unitTypes[unit->o.type];
 
 	if (ui->movementType == MOVEMENT_WINGER) {
 		if (type != 0) {
@@ -2481,7 +2481,7 @@ void Unit_UpdateMap(uint16 type, Unit *unit)
 			g_dirtyAirUnitCount++;
 		}
 
-		Map_UpdateAround(g_table_unitInfo[unit->o.type].dimension, unit->o.position, unit, g_functions[0][type]);
+		Map_UpdateAround(g_table_unitTypes[unit->o.type].dimension, unit->o.position, unit, g_functions[0][type]);
 		return;
 	}
 
@@ -2489,14 +2489,14 @@ void Unit_UpdateMap(uint16 type, Unit *unit)
 	packed = Tile_PackTile(position);
 	t = &g_map[packed];
 
-	if (t->isUnveiled || unit->o.houseID == g_playerHouseID) {
-		Unit_HouseUnitCount_Add(unit, g_playerHouseID);
+	if (t->isUnveiled || unit->o.houseID == Whom) {
+		Unit_HouseUnitCount_Add(unit, Whom);
 	} else {
 		Unit_HouseUnitCount_Remove(unit);
 	}
 
 	if (type == 1) {
-		if (House_AreAllied(Unit_GetHouseID(unit), g_playerHouseID) && !Map_IsPositionUnveiled(packed) && unit->o.type != UNIT_SANDWORM) {
+		if (House_Is_Ally(Unit_GetHouseID(unit), Whom) && !Map_IsPositionUnveiled(packed) && unit->o.type != UNIT_SANDWORM) {
 			Tile_RemoveFogInRadius(position, 1);
 		}
 
@@ -2559,19 +2559,19 @@ void Unit_AddToTile(Unit *unit, uint16 packed)
  * @param target The structure to look at.
  * @return The priority of the target.
  */
-uint16 Unit_GetTargetStructurePriority(Unit *unit, Structure *target)
+uint16 Unit_GetTargetStructurePriority(Unit *unit, Building *target)
 {
-	const StructureInfo *si;
+	const BuildingType *si;
 	uint16 priority;
 	uint16 distance;
 
 	if (unit == NULL || target == NULL) return 0;
 
-	if (House_AreAllied(Unit_GetHouseID(unit), target->o.houseID)) return 0;
+	if (House_Is_Ally(Unit_GetHouseID(unit), target->o.houseID)) return 0;
 	if ((target->o.seenByHouses & (1 << Unit_GetHouseID(unit))) == 0) return 0;
 
 	si = &g_table_structureInfo[target->o.type];
-	priority = si->o.priorityBuild + si->o.priorityTarget;
+	priority = si->o.Risk + si->o.Reward;
 	distance = Tile_GetDistanceRoundedUp(unit->o.position, target->o.position);
 	if (distance != 0) priority /= distance;
 
@@ -2593,7 +2593,7 @@ void Unit_LaunchHouseMissile(uint16 packed)
 
 	packed = Tile_PackTile(tile);
 
-	isAI = g_unitHouseMissile->o.houseID != g_playerHouseID;
+	isAI = g_unitHouseMissile->o.houseID != Whom;
 
 	Unit_Free(g_unitHouseMissile);
 
@@ -2636,7 +2636,7 @@ void Unit_HouseUnitCount_Remove(Unit *unit)
 
 		if ((unit->o.seenByHouses & (1 << h->index)) == 0) continue;
 
-		if (!House_AreAllied((uint8)h->index, Unit_GetHouseID(unit))) {
+		if (!House_Is_Ally((uint8)h->index, Unit_GetHouseID(unit))) {
 			h->unitCountEnemy--;
 		} else {
 			h->unitCountAllied--;
@@ -2656,15 +2656,15 @@ void Unit_HouseUnitCount_Remove(Unit *unit)
  */
 void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 {
-	const UnitInfo *ui;
+	const UnitType *ui;
 	uint16 houseIDBit;
 	House *hp;
 	House *h;
 
 	if (unit == NULL) return;
 
-	hp = House_Get_ByIndex(g_playerHouseID);
-	ui = &g_table_unitInfo[unit->o.type];
+	hp = House_Get_ByIndex(Whom);
+	ui = &g_table_unitTypes[unit->o.type];
 	h = House_Get_ByIndex(houseID);
 	houseIDBit = (1 << houseID);
 
@@ -2682,7 +2682,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 	}
 
 	if ((unit->o.seenByHouses & houseIDBit) == 0) {
-		if (House_AreAllied(houseID, Unit_GetHouseID(unit))) {
+		if (House_Is_Ally(houseID, Unit_GetHouseID(unit))) {
 			h->unitCountAllied++;
 		} else {
 			h->unitCountEnemy++;
@@ -2690,13 +2690,13 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 	}
 
 	if (ui->movementType != MOVEMENT_WINGER) {
-		if (!House_AreAllied(houseID, Unit_GetHouseID(unit))) {
+		if (!House_Is_Ally(houseID, Unit_GetHouseID(unit))) {
 			h->flags.isAIActive = true;
 			House_Get_ByIndex(Unit_GetHouseID(unit))->flags.isAIActive = true;
 		}
 	}
 
-	if (houseID == g_playerHouseID && g_selectionType != SELECTIONTYPE_MENTAT) {
+	if (houseID == Whom && g_selectionType != SELECTIONTYPE_MENTAT) {
 		if (unit->o.type == UNIT_SANDWORM) {
 			if (hp->timerSandwormAttack == 0) {
 				if (g_musicInBattle == 0) g_musicInBattle = 1;
@@ -2709,7 +2709,7 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 
 				hp->timerSandwormAttack = 8;
 			}
-		} else if (!House_AreAllied(g_playerHouseID, Unit_GetHouseID(unit))) {
+		} else if (!House_Is_Ally(Whom, Unit_GetHouseID(unit))) {
 			Team *t;
 
 			if (hp->timerUnitAttack == 0) {
@@ -2720,10 +2720,10 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 				} else {
 					if (g_scenarioID < 3) {
 						PoolFindStruct find;
-						Structure *s;
+						Building *s;
 						uint16 feedbackID;
 
-						find.houseID = g_playerHouseID;
+						find.houseID = Whom;
 						find.index   = 0xFFFF;
 						find.type    = STRUCTURE_CONSTRUCTION_YARD;
 
@@ -2743,14 +2743,14 @@ void Unit_HouseUnitCount_Add(Unit *unit, uint8 houseID)
 				hp->timerUnitAttack = 8;
 			}
 
-			t = Team_Get_ByIndex(unit->team);
+			t = Team_Get_ByIndex(unit->Team);
 			if (t != NULL) t->script.variables[4] = 1;
 		}
 	}
 
-	if (!House_AreAllied(houseID, unit->o.houseID) && unit->actionID == ACTION_AMBUSH) Unit_SetAction(unit, ACTION_HUNT);
+	if (!House_Is_Ally(houseID, unit->o.houseID) && unit->actionID == ACTION_AMBUSH) Unit_SetAction(unit, ACTION_HUNT);
 
-	if (unit->o.houseID == g_playerHouseID || (unit->o.houseID == HOUSE_FREMEN && g_playerHouseID == HOUSE_ATREIDES)) {
+	if (unit->o.houseID == Whom || (unit->o.houseID == HOUSE_FREMEN && Whom == HOUSE_ATREIDES)) {
 		unit->o.seenByHouses = 0xFF;
 	} else {
 		unit->o.seenByHouses |= houseIDBit;
