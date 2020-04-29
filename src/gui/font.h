@@ -18,17 +18,17 @@ typedef struct Font {
 } Font;
 
 extern Font *g_fontIntro;
-extern Font *g_fontNew6p;
-extern Font *g_fontNew8p;
+extern Font *FontNew6Ptr;
+extern Font *FontNew8Ptr;
 
 extern int8 g_fontCharOffset;
 
-extern Font *g_fontCurrent;
+extern Font *FontPtr;
 
 extern bool Font_Init(void);
 extern void Font_Uninit(void);
-extern uint16 Font_GetCharWidth(unsigned char c);
-extern uint16 Font_GetStringWidth(const char *string);
-extern void Font_Select(Font *f);
+extern uint16 Char_Pixel_Width(unsigned char c);
+extern uint16 String_Pixel_Width(const char *string);
+extern void Set_Font(Font *f);
 
 #endif /* GUI_FONT_H */

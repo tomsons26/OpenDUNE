@@ -85,7 +85,7 @@ void *Get_Buff(Screen screenID)
  * @param screenID The new screen to get active.
  * @return Old screenID that was currently active.
  */
-Screen GFX_Screen_SetActive(Screen screenID)
+Screen Set_LogicPage(Screen screenID)
 {
 	Screen oldScreen = s_screenActiveID;
 	if (screenID != SCREEN_ACTIVE) {
@@ -467,7 +467,7 @@ void GFX_ClearBlock(Screen index)
  * Set a new palette for the screen.
  * @param palette The palette in RGB order.
  */
-void GFX_SetPalette(uint8 *palette)
+void Set_Palette(uint8 *palette)
 {
 	int from, to;
 

@@ -29,7 +29,7 @@ Widget *g_widgetMentatScrollDown = NULL;
 Widget *g_widgetMentatScrollbar = NULL;
 
 /** Layout and other properties of the widgets. */
-WidgetProperties WindowList[22] = {
+WindowType WindowList[22] = {
 	/* x   y   w    h   p4  norm sel */
 	{ 0,   0, 40, 200,  15,  12,  0}, /*  0 */
 	{ 1,  75, 29,  70,  15,  15,  0}, /*  1 */
@@ -102,7 +102,7 @@ static void GUI_Widget_DrawBlocked(Widget *w, uint8 colour)
 		GUI_Mouse_Hide_InRegion(w->offsetX, w->offsetY, w->offsetX + w->width, w->offsetY + w->height);
 	}
 
-	GUI_DrawSprite(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
+	Draw_Shape(SCREEN_ACTIVE, w->drawParameterNormal.sprite, w->offsetX, w->offsetY, w->parentID, 0);
 
 	GUI_DrawBlockedRectangle(w->offsetX, w->offsetY, w->width, w->height, colour);
 
@@ -201,7 +201,7 @@ void GUI_Widget_Draw(Widget *w)
 		case DRAW_MODE_NONE: break;
 
 		case DRAW_MODE_SPRITE: {
-			GUI_DrawSprite(SCREEN_ACTIVE, drawParam.sprite, offsetX, offsetY, w->parentID, DRAWSPRITE_FLAG_REMAP | DRAWSPRITE_FLAG_WIDGETPOS, g_remap, 1);
+			Draw_Shape(SCREEN_ACTIVE, drawParam.sprite, offsetX, offsetY, w->parentID, DRAWSPRITE_FLAG_REMAP | DRAWSPRITE_FLAG_WIDGETPOS, g_remap, 1);
 		} break;
 
 		case DRAW_MODE_TEXT: {
@@ -218,11 +218,11 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_WIRED_RECTANGLE: {
-			GUI_DrawWiredRectangle(positionLeft, positionTop, positionRight, positionBottom, fgColour);
+			Draw_Rect(positionLeft, positionTop, positionRight, positionBottom, fgColour);
 		} break;
 
 		case DRAW_MODE_XORFILLED_RECTANGLE: {
-			GUI_DrawXorFilledRectangle(positionLeft, positionTop, positionRight, positionBottom, fgColour);
+			Eor_Region(positionLeft, positionTop, positionRight, positionBottom, fgColour);
 		} break;
 	}
 
@@ -950,7 +950,7 @@ Widget *GUI_Widget_Insert(Widget *w1, Widget *w2)
  * @param index %Widget number to select.
  * @return Index of the previous selected widget.
  */
-uint16 Widget_SetCurrentWidget(uint16 index)
+uint16 Change_Window(uint16 index)
 {
 	uint16 oldIndex = g_curWidgetIndex;
 	g_curWidgetIndex = index;
@@ -970,9 +970,9 @@ uint16 Widget_SetCurrentWidget(uint16 index)
  * @param index %Widget number to select.
  * @return Index of the previous selected widget.
  */
-uint16 Widget_SetAndPaintCurrentWidget(uint16 index)
+uint16 Change_New_Window(uint16 index)
 {
-	index = Widget_SetCurrentWidget(index);
+	index = Change_Window(index);
 
 	Widget_PaintCurrentWidget();
 
@@ -984,5 +984,5 @@ uint16 Widget_SetAndPaintCurrentWidget(uint16 index)
  */
 void Widget_PaintCurrentWidget(void)
 {
-	GUI_DrawFilledRectangle(g_curWidgetXBase << 3, g_curWidgetYBase, ((g_curWidgetXBase + g_curWidgetWidth) << 3) - 1, g_curWidgetYBase + g_curWidgetHeight - 1, g_curWidgetFGColourNormal);
+	Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, ((g_curWidgetXBase + g_curWidgetWidth) << 3) - 1, g_curWidgetYBase + g_curWidgetHeight - 1, g_curWidgetFGColourNormal);
 }

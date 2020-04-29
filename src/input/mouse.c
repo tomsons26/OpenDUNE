@@ -207,8 +207,8 @@ void Mouse_SetMouseMode(uint8 mouseMode, const char *filename)
 					g_mouseY = g_mouseRecordedY;
 					g_prevButtonState = 0;
 
-					GUI_Mouse_Hide_Safe();
-					GUI_Mouse_Show_Safe();
+					Hide_Mouse();
+					Show_Mouse();
 
 					g_mouseNoRecordedValue = false;
 					break;

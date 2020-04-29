@@ -250,7 +250,7 @@ uint16 Input_Flags_SetBits(uint16 bits)
 }
 
 /** Clear the history buffer. */
-void Input_History_Clear(void)
+void Clear_KeyBuffer(void)
 {
 	s_historyTail = s_historyHead;
 }

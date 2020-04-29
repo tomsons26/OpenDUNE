@@ -170,7 +170,7 @@ typedef struct WindowDesc {
 } WindowDesc;
 
 /** Widget properties. */
-typedef struct WidgetProperties {
+typedef struct WindowType {
 	uint16 xBase;                                           /*!< Horizontal base coordinate divided by 8. */
 	uint16 yBase;                                           /*!< Vertical base coordinate. */
 	uint16 width;                                           /*!< Width of the widget divided by 8. */
@@ -178,7 +178,7 @@ typedef struct WidgetProperties {
 	uint8  fgColourBlink;                                   /*!< Foreground colour for 'blink'. */
 	uint8  fgColourNormal;                                  /*!< Foreground colour for 'normal'. */
 	uint8  fgColourSelected;                                /*!< Foreground colour when 'selected' */
-} WidgetProperties;
+} WindowType;
 
 extern WidgetInfo g_table_gameWidgetInfo[19];
 extern WidgetInfo g_table_factoryWidgetInfo[13];
@@ -198,7 +198,7 @@ extern Widget *g_widgetMentatScrollUp;
 extern Widget *g_widgetMentatScrollDown;
 extern Widget *g_widgetMentatScrollbar;
 
-extern WidgetProperties WindowList[22];
+extern WindowType WindowList[22];
 extern uint16 g_curWidgetIndex;
 extern uint16 g_curWidgetXBase;
 extern uint16 g_curWidgetYBase;
@@ -228,8 +228,8 @@ extern uint16 GUI_Widget_Scrollbar_CalculatePosition(WidgetScrollbar *scrollbar)
 extern uint16 GUI_Widget_Scrollbar_CalculateScrollPosition(WidgetScrollbar *scrollbar);
 extern void GUI_Widget_Free_WithScrollbar(Widget *w);
 extern Widget *GUI_Widget_Insert(Widget *w1, Widget *w2);
-extern uint16 Widget_SetCurrentWidget(uint16 index);
-extern uint16 Widget_SetAndPaintCurrentWidget(uint16 index);
+extern uint16 Change_Window(uint16 index);
+extern uint16 Change_New_Window(uint16 index);
 extern void Widget_PaintCurrentWidget(void);
 
 /* viewport.c */

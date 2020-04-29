@@ -297,24 +297,24 @@ static void GameLoop_LevelEnd(void)
 			GUI_EndStats_Show(g_scenario.killedAllied, g_scenario.killedEnemy, g_scenario.destroyedAllied, g_scenario.destroyedEnemy, g_scenario.harvestedAllied, g_scenario.harvestedEnemy, g_scenario.score, g_playerHouseID);
 
 			if (g_campaignID == 9) {
-				GUI_Mouse_Hide_Safe();
+				Hide_Mouse();
 
-				GUI_SetPaletteAnimated(g_palette2, 15);
+				Fade_Palette_To(g_palette2, 15);
 				GUI_ClearScreen(SCREEN_0);
 				GameLoop_GameEndAnimation();
 				PrepareEnd();
 				exit(0);
 			}
 
-			GUI_Mouse_Hide_Safe();
+			Hide_Mouse();
 			GameLoop_LevelEndAnimation();
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 
 			File_ReadBlockFile("IBM.PAL", g_palette1, 256 * 3);
 
 			g_scenarioID = GUI_StrategicMap_Show(g_campaignID, true);
 
-			GUI_SetPaletteAnimated(g_palette2, 15);
+			Fade_Palette_To(g_palette2, 15);
 
 			if (g_campaignID == 1 || g_campaignID == 7) {
 				if (!GUI_Security_Show()) {
@@ -347,7 +347,7 @@ static void GameLoop_LevelEnd(void)
 
 static void GameLoop_DrawMenu(const char **strings)
 {
-	WidgetProperties *props;
+	WindowType *props;
 	uint16 left;
 	uint16 top;
 	uint8 i;
@@ -356,21 +356,21 @@ static void GameLoop_DrawMenu(const char **strings)
 	top = g_curWidgetYBase + props->yBase;
 	left = (g_curWidgetXBase + props->xBase) << 3;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	for (i = 0; i < props->height; i++) {
-		uint16 pos = top + g_fontCurrent->height * i;
+		uint16 pos = top + FontPtr->height * i;
 
 		if (i == props->fgColourBlink) {
-			GUI_DrawText_Wrapper(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
+			Fancy_Text_Print(strings[i], left, pos, props->fgColourSelected, 0, 0x22);
 		} else {
-			GUI_DrawText_Wrapper(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
+			Fancy_Text_Print(strings[i], left, pos, props->fgColourNormal, 0, 0x22);
 		}
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 }
 
 static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint8 fgColourNormal, uint8 fgColourSelected, uint8 bgColour)
@@ -378,13 +378,13 @@ static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint
 	uint8 i;
 
 	for (i = 0; i < 3; i++) {
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
-		GUI_DrawText_Wrapper(string, left, top, fgColourSelected, bgColour, 0x22);
+		Fancy_Text_Print(string, left, top, fgColourSelected, bgColour, 0x22);
 		Delay(2);
 
-		GUI_DrawText_Wrapper(string, left, top, fgColourNormal, bgColour, 0x22);
-		GUI_Mouse_Show_Safe();
+		Fancy_Text_Print(string, left, top, fgColourNormal, bgColour, 0x22);
+		Show_Mouse();
 		Delay(2);
 	}
 }
@@ -409,7 +409,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	uint8 fgColourNormal;
 	uint8 fgColourSelected;
 	uint8 old;
-	WidgetProperties *props;
+	WindowType *props;
 	uint8 current;
 
 	props = &WindowList[21];
@@ -423,11 +423,11 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	top = g_curWidgetYBase + props->yBase;
 	left = (g_curWidgetXBase + props->xBase) << 3;
 
-	lineHeight = g_fontCurrent->height;
+	lineHeight = FontPtr->height;
 
-	minX = (g_curWidgetXBase << 3) + (g_fontCurrent->maxWidth * props->xBase);
+	minX = (g_curWidgetXBase << 3) + (FontPtr->maxWidth * props->xBase);
 	minY = g_curWidgetYBase + props->yBase;
-	maxX = minX + (g_fontCurrent->maxWidth * props->width) - 1;
+	maxX = minX + (FontPtr->maxWidth * props->width) - 1;
 	maxY = minY + (props->height * lineHeight) - 1;
 
 	fgColourNormal = props->fgColourNormal;
@@ -499,19 +499,19 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	}
 
 	if (current != old) {
-		GUI_Mouse_Hide_Safe();
-		GUI_DrawText_Wrapper(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
-		GUI_DrawText_Wrapper(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Fancy_Text_Print(strings[old], left, top + (old * lineHeight), fgColourNormal, 0, 0x22);
+		Fancy_Text_Print(strings[current], left, top + (current * lineHeight), fgColourSelected, 0, 0x22);
+		Show_Mouse();
 	}
 
 	props->fgColourBlink = current;
 
 	if (result == 0xFFFF) return 0xFFFF;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GameLoop_DrawText2(strings[result], left, top + (current * lineHeight), fgColourNormal, fgColourSelected, 0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	return result;
 }
@@ -701,7 +701,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			g_readBufferSize = (g_enableVoices == 0) ? 12000 : 28000;
 			g_readBuffer = calloc(1, g_readBufferSize);
 
-			GUI_Mouse_Hide_Safe();
+			Hide_Mouse();
 
 			Fade_Score();
 
@@ -722,7 +722,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			g_readBufferSize = (g_enableVoices == 0) ? 12000 : 20000;
 			g_readBuffer = calloc(1, g_readBufferSize);
 
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 
 			Music_Play(28);
 
@@ -736,26 +736,26 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		case STR_HALL_OF_FAME:
 			GUI_HallOfFame_Show(0xFFFF);
 
-			GFX_SetPalette(g_palette2);
+			Set_Palette(g_palette2);
 
 			hasFame = File_Exists_Personal("SAVEFAME.DAT");
 			drawMenu = true;
 			break;
 
 		case STR_LOAD_GAME:
-			GUI_Mouse_Hide_Safe();
-			GUI_SetPaletteAnimated(g_palette2, 30);
+			Hide_Mouse();
+			Fade_Palette_To(g_palette2, 30);
 			GUI_ClearScreen(SCREEN_0);
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
 			if (GUI_Widget_SaveLoad_Click(false)) {
 				loadGame = true;
 				if (g_gameMode == GM_RESTART) break;
 				g_gameMode = GM_NORMAL;
 			} else {
-				GFX_SetPalette(g_palette2);
+				Set_Palette(g_palette2);
 
 				drawMenu = true;
 			}
@@ -780,13 +780,13 @@ static void GameLoop_GameIntroAnimationMenu(void)
 			strings[i] = Text_String(mainMenuStrings[index][i]);
 		}
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		maxWidth = 0;
 
 		for (i = 0; i < WindowList[21].height; i++) {
-			if (Font_GetStringWidth(strings[i]) <= maxWidth) continue;
-			maxWidth = Font_GetStringWidth(strings[i]);
+			if (String_Pixel_Width(strings[i]) <= maxWidth) continue;
+			maxWidth = String_Pixel_Width(strings[i]);
 		}
 
 		maxWidth += 7;
@@ -794,29 +794,29 @@ static void GameLoop_GameIntroAnimationMenu(void)
 		WindowList[21].width  = maxWidth >> 3;
 		WindowList[13].width  = WindowList[21].width + 2;
 		WindowList[13].xBase  = 19 - (maxWidth >> 4);
-		WindowList[13].yBase  = 160 - ((WindowList[21].height * g_fontCurrent->height) >> 1);
-		WindowList[13].height = (WindowList[21].height * g_fontCurrent->height) + 11;
+		WindowList[13].yBase  = 160 - ((WindowList[21].height * FontPtr->height) >> 1);
+		WindowList[13].height = (WindowList[21].height * FontPtr->height) + 11;
 
 		Sprites_LoadImage(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		GUI_ClearScreen(SCREEN_0);
 
-		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-		GUI_SetPaletteAnimated(g_palette1, 30);
+		Fade_Palette_To(g_palette1, 30);
 
-		GUI_DrawText_Wrapper("V1.07", 319, 192, 133, 0, 0x231, 0x39);
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print("V1.07", 319, 192, 133, 0, 0x231, 0x39);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-		Widget_SetCurrentWidget(13);
+		Change_Window(13);
 
 		GUI_Widget_DrawBorder(13, 2, 1);
 
 		GameLoop_DrawMenu(strings);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		drawMenu = false;
 	}
@@ -950,8 +950,8 @@ static void GameLoop_Main(void)
 
 	Video_SetPalette(g_palette1, 0, 256);
 
-	GFX_SetPalette(g_palette1);
-	GFX_SetPalette(g_palette2);
+	Set_Palette(g_palette1);
+	Set_Palette(g_palette2);
 
 	g_paletteMapping1 = malloc(256);
 	g_paletteMapping2 = malloc(256);
@@ -976,7 +976,7 @@ static void GameLoop_Main(void)
 	Sprites_SetMouseSprite(0, 0, g_sprites[0]);
 
 	while (g_mouseHiddenDepth > 1) {
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	Window_WidgetClick_Create();
@@ -986,7 +986,7 @@ static void GameLoop_Main(void)
 	House_Init();
 	Structure_Init();
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	g_canSkipIntro = File_Exists_Personal("ONETIME.DAT");
 
@@ -997,17 +997,17 @@ static void GameLoop_Main(void)
 			if (!g_running) break;
 			if (g_gameMode == GM_MENU) continue;
 
-			GUI_Mouse_Hide_Safe();
+			Hide_Mouse();
 
-			GUI_DrawFilledRectangle(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 12);
+			Fill_Rect(g_curWidgetXBase << 3, g_curWidgetYBase, (g_curWidgetXBase + g_curWidgetWidth) << 3, g_curWidgetYBase + g_curWidgetHeight, 12);
 
-			Input_History_Clear();
+			Clear_KeyBuffer();
 
 			if (s_enableLog != 0) Mouse_SetMouseMode((uint8)s_enableLog, "DUNE.LOG");
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 		}
 
 		if (g_gameMode == GM_PICKHOUSE) {
@@ -1016,7 +1016,7 @@ static void GameLoop_Main(void)
 			g_playerHouseID = HOUSE_MERCENARY;
 			g_playerHouseID = GUI_PickHouse();
 
-			GUI_Mouse_Hide_Safe();
+			Hide_Mouse();
 
 			GFX_ClearBlock(SCREEN_0);
 
@@ -1026,7 +1026,7 @@ static void GameLoop_Main(void)
 
 			Voice_LoadVoices(g_playerHouseID);
 
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 
 			g_gameMode = GM_RESTART;
 			g_scenarioID = 1;
@@ -1084,7 +1084,7 @@ static void GameLoop_Main(void)
 			}
 		}
 
-		GFX_Screen_SetActive(SCREEN_0);
+		Set_LogicPage(SCREEN_0);
 
 		key = GUI_Widget_HandleEvents(g_widgetLinkedListHead);
 
@@ -1123,15 +1123,15 @@ static void GameLoop_Main(void)
 		if (!g_running) break;
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (s_enableLog != 0) Mouse_SetMouseMode(INPUT_MOUSE_MODE_NORMAL, "DUNE.LOG");
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
-	Widget_SetCurrentWidget(0);
+	Change_Window(0);
 
-	GFX_Screen_SetActive(SCREEN_1);
+	Set_LogicPage(SCREEN_1);
 
 	GFX_ClearScreen(SCREEN_1);
 
@@ -1171,17 +1171,17 @@ static bool OpenDune_Init(int screen_magnification, VideoScaleFilter filter, int
 	GFX_Init();
 	GFX_ClearScreen(SCREEN_ACTIVE);
 
-	Font_Select(g_fontNew8p);
+	Set_Font(FontNew8Ptr);
 
 	g_palette_998A = calloc(256 * 3, sizeof(uint8));
 
 	memset(&g_palette_998A[45], 63, 3);	/* Set color 15 to WHITE */
 
-	GFX_SetPalette(g_palette_998A);
+	Set_Palette(g_palette_998A);
 
 	Tools_RandomLCG_Seed((unsigned)time(NULL));
 
-	Widget_SetCurrentWidget(0);
+	Change_Window(0);
 
 	return true;
 }

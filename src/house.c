@@ -396,7 +396,7 @@ bool House_UpdateRadarState(House *h)
 
 	g_textDisplayNeedsUpdate = true;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	while (Driver_Voice_IsPlaying()) sleepIdle();
 
@@ -419,7 +419,7 @@ bool House_UpdateRadarState(House *h)
 
 	g_viewport_forceRedraw = true;
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GUI_Widget_Viewport_RedrawMap(SCREEN_0);
 

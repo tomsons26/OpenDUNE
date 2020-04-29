@@ -110,7 +110,7 @@ static uint8 *s_palette1_houseColour;
 static uint32 s_tickCreditsAnimation = 0;                   /*!< Next tick when credits animation needs an update. */
 static uint32 s_arrowAnimationTimeout = 0;                  /*!< Timeout value for the next palette change in the animation of the arrows. */
 static uint16 s_arrowAnimationState = 0;                    /*!< State of the arrow animation. @see _arrowAnimationTimeout */
-static uint16 s_temporaryColourBorderSchema[5][4];          /*!< Temporary storage for the #s_colourBorderSchema. */
+static uint16 s_temporaryColourBorderSchema[5][4];          /*!< Temporary storage for the #ButtonColors. */
 uint16 g_productionStringID;                                /*!< Descriptive text of activity of the active structure. */
 bool g_textDisplayNeedsUpdate;                              /*!< If set, text display needs to be updated. */
 uint32 g_strategicRegionBits;                               /*!< Region bits at the map. */
@@ -148,7 +148,7 @@ int16  g_selectionState = 1;                                /*!< State of the se
 
 
 /*!< Colours used for the border of widgets. */
-static uint16 s_colourBorderSchema[5][4] = {
+static uint16 ButtonColors[5][4] = {
 	{ 26,  29,  29,  29},
 	{ 20,  26,  16,  20},
 	{ 20,  16,  26,  20},
@@ -165,8 +165,8 @@ static const uint16 s_HOF_ColourBorderSchema[5][4] = {
 	{233, 232, 235, 233}
 };
 
-assert_compile(lengthof(s_colourBorderSchema) == lengthof(s_temporaryColourBorderSchema));
-assert_compile(lengthof(s_colourBorderSchema) == lengthof(s_HOF_ColourBorderSchema));
+assert_compile(lengthof(ButtonColors) == lengthof(s_temporaryColourBorderSchema));
+assert_compile(lengthof(ButtonColors) == lengthof(s_HOF_ColourBorderSchema));
 
 /**
  * Draw a wired rectangle.
@@ -176,12 +176,12 @@ assert_compile(lengthof(s_colourBorderSchema) == lengthof(s_HOF_ColourBorderSche
  * @param bottom The bottom position of the rectangle.
  * @param colour The colour of the rectangle.
  */
-void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour)
+void Draw_Rect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour)
 {
-	GUI_DrawLine(left, top, right, top, colour);
-	GUI_DrawLine(left, bottom, right, bottom, colour);
-	GUI_DrawLine(left, top, left, bottom, colour);
-	GUI_DrawLine(right, top, right, bottom, colour);
+	Draw_Line(left, top, right, top, colour);
+	Draw_Line(left, bottom, right, bottom, colour);
+	Draw_Line(left, top, left, bottom, colour);
+	Draw_Line(right, top, right, bottom, colour);
 
 	GFX_Screen_SetDirty(SCREEN_ACTIVE, left, top, right+1, bottom+1);
 }
@@ -194,7 +194,7 @@ void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom
  * @param bottom The bottom position of the rectangle.
  * @param colour The colour of the rectangle.
  */
-void GUI_DrawFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
+void Fill_Rect(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
 {
 	uint16 x;
 	uint16 y;
@@ -301,19 +301,19 @@ void GUI_DisplayText(const char *str, int importance, ...)
 		}
 		if (displayTimer > g_timerGUI) return;
 
-		oldWidgetId = Widget_SetCurrentWidget(7);
+		oldWidgetId = Change_Window(7);
 
 		if (g_textDisplayNeedsUpdate) {
-			Screen oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+			Screen oldScreenID = Set_LogicPage(SCREEN_1);
 
-			GUI_DrawFilledRectangle(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
+			Fill_Rect(0, 0, SCREEN_WIDTH - 1, 23, g_curWidgetFGColourNormal);
 
-			GUI_DrawText_Wrapper(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
-			GUI_DrawText_Wrapper(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
+			Fancy_Text_Print(displayLine2, g_curWidgetXBase << 3,  2, fgColour2, 0, 0x012);
+			Fancy_Text_Print(displayLine1, g_curWidgetXBase << 3, 13, fgColour1, 0, 0x012);
 
 			g_textDisplayNeedsUpdate = false;
 
-			GFX_Screen_SetActive(oldScreenID);
+			Set_LogicPage(oldScreenID);
 		}
 
 		GUI_Mouse_Hide_InWidget(7);
@@ -324,10 +324,10 @@ void GUI_DisplayText(const char *str, int importance, ...)
 			height = g_curWidgetHeight;
 		}
 
-		GUI_Screen_Copy(g_curWidgetXBase, textOffset, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, height, SCREEN_1, SCREEN_0);
+		Byte_Blit(g_curWidgetXBase, textOffset, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, height, SCREEN_1, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 
-		Widget_SetCurrentWidget(oldWidgetId);
+		Change_Window(oldWidgetId);
 
 		if (textOffset != 0) {
 			if (line3Importance <= line2Importance) {
@@ -405,15 +405,15 @@ static void GUI_DrawChar(unsigned char c, uint16 x, uint16 y)
 	uint8 i;
 	uint8 j;
 
-	if (g_fontCurrent == NULL) return;
+	if (FontPtr == NULL) return;
 
-	fc = &g_fontCurrent->chars[c];
+	fc = &FontPtr->chars[c];
 	if (fc->data == NULL) return;
 
 	if (x >= SCREEN_WIDTH || (x + fc->width) > SCREEN_WIDTH) return;
-	if (y >= SCREEN_HEIGHT || (y + g_fontCurrent->height) > SCREEN_HEIGHT) return;
+	if (y >= SCREEN_HEIGHT || (y + FontPtr->height) > SCREEN_HEIGHT) return;
 
-	GFX_Screen_SetDirty(SCREEN_ACTIVE, x, y, x + fc->width, y + g_fontCurrent->height);
+	GFX_Screen_SetDirty(SCREEN_ACTIVE, x, y, x + fc->width, y + FontPtr->height);
 	x += y * SCREEN_WIDTH;
 	remainingWidth = SCREEN_WIDTH - fc->width;
 
@@ -440,7 +440,7 @@ static void GUI_DrawChar(unsigned char c, uint16 x, uint16 y)
 
 	if (g_colours[0] == 0) return;
 
-	for (j = fc->unusedLines + fc->usedLines; j < g_fontCurrent->height; j++) {
+	for (j = fc->unusedLines + fc->usedLines; j < FontPtr->height; j++) {
 		for (i = 0; i < fc->width; i++) screen[x++] = g_colours[0];
 		x += remainingWidth;
 	}
@@ -462,7 +462,7 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
 	uint16 y;
 	const char *s;
 
-	if (g_fontCurrent == NULL) return;
+	if (FontPtr == NULL) return;
 
 	if (left < 0) left = 0;
 	if (top  < 0) top  = 0;
@@ -482,16 +482,16 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
 
 		if (*s == '\n' || *s == '\r') {
 			x = left;
-			y += g_fontCurrent->height;
+			y += FontPtr->height;
 
 			while (*s == '\n' || *s == '\r') s++;
 		}
 
-		width = Font_GetCharWidth(*s);
+		width = Char_Pixel_Width(*s);
 
 		if (x + width > SCREEN_WIDTH) {
 			x = left;
-			y += g_fontCurrent->height;
+			y += FontPtr->height;
 		}
 		if (y > SCREEN_HEIGHT) break;
 
@@ -522,7 +522,7 @@ void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8
  * 0x0100 : align center
  * 0x0200 : align right
  */
-void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...)
+void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...)
 {
 	char textBuffer[240];
 	static uint16 displayedarg12low = -1;
@@ -533,9 +533,9 @@ void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgCol
 
 	if ((arg12low != displayedarg12low && arg12low != 0) || string == NULL) {
 		switch (arg12low) {
-			case 1:  Font_Select(g_fontNew6p); break;
-			case 2:  Font_Select(g_fontNew8p); break;
-			default: Font_Select(g_fontNew8p); break;
+			case 1:  Set_Font(FontNew6Ptr); break;
+			case 2:  Set_Font(FontNew8Ptr); break;
+			default: Set_Font(FontNew8Ptr); break;
 		}
 
 		displayedarg12low = arg12low;
@@ -592,11 +592,11 @@ void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgCol
 
 	switch (flags & 0x0F00) {
 		case 0x100:
-			left -= Font_GetStringWidth(textBuffer) / 2;
+			left -= String_Pixel_Width(textBuffer) / 2;
 			break;
 
 		case 0x200:
-			left -= Font_GetStringWidth(textBuffer);
+			left -= String_Pixel_Width(textBuffer);
 			break;
 	}
 
@@ -703,7 +703,7 @@ void GUI_PaletteAnimate(void)
 		timerToggle = g_timerGUI + 5;
 	}
 
-	if (shouldSetPalette) GFX_SetPalette(g_palette1);
+	if (shouldSetPalette) Set_Palette(g_palette1);
 
 	Sound_StartSpeech();
 }
@@ -762,7 +762,7 @@ static void GUI_Widget_SetProperties(uint16 index, uint16 xpos, uint16 ypos, uin
 	WindowList[index].width  = width;
 	WindowList[index].height = height;
 
-	if (g_curWidgetIndex == index) Widget_SetCurrentWidget(index);
+	if (g_curWidgetIndex == index) Change_Window(index);
 }
 
 /**
@@ -786,17 +786,17 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 	vsnprintf(textBuffer, sizeof(textBuffer), str, ap);
 	va_end(ap);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+	oldScreenID = Set_LogicPage(SCREEN_0);
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
-	oldWidgetId = Widget_SetCurrentWidget(1);
+	oldWidgetId = Change_Window(1);
 
-	WindowList[1].height = g_fontCurrent->height * max(GUI_SplitText(textBuffer, ((g_curWidgetWidth - ((spriteID == 0xFFFF) ? 2 : 7)) << 3) - 6, '\r'), 3) + 18;
+	WindowList[1].height = FontPtr->height * max(GUI_SplitText(textBuffer, ((g_curWidgetWidth - ((spriteID == 0xFFFF) ? 2 : 7)) << 3) - 6, '\r'), 3) + 18;
 
-	Widget_SetCurrentWidget(1);
+	Change_Window(1);
 
 	screenBackup = malloc(GFX_GetSize(g_curWidgetWidth * 8, g_curWidgetHeight));
 
@@ -807,7 +807,7 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 	GUI_Widget_DrawBorder(1, 1, 1);
 
 	if (spriteID != 0xFFFF) {
-		GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], 7, 8, 1, DRAWSPRITE_FLAG_WIDGETPOS);
+		Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], 7, 8, 1, DRAWSPRITE_FLAG_WIDGETPOS);
 		GUI_Widget_SetProperties(1, g_curWidgetXBase + 5, g_curWidgetYBase + 8, g_curWidgetWidth - 7, g_curWidgetHeight - 16);
 	} else {
 		GUI_Widget_SetProperties(1, g_curWidgetXBase + 1, g_curWidgetYBase + 8, g_curWidgetWidth - 2, g_curWidgetHeight - 16);
@@ -817,15 +817,15 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 
 	Text_Print(textBuffer, g_curWidgetXBase << 3, g_curWidgetYBase, g_curWidgetFGColourBlink, g_curWidgetFGColourNormal);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	for (g_timerTimeout = 30; g_timerTimeout != 0; sleepIdle()) {
 		GUI_PaletteAnimate();
 	}
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	do {
 		GUI_PaletteAnimate();
@@ -836,7 +836,7 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 
 	Input_HandleInput(0x841);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (spriteID != 0xFFFF) {
 		GUI_Widget_SetProperties(1, g_curWidgetXBase - 5, g_curWidgetYBase - 8, g_curWidgetWidth + 7, g_curWidgetHeight + 16);
@@ -848,7 +848,7 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 		GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, screenBackup);
 	}
 
-	Widget_SetCurrentWidget(oldWidgetId);
+	Change_Window(oldWidgetId);
 
 	if (screenBackup != NULL) {
 		free(screenBackup);
@@ -856,9 +856,9 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 		g_viewport_forceRedraw = true;
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	return ret;
 }
@@ -881,10 +881,10 @@ uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter)
 
 		lines++;
 
-		while (width < maxwidth && *str != delimiter && *str != '\r' && *str != '\0') width += Font_GetCharWidth(*str++);
+		while (width < maxwidth && *str != delimiter && *str != '\r' && *str != '\0') width += Char_Pixel_Width(*str++);
 
 		if (width >= maxwidth) {
-			while (*str != 0x20 && *str != delimiter && *str != '\r' && *str != '\0') width -= Font_GetCharWidth(*str--);
+			while (*str != 0x20 && *str != delimiter && *str != '\r' && *str != '\0') width -= Char_Pixel_Width(*str--);
 		}
 
 		if (*str != '\0') *str++ = delimiter;
@@ -925,7 +925,7 @@ uint16 GUI_SplitText(char *str, uint16 maxwidth, char delimiter)
  * 0A: [16 bytes] = house colors (if flags & 0x01)
  * [1]A: xx bytes = data (depending on flags & 0x02 : 1 = raw, 0 = Format80 encoded)
  */
-void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...)
+void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...)
 {
 	/* variables for blur/sandworm effect */
 	static const uint8 blurOffsets[8] = {1, 3, 2, 5, 4, 3, 2, 1};
@@ -1494,12 +1494,12 @@ static void GUI_DrawTextOnFilledRectangle(const char *string, uint16 top)
 {
 	uint16 halfWidth;
 
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x121);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x121);
 
-	halfWidth = (Font_GetStringWidth(string) / 2) + 4;
+	halfWidth = (String_Pixel_Width(string) / 2) + 4;
 
-	GUI_DrawFilledRectangle(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
-	GUI_DrawText_Wrapper(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
+	Fill_Rect(SCREEN_WIDTH / 2 - halfWidth, top, SCREEN_WIDTH / 2 + halfWidth, top + 6, 116);
+	Fancy_Text_Print(string, SCREEN_WIDTH / 2, top, 0xF, 0, 0x121);
 }
 
 static uint16 GUI_HallOfFame_GetRank(uint16 score)
@@ -1515,7 +1515,7 @@ static uint16 GUI_HallOfFame_GetRank(uint16 score)
 
 static void GUI_HallOfFame_DrawRank(uint16 score, bool fadeIn)
 {
-	GUI_DrawText_Wrapper(Text_String(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
+	Fancy_Text_Print(Text_String(_rankScores[GUI_HallOfFame_GetRank(score)].rankString), SCREEN_WIDTH / 2, 49, 6, 0, 0x122);
 
 	if (!fadeIn) return;
 
@@ -1529,7 +1529,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 	uint16 colour;
 	uint16 offset;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	Sprites_LoadImage("FAME.CPS", SCREEN_1, g_palette_998A);
 
@@ -1538,18 +1538,18 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		xSrc = (g_playerHouseID * 56 + 8) / 8;
 	}
 
-	GUI_Screen_Copy(xSrc, 136, 0, 8, 7, 56, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc, 136, 0, 8, 7, 56, SCREEN_1, SCREEN_1);
 
 	if (g_playerHouseID > HOUSE_ORDOS) {
 		xSrc += 7;
 	}
 
-	GUI_Screen_Copy(xSrc, 136, 33, 8, 7, 56, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc, 136, 33, 8, 7, 56, SCREEN_1, SCREEN_1);
 
-	GUI_DrawFilledRectangle(8, 136, 175, 191, 116);
+	Fill_Rect(8, 136, 175, 191, 116);
 
 	if (hallOfFame) {
-		GUI_DrawFilledRectangle(8, 80, 311, 191, 116);
+		Fill_Rect(8, 80, 311, 191, 116);
 		if (score != 0xFFFF) GUI_HallOfFame_DrawRank(score, false);
 	} else {
 		GFX_Screen_Copy2(8, 80, 8, 116, 304, 36, SCREEN_1, SCREEN_1, false);
@@ -1566,13 +1566,13 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 		}
 
 		/* "Score: %d" */
-		GUI_DrawText_Wrapper(Text_String(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
-		GUI_DrawText_Wrapper(buffer, 248, 15, 15, 0, 0x222);
+		Fancy_Text_Print(Text_String(STR_SCORE_D), 72, 15, 15, 0, 0x22, score);
+		Fancy_Text_Print(buffer, 248, 15, 15, 0, 0x222);
 		/* "You have attained the rank of" */
-		GUI_DrawText_Wrapper(Text_String(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
+		Fancy_Text_Print(Text_String(STR_YOU_HAVE_ATTAINED_THE_RANK_OF), SCREEN_WIDTH / 2, 38, 15, 0, 0x122);
 	} else {
 		/* "Hall of Fame" */
-		GUI_DrawText_Wrapper(Text_String(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
+		Fancy_Text_Print(Text_String(STR_HALL_OF_FAME2), SCREEN_WIDTH / 2, 15, 15, 0, 0x122);
 	}
 
 	switch (g_playerHouseID) {
@@ -1598,7 +1598,7 @@ static void GUI_HallOfFame_DrawBackground(uint16 score, bool hallOfFame)
 
 	if (!hallOfFame) GUI_HallOfFame_Tick();
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 static void GUI_EndStats_Sleep(uint16 delay)
@@ -1635,11 +1635,11 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	/* 1st scenario doesn't have the "Building destroyed" stats */
 	statsBoxCount = (g_scenarioID == 1) ? 2 : 3;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	GUI_ChangeSelectionType(SELECTIONTYPE_MENTAT);
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	GUI_HallOfFame_DrawBackground(score, false);
 
@@ -1647,19 +1647,19 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 	GUI_DrawTextOnFilledRectangle(Text_String(STR_UNITS_DESTROYED_BY), 119);
 	if (g_scenarioID != 1) GUI_DrawTextOnFilledRectangle(Text_String(STR_BUILDINGS_DESTROYED_BY), 155);
 
-	textLeft = 19 + max(Font_GetStringWidth(Text_String(STR_YOU)), Font_GetStringWidth(Text_String(STR_ENEMY)));
+	textLeft = 19 + max(String_Pixel_Width(Text_String(STR_YOU)), String_Pixel_Width(Text_String(STR_ENEMY)));
 	statsBarWidth = 261 - textLeft;
 
 	for (i = 0; i < statsBoxCount; i++) {
-		GUI_DrawText_Wrapper(Text_String(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
-		GUI_DrawText_Wrapper(Text_String(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(Text_String(STR_YOU), textLeft - 4,  92 + (i * 36), 0xF, 0, 0x221);
+		Fancy_Text_Print(Text_String(STR_ENEMY), textLeft - 4, 101 + (i * 36), 0xF, 0, 0x221);
 	}
 
 	Music_Play(17 + Tools_RandomLCG_Range(0, 5));
 
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	scores[0][0].value = harvestedAllied;
 	scores[0][1].value = harvestedEnemy;
@@ -1704,18 +1704,18 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 			posY = 93 + (i * 36) + (j * 9);
 
 			for (score = 0; score < scores[i][j].value; score += scores[i][j].increment) {
-				GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-				GUI_DrawText_Wrapper("%u", 287, posY - 1, 0x14, 0, 0x121, score);
+				Fill_Rect(271, posY, 303, posY + 5, 226);
+				Fancy_Text_Print("%u", 287, posY - 1, 0x14, 0, 0x121, score);
 
 				GUI_HallOfFame_Tick();
 
 				g_timerTimeout = 1;
 
-				GUI_DrawLine(posX, posY, posX, posY + 5, colour);
+				Draw_Line(posX, posY, posX, posY + 5, colour);
 
 				posX++;
 
-				GUI_DrawLine(posX, posY + 1, posX, posY + 6, 12);	/* shadow */
+				Draw_Line(posX, posY + 1, posX, posY + 6, 12);	/* shadow */
 
 				GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
 
@@ -1724,8 +1724,8 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 				GUI_EndStats_Sleep(g_timerTimeout);
 			}
 
-			GUI_DrawFilledRectangle(271, posY, 303, posY + 5, 226);
-			GUI_DrawText_Wrapper("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
+			Fill_Rect(271, posY, 303, posY + 5, 226);
+			Fancy_Text_Print("%u", 287, posY - 1, 0xF, 0, 0x121, scores[i][j].value);
 
 			GFX_Screen_Copy2(textLeft, posY, textLeft, posY, 304, 7, SCREEN_1, SCREEN_0, false);
 
@@ -1737,22 +1737,22 @@ void GUI_EndStats_Show(uint16 killedAllied, uint16 killedEnemy, uint16 destroyed
 		GUI_EndStats_Sleep(60);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	for (;; sleepIdle()) {
 		GUI_HallOfFame_Tick();
 		if (Input_Keyboard_NextKey() != 0) break;
 	}
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	GUI_HallOfFame_Show(score);
 
 	memset(g_palette1 + 255 * 3, 0, 3);
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	Fade_Score();
 }
@@ -1802,10 +1802,10 @@ uint8 GUI_PickHouse(void)
 
 		Sprites_LoadImage(String_GenerateFilename("HERALD"), SCREEN_1, NULL);
 
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-		GUI_SetPaletteAnimated(g_palette1, 15);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+		Fade_Palette_To(g_palette1, 15);
+		Show_Mouse();
 
 		for (houseID = HOUSE_INVALID; houseID == HOUSE_INVALID; sleepIdle()) {
 			uint16 key = GUI_Widget_HandleEvents(w);
@@ -1822,7 +1822,7 @@ uint8 GUI_PickHouse(void)
 			}
 		}
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
 		if (g_enableVoices != 0) {
 			Sound_Output_Feedback(houseID + 62);
@@ -1838,7 +1838,7 @@ uint8 GUI_PickHouse(void)
 			w = next;
 		}
 
-		GUI_SetPaletteAnimated(palette, 15);
+		Fade_Palette_To(palette, 15);
 
 		if (g_debugSkipDialogs || g_debugScenario) {
 			Debug("Skipping House selection confirmation.\n");
@@ -1850,24 +1850,24 @@ uint8 GUI_PickHouse(void)
 
 		g_playerHouseID = HOUSE_MERCENARY;
 
-		oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+		oldScreenID = Set_LogicPage(SCREEN_0);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		strncpy(g_readBuffer, Text_String(STR_HOUSE_HARKONNENFROM_THE_DARK_WORLD_OF_GIEDI_PRIME_THE_SAVAGE_HOUSE_HARKONNEN_HAS_SPREAD_ACROSS_THE_UNIVERSE_A_CRUEL_PEOPLE_THE_HARKONNEN_ARE_RUTHLESS_TOWARDS_BOTH_FRIEND_AND_FOE_IN_THEIR_FANATICAL_PURSUIT_OF_POWER + houseID * 40), g_readBufferSize);
 		GUI_Mentat_Show(g_readBuffer, House_GetWSAHouseFilename(houseID), NULL);
 
 		Sprites_LoadImage(String_GenerateFilename("MISC"), SCREEN_1, g_palette1);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
-		GUI_Screen_Copy(0, 0, 0, 0, 26, 24, SCREEN_1, SCREEN_0);
+		Byte_Blit(0, 0, 0, 0, 26, 24, SCREEN_1, SCREEN_0);
 
-		GUI_Screen_Copy(0, 24 * (houseID + 1), 26, 0, 13, 24, SCREEN_1, SCREEN_0);
+		Byte_Blit(0, 24 * (houseID + 1), 26, 0, 13, 24, SCREEN_1, SCREEN_0);
 
 		GUI_Widget_DrawAll(w);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		for (;; sleepIdle()) {
 			yes_no = GUI_Mentat_Loop(House_GetWSAHouseFilename(houseID), NULL, NULL, true, w);
@@ -1878,7 +1878,7 @@ uint8 GUI_PickHouse(void)
 		if (yes_no == 0x8001) {
 			Fade_Score();
 		} else {
-			GUI_SetPaletteAnimated(palette, 15);
+			Fade_Palette_To(palette, 15);
 		}
 
 		while (w != NULL) {
@@ -1892,7 +1892,7 @@ uint8 GUI_PickHouse(void)
 		Load_Palette_Mercenaries();
 		Sprites_LoadTiles();
 
-		GFX_Screen_SetActive(oldScreenID);
+		Set_LogicPage(oldScreenID);
 
 		while (Driver_Voice_IsPlaying()) sleepIdle();
 
@@ -1903,11 +1903,11 @@ uint8 GUI_PickHouse(void)
 
 	GUI_Palette_CreateRemap(houseID);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	GUI_SetPaletteAnimated(palette, 15);
+	Fade_Palette_To(palette, 15);
 
 	return houseID;
 }
@@ -1973,14 +1973,14 @@ void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16
 	width  -= 1;
 	height -= 1;
 
-	colourSchema = s_colourBorderSchema[colourSchemaIndex];
+	colourSchema = ButtonColors[colourSchemaIndex];
 
-	if (fill) GUI_DrawFilledRectangle(left, top, left + width, top + height, colourSchema[0] & 0xFF);
+	if (fill) Fill_Rect(left, top, left + width, top + height, colourSchema[0] & 0xFF);
 
-	GUI_DrawLine(left, top + height, left + width, top + height, colourSchema[1] & 0xFF);
-	GUI_DrawLine(left + width, top, left + width, top + height, colourSchema[1] & 0xFF);
-	GUI_DrawLine(left, top, left + width, top, colourSchema[2] & 0xFF);
-	GUI_DrawLine(left, top, left, top + height, colourSchema[2] & 0xFF);
+	Draw_Line(left, top + height, left + width, top + height, colourSchema[1] & 0xFF);
+	Draw_Line(left + width, top, left + width, top + height, colourSchema[1] & 0xFF);
+	Draw_Line(left, top, left + width, top, colourSchema[2] & 0xFF);
+	Draw_Line(left, top, left, top + height, colourSchema[2] & 0xFF);
 
 	GFX_PutPixel(left, top + height, colourSchema[3] & 0xFF);
 	GFX_PutPixel(left + width, top, colourSchema[3] & 0xFF);
@@ -2057,7 +2057,7 @@ void GUI_DrawProgressbar(uint16 current, uint16 max)
 	}
 
 	if (width != 0) {
-		GUI_DrawFilledRectangle(l_info[0], l_info[1] + l_info[3] - height, l_info[0] + width - 1, l_info[1] + l_info[3] - 1, (uint8)colour);
+		Fill_Rect(l_info[0], l_info[1] + l_info[3] - height, l_info[0] + width - 1, l_info[1] + l_info[3] - 1, (uint8)colour);
 	}
 }
 
@@ -2071,12 +2071,12 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	Screen oldScreenID;
 	Widget *w;
 
-	oldScreenID = GFX_Screen_SetActive((screenID == SCREEN_0) ? SCREEN_1 : screenID);
+	oldScreenID = Set_LogicPage((screenID == SCREEN_0) ? SCREEN_1 : screenID);
 
 	g_viewport_forceRedraw = true;
 
 	Sprites_LoadImage("SCREEN.CPS", SCREEN_1, NULL);
-	GUI_DrawSprite(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
+	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
 
@@ -2123,22 +2123,22 @@ void GUI_DrawInterfaceAndRadar(Screen screenID)
 	}
 
 	if (screenID == SCREEN_0) {
-		GFX_Screen_SetActive(SCREEN_0);
+		Set_LogicPage(SCREEN_0);
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 
-		GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+		Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 		GUI_DrawCredits(g_playerHouseID, (g_playerCredits == 0xFFFF) ? 2 : 1);
-		GUI_SetPaletteAnimated(g_palette1, 15);
+		Fade_Palette_To(g_palette1, 15);
 
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	GUI_DrawCredits(g_playerHouseID, 2);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 }
 
 /**
@@ -2174,9 +2174,9 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 
 	if (mode == 0 && h->credits == creditsAnimation && creditsAnimationOffset == 0) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
-	oldWidgetId = Widget_SetCurrentWidget(4);
+	oldWidgetId = Change_Window(4);
 
 	creditsDiff = h->credits - creditsAnimation;
 	if (creditsDiff != 0) {
@@ -2215,7 +2215,7 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 		creditsNew += 1;
 	}
 
-	GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[12], 0, 0, 4, DRAWSPRITE_FLAG_WIDGETPOS);
+	Draw_Shape(SCREEN_ACTIVE, g_sprites[12], 0, 0, 4, DRAWSPRITE_FLAG_WIDGETPOS);
 
 	g_playerCredits = creditsOld;
 
@@ -2229,26 +2229,26 @@ void GUI_DrawCredits(uint8 houseID, uint16 mode)
 		spriteID = (charCreditsOld[i] == ' ') ? 13 : charCreditsOld[i] - 34;
 
 		if (charCreditsOld[i] != charCreditsNew[i]) {
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, offset - creditsAnimationOffset, 4, DRAWSPRITE_FLAG_WIDGETPOS);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, offset - creditsAnimationOffset, 4, DRAWSPRITE_FLAG_WIDGETPOS);
 			if (creditsAnimationOffset == 0) continue;
 
 			spriteID = (charCreditsNew[i] == ' ') ? 13 : charCreditsNew[i] - 34;
 
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, offset + 8 - creditsAnimationOffset, 4, DRAWSPRITE_FLAG_WIDGETPOS);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, offset + 8 - creditsAnimationOffset, 4, DRAWSPRITE_FLAG_WIDGETPOS);
 		} else {
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], left, 1, 4, DRAWSPRITE_FLAG_WIDGETPOS);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], left, 1, 4, DRAWSPRITE_FLAG_WIDGETPOS);
 		}
 	}
 
 	if (!GFX_Screen_IsActive(oldScreenID)) {
 		GUI_Mouse_Hide_InWidget(5);
-		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase - 40, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, oldScreenID);
+		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase - 40, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, oldScreenID);
 		GUI_Mouse_Show_InWidget();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
-	Widget_SetCurrentWidget(oldWidgetId);
+	Change_Window(oldWidgetId);
 }
 
 /**
@@ -2267,7 +2267,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 		g_unitSelected = NULL;
 	}
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	if (g_selectionType != selectionType) {
 		uint16 oldSelectionType = g_selectionType;
@@ -2306,7 +2306,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 			GUI_DrawInterfaceAndRadar(SCREEN_0);
 		}
 
-		Widget_SetCurrentWidget(g_table_selectionType[selectionType].defaultWidget);
+		Change_Window(g_table_selectionType[selectionType].defaultWidget);
 
 		if (g_curWidgetIndex != 0) {
 			GUI_Widget_DrawBorder(g_curWidgetIndex, 0, false);
@@ -2344,7 +2344,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 					Sprites_SetMouseSprite(0, 0, g_sprites[0]);
 				}
 
-				Widget_SetCurrentWidget(g_table_selectionType[selectionType].defaultWidget);
+				Change_Window(g_table_selectionType[selectionType].defaultWidget);
 				break;
 
 			case SELECTIONTYPE_TARGET:
@@ -2381,7 +2381,7 @@ void GUI_ChangeSelectionType(uint16 selectionType)
 		}
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -2480,7 +2480,7 @@ static void ClipRight(int16 *x1, int16 *y1, int16 x2, int16 y2)
  * @param y2 The Y-coordinate of the end of the line.
  * @param colour The colour to use to draw the line.
  */
-void GUI_DrawLine(int16 x1, int16 y1, int16 x2, int16 y2, uint8 colour)
+void Draw_Line(int16 x1, int16 y1, int16 x2, int16 y2, uint8 colour)
 {
 	uint8 *screen = GFX_Screen_GetActive();
 	int16 increment = 1;
@@ -2611,7 +2611,7 @@ void GUI_SetClippingArea(uint16 left, uint16 top, uint16 right, uint16 bottom)
  * @param screenSrc The ID of the source screen.
  * @param screenDst The ID of the destination screen.
  */
-void GUI_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst)
+void Byte_Blit(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst)
 {
 	if (width  > SCREEN_WIDTH / 8) width  = SCREEN_WIDTH / 8;
 	if (height > SCREEN_HEIGHT)    height = SCREEN_HEIGHT;
@@ -2807,15 +2807,15 @@ static void GUI_FactoryWindow_Init(void)
 	int16 i;
 	ObjectInfo *oi;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	Sprites_LoadImage("CHOAM.CPS", SCREEN_1, NULL);
-	GUI_DrawSprite(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
+	Draw_Shape(SCREEN_1, g_sprites[11], 192, 0, 0, 0); /* "Credits" */
 
 	GUI_Palette_RemapScreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_1, g_remap);
 
-	GUI_Screen_Copy(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 8, 7, 40, SCREEN_1, SCREEN_1);
-	GUI_Screen_Copy(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 152, 7, 40, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 8, 7, 40, SCREEN_1, SCREEN_1);
+	Byte_Blit(xSrc[g_playerHouseID], ySrc[g_playerHouseID], 0, 152, 7, 40, SCREEN_1, SCREEN_1);
 
 	GUI_FactoryWindow_CreateWidgets();
 	GUI_FactoryWindow_LoadGraymapTbl();
@@ -2830,9 +2830,9 @@ static void GUI_FactoryWindow_Init(void)
 
 		oi = item->objectInfo;
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 24 + i * 32, 0, 0);
 		}
 	}
 
@@ -2845,21 +2845,21 @@ static void GUI_FactoryWindow_Init(void)
 	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
 	Close_Animation(wsa);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Show_Mouse();
 
-	GUI_DrawFilledRectangle(64, 0, 112, SCREEN_HEIGHT - 1, GFX_GetPixel(72, 23));
+	Fill_Rect(64, 0, 112, SCREEN_HEIGHT - 1, GFX_GetPixel(72, 23));
 
 	GUI_FactoryWindow_PrepareScrollList();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 
 	GUI_FactoryWindow_DrawDetails();
 
 	GUI_DrawCredits(g_playerHouseID, 1);
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -2874,7 +2874,7 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 	Screen oldScreenID;
 	uint8 backup[3];
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_0);
+	oldScreenID = Set_LogicPage(SCREEN_0);
 
 	memcpy(backup, g_palette1 + 255 * 3, 3);
 
@@ -2903,13 +2903,13 @@ FactoryResult GUI_DisplayFactoryWindow(bool isConstructionYard, bool isStarPort,
 
 	GUI_DrawCredits(g_playerHouseID, 1);
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	GUI_FactoryWindow_B495_0F30();
 
 	memcpy(g_palette1 + 255 * 3, backup, 3);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	/* Visible credits have to be reset, as it might not be the real value */
 	g_playerCredits = 0xFFFF;
@@ -2971,7 +2971,7 @@ static void GUI_StrategicMap_AnimateArrows(void)
 
 	memcpy(g_palette1 + 251 * 3, s_strategicMapArrowColors + s_arrowAnimationState * 3, 4 * 3);
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 }
 
 static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *data)
@@ -2992,9 +2992,9 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 
 		if (data[i].index == 0 || data[i].index == selected) continue;
 
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GFX_Screen_Copy2(i * 16, 0, data[i].offsetX, data[i].offsetY, 16, 16, SCREEN_1, SCREEN_0, false);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 	}
 
 	sprintf(key, "%d", selected);
@@ -3009,26 +3009,26 @@ static void GUI_StrategicMap_AnimateSelected(uint16 selected, StrategicMapData *
 	x += 8;
 	y += 24;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_Screen_Copy2(x, y, 16, 16, width, height, SCREEN_0, SCREEN_1, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	GFX_Screen_Copy2(16, 16, 176, 16, width, height, SCREEN_1, SCREEN_1, false);
 
-	GUI_DrawSprite(SCREEN_1, sprite, 16, 16, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
+	Draw_Shape(SCREEN_1, sprite, 16, 16, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
 
 	for (i = 0; i < 20; i++) {
 		GUI_StrategicMap_AnimateArrows();
 
 		if (data[i].index != selected) continue;
 
-		GUI_DrawSprite(SCREEN_1, g_sprites[505 + data[i].arrow], data[i].offsetX + 16 - x, data[i].offsetY + 16 - y, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
+		Draw_Shape(SCREEN_1, g_sprites[505 + data[i].arrow], data[i].offsetX + 16 - x, data[i].offsetY + 16 - y, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
 	}
 
 	for (i = 0; i < 4; i++) {
-		GUI_Mouse_Hide_Safe();
+		Hide_Mouse();
 		GFX_Screen_Copy2((i % 2 == 0) ? 16 : 176, 16, x, y, width, height, SCREEN_1, SCREEN_0, false);
-		GUI_Mouse_Show_Safe();
+		Show_Mouse();
 
 		for (g_timerTimeout = 20; g_timerTimeout != 0; sleepIdle()) {
 			GUI_StrategicMap_AnimateArrows();
@@ -3082,7 +3082,7 @@ static bool GUI_StrategicMap_FastForwardToggleWithESC(void)
 
 	s_strategicMapFastForward = !s_strategicMapFastForward;
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	return s_strategicMapFastForward;
 }
@@ -3093,18 +3093,18 @@ static void GUI_StrategicMap_DrawText(const char *string)
 	Screen oldScreenID;
 	uint16 y;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
-	GUI_Screen_Copy(8, 165, 8, 186, 24, 14, SCREEN_0, SCREEN_1);
+	Byte_Blit(8, 165, 8, 186, 24, 14, SCREEN_0, SCREEN_1);
 
-	GUI_DrawFilledRectangle(64, 172, 255, 185, GFX_GetPixel(64, 186));
+	Fill_Rect(64, 172, 255, 185, GFX_GetPixel(64, 186));
 
-	GUI_DrawText_Wrapper(string, 64, 175, 12, 0, 0x12);
+	Fancy_Text_Print(string, 64, 175, 12, 0, 0x12);
 
 	while (g_timerGUI + 90 < l_timerNext) sleepIdle();
 
 	for (y = 185; y > 172; y--) {
-		GUI_Screen_Copy(8, y, 8, 165, 24, 14, SCREEN_1, SCREEN_0);
+		Byte_Blit(8, y, 8, 165, 24, 14, SCREEN_1, SCREEN_0);
 
 		for (g_timerTimeout = 3; g_timerTimeout != 0; sleepIdle()) {
 			if (GUI_StrategicMap_FastForwardToggleWithESC()) break;
@@ -3113,7 +3113,7 @@ static void GUI_StrategicMap_DrawText(const char *string)
 
 	l_timerNext = g_timerGUI + 90;
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
@@ -3147,7 +3147,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 
 		GFX_Screen_Copy2(data[i].offsetX, data[i].offsetY, i * 16, 152, 16, 16, SCREEN_1, SCREEN_1, false);
 		GFX_Screen_Copy2(data[i].offsetX, data[i].offsetY, i * 16, 0, 16, 16, SCREEN_1, SCREEN_1, false);
-		GUI_DrawSprite(SCREEN_1, g_sprites[505 + data[i].arrow], i * 16, 152, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
+		Draw_Shape(SCREEN_1, g_sprites[505 + data[i].arrow], i * 16, 152, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
 	}
 
 	count = i;
@@ -3164,7 +3164,7 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	for (i = 0; i < count; i++) {
 		if (data[i].index == 0) continue;
@@ -3172,8 +3172,8 @@ static uint16 GUI_StrategicMap_ScenarioSelection(uint16 campaignID)
 		GFX_Screen_Copy2(i * 16, 152, data[i].offsetX, data[i].offsetY, 16, 16, SCREEN_1, SCREEN_0, false);
 	}
 
-	GUI_Mouse_Show_Safe();
-	Input_History_Clear();
+	Show_Mouse();
+	Clear_KeyBuffer();
 
 	for (loop = true; loop; sleepIdle()) {
 		region = GUI_StrategicMap_ClickedRegion();
@@ -3247,7 +3247,7 @@ static void GUI_StrategicMap_DrawRegion(uint8 houseId, uint16 region, bool progr
 
 	sprite = g_sprites[477 + region];
 
-	GUI_DrawSprite(SCREEN_1, sprite, x + 8, y + 24, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
+	Draw_Shape(SCREEN_1, sprite, x + 8, y + 24, 0, DRAWSPRITE_FLAG_REMAP, g_remap, 1);
 
 	if (!progressive) return;
 
@@ -3332,9 +3332,9 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	memset(palette, 0, 256 * 3);
 
 	previousCampaignID = campaignID - (win ? 1 : 0);
-	oldScreenID = GFX_Screen_SetActive(SCREEN_2);
+	oldScreenID = Set_LogicPage(SCREEN_2);
 
-	GUI_SetPaletteAnimated(palette, 15);
+	Fade_Palette_To(palette, 15);
 
 	Mouse_SetRegion(8, 24, 311, 143);
 
@@ -3368,27 +3368,27 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 	memcpy(s_strategicMapArrowColors, g_palette1 + (144 + (g_playerHouseID * 16)) * 3, 4 * 3);
 	memcpy(s_strategicMapArrowColors + 4 * 3, s_strategicMapArrowColors, 4 * 3);
 
-	GUI_Screen_Copy(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
-	GUI_Screen_Copy(x, y, 33, 152, 7, 40, SCREEN_2, SCREEN_2);
+	Byte_Blit(x, y, 0, 152, 7, 40, SCREEN_2, SCREEN_2);
+	Byte_Blit(x, y, 33, 152, 7, 40, SCREEN_2, SCREEN_2);
 
 	switch (g_config.language) {
 		case LANGUAGE_GERMAN:
-			GUI_Screen_Copy(1, 120, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
+			Byte_Blit(1, 120, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
 			break;
 
 		case LANGUAGE_FRENCH:
-			GUI_Screen_Copy(1, 96, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
+			Byte_Blit(1, 96, 1, 0, 38, 24, SCREEN_2, SCREEN_2);
 			break;
 
 		default: break;
 	}
 
-	GUI_DrawFilledRectangle(8, 24, 311, 143, 12);
+	Fill_Rect(8, 24, 311, 143, 12);
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
-	GUI_SetPaletteAnimated(g_palette1, 15);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_2, SCREEN_0);
+	Fade_Palette_To(g_palette1, 15);
+	Show_Mouse();
 
 	s_strategicMapFastForward = false;
 
@@ -3399,7 +3399,7 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 		GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 
-		Input_History_Clear();
+		Clear_KeyBuffer();
 
 		Sprites_CPS_LoadRegionClick();
 
@@ -3424,21 +3424,21 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	Sprites_LoadImage("DUNERGN.CPS", SCREEN_1, g_palette_998A);
 
-	GFX_Screen_SetActive(SCREEN_1);
+	Set_LogicPage(SCREEN_1);
 
 	GUI_StrategicMap_PrepareRegions(previousCampaignID);
 
 	if (GUI_StrategicMap_FastForwardToggleWithESC()) {
-		GUI_Screen_Copy(1, 24, 1, 24, 38, 120, SCREEN_1, SCREEN_0);
+		Byte_Blit(1, 24, 1, 24, 38, 120, SCREEN_1, SCREEN_0);
 	} else {
 		GUI_Screen_FadeIn2(8, 24, 304, 120, SCREEN_1, SCREEN_0, 0, false);
 	}
 
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_0, SCREEN_1);
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_0, SCREEN_1);
 
 	if (campaignID != previousCampaignID) GUI_StrategicMap_ShowProgression(campaignID);
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	if (*g_regions >= campaignID) {
 		GUI_StrategicMap_DrawText(Text_String(STR_SELECT_YOUR_NEXT_REGION));
@@ -3450,21 +3450,21 @@ uint16 GUI_StrategicMap_Show(uint16 campaignID, bool win)
 
 	Fade_Score();
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	Mouse_SetRegion(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	memcpy(g_palette1 + 251 * 3, loc316, 12);
 
-	GUI_SetPaletteAnimated(palette, 15);
+	Fade_Palette_To(palette, 15);
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GUI_ClearScreen(SCREEN_0);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	return scenarioID;
 }
@@ -3492,9 +3492,9 @@ void GUI_DrawText_Monospace(char *string, uint16 left, uint16 top, uint8 fgColou
 
 void GUI_FactoryWindow_B495_0F30(void)
 {
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	GFX_Screen_Copy2(69, ((g_factoryWindowSelected + 1) * 32) + 5, 69, (g_factoryWindowSelected * 32) + 21, 38, 30, SCREEN_1, SCREEN_0, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 }
 
 FactoryWindowItem *GUI_FactoryWindow_GetItem(int16 offset)
@@ -3513,7 +3513,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 	ObjectInfo *oi = item->objectInfo;
 	void *wsa;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
 	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
@@ -3528,7 +3528,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 		uint16 i;
 		uint16 j;
 
-		GUI_DrawSprite(SCREEN_1, g_sprites[64], x, y, 0, 0);
+		Draw_Shape(SCREEN_1, g_sprites[64], x, y, 0, 0);
 		x++;
 		y++;
 
@@ -3538,7 +3538,7 @@ void GUI_FactoryWindow_DrawDetails(void)
 
 		for (j = 0; j < g_table_structure_layoutSize[si->layout].height; j++) {
 			for (i = 0; i < g_table_structure_layoutSize[si->layout].width; i++) {
-				GUI_DrawSprite(SCREEN_1, sprite, x + i * width, y + j * width, 0, 0);
+				Draw_Shape(SCREEN_1, sprite, x + i * width, y + j * width, 0, 0);
 			}
 		}
 	}
@@ -3547,33 +3547,33 @@ void GUI_FactoryWindow_DrawDetails(void)
 		GUI_Palette_RemapScreen(128, 48, 184, 112, SCREEN_1, s_factoryWindowGraymapTbl);
 
 		if (g_factoryWindowStarport) {
-			GUI_DrawText_Wrapper(Text_String(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
+			Fancy_Text_Print(Text_String(STR_OUT_OF_STOCK), 220, 99, 6, 0, 0x132);
 		} else {
-			GUI_DrawText_Wrapper(Text_String(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
+			Fancy_Text_Print(Text_String(STR_NEED_STRUCTURE_UPGRADE), 220, 94, 6, 0, 0x132);
 
 			if (g_factoryWindowUpgradeCost != 0) {
-				GUI_DrawText_Wrapper(Text_String(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
+				Fancy_Text_Print(Text_String(STR_UPGRADE_COST_D), 220, 104, 6, 0, 0x132, g_factoryWindowUpgradeCost);
 			} else {
-				GUI_DrawText_Wrapper(Text_String(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
+				Fancy_Text_Print(Text_String(STR_REPAIR_STRUCTURE_FIRST), 220, 104, 6, 0, 0x132);
 			}
 		}
 	} else {
 		if (g_factoryWindowStarport) {
-			GUI_Screen_Copy(16, 99, 16, 160, 23, 9, SCREEN_1, SCREEN_1);
-			GUI_Screen_Copy(16, 99, 16, 169, 23, 9, SCREEN_1, SCREEN_1);
-			GUI_DrawText_Wrapper(Text_String(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
-			GUI_Screen_Copy(16, 99, 16, 178, 23, 9, SCREEN_1, SCREEN_1);
-			GUI_DrawText_Wrapper(Text_String(STR_UNABLE_TO_CREATE_MORE), 220, 178, 6, 0, 0x132);
+			Byte_Blit(16, 99, 16, 160, 23, 9, SCREEN_1, SCREEN_1);
+			Byte_Blit(16, 99, 16, 169, 23, 9, SCREEN_1, SCREEN_1);
+			Fancy_Text_Print(Text_String(STR_OUT_OF_STOCK), 220, 169, 6, 0, 0x132);
+			Byte_Blit(16, 99, 16, 178, 23, 9, SCREEN_1, SCREEN_1);
+			Fancy_Text_Print(Text_String(STR_UNABLE_TO_CREATE_MORE), 220, 178, 6, 0, 0x132);
 
 			GUI_FactoryWindow_UpdateDetails(item);
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(16, 48, 16, 48, 23, 112, SCREEN_1, oldScreenID);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(16, 48, 16, 48, 23, 112, SCREEN_1, oldScreenID);
+	Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	GUI_FactoryWindow_DrawCaption(NULL);
 }
@@ -3582,33 +3582,33 @@ void GUI_FactoryWindow_DrawCaption(const char *caption)
 {
 	Screen oldScreenID;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
-	GUI_DrawFilledRectangle(128, 21, 310, 35, 116);
+	Fill_Rect(128, 21, 310, 35, 116);
 
 	if (caption != NULL && *caption != '\0') {
-		GUI_DrawText_Wrapper(caption, 128, 23, 12, 0, 0x12);
+		Fancy_Text_Print(caption, 128, 23, 12, 0, 0x12);
 	} else {
 		FactoryWindowItem *item = GUI_FactoryWindow_GetItem(g_factoryWindowSelected);
 		ObjectInfo *oi = item->objectInfo;
 		uint16 width;
 
-		GUI_DrawText_Wrapper(Text_String(oi->stringID_full), 128, 23, 12, 0, 0x12);
+		Fancy_Text_Print(Text_String(oi->stringID_full), 128, 23, 12, 0, 0x12);
 
-		width = Font_GetStringWidth(Text_String(STR_COST_999));
-		GUI_DrawText_Wrapper(Text_String(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
+		width = String_Pixel_Width(Text_String(STR_COST_999));
+		Fancy_Text_Print(Text_String(STR_COST_3D), 310 - width, 23, 12, 0, 0x12, item->credits);
 
 		if (g_factoryWindowStarport) {
-			width += Font_GetStringWidth(Text_String(STR_QTY_99)) + 2;
-			GUI_DrawText_Wrapper(Text_String(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
+			width += String_Pixel_Width(Text_String(STR_QTY_99)) + 2;
+			Fancy_Text_Print(Text_String(STR_QTY_2D), 310 - width, 23, 12, 0, 0x12, item->amount);
 		}
 	}
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 	if (oldScreenID == SCREEN_0) GFX_Screen_Copy2(128, 21, 128, 21, 182, 14, SCREEN_1, oldScreenID, false);
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 void GUI_FactoryWindow_UpdateDetails(const FactoryWindowItem *item)
@@ -3626,9 +3626,9 @@ void GUI_FactoryWindow_UpdateDetails(const FactoryWindowItem *item)
 		House *h = g_playerHouse;
 		if (h->unitCount >= h->unitCountMax) y = 178;
 	}
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(16, y, 16, 99, 23, 9, SCREEN_1, SCREEN_ACTIVE);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(16, y, 16, 99, 23, 9, SCREEN_1, SCREEN_ACTIVE);
+	Show_Mouse();
 }
 
 /**
@@ -3659,10 +3659,10 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 
 		y = g_factoryWindowSelected * 32 + 24;
 
-		GUI_Mouse_Hide_Safe();
-		GUI_DrawWiredRectangle(71, y - 1, 104, y + 24, 255);
-		GUI_DrawWiredRectangle(72, y, 103, y + 23, 255);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Draw_Rect(71, y - 1, 104, y + 24, 255);
+		Draw_Rect(72, y, 103, y + 23, 255);
+		Show_Mouse();
 	} else {
 		if (paletteChangeTimer > g_timerGUI) return;
 	}
@@ -3695,7 +3695,7 @@ void GUI_FactoryWindow_UpdateSelection(bool selectionChanged)
 		default: break;
 	}
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 }
 
 /**
@@ -3754,7 +3754,7 @@ void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint1
 			offsetX = offsetsX[x];
 			offsetY = offsetsY[y2];
 
-			GUI_Screen_Copy(xSrc + offsetX, ySrc + offsetY * 2, xDst + offsetX, yDst + offsetY * 2, 1, 2, screenSrc, screenDst);
+			Byte_Blit(xSrc + offsetX, ySrc + offsetY * 2, xDst + offsetX, yDst + offsetY * 2, 1, 2, screenSrc, screenDst);
 
 			y2++;
 			if (y2 == height) y2 = 0;
@@ -3773,9 +3773,9 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 {
 	FactoryWindowItem *item;
 
-	GUI_Mouse_Hide_Safe();
-	GUI_Screen_Copy(9, 24, 9, 40, 4, 128, SCREEN_0, SCREEN_1);
-	GUI_Mouse_Show_Safe();
+	Hide_Mouse();
+	Byte_Blit(9, 24, 9, 40, 4, 128, SCREEN_0, SCREEN_1);
+	Show_Mouse();
 
 	item = GUI_FactoryWindow_GetItem(-1);
 
@@ -3783,12 +3783,12 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 		ObjectInfo *oi = item->objectInfo;
 
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 8, 0, 0);
 		}
 	} else {
-		GUI_Screen_Copy(9, 32, 9, 24, 4, 8, SCREEN_1, SCREEN_1);
+		Byte_Blit(9, 32, 9, 24, 4, 8, SCREEN_1, SCREEN_1);
 	}
 
 	item = GUI_FactoryWindow_GetItem(4);
@@ -3797,12 +3797,12 @@ void GUI_FactoryWindow_PrepareScrollList(void)
 		ObjectInfo *oi = item->objectInfo;
 
 		if (oi->available == -1) {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, DRAWSPRITE_FLAG_REMAP, s_factoryWindowGraymapTbl, 1);
 		} else {
-			GUI_DrawSprite(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0);
+			Draw_Shape(SCREEN_1, g_sprites[oi->spriteID], 72, 168, 0, 0);
 		}
 	} else {
-		GUI_Screen_Copy(9, 0, 9, 168, 4, 8, SCREEN_1, SCREEN_1);
+		Byte_Blit(9, 0, 9, 168, 4, 8, SCREEN_1, SCREEN_1);
 	}
 }
 
@@ -3856,7 +3856,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 		rows[i] = tmp;
 	}
 
-	oldScreenID = GFX_Screen_SetActive(screenDst);
+	oldScreenID = Set_LogicPage(screenDst);
 
 	for (j = 0; j < height; j++) {
 		uint16 j2 = j;
@@ -3868,11 +3868,11 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 
 			if (++j2 >= height) j2 = 0;
 
-			GFX_Screen_SetActive(screenSrc);
+			Set_LogicPage(screenSrc);
 
 			colour = GFX_GetPixel(curX, curY);
 
-			GFX_Screen_SetActive(screenDst);
+			Set_LogicPage(screenDst);
 
 			if (skipNull && colour == 0) continue;
 
@@ -3887,7 +3887,7 @@ void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen scre
 		GUI_Mouse_Show_InRegion();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -3917,7 +3917,7 @@ void GUI_Mouse_Show(void)
 		GFX_CopyToBuffer(s_mouseSpriteLeft * 8, s_mouseSpriteTop, s_mouseSpriteWidth * 8, s_mouseSpriteHeight, g_mouseSpriteBuffer);
 	}
 
-	GUI_DrawSprite(SCREEN_0, g_mouseSprite, left, top, 0, 0);
+	Draw_Shape(SCREEN_0, g_mouseSprite, left, top, 0, 0);
 }
 
 /**
@@ -3943,7 +3943,7 @@ void GUI_Mouse_Hide(void)
  * The safe version of GUI_Mouse_Hide(). It waits for a mouselock before doing
  *  anything.
  */
-void GUI_Mouse_Hide_Safe(void)
+void Hide_Mouse(void)
 {
 	while (g_mouseLock != 0) sleepIdle();
 	if (g_mouseDisabled == 1) return;
@@ -3958,7 +3958,7 @@ void GUI_Mouse_Hide_Safe(void)
  * The safe version of GUI_Mouse_Show(). It waits for a mouselock before doing
  *  anything.
  */
-void GUI_Mouse_Show_Safe(void)
+void Show_Mouse(void)
 {
 	while (g_mouseLock != 0) sleepIdle();
 	if (g_mouseDisabled == 1) return;
@@ -4200,7 +4200,7 @@ uint16 GUI_HallOfFame_Tick(void)
 
 	*s_palette1_houseColour += colouringDirection;
 
-	GFX_SetPalette(g_palette1);
+	Set_Palette(g_palette1);
 
 	return 0;
 }
@@ -4213,13 +4213,13 @@ static Widget *GUI_HallOfFame_CreateButtons(HallOfFameStruct *data)
 	Widget *wResume;
 	uint16 width;
 
-	memcpy(s_temporaryColourBorderSchema, s_colourBorderSchema, sizeof(s_colourBorderSchema));
-	memcpy(s_colourBorderSchema, s_HOF_ColourBorderSchema, sizeof(s_colourBorderSchema));
+	memcpy(s_temporaryColourBorderSchema, ButtonColors, sizeof(ButtonColors));
+	memcpy(ButtonColors, s_HOF_ColourBorderSchema, sizeof(ButtonColors));
 
 	resumeString = Text_String(STR_RESUME_GAME2);
 	clearString  = Text_String(STR_CLEAR_LIST);
 
-	width = max(Font_GetStringWidth(resumeString), Font_GetStringWidth(clearString)) + 6;
+	width = max(String_Pixel_Width(resumeString), String_Pixel_Width(clearString)) + 6;
 
 	/* "Clear List" */
 	wClear = GUI_Widget_Allocate(100, *clearString, 160 - width - 18, 180, 0xFFFE, STR_CLEAR_LIST);
@@ -4262,7 +4262,7 @@ static void GUI_HallOfFame_DeleteButtons(Widget *w)
 		w = next;
 	}
 
-	memcpy(s_colourBorderSchema, s_temporaryColourBorderSchema, sizeof(s_temporaryColourBorderSchema));
+	memcpy(ButtonColors, s_temporaryColourBorderSchema, sizeof(s_temporaryColourBorderSchema));
 }
 
 static void GUI_HallOfFame_Encode(HallOfFameStruct *data)
@@ -4308,11 +4308,11 @@ void GUI_HallOfFame_Show(uint16 score)
 	uint8 fileID;
 	HallOfFameStruct *data;
 
-	GUI_Mouse_Hide_Safe();
+	Hide_Mouse();
 
 	if (score == 0xFFFF) {
 		if (!File_Exists_Personal("SAVEFAME.DAT")) {
-			GUI_Mouse_Show_Safe();
+			Show_Mouse();
 			return;
 		}
 		s_ticksPlayed = 0;
@@ -4348,15 +4348,15 @@ void GUI_HallOfFame_Show(uint16 score)
 
 	width = GUI_HallOfFame_DrawData(data, false);
 
-	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
+	Byte_Blit(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
 
 	if (editLine != 0) {
-		WidgetProperties backupProperties;
+		WindowType backupProperties;
 		char *name;
 
 		name = data[editLine - 1].name;
 
-		memcpy(&backupProperties, &WindowList[19], sizeof(WidgetProperties));
+		memcpy(&backupProperties, &WindowList[19], sizeof(WindowType));
 
 		WindowList[19].xBase = 4;
 		WindowList[19].yBase = (editLine - 1) * 11 + 90;
@@ -4365,15 +4365,15 @@ void GUI_HallOfFame_Show(uint16 score)
 		WindowList[19].fgColourBlink = 6;
 		WindowList[19].fgColourNormal = 116;
 
-		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+		Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 		while (*name == '\0') {
 			char *nameEnd;
 			Screen oldScreenID;
 
-			oldScreenID = GFX_Screen_SetActive(SCREEN_0);
-			Widget_SetAndPaintCurrentWidget(19);
-			GFX_Screen_SetActive(oldScreenID);
+			oldScreenID = Set_LogicPage(SCREEN_0);
+			Change_New_Window(19);
+			Set_LogicPage(oldScreenID);
 
 			GUI_EditBox(name, 5, 19, NULL, &GUI_HallOfFame_Tick, false);
 
@@ -4384,7 +4384,7 @@ void GUI_HallOfFame_Show(uint16 score)
 			while (*nameEnd <= ' ' && nameEnd >= name) *nameEnd-- = '\0';
 		}
 
-		memcpy(&WindowList[19], &backupProperties, sizeof(WidgetProperties));
+		memcpy(&WindowList[19], &backupProperties, sizeof(WindowType));
 
 		GUI_HallOfFame_DrawData(data, true);
 
@@ -4395,13 +4395,13 @@ void GUI_HallOfFame_Show(uint16 score)
 		File_Close(fileID);
 	}
 
-	GUI_Mouse_Show_Safe();
+	Show_Mouse();
 
 	w = GUI_HallOfFame_CreateButtons(data);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 
 	for (g_doQuitHOF = false; !g_doQuitHOF; sleepIdle()) {
 		GUI_Widget_HandleEvents(w);
@@ -4409,7 +4409,7 @@ void GUI_HallOfFame_Show(uint16 score)
 
 	GUI_HallOfFame_DeleteButtons(w);
 
-	Input_History_Clear();
+	Clear_KeyBuffer();
 
 	if (score == 0xFFFF) return;
 
@@ -4427,20 +4427,20 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 	uint16 battleX;
 	uint8 i;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
-	GUI_DrawFilledRectangle(8, 80, 311, 178, 116);
-	GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
+	oldScreenID = Set_LogicPage(SCREEN_1);
+	Fill_Rect(8, 80, 311, 178, 116);
+	Fancy_Text_Print(NULL, 0, 0, 0, 0, 0x22);
 
 	battleString = Text_String(STR_BATTLE);
 	scoreString = Text_String(STR_SCORE);
 
-	scoreX = 320 - Font_GetStringWidth(scoreString) / 2 - 12;
-	battleX = scoreX - Font_GetStringWidth(scoreString) / 2 - 8 - Font_GetStringWidth(battleString) / 2;
+	scoreX = 320 - String_Pixel_Width(scoreString) / 2 - 12;
+	battleX = scoreX - String_Pixel_Width(scoreString) / 2 - 8 - String_Pixel_Width(battleString) / 2;
 	offsetY = 80;
 
-	GUI_DrawText_Wrapper(Text_String(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
-	GUI_DrawText_Wrapper(battleString, battleX, offsetY, 8, 0, 0x122);
-	GUI_DrawText_Wrapper(scoreString, scoreX, offsetY, 8, 0, 0x122);
+	Fancy_Text_Print(Text_String(STR_NAME_AND_RANK), 32, offsetY, 8, 0, 0x22);
+	Fancy_Text_Print(battleString, battleX, offsetY, 8, 0, 0x122);
+	Fancy_Text_Print(scoreString, scoreX, offsetY, 8, 0, 0x122);
 
 	offsetY = 90;
 	for (i = 0; i < 8; i++, offsetY += 11) {
@@ -4459,23 +4459,23 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
 		snprintf(buffer, sizeof(buffer), "%s, %s %s", data[i].name, p1, p2);
 
 		if (*data[i].name == '\0') {
-			width = battleX - 36 - Font_GetStringWidth(buffer);
+			width = battleX - 36 - String_Pixel_Width(buffer);
 		} else {
-			GUI_DrawText_Wrapper(buffer, 32, offsetY, 15, 0, 0x22);
+			Fancy_Text_Print(buffer, 32, offsetY, 15, 0, 0x22);
 		}
 
-		GUI_DrawText_Wrapper("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
-		GUI_DrawText_Wrapper("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
-		GUI_DrawText_Wrapper("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
+		Fancy_Text_Print("%u.", 24, offsetY, 15, 0, 0x222, i + 1);
+		Fancy_Text_Print("%u", battleX, offsetY, 15, 0, 0x122, data[i].campaignID);
+		Fancy_Text_Print("%u", scoreX, offsetY, 15, 0, 0x122, data[i].score);
 	}
 
 	if (show) {
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(1, 80, 1, 80, 38, 100, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(1, 80, 1, 80, 38, 100, SCREEN_1, SCREEN_0);
+		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	return width;
 }
@@ -4488,7 +4488,7 @@ uint16 GUI_HallOfFame_DrawData(HallOfFameStruct *data, bool show)
  * @param bottom The bottom position of the rectangle.
  * @param colour The colour of the rectangle.
  */
-void GUI_DrawXorFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
+void Eor_Region(int16 left, int16 top, int16 right, int16 bottom, uint8 colour)
 {
 	uint16 x;
 	uint16 y;
@@ -4563,7 +4563,7 @@ void GUI_DrawScreen(Screen screenID)
 	if (g_selectionType == SELECTIONTYPE_UNKNOWN6) return;
 	if (g_selectionType == SELECTIONTYPE_INTRO) return;
 
-	oldScreenID = GFX_Screen_SetActive(screenID);
+	oldScreenID = Set_LogicPage(screenID);
 
 	if (!GFX_Screen_IsActive(SCREEN_0)) g_viewport_forceRedraw = true;
 
@@ -4591,7 +4591,7 @@ void GUI_DrawScreen(Screen screenID)
 
 			GUI_Mouse_Hide_InWidget(2);
 
-			GUI_Screen_Copy(max(-xOffset << 1, 0), 40 + max(-yOffset << 4, 0), max(0, xOffset << 1), 40 + max(0, yOffset << 4), xOverlap << 1, yOverlap << 4, SCREEN_0, SCREEN_1);
+			Byte_Blit(max(-xOffset << 1, 0), 40 + max(-yOffset << 4, 0), max(0, xOffset << 1), 40 + max(0, yOffset << 4), xOverlap << 1, yOverlap << 4, SCREEN_0, SCREEN_1);
 		} else {
 			g_viewport_forceRedraw = true;
 		}
@@ -4639,7 +4639,7 @@ void GUI_DrawScreen(Screen screenID)
 
 	g_viewport_forceRedraw = false;
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	Map_SetSelectionObjectPosition(g_selectionRectanglePosition);
 	Map_UpdateMinimapPosition(g_minimapPosition, false);
@@ -4652,7 +4652,7 @@ void GUI_DrawScreen(Screen screenID)
  * @param palette The new palette.
  * @param ticksOfAnimation The amount of ticks it should take.
  */
-void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation)
+void Fade_Palette_To(uint8 *palette, int16 ticksOfAnimation)
 {
 	bool progress;
 	int16 diffPerTick;
@@ -4715,7 +4715,7 @@ void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation)
 		/* if no color was changed, the target palette has been reached */
 		if (!progress) break;
 
-		GFX_SetPalette(data);
+		Set_Palette(data);
 
 		while (g_timerSleep < timerCurrent) sleepIdle();
 	}

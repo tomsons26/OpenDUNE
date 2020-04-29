@@ -37,7 +37,7 @@ extern void Input_Init(void);
 extern void Input_EventHandler(uint8 key);
 extern uint16 Input_Flags_ClearBits(uint16 bits);
 extern uint16 Input_Flags_SetBits(uint16 bits);
-extern void Input_History_Clear(void);
+extern void Clear_KeyBuffer(void);
 extern void Input_HandleInput(uint16 input);
 extern uint16 Input_IsInputAvailable(void);
 extern uint16 Input_Wait(void);

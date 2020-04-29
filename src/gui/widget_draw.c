@@ -36,7 +36,7 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 
 	if (w == NULL) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	positionX = w->offsetX + (WindowList[w->parentID].xBase << 3);
 	positionY = w->offsetY +  WindowList[w->parentID].yBase;
@@ -54,18 +54,18 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 	GUI_Widget_DrawBorder(19, state, 1);
 
 	if (w->stringID == STR_CANCEL || w->stringID == STR_PREVIOUS || w->stringID == STR_YES || w->stringID == STR_NO) {
-		GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(w->stringID), positionX + (width / 2), positionY + 2, colour, 0, 0x122);
+		Fancy_Text_Print(GUI_String_Get_ByIndex(w->stringID), positionX + (width / 2), positionY + 2, colour, 0, 0x122);
 	} else {
-		GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(w->stringID), positionX + 3, positionY + 2, colour, 0, 0x22);
+		Fancy_Text_Print(GUI_String_Get_ByIndex(w->stringID), positionX + 3, positionY + 2, colour, 0, 0x22);
 	}
 
 	if (oldScreenID == SCREEN_0) {
 		GUI_Mouse_Hide_InRegion(positionX, positionY, positionX + width, positionY + height);
-		GUI_Screen_Copy(positionX >> 3, positionY, positionX >> 3, positionY, width >> 3, height, SCREEN_1, SCREEN_0);
+		Byte_Blit(positionX >> 3, positionY, positionX >> 3, positionY, width >> 3, height, SCREEN_1, SCREEN_0);
 		GUI_Mouse_Show_InRegion();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 }
 
 /**
@@ -103,7 +103,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = Set_LogicPage(SCREEN_1);
 	}
 
 	buttonDown = w->state.hover2;
@@ -113,9 +113,9 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
 
-	GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], positionX, positionY, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 1 : 0);
+	Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], positionX, positionY, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 1 : 0);
 
 	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, false);
 
@@ -125,7 +125,7 @@ void GUI_Widget_SpriteButton_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	GUI_Mouse_Show_InRegion();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -155,7 +155,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = Set_LogicPage(SCREEN_1);
 	}
 
 	buttonDown = w->state.hover2;
@@ -165,7 +165,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
 	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
 
 	switch (g_productionStringID) {
@@ -197,7 +197,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 				uint16 x, y;
 				uint8 *sprite;
 
-				GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[63], positionX + 37, positionY + 5, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 2 : 0);
+				Draw_Shape(SCREEN_ACTIVE, g_sprites[63], positionX + 37, positionY + 5, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 2 : 0);
 
 				sprite = g_sprites[24];
 				spriteWidth = Sprite_GetWidth(sprite) + 1;
@@ -206,7 +206,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 
 				for (y = 0; y < g_table_structure_layoutSize[si->layout].height; y++) {
 					for (x = 0; x < g_table_structure_layoutSize[si->layout].width; x++) {
-						GUI_DrawSprite(SCREEN_ACTIVE, sprite, positionX + x * spriteWidth + 38, positionY + y * spriteWidth + 6, 0, 0);
+						Draw_Shape(SCREEN_ACTIVE, sprite, positionX + x * spriteWidth + 38, positionY + y * spriteWidth + 6, 0, 0);
 					}
 				}
 
@@ -220,7 +220,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 			break;
 	}
 
-	if (spriteID != 0) GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], positionX + 2, positionY + 2, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 1 : 0);
+	if (spriteID != 0) Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], positionX + 2, positionY + 2, 0, DRAWSPRITE_FLAG_REMAP, g_paletteMapping1, buttonDown ? 1 : 0);
 
 	if (g_productionStringID == STR_D_DONE) {
 		uint16 buildTime;
@@ -252,7 +252,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	if (g_productionStringID == STR_UPGRADINGD_DONE) {
 		percentDone = 100 - s->upgradeTimeLeft;
 
-		GUI_DrawText_Wrapper(
+		Fancy_Text_Print(
 			Text_String(g_productionStringID),
 			positionX + 1,
 			positionY + height - 19,
@@ -262,7 +262,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 			percentDone
 		);
 	} else {
-		GUI_DrawText_Wrapper(
+		Fancy_Text_Print(
 			Text_String(g_productionStringID),
 			positionX + width / 2,
 			positionY + height - 9,
@@ -285,7 +285,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	GUI_Mouse_Show_InRegion();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -307,7 +307,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 
 	oldScreenID = SCREEN_ACTIVE;
 	if (GFX_Screen_IsActive(SCREEN_0)) {
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+		oldScreenID = Set_LogicPage(SCREEN_1);
 	}
 
 	stringID = w->stringID;
@@ -320,7 +320,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 	width     = w->width;
 	height    = w->height;
 
-	GUI_DrawWiredRectangle(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
+	Draw_Rect(positionX - 1, positionY - 1, positionX + width, positionY + height, 12);
 	GUI_DrawBorder(positionX, positionY, width, height, buttonDown ? 0 : 1, true);
 
 	colour = 0xF;
@@ -334,7 +334,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 		colour = 0xEF;
 	}
 
-	GUI_DrawText_Wrapper(
+	Fancy_Text_Print(
 		Text_String(stringID),
 		positionX + width / 2,
 		positionY + 1,
@@ -351,7 +351,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 	GFX_Screen_Copy2(positionX - 1, positionY - 1, positionX - 1, positionY - 1, width + 2, height + 2, SCREEN_1, SCREEN_0, false);
 	GUI_Mouse_Show_InRegion();
 
-	GFX_Screen_SetActive(SCREEN_0);
+	Set_LogicPage(SCREEN_0);
 }
 
 /**
@@ -400,10 +400,10 @@ void GUI_Widget_Scrollbar_Draw(Widget *w)
 	}
 
 	/* Draw background */
-	GUI_DrawFilledRectangle(positionX, positionY, positionX + width - 1, positionY + height - 1, w->bgColourNormal);
+	Fill_Rect(positionX, positionY, positionX + width - 1, positionY + height - 1, w->bgColourNormal);
 
 	/* Draw where we currently are */
-	GUI_DrawFilledRectangle(positionX + scrollLeft, positionY + scrollTop, positionX + scrollRight, positionY + scrollBottom, (scrollbar->pressed == 0) ? w->fgColourNormal : w->fgColourSelected);
+	Fill_Rect(positionX + scrollLeft, positionY + scrollTop, positionX + scrollRight, positionY + scrollBottom, (scrollbar->pressed == 0) ? w->fgColourNormal : w->fgColourSelected);
 
 	if (GFX_Screen_IsActive(SCREEN_0)) {
 		GUI_Mouse_Show_InRegion();
@@ -638,8 +638,8 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		Widget *w = g_widgetLinkedListHead;
 		int i;
 
-		oldScreenID = GFX_Screen_SetActive(SCREEN_1);
-		oldWidgetID = Widget_SetCurrentWidget(6);
+		oldScreenID = Set_LogicPage(SCREEN_1);
+		oldWidgetID = Change_Window(6);
 
 		widget30 = GUI_Widget_Get_ByIndex(w, 7);
 		GUI_Widget_MakeInvisible(widget30);
@@ -684,7 +684,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 			default: break;
 		}
 
-		if (stringID != STR_NULL) GUI_DrawText_Wrapper(Text_String(stringID), 288, 43, 29, 0, 0x111);
+		if (stringID != STR_NULL) Fancy_Text_Print(Text_String(stringID), 288, 43, 29, 0, 0x111);
 
 		switch (actionType) {
 			case 3: /* Structure */
@@ -717,14 +717,14 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		}
 
 		if (spriteID != 0xFFFF) {
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[spriteID], 258, 51, 0, 0);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[spriteID], 258, 51, 0, 0);
 		}
 
 		/* Unit / Structure */
 		if (actionType == 2 || actionType == 3) {
 			GUI_DrawProgressbar(o->hitpoints, oi->hitpoints);
-			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[27], 292, 60, 0, 0);
-			GUI_DrawText_Wrapper(Text_String(STR_DMG), 296, 65, 29, 0, 0x11);
+			Draw_Shape(SCREEN_ACTIVE, g_sprites[27], 292, 60, 0, 0);
+			Fancy_Text_Print(Text_String(STR_DMG), 296, 65, 29, 0, 0x11);
 		}
 
 		if (!isNotPlayerOwned || g_debugGame) {
@@ -821,29 +821,29 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							u2 = Structure_GetLinkedUnit(s);
 							if (u2 == NULL) break;
 
-							GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[g_table_unitInfo[u2->o.type].o.spriteID], 260, 89, 0, 0);
+							Draw_Shape(SCREEN_ACTIVE, g_sprites[g_table_unitInfo[u2->o.type].o.spriteID], 260, 89, 0, 0);
 
 							steps = g_table_unitInfo[u2->o.type].o.buildTime / 4;
 							percent = (steps - (s->countDown >> 8)) * 100 / steps;
 
-							GUI_DrawText_Wrapper(Text_String(STR_D_DONE), 258, 116, 29, 0, 0x11, percent);
+							Fancy_Text_Print(Text_String(STR_D_DONE), 258, 116, 29, 0, 0x11, percent);
 						} break;
 
 						case STRUCTURE_WINDTRAP: {
 							uint16 powerOutput = o->hitpoints * -si->powerUsage / oi->hitpoints;
 							uint16 powerAverage = (h->windtrapCount == 0) ? 0 : h->powerUsage / h->windtrapCount;
 
-							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(Text_String(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);
-							GUI_DrawText_Wrapper("%3d", 292, g_fontCurrent->height * 2 + 80, 29, 0, 0x11, powerAverage);
-							GUI_DrawText_Wrapper("%3d", 292, g_fontCurrent->height * 3 + 80, (powerOutput >= powerAverage) ? 29 : 6, 0, 0x11, powerOutput);
+							Draw_Line(261, 95, 312, 95, 16);
+							Fancy_Text_Print(Text_String(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);
+							Fancy_Text_Print("%3d", 292, FontPtr->height * 2 + 80, 29, 0, 0x11, powerAverage);
+							Fancy_Text_Print("%3d", 292, FontPtr->height * 3 + 80, (powerOutput >= powerAverage) ? 29 : 6, 0, 0x11, powerOutput);
 						} break;
 
 						case STRUCTURE_STARPORT: {
 							if (h->starportLinkedID != 0xFFFF) {
-								GUI_DrawText_Wrapper(Text_String(STR_FRIGATEARRIVAL_INTMINUS_D), 258, 88, 29, 0, 0x11, h->starportTimeLeft);
+								Fancy_Text_Print(Text_String(STR_FRIGATEARRIVAL_INTMINUS_D), 258, 88, 29, 0, 0x11, h->starportTimeLeft);
 							} else {
-								GUI_DrawText_Wrapper(Text_String(STR_FRIGATE_INORBIT_ANDAWAITINGORDER), 258, 88, 29, 0, 0x11);
+								Fancy_Text_Print(Text_String(STR_FRIGATE_INORBIT_ANDAWAITINGORDER), 258, 88, 29, 0, 0x11);
 							}
 						} break;
 
@@ -854,35 +854,35 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							creditsStored = h->credits * si->creditsStorage / h->creditsStorage;
 							if (h->credits > h->creditsStorage) creditsStored = si->creditsStorage;
 
-							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(Text_String(STR_SPICEHOLDS_4DMAX_4D), 258, 88, 29, 0, 0x11, creditsStored, (si->creditsStorage <= 1000) ? si->creditsStorage : 1000);
+							Draw_Line(261, 95, 312, 95, 16);
+							Fancy_Text_Print(Text_String(STR_SPICEHOLDS_4DMAX_4D), 258, 88, 29, 0, 0x11, creditsStored, (si->creditsStorage <= 1000) ? si->creditsStorage : 1000);
 						} break;
 
 						case STRUCTURE_OUTPOST: {
-							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(Text_String(STR_RADAR_SCANFRIEND_2DENEMY_2D), 258, 88, 29, 0, 0x11, h->unitCountAllied, h->unitCountEnemy);
+							Draw_Line(261, 95, 312, 95, 16);
+							Fancy_Text_Print(Text_String(STR_RADAR_SCANFRIEND_2DENEMY_2D), 258, 88, 29, 0, 0x11, h->unitCountAllied, h->unitCountEnemy);
 						} break;
 					}
 				} break;
 
 				case 4: /* Attack */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(Text_String(STR_SELECTTARGET), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					Fancy_Text_Print(Text_String(STR_SELECTTARGET), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 5: /* Movement */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(Text_String(STR_SELECTDESTINATION), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					Fancy_Text_Print(Text_String(STR_SELECTDESTINATION), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 6: /* Harvest */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(Text_String(STR_SELECTPLACE_TOHARVEST), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					Fancy_Text_Print(Text_String(STR_SELECTPLACE_TOHARVEST), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 7: /* Placement */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(Text_String(STR_SELECTLOCATION_TOBUILD), 259, 84, g_curWidgetFGColourBlink, 0, 0x11);
+					Fancy_Text_Print(Text_String(STR_SELECTLOCATION_TOBUILD), 259, 84, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 8: /* House Missile */
@@ -890,7 +890,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 					int16 count = (int16)g_houseMissileCountdown - 1;
 					if (count <= 0) count = 0;
 
-					GUI_DrawText_Wrapper(Text_String(STR_PICK_TARGETTMINUS_D), 259, 84, g_curWidgetFGColourBlink, 0, 0x11, count);
+					Fancy_Text_Print(Text_String(STR_PICK_TARGETTMINUS_D), 259, 84, g_curWidgetFGColourBlink, 0, 0x11, count);
 				} break;
 
 				default:
@@ -901,13 +901,13 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 
 	if (actionType != 0) {
 		GUI_Mouse_Hide_InWidget(6);
-		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, SCREEN_0);
+		Byte_Blit(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_ACTIVE, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 	}
 
 	if (actionType > 1) {
-		Widget_SetCurrentWidget(oldWidgetID);
-		GFX_Screen_SetActive(oldScreenID);
+		Change_Window(oldWidgetID);
+		Set_LogicPage(oldScreenID);
 	}
 }
 

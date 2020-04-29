@@ -1563,7 +1563,7 @@ bool Structure_BuildObject(Structure *s, uint16 objectType)
 
 			Sprites_LoadTiles();
 
-			GFX_SetPalette(g_palette1);
+			Set_Palette(g_palette1);
 
 			GUI_ChangeSelectionType(SELECTIONTYPE_STRUCTURE);
 

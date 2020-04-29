@@ -257,7 +257,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	if (packed != 0xFFFF && packed == minimapPreviousPosition && !forceUpdate) return;
 	if (g_selectionType == SELECTIONTYPE_MENTAT) return;
 
-	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
+	oldScreenID = Set_LogicPage(SCREEN_1);
 
 	cleared = false;
 
@@ -290,7 +290,7 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 		top    = (Tile_GetPackedY(packed) - mapInfo->minY) * (mapScale + 1) + 136;
 		bottom = top + mapScale * 10 + 9;
 
-		GUI_DrawWiredRectangle(left, top, right, bottom, 15);
+		Draw_Rect(left, top, right, bottom, 15);
 
 		for (m = viewportBorder; *m != 0xFFFF; m++) {
 			uint16 curPacked;
@@ -301,12 +301,12 @@ void Map_UpdateMinimapPosition(uint16 packed, bool forceUpdate)
 	}
 
 	if (cleared && oldScreenID == SCREEN_0) {
-		GUI_Mouse_Hide_Safe();
-		GUI_Screen_Copy(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
-		GUI_Mouse_Show_Safe();
+		Hide_Mouse();
+		Byte_Blit(32, 136, 32, 136, 8, 64, SCREEN_1, SCREEN_0);
+		Show_Mouse();
 	}
 
-	GFX_Screen_SetActive(oldScreenID);
+	Set_LogicPage(oldScreenID);
 
 	minimapPreviousPosition = packed;
 }

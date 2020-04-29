@@ -133,31 +133,31 @@ extern bool g_var_37B8;
 
 #define GUI_ClearScreen(screenID) GFX_ClearScreen(screenID)
 extern void GUI_DrawScreen(Screen screenID);
-extern void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...);
+extern void Draw_Shape(Screen screenID, const uint8 *sprite, int16 posX, int16 posY, uint16 windowID, int flags, ...);
 extern void GUI_DrawInterfaceAndRadar(Screen screenID);
 extern void GUI_Palette_RemapScreen(uint16 left, uint16 top, uint16 width, uint16 height, Screen screenID, const uint8 *remap);
-extern void GUI_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
+extern void Byte_Blit(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width, int16 height, Screen screenSrc, Screen screenDst);
 extern void GUI_Screen_FadeIn(uint16 xSrc, uint16 ySrc, uint16 xDst, uint16 yDst, uint16 width, uint16 height, Screen screenSrc, Screen screenDst);
 extern void GUI_Screen_FadeIn2(int16 x, int16 y, int16 width, int16 height, Screen screenSrc, Screen screenDst, uint16 delay, bool skipNull);
 
 extern void GUI_DrawBlockedRectangle(int16 left, int16 top, int16 width, int16 height, uint8 colour);
 extern void GUI_DrawBorder(uint16 left, uint16 top, uint16 width, uint16 height, uint16 colourSchemaIndex, bool fill);
 extern void GUI_DrawCredits(uint8 houseID, uint16 mode);
-extern void GUI_DrawFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
-extern void GUI_DrawLine(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
+extern void Fill_Rect(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
+extern void Draw_Line(int16 x1, int16 y1, int16 x2, int16 y2, uint8 color);
 extern void GUI_DrawProgressbar(uint16 current, uint16 max);
 extern void GUI_DrawText_Monospace(char *string, uint16 left, uint16 top, uint8 fgColour, uint8 bgColour, uint16 charWidth);
-extern void GUI_DrawWiredRectangle(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
-extern void GUI_DrawXorFilledRectangle(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
+extern void Draw_Rect(uint16 left, uint16 top, uint16 right, uint16 bottom, uint8 colour);
+extern void Eor_Region(int16 left, int16 top, int16 right, int16 bottom, uint8 colour);
 
 extern void GUI_Palette_CreateMapping(const uint8 *palette, uint8 *colors, uint8 reference, uint8 intensity);
 extern void GUI_Palette_CreateRemap(uint8 houseID);
-extern void GUI_SetPaletteAnimated(uint8 *palette, int16 ticksOfAnimation);
+extern void Fade_Palette_To(uint8 *palette, int16 ticksOfAnimation);
 extern void GUI_PaletteAnimate(void);
 
 extern void GUI_DisplayText(const char *str, int importance, ...);
 extern void Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour);
-extern void GUI_DrawText_Wrapper(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...);
+extern void Fancy_Text_Print(const char *string, int16 left, int16 top, uint8 fgColour, uint8 bgColour, int flags, ...);
 extern uint16 GUI_DisplayModalMessage(const char *str, unsigned int stringID, ...);
 extern uint16 GUI_DisplayHint(uint16 stringID, uint16 spriteID);
 
@@ -181,8 +181,8 @@ extern void GUI_FactoryWindow_UpdateSelection(bool selectionChanged);
 extern void GUI_FactoryWindow_PrepareScrollList(void);
 extern void GUI_Mouse_Show(void);
 extern void GUI_Mouse_Hide(void);
-extern void GUI_Mouse_Show_Safe(void);
-extern void GUI_Mouse_Hide_Safe(void);
+extern void Show_Mouse(void);
+extern void Hide_Mouse(void);
 extern void GUI_Mouse_Show_InRegion(void);
 extern void GUI_Mouse_Hide_InRegion(uint16 left, uint16 top, uint16 right, uint16 bottom);
 extern void GUI_Mouse_Show_InWidget(void);
