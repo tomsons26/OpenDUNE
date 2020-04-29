@@ -461,7 +461,7 @@ static void GUI_Window_Create(WindowDesc *desc)
 	}
 
 	if (GUI_String_Get_ByIndex(desc->widgets[0].stringID) == NULL) {
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (g_curWidgetXBase + 2) << 3, g_curWidgetYBase + 42, 232, 0, 0x22);
+		GUI_DrawText_Wrapper(Text_String(STR_THERE_ARE_NO_SAVED_GAMES_TO_LOAD), (g_curWidgetXBase + 2) << 3, g_curWidgetYBase + 42, 232, 0, 0x22);
 	}
 
 	for (i = 0; i < desc->widgetCount; i++) {
@@ -754,7 +754,7 @@ bool GUI_Widget_Options_Click(Widget *w)
 					if (!GUI_YesNo(STR_ARE_YOU_SURE_YOU_WISH_TO_PICK_A_NEW_HOUSE)) break;
 
 					loop = false;
-					Driver_Music_FadeOut();
+					Fade_Score();
 					g_gameMode = GM_PICKHOUSE;
 					break;
 
@@ -833,7 +833,7 @@ static void FillSavegameDesc(bool save)
 		if (s_savegameIndexBase - i == s_savegameCountOnDisk) {
 			if (!save) continue;
 
-			strncpy(desc, String_Get_ByIndex(STR_EMPTY_SLOT_), 50);
+			strncpy(desc, Text_String(STR_EMPTY_SLOT_), 50);
 			continue;
 		}
 
@@ -1284,7 +1284,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	GUI_DrawFilledRectangle(128, 48, 311, 159, 20);
 
-	GUI_DrawText_Wrapper(String_Get_ByIndex(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
+	GUI_DrawText_Wrapper(Text_String(STR_ITEM_NAME_QTY_TOTAL), 128, y, 12, 0, 0x11);
 
 	y += 7;
 
@@ -1307,14 +1307,14 @@ static void GUI_Purchase_ShowInvoice(void)
 			snprintf(textBuffer, sizeof(textBuffer), "%02d %5d", g_factoryWindowItems[i].amount, amount);
 
 			oi = g_factoryWindowItems[i].objectInfo;
-			GUI_DrawText_Wrapper(String_Get_ByIndex(oi->stringID_full), 128, y, 8, 0, 0x11);
+			GUI_DrawText_Wrapper(Text_String(oi->stringID_full), 128, y, 8, 0, 0x11);
 
 			GUI_DrawText_Monospace(textBuffer, 311 - (short)strlen(textBuffer) * 6, y, 15, 0, 6);
 
 			y += 8;
 		}
 	} else {
-		GUI_DrawText_Wrapper(String_Get_ByIndex(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
+		GUI_DrawText_Wrapper(Text_String(STR_NO_UNITS_ON_ORDER), 220, 99, 6, 0, 0x112);
 	}
 
 	GUI_DrawLine(129, 148, 310, 148, 12);
@@ -1334,7 +1334,7 @@ static void GUI_Purchase_ShowInvoice(void)
 
 	GFX_Screen_SetActive(SCREEN_0);
 
-	GUI_FactoryWindow_DrawCaption(String_Get_ByIndex(STR_INVOICE_OF_UNITS_ON_ORDER));
+	GUI_FactoryWindow_DrawCaption(Text_String(STR_INVOICE_OF_UNITS_ON_ORDER));
 
 	Input_History_Clear();
 

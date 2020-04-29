@@ -211,11 +211,11 @@ static void GameLoop_PlaySubtitle(uint8 animation)
 
 		if (g_feedback[feedback_index].messageId != 0) {
 			/* force drawing of subtitle */
-			GameLoop_DrawText(String_Get_ByIndex(subtitle->stringID), subtitle->top);
+			GameLoop_DrawText(Text_String(subtitle->stringID), subtitle->top);
 		}
 	} else {
 		if (subtitle->stringID != STR_NULL) {
-			GameLoop_DrawText(String_Get_ByIndex(subtitle->stringID), subtitle->top);
+			GameLoop_DrawText(Text_String(subtitle->stringID), subtitle->top);
 		}
 	}
 
@@ -543,7 +543,7 @@ void GameLoop_LevelEndAnimation(void)
 
 	GameLoop_PlayAnimation(animation);
 
-	Driver_Music_FadeOut();
+	Fade_Score();
 
 	GameLoop_FinishAnimation();
 }
@@ -747,7 +747,7 @@ static void GameCredits_Play(char *data, uint16 windowID, Screen spriteScreenID,
 
 				if (strings[i].charHeight != g_fontCurrent->height) Font_Select(g_fontNew6p);
 
-				GUI_DrawText(strings[i].text, strings[i].x, strings[i].y + g_curWidgetYBase, 255, 0);
+				Text_Print(strings[i].text, strings[i].x, strings[i].y + g_curWidgetYBase, 255, 0);
 
 				GFX_Screen_SetActive(SCREEN_0);
 			}
@@ -882,7 +882,7 @@ static void GameLoop_GameCredits(void)
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
 
-	Driver_Music_FadeOut();
+	Fade_Score();
 
 	GFX_ClearScreen(SCREEN_ACTIVE);
 }
@@ -929,7 +929,7 @@ void GameLoop_GameEndAnimation(void)
 
 	GameLoop_PlayAnimation(animation);
 
-	Driver_Music_FadeOut();
+	Fade_Score();
 
 	GameLoop_FinishAnimation();
 
@@ -962,7 +962,7 @@ static void Gameloop_Logos(void)
 
 	g_timerTimeout = 360;
 
-	while (Animate_Frame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
+	while (Animate_Frame(wsa, frame++, 0, 0, SCREEN_0)) Delay(6);
 	
 	Close_Animation(wsa);
 
@@ -975,7 +975,7 @@ static void Gameloop_Logos(void)
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
 
-	while (Driver_Music_IsPlaying()) sleepIdle();
+	while (Score_Status()) sleepIdle();
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
 
@@ -1034,7 +1034,7 @@ void GameLoop_GameIntroAnimation(void)
 
 		GameLoop_PlayAnimation(animation);
 
-		Driver_Music_FadeOut();
+		Fade_Score();
 
 		GameLoop_FinishAnimation();
 	}

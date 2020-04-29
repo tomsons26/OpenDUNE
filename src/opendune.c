@@ -286,7 +286,7 @@ static void GameLoop_LevelEnd(void)
 		if (GameLoop_IsLevelWon()) {
 			Sound_Output_Feedback(40);
 
-			GUI_DisplayModalMessage(String_Get_ByIndex(STR_YOU_HAVE_SUCCESSFULLY_COMPLETED_YOUR_MISSION), 0xFFFF);
+			GUI_DisplayModalMessage(Text_String(STR_YOU_HAVE_SUCCESSFULLY_COMPLETED_YOUR_MISSION), 0xFFFF);
 
 			GUI_Mentat_ShowWin();
 
@@ -325,7 +325,7 @@ static void GameLoop_LevelEnd(void)
 		} else {
 			Sound_Output_Feedback(41);
 
-			GUI_DisplayModalMessage(String_Get_ByIndex(STR_YOU_HAVE_FAILED_YOUR_MISSION), 0xFFFF);
+			GUI_DisplayModalMessage(Text_String(STR_YOU_HAVE_FAILED_YOUR_MISSION), 0xFFFF);
 
 			GUI_Mentat_ShowLose();
 
@@ -381,11 +381,11 @@ static void GameLoop_DrawText2(const char *string, uint16 left, uint16 top, uint
 		GUI_Mouse_Hide_Safe();
 
 		GUI_DrawText_Wrapper(string, left, top, fgColourSelected, bgColour, 0x22);
-		Timer_Sleep(2);
+		Delay(2);
 
 		GUI_DrawText_Wrapper(string, left, top, fgColourNormal, bgColour, 0x22);
 		GUI_Mouse_Show_Safe();
-		Timer_Sleep(2);
+		Delay(2);
 	}
 }
 
@@ -703,7 +703,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 			GUI_Mouse_Hide_Safe();
 
-			Driver_Music_FadeOut();
+			Fade_Score();
 
 			GameLoop_GameIntroAnimation();
 
@@ -777,7 +777,7 @@ static void GameLoop_GameIntroAnimationMenu(void)
 				continue;
 			}
 
-			strings[i] = String_Get_ByIndex(mainMenuStrings[index][i]);
+			strings[i] = Text_String(mainMenuStrings[index][i]);
 		}
 
 		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
@@ -912,9 +912,9 @@ static void GameLoop_Main(void)
 	Sprites_Init();
 
 #ifdef MUNT
-	if (IniFile_GetInteger("mt32midi", 1) != 0) Music_InitMT32();
+	if (IniFile_GetInteger("mt32midi", 1) != 0) MT32_Init();
 #else
-	if (IniFile_GetInteger("mt32midi", 0) != 0) Music_InitMT32();
+	if (IniFile_GetInteger("mt32midi", 0) != 0) MT32_Init();
 #endif
 
 	Input_Flags_SetBits(INPUT_FLAG_KEY_REPEAT | INPUT_FLAG_UNKNOWN_0010 | INPUT_FLAG_UNKNOWN_0200 |
@@ -1076,7 +1076,7 @@ static void GameLoop_Main(void)
 			} else {
 				g_musicInBattle = 0;
 				if (g_enableSoundMusic != 0 && g_timerGUI > l_timerNext) {
-					if (!Driver_Music_IsPlaying()) {
+					if (!Score_Status()) {
 						Music_Play(Tools_RandomLCG_Range(0, 8) + 8);
 						l_timerNext = g_timerGUI + 300;
 					}
@@ -1317,7 +1317,7 @@ int main(int argc, char **argv)
 
 	GameLoop_Main();
 
-	printf("%s\n", String_Get_ByIndex(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
+	printf("%s\n", Text_String(STR_THANK_YOU_FOR_PLAYING_DUNE_II));
 
 	PrepareEnd();
 	Free_IniFile();

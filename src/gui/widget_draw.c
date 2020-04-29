@@ -253,7 +253,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 		percentDone = 100 - s->upgradeTimeLeft;
 
 		GUI_DrawText_Wrapper(
-			String_Get_ByIndex(g_productionStringID),
+			Text_String(g_productionStringID),
 			positionX + 1,
 			positionY + height - 19,
 			buttonDown ? 0xE : 0xF,
@@ -263,7 +263,7 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 		);
 	} else {
 		GUI_DrawText_Wrapper(
-			String_Get_ByIndex(g_productionStringID),
+			Text_String(g_productionStringID),
 			positionX + width / 2,
 			positionY + height - 9,
 			(g_productionStringID == STR_PLACE_IT) ? 0xEF : (buttonDown ? 0xE : 0xF),
@@ -274,9 +274,9 @@ void GUI_Widget_SpriteTextButton_Draw(Widget *w)
 	}
 
 	if (g_productionStringID == STR_D_DONE || g_productionStringID == STR_UPGRADINGD_DONE) {
-		w->shortcut = GUI_Widget_GetShortcut(*String_Get_ByIndex(STR_ON_HOLD));
+		w->shortcut = GUI_Widget_GetShortcut(*Text_String(STR_ON_HOLD));
 	} else {
-		w->shortcut = GUI_Widget_GetShortcut(*String_Get_ByIndex(g_productionStringID));
+		w->shortcut = GUI_Widget_GetShortcut(*Text_String(g_productionStringID));
 	}
 
 	if (oldScreenID != SCREEN_0) return;
@@ -335,7 +335,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 	}
 
 	GUI_DrawText_Wrapper(
-		String_Get_ByIndex(stringID),
+		Text_String(stringID),
 		positionX + width / 2,
 		positionY + 1,
 		colour,
@@ -343,7 +343,7 @@ void GUI_Widget_TextButton2_Draw(Widget *w)
 		0x121
 	);
 
-	w->shortcut = GUI_Widget_GetShortcut(*String_Get_ByIndex(stringID));
+	w->shortcut = GUI_Widget_GetShortcut(*Text_String(stringID));
 
 	if (oldScreenID != SCREEN_0) return;
 
@@ -684,7 +684,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 			default: break;
 		}
 
-		if (stringID != STR_NULL) GUI_DrawText_Wrapper(String_Get_ByIndex(stringID), 288, 43, 29, 0, 0x111);
+		if (stringID != STR_NULL) GUI_DrawText_Wrapper(Text_String(stringID), 288, 43, 29, 0, 0x111);
 
 		switch (actionType) {
 			case 3: /* Structure */
@@ -724,7 +724,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 		if (actionType == 2 || actionType == 3) {
 			GUI_DrawProgressbar(o->hitpoints, oi->hitpoints);
 			GUI_DrawSprite(SCREEN_ACTIVE, g_sprites[27], 292, 60, 0, 0);
-			GUI_DrawText_Wrapper(String_Get_ByIndex(STR_DMG), 296, 65, 29, 0, 0x11);
+			GUI_DrawText_Wrapper(Text_String(STR_DMG), 296, 65, 29, 0, 0x11);
 		}
 
 		if (!isNotPlayerOwned || g_debugGame) {
@@ -744,7 +744,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 
 					for (i = 0; i < 4; i++) {
 						buttons[i]->stringID = g_table_actionInfo[actions[i]].stringID;
-						buttons[i]->shortcut = GUI_Widget_GetShortcut(String_Get_ByIndex(buttons[i]->stringID)[0]);
+						buttons[i]->shortcut = GUI_Widget_GetShortcut(Text_String(buttons[i]->stringID)[0]);
 
 						if (g_config.language == LANGUAGE_FRENCH) {
 							if (buttons[i]->stringID == STR_MOVE) buttons[i]->shortcut2 = 0x27;	/* L key */
@@ -826,7 +826,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							steps = g_table_unitInfo[u2->o.type].o.buildTime / 4;
 							percent = (steps - (s->countDown >> 8)) * 100 / steps;
 
-							GUI_DrawText_Wrapper(String_Get_ByIndex(STR_D_DONE), 258, 116, 29, 0, 0x11, percent);
+							GUI_DrawText_Wrapper(Text_String(STR_D_DONE), 258, 116, 29, 0, 0x11, percent);
 						} break;
 
 						case STRUCTURE_WINDTRAP: {
@@ -834,16 +834,16 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							uint16 powerAverage = (h->windtrapCount == 0) ? 0 : h->powerUsage / h->windtrapCount;
 
 							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(String_Get_ByIndex(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);
+							GUI_DrawText_Wrapper(Text_String(STR_POWER_INFONEEDEDOUTPUT), 258, 88, 29, 0, 0x11);
 							GUI_DrawText_Wrapper("%3d", 292, g_fontCurrent->height * 2 + 80, 29, 0, 0x11, powerAverage);
 							GUI_DrawText_Wrapper("%3d", 292, g_fontCurrent->height * 3 + 80, (powerOutput >= powerAverage) ? 29 : 6, 0, 0x11, powerOutput);
 						} break;
 
 						case STRUCTURE_STARPORT: {
 							if (h->starportLinkedID != 0xFFFF) {
-								GUI_DrawText_Wrapper(String_Get_ByIndex(STR_FRIGATEARRIVAL_INTMINUS_D), 258, 88, 29, 0, 0x11, h->starportTimeLeft);
+								GUI_DrawText_Wrapper(Text_String(STR_FRIGATEARRIVAL_INTMINUS_D), 258, 88, 29, 0, 0x11, h->starportTimeLeft);
 							} else {
-								GUI_DrawText_Wrapper(String_Get_ByIndex(STR_FRIGATE_INORBIT_ANDAWAITINGORDER), 258, 88, 29, 0, 0x11);
+								GUI_DrawText_Wrapper(Text_String(STR_FRIGATE_INORBIT_ANDAWAITINGORDER), 258, 88, 29, 0, 0x11);
 							}
 						} break;
 
@@ -855,34 +855,34 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 							if (h->credits > h->creditsStorage) creditsStored = si->creditsStorage;
 
 							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SPICEHOLDS_4DMAX_4D), 258, 88, 29, 0, 0x11, creditsStored, (si->creditsStorage <= 1000) ? si->creditsStorage : 1000);
+							GUI_DrawText_Wrapper(Text_String(STR_SPICEHOLDS_4DMAX_4D), 258, 88, 29, 0, 0x11, creditsStored, (si->creditsStorage <= 1000) ? si->creditsStorage : 1000);
 						} break;
 
 						case STRUCTURE_OUTPOST: {
 							GUI_DrawLine(261, 95, 312, 95, 16);
-							GUI_DrawText_Wrapper(String_Get_ByIndex(STR_RADAR_SCANFRIEND_2DENEMY_2D), 258, 88, 29, 0, 0x11, h->unitCountAllied, h->unitCountEnemy);
+							GUI_DrawText_Wrapper(Text_String(STR_RADAR_SCANFRIEND_2DENEMY_2D), 258, 88, 29, 0, 0x11, h->unitCountAllied, h->unitCountEnemy);
 						} break;
 					}
 				} break;
 
 				case 4: /* Attack */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECTTARGET), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					GUI_DrawText_Wrapper(Text_String(STR_SELECTTARGET), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 5: /* Movement */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECTDESTINATION), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					GUI_DrawText_Wrapper(Text_String(STR_SELECTDESTINATION), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 6: /* Harvest */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECTPLACE_TOHARVEST), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
+					GUI_DrawText_Wrapper(Text_String(STR_SELECTPLACE_TOHARVEST), 259, 76, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 7: /* Placement */
 					GUI_Widget_MakeVisible(widget30);
-					GUI_DrawText_Wrapper(String_Get_ByIndex(STR_SELECTLOCATION_TOBUILD), 259, 84, g_curWidgetFGColourBlink, 0, 0x11);
+					GUI_DrawText_Wrapper(Text_String(STR_SELECTLOCATION_TOBUILD), 259, 84, g_curWidgetFGColourBlink, 0, 0x11);
 					break;
 
 				case 8: /* House Missile */
@@ -890,7 +890,7 @@ void GUI_Widget_ActionPanel_Draw(bool forceDraw)
 					int16 count = (int16)g_houseMissileCountdown - 1;
 					if (count <= 0) count = 0;
 
-					GUI_DrawText_Wrapper(String_Get_ByIndex(STR_PICK_TARGETTMINUS_D), 259, 84, g_curWidgetFGColourBlink, 0, 0x11, count);
+					GUI_DrawText_Wrapper(Text_String(STR_PICK_TARGETTMINUS_D), 259, 84, g_curWidgetFGColourBlink, 0, 0x11, count);
 				} break;
 
 				default:

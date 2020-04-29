@@ -104,10 +104,10 @@ bool GUI_Security_Show(void)
 
 	GUI_SetPaletteAnimated(g_palette1, 15);
 
-	strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_TEXT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+	strncpy(g_readBuffer, Text_String(STR_SECURITY_TEXT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
 	GUI_Mentat_Loop(wsaHouseFilename, NULL, g_readBuffer, true, NULL);
 
-	questionsCount = atoi(String_Get_ByIndex(STR_SECURITY_COUNT));
+	questionsCount = atoi(Text_String(STR_SECURITY_COUNT));
 
 	oldCurrentWidget = Widget_SetCurrentWidget(8);
 
@@ -123,7 +123,7 @@ bool GUI_Security_Show(void)
 
 		Widget_SetCurrentWidget(8);
 
-		wsa = Open_Animation(String_Get_ByIndex(questionIndex + 1), Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(Text_String(questionIndex + 1), Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
 		Animate_Frame(wsa, 0, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2);
 		Close_Animation(wsa);
 
@@ -133,7 +133,7 @@ bool GUI_Security_Show(void)
 		GUI_Screen_Copy(g_curWidgetXBase, g_curWidgetYBase, g_curWidgetXBase, g_curWidgetYBase, g_curWidgetWidth, g_curWidgetHeight, SCREEN_2, SCREEN_0);
 		GUI_Mouse_Show_InWidget();
 
-		strncpy(g_readBuffer, String_Get_ByIndex(questionIndex), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(questionIndex), g_readBufferSize);
 		GUI_Security_DrawText(g_readBuffer);
 
 		g_interrogationTimer = g_timerGUI + (uint32)strlen(g_readBuffer) * 4;
@@ -157,7 +157,7 @@ bool GUI_Security_Show(void)
 
 		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
-		Debug("Answer : %s\n", String_Get_ByIndex(questionIndex + 2));
+		Debug("Answer : %s\n", Text_String(questionIndex + 2));
 		GUI_EditBox(buffer, sizeof(buffer) - 1, 9, NULL, &GUI_Mentat_Tick, false);
 
 		GUI_Security_UndrawText();
@@ -168,13 +168,13 @@ bool GUI_Security_Show(void)
 
 		GUI_Security_NormaliseText(buffer);
 
-		strncpy(g_readBuffer, String_Get_ByIndex(questionIndex + 2), g_readBufferSize);
+		strncpy(g_readBuffer, Text_String(questionIndex + 2), g_readBufferSize);
 		GUI_Security_NormaliseText(g_readBuffer);
 
 		if (strcasecmp(g_readBuffer, buffer) != 0) {
-			strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_WRONG_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_WRONG_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
 		} else {
-			strncpy(g_readBuffer, String_Get_ByIndex(STR_SECURITY_CORRECT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
+			strncpy(g_readBuffer, Text_String(STR_SECURITY_CORRECT_HARKONNEN + g_playerHouseID * 3), g_readBufferSize);
 
 			valid = true;
 		}

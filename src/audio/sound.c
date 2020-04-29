@@ -29,7 +29,7 @@ static int16 s_currentVoicePriority;            /*!< Priority of the currently p
 
 static void *Sound_LoadVoc(const char *filename, uint32 *retFileSize);
 
-static void Driver_Music_Play(int16 index, uint16 volume)
+static void Play_Score(int16 index, uint16 volume)
 {
 	Driver *music = g_driverMusic;
 	MSBuffer *musicBuffer = g_bufferMusic;
@@ -50,7 +50,7 @@ static void Driver_Music_Play(int16 index, uint16 volume)
 	MPU_SetVolume(musicBuffer->index, ((volume & 0xFF) * 90) / 256, 0);
 }
 
-static void Driver_Music_LoadFile(const char *musicName)
+static void Load_Score_File(const char *musicName)
 {
 	Driver *music = g_driverMusic;
 	Driver *sound = g_driverSound;
@@ -95,34 +95,34 @@ void Music_Play(uint16 musicID)
 
 		Driver_Music_Stop();
 		Driver_Voice_Play(NULL, 0xFF);
-		Driver_Music_LoadFile(NULL);
+		Load_Score_File(NULL);
 		Driver_Sound_LoadFile(NULL);
-		Driver_Music_LoadFile(s_currentMusic);
+		Load_Score_File(s_currentMusic);
 		Driver_Sound_LoadFile(s_currentMusic);
 	}
 
-	Driver_Music_Play(g_table_musics[musicID].index, 0xFF);
+	Play_Score(g_table_musics[musicID].index, 0xFF);
 }
 
 /**
  * Initialises the MT-32.
  * @param index The index of the music to play.
  */
-void Music_InitMT32(void)
+void MT32_Init(void)
 {
 	uint16 left = 0;
 
-	Driver_Music_LoadFile("DUNEINIT");
+	Load_Score_File("DUNEINIT");
 
-	Driver_Music_Play(0, 0xFF);
+	Play_Score(0, 0xFF);
 
-	GUI_DrawText(String_Get_ByIndex(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
+	Text_Print(Text_String(15), 0, 0, 15, 12); /* "Initializing the MT-32" */
 
-	while (Driver_Music_IsPlaying()) {
-		Timer_Sleep(60);
+	while (Score_Status()) {
+		Delay(60);
 
 		left += 6;
-		GUI_DrawText(".", left, 10, 15, 12);
+		Text_Print(".", left, 10, 15, 12);
 	}
 }
 
@@ -377,7 +377,7 @@ void Sound_Output_Feedback(uint16 index)
 	if (g_enableVoices == 0 || g_gameConfig.sounds == 0) {
 		Driver_Sound_Play(g_feedback[index].soundId, 0xFF);
 
-		g_viewportMessageText = String_Get_ByIndex(g_feedback[index].messageId);
+		g_viewportMessageText = Text_String(g_feedback[index].messageId);
 
 		if ((g_viewportMessageCounter & 1) != 0) {
 			g_viewport_forceRedraw = true;

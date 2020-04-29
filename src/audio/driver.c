@@ -169,7 +169,7 @@ void Drivers_All_Init(void)
 	g_enableVoices = Drivers_Voice_Init(g_enableVoices);
 }
 
-bool Driver_Music_IsPlaying(void)
+bool Score_Status(void)
 {
 	MSBuffer *buffer = g_bufferMusic;
 
@@ -447,7 +447,7 @@ void Driver_UnloadFile(Driver *driver)
 	driver->contentMalloced = false;
 }
 
-void Driver_Music_FadeOut(void)
+void Fade_Score(void)
 {
 	Driver *music = g_driverMusic;
 	MSBuffer *musicBuffer = g_bufferMusic;

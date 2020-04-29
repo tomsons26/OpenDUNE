@@ -1602,9 +1602,9 @@ uint16 Script_Unit_DisplayDestroyedText(ScriptEngine *script)
 	ui = &g_table_unitInfo[u->o.type];
 
 	if (g_config.language == LANGUAGE_FRENCH) {
-		GUI_DisplayText(String_Get_ByIndex(STR_S_S_DESTROYED), 0, String_Get_ByIndex(ui->o.stringID_abbrev), g_table_houseInfo[Unit_GetHouseID(u)].name);
+		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, Text_String(ui->o.stringID_abbrev), g_table_houseInfo[Unit_GetHouseID(u)].name);
 	} else {
-		GUI_DisplayText(String_Get_ByIndex(STR_S_S_DESTROYED), 0, g_table_houseInfo[Unit_GetHouseID(u)].name, String_Get_ByIndex(ui->o.stringID_abbrev));
+		GUI_DisplayText(Text_String(STR_S_S_DESTROYED), 0, g_table_houseInfo[Unit_GetHouseID(u)].name, Text_String(ui->o.stringID_abbrev));
 	}
 
 	return 0;
@@ -1855,7 +1855,7 @@ uint16 Script_Unit_MCVDeploy(ScriptEngine *script)
 	}
 
 	if (Unit_GetHouseID(u) == g_playerHouseID) {
-		GUI_DisplayText(String_Get_ByIndex(STR_UNIT_IS_UNABLE_TO_DEPLOY_HERE), 0);
+		GUI_DisplayText(Text_String(STR_UNIT_IS_UNABLE_TO_DEPLOY_HERE), 0);
 	}
 
 	Unit_UpdateMap(1, u);

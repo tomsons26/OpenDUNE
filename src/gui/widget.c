@@ -205,7 +205,7 @@ void GUI_Widget_Draw(Widget *w)
 		} break;
 
 		case DRAW_MODE_TEXT: {
-			GUI_DrawText(drawParam.text, positionLeft, positionTop, fgColour, bgColour);
+			Text_Print(drawParam.text, positionLeft, positionTop, fgColour, bgColour);
 		} break;
 
 		case DRAW_MODE_UNKNOWN3: {
@@ -598,7 +598,7 @@ Widget *GUI_Widget_Allocate(uint16 index, uint16 shortcut, uint16 offsetX, uint1
 
 			if (stringID == STR_NULL) break;
 
-			if (String_Get_ByIndex(stringID) != NULL) w->shortcut = GUI_Widget_GetShortcut(*String_Get_ByIndex(stringID));
+			if (Text_String(stringID) != NULL) w->shortcut = GUI_Widget_GetShortcut(*Text_String(stringID));
 			if (stringID == STR_CANCEL) w->shortcut2 = 'n';
 			break;
 

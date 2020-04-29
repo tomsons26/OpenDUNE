@@ -16,7 +16,7 @@ extern volatile uint32 g_timerTimeout;
 
 extern uint32 Timer_GetTime(void);
 
-extern void Timer_Sleep(uint16 ticks);
+extern void Delay(uint16 ticks);
 extern bool Timer_SetTimer(TimerType timer, bool set);
 
 extern void Timer_Init(void);

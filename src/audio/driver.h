@@ -24,7 +24,7 @@ extern MSBuffer *g_bufferMusic;
 extern MSBuffer *g_bufferSound[4];
 
 extern void Drivers_All_Init(void);
-extern bool Driver_Music_IsPlaying(void);
+extern bool Score_Status(void);
 extern bool Driver_Voice_IsPlaying(void);
 extern void Driver_Sound_Play(int16 index, int16 volume);
 extern void Driver_Music_Stop(void);
@@ -37,6 +37,6 @@ extern char *Drivers_GenerateFilename(const char *name, Driver *driver);
 extern void Drivers_All_Uninit(void);
 extern void Driver_LoadFile(const char *musicName, Driver *driver);
 extern void Driver_UnloadFile(Driver *driver);
-extern void Driver_Music_FadeOut(void);
+extern void Fade_Score(void);
 
 #endif /* DRIVER_H */
