@@ -126,7 +126,7 @@ static void Sprites_Load(const char *filename)
 						decoded_data += 16;
 						encoded_data += 16;
 					}
-					Format80_Decode(decoded_data, encoded_data, READ_LE_UINT16(src+8));
+					LCW_Uncomp(decoded_data, encoded_data, READ_LE_UINT16(src+8));
 				}
 			} else {
 				size = READ_LE_UINT16(src + 6);	/* "packed" size */
@@ -196,7 +196,7 @@ static uint32 Sprites_Decode(uint8 *source, uint8 *dest)
 			source += 6;
 			source += READ_LE_UINT16(source);
 			source += 2;
-			size = Format80_Decode(dest, source, 0xFFFF);
+			size = LCW_Uncomp(dest, source, 0xFFFF);
 			break;
 
 		default: break;
@@ -272,7 +272,7 @@ void Sprites_LoadTiles(void)
 	g_landscapeTileID = g_iconMap[g_iconMap[ICM_ICONGROUP_LANDSCAPE]];
 	g_wallTileID      = g_iconMap[g_iconMap[ICM_ICONGROUP_WALLS]];
 
-	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, GFX_Screen_Get_ByIndex(SCREEN_2));
+	Script_LoadFromFile("UNIT.EMC", g_scriptUnit, g_scriptFunctionsUnit, Get_Buff(SCREEN_2));
 }
 
 /**
@@ -299,7 +299,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	uint8 *buffer2;
 	uint16 paletteSize;
 
-	buffer = GFX_Screen_Get_ByIndex(screenID);
+	buffer = Get_Buff(screenID);
 
 	index = File_Open(filename, FILE_MODE_READ);
 
@@ -321,7 +321,7 @@ static uint32 Sprites_LoadCPSFile(const char *filename, Screen screenID, uint8 *
 	buffer[7] = 0;
 	size -= paletteSize;
 
-	buffer2 = GFX_Screen_Get_ByIndex(screenID);
+	buffer2 = Get_Buff(screenID);
 	buffer2 += GFX_Screen_GetSize_ByIndex(screenID) - size - 8;
 
 	memmove(buffer2, buffer, 8);
@@ -410,7 +410,7 @@ void Sprites_SetMouseSprite(uint16 hotSpotX, uint16 hotSpotY, const uint8 *sprit
 			sprite += 16;
 		}
 
-		Format80_Decode(dst, sprite, size);
+		LCW_Uncomp(dst, sprite, size);
 	}
 
 	g_mouseSpriteHotspotX = hotSpotX;
@@ -444,7 +444,7 @@ void Sprites_CPS_LoadRegionClick(void)
 	uint8 i;
 	char filename[16];
 
-	buf = GFX_Screen_Get_ByIndex(SCREEN_2);
+	buf = Get_Buff(SCREEN_2);
 
 	g_fileRgnclkCPS = buf;
 	Sprites_LoadCPSFile("RGNCLK.CPS", SCREEN_2, NULL);

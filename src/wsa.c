@@ -62,7 +62,7 @@ typedef struct WSAFileHeader {
 /**
  * Get the amount of frames a WSA has.
  */
-uint16 WSA_GetFrameCount(void *wsa)
+uint16 Animate_Frame_Count(void *wsa)
 {
 	WSAHeader *header = (WSAHeader *)wsa;
 
@@ -77,7 +77,7 @@ uint16 WSA_GetFrameCount(void *wsa)
  * @param frame The frame of animation.
  * @return The offset for the animation from the beginning of the fileContent.
  */
-static uint32 WSA_GetFrameOffset_FromMemory(WSAHeader *header, uint16 frame)
+static uint32 Get_Resident_Frame_Offset(WSAHeader *header, uint16 frame)
 {
 	uint16 lengthAnimation = 0;
 	uint32 animationFrame;
@@ -102,7 +102,7 @@ static uint32 WSA_GetFrameOffset_FromMemory(WSAHeader *header, uint16 frame)
  * @param frame The frame of animation.
  * @return The offset for the animation from the beginning of the file.
  */
-static uint32 WSA_GetFrameOffset_FromDisk(uint8 fileno, uint16 frame)
+static uint32 Get_File_Frame_Offset(uint8 fileno, uint16 frame)
 {
 	uint32 offset;
 
@@ -119,7 +119,7 @@ static uint32 WSA_GetFrameOffset_FromDisk(uint8 fileno, uint16 frame)
  * @param dst Destination buffer to write the animation to.
  * @return 1 on success, 0 on failure.
  */
-static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
+static uint16 Apply_Delta(void *wsa, uint16 frame, uint8 *dst)
 {
 	WSAHeader *header = (WSAHeader *)wsa;
 	uint16 lengthPalette;
@@ -135,8 +135,8 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 		uint32 length;
 		uint8 *positionFrame;
 
-		positionStart = WSA_GetFrameOffset_FromMemory(header, frame);
-		positionEnd = WSA_GetFrameOffset_FromMemory(header, frame + 1);
+		positionStart = Get_Resident_Frame_Offset(header, frame);
+		positionEnd = Get_Resident_Frame_Offset(header, frame + 1);
 		length = positionEnd - positionStart;
 
 		positionFrame = header->fileContent + positionStart;
@@ -152,8 +152,8 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 
 		fileno = File_Open(header->filename, FILE_MODE_READ);
 
-		positionStart = WSA_GetFrameOffset_FromDisk(fileno, frame);
-		positionEnd = WSA_GetFrameOffset_FromDisk(fileno, frame + 1);
+		positionStart = Get_File_Frame_Offset(fileno, frame);
+		positionEnd = Get_File_Frame_Offset(fileno, frame + 1);
 		length = positionEnd - positionStart;
 
 		if (positionStart == 0 || positionEnd == 0 || length == 0) {
@@ -170,12 +170,12 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
 		if (res != length) return 0;
 	}
 
-	Format80_Decode(header->buffer, buffer, header->bufferLength);
+	LCW_Uncomp(header->buffer, buffer, header->bufferLength);
 
 	if (header->flags.displayInBuffer) {
-		Format40_Decode(dst, header->buffer);
+		Apply_XOR_Delta(dst, header->buffer);
 	} else {
-		Format40_Decode_XorToScreen(dst, header->buffer, header->width);
+		XOR_Delta_Buffer(dst, header->buffer, header->width);
 	}
 
 	return 1;
@@ -189,7 +189,7 @@ static uint16 WSA_GotoNextFrame(void *wsa, uint16 frame, uint8 *dst)
  * @param reserveDisplayFrame True if we need to reserve the display frame.
  * @return Address of loaded WSA file, or NULL.
  */
-void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserveDisplayFrame)
+void *Open_Animation(const char *filename, void *wsa, uint32 wsaSize, bool reserveDisplayFrame)
 {
 	WSAFlags flags;
 	WSAFileHeader fileheader;
@@ -301,10 +301,10 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 		File_Read(fileno, header->fileContent + lengthHeader, lengthFileContent - lengthHeader);
 
 		header->flags.dataInMemory = true;
-		if (WSA_GetFrameOffset_FromMemory(header, header->frames + 1) == 0) header->flags.noAnimation = true;
+		if (Get_Resident_Frame_Offset(header, header->frames + 1) == 0) header->flags.noAnimation = true;
 	} else {
 		header->flags.dataOnDisk = true;
-		if (WSA_GetFrameOffset_FromDisk(fileno, header->frames + 1) == 0) header->flags.noAnimation = true;
+		if (Get_File_Frame_Offset(fileno, header->frames + 1) == 0) header->flags.noAnimation = true;
 	}
 
 	{
@@ -315,7 +315,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
 		File_Read(fileno, b, lengthFirstFrame);
 		File_Close(fileno);
 
-		Format80_Decode(buffer, b, header->bufferLength);
+		LCW_Uncomp(buffer, b, header->bufferLength);
 	}
 	return wsa;
 }
@@ -324,7 +324,7 @@ void *WSA_LoadFile(const char *filename, void *wsa, uint32 wsaSize, bool reserve
  * Unload the WSA.
  * @param wsa The pointer to the WSA.
  */
-void WSA_Unload(void *wsa)
+void Close_Animation(void *wsa)
 {
 	WSAHeader *header = (WSAHeader *)wsa;
 
@@ -344,7 +344,7 @@ void WSA_Unload(void *wsa)
  * @param screenID the screen to write to
  * @param src The source for the frame.
  */
-static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
+static void Buffer_Bitblit_To_LogicPage(int16 x, int16 y, int16 width, int16 height, uint16 windowID, uint8 *src, Screen screenID)
 {
 	int16 left;
 	int16 right;
@@ -354,12 +354,12 @@ static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 wi
 	int16 skipAfter;
 	uint8 *dst;
 
-	dst = GFX_Screen_Get_ByIndex(screenID);
+	dst = Get_Buff(screenID);
 
-	left   = g_widgetProperties[windowID].xBase << 3;
-	right  = left + (g_widgetProperties[windowID].width << 3);
-	top    = g_widgetProperties[windowID].yBase;
-	bottom = top + g_widgetProperties[windowID].height;
+	left   = WindowList[windowID].xBase << 3;
+	right  = left + (WindowList[windowID].width << 3);
+	top    = WindowList[windowID].yBase;
+	bottom = top + WindowList[windowID].height;
 
 	if (y - top < 0) {
 		if (y - top + height <= 0) return;
@@ -404,7 +404,7 @@ static void WSA_DrawFrame(int16 x, int16 y, int16 width, int16 height, uint16 wi
  * @param screenID The screenID to draw on.
  * @return False on failure, true on success.
  */
-bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen screenID)
+bool Animate_Frame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Screen screenID)
 {
 	WSAHeader *header = (WSAHeader *)wsa;
 	uint8 *dst;
@@ -421,16 +421,16 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 	if (header->flags.displayInBuffer) {
 		dst = (uint8 *)wsa + sizeof(WSAHeader);
 	} else {
-		dst = GFX_Screen_Get_ByIndex(screenID);
+		dst = Get_Buff(screenID);
 		dst += posX + posY * SCREEN_WIDTH;
 	}
 
 	if (header->frameCurrent == header->frames) {
 		if (!header->flags.hasNoFirstFrame) {
 			if (!header->flags.displayInBuffer) {
-				Format40_Decode_ToScreen(dst, header->buffer, header->width);
+				Copy_Delta_Buffer(dst, header->buffer, header->width);
 			} else {
-				Format40_Decode(dst, header->buffer);
+				Apply_XOR_Delta(dst, header->buffer);
 			}
 		}
 
@@ -463,7 +463,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 		for (i = 0; i < frameCount; i++) {
 			frame += direction;
 
-			WSA_GotoNextFrame(wsa, frame, dst);
+			Apply_Delta(wsa, frame, dst);
 
 			if (frame == header->frames) frame = 0;
 		}
@@ -471,7 +471,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 		for (i = 0; i < frameCount; i++) {
 			if (frame == 0) frame = header->frames;
 
-			WSA_GotoNextFrame(wsa, frame, dst);
+			Apply_Delta(wsa, frame, dst);
 
 			frame += direction;
 		}
@@ -480,7 +480,7 @@ bool WSA_DisplayFrame(void *wsa, uint16 frameNext, uint16 posX, uint16 posY, Scr
 	header->frameCurrent = frameNext;
 
 	if (header->flags.displayInBuffer) {
-		WSA_DrawFrame(posX, posY, header->width, header->height, 0, dst, screenID);
+		Buffer_Bitblit_To_LogicPage(posX, posY, header->width, header->height, 0, dst, screenID);
 	}
 
 	GFX_Screen_SetDirty(screenID, posX, posY, posX + header->width, posY + header->height);

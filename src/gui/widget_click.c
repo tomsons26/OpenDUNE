@@ -163,12 +163,12 @@ bool GUI_Widget_Scrollbar_Click(Widget *w)
 	scrollbar = w->data;
 
 	positionX = w->offsetX;
-	if (w->offsetX < 0) positionX += g_widgetProperties[w->parentID].width << 3;
-	positionX += g_widgetProperties[w->parentID].xBase << 3;
+	if (w->offsetX < 0) positionX += WindowList[w->parentID].width << 3;
+	positionX += WindowList[w->parentID].xBase << 3;
 
 	positionY = w->offsetY;
-	if (w->offsetY < 0) positionY += g_widgetProperties[w->parentID].height;
-	positionY += g_widgetProperties[w->parentID].yBase;
+	if (w->offsetY < 0) positionY += WindowList[w->parentID].height;
+	positionY += WindowList[w->parentID].yBase;
 
 	if ((w->state.buttonState & 0x44) != 0) {
 		scrollbar->pressed = 0;
@@ -426,8 +426,8 @@ static void GUI_Widget_Undraw(Widget *w, uint8 colour)
 
 	if (w == NULL) return;
 
-	offsetX = w->offsetX + (g_widgetProperties[w->parentID].xBase << 3);
-	offsetY = w->offsetY + g_widgetProperties[w->parentID].yBase;
+	offsetX = w->offsetX + (WindowList[w->parentID].xBase << 3);
+	offsetY = w->offsetY + WindowList[w->parentID].yBase;
 	width = w->width;
 	height = w->height;
 
@@ -509,9 +509,9 @@ static void GUI_Window_Create(WindowDesc *desc)
 		if (desc->widgets[i].labelStringId == STR_NULL) continue;
 
 		if (g_config.language == LANGUAGE_FRENCH) {
-			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (g_widgetProperties[w->parentID].xBase << 3) + 40, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x22);
+			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), (WindowList[w->parentID].xBase << 3) + 40, w->offsetY + WindowList[w->parentID].yBase + 3, 232, 0, 0x22);
 		} else {
-			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (g_widgetProperties[w->parentID].xBase << 3) - 10, w->offsetY + g_widgetProperties[w->parentID].yBase + 3, 232, 0, 0x222);
+			GUI_DrawText_Wrapper(GUI_String_Get_ByIndex(desc->widgets[i].labelStringId), w->offsetX + (WindowList[w->parentID].xBase << 3) - 10, w->offsetY + WindowList[w->parentID].yBase + 3, 232, 0, 0x222);
 		}
 	}
 
@@ -561,7 +561,7 @@ static void GUI_Window_BackupScreen(WindowDesc *desc)
 	Widget_SetCurrentWidget(desc->index);
 
 	GUI_Mouse_Hide_Safe();
-	GFX_CopyToBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, GFX_Screen_Get_ByIndex(SCREEN_2));
+	GFX_CopyToBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Buff(SCREEN_2));
 	GUI_Mouse_Show_Safe();
 }
 
@@ -570,7 +570,7 @@ static void GUI_Window_RestoreScreen(WindowDesc *desc)
 	Widget_SetCurrentWidget(desc->index);
 
 	GUI_Mouse_Hide_Safe();
-	GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, GFX_Screen_Get_ByIndex(SCREEN_2));
+	GFX_CopyFromBuffer(g_curWidgetXBase * 8, g_curWidgetYBase, g_curWidgetWidth * 8, g_curWidgetHeight, Get_Buff(SCREEN_2));
 	GUI_Mouse_Show_Safe();
 }
 

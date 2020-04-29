@@ -757,10 +757,10 @@ void GUI_UpdateProductionStringID(void)
 
 static void GUI_Widget_SetProperties(uint16 index, uint16 xpos, uint16 ypos, uint16 width, uint16 height)
 {
-	g_widgetProperties[index].xBase  = xpos;
-	g_widgetProperties[index].yBase  = ypos;
-	g_widgetProperties[index].width  = width;
-	g_widgetProperties[index].height = height;
+	WindowList[index].xBase  = xpos;
+	WindowList[index].yBase  = ypos;
+	WindowList[index].width  = width;
+	WindowList[index].height = height;
 
 	if (g_curWidgetIndex == index) Widget_SetCurrentWidget(index);
 }
@@ -794,7 +794,7 @@ uint16 GUI_DisplayModalMessage(const char *str, unsigned int spriteID, ...)
 
 	oldWidgetId = Widget_SetCurrentWidget(1);
 
-	g_widgetProperties[1].height = g_fontCurrent->height * max(GUI_SplitText(textBuffer, ((g_curWidgetWidth - ((spriteID == 0xFFFF) ? 2 : 7)) << 3) - 6, '\r'), 3) + 18;
+	WindowList[1].height = g_fontCurrent->height * max(GUI_SplitText(textBuffer, ((g_curWidgetWidth - ((spriteID == 0xFFFF) ? 2 : 7)) << 3) - 6, '\r'), 3) + 18;
 
 	Widget_SetCurrentWidget(1);
 
@@ -995,17 +995,17 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 
 	va_end(ap);
 
-	buf = GFX_Screen_Get_ByIndex(screenID);
-	buf += g_widgetProperties[windowID].xBase << 3;
+	buf = Get_Buff(screenID);
+	buf += WindowList[windowID].xBase << 3;
 
-	width = g_widgetProperties[windowID].width << 3;
-	top = g_widgetProperties[windowID].yBase;
-	bottom = top + g_widgetProperties[windowID].height;
+	width = WindowList[windowID].width << 3;
+	top = WindowList[windowID].yBase;
+	bottom = top + WindowList[windowID].height;
 
 	if ((flags & DRAWSPRITE_FLAG_WIDGETPOS) != 0) {
-		posY += g_widgetProperties[windowID].yBase;
+		posY += WindowList[windowID].yBase;
 	} else {
-		posX -= g_widgetProperties[windowID].xBase << 3;
+		posX -= WindowList[windowID].xBase << 3;
 	}
 
 	spriteFlags = READ_LE_UINT16(sprite);
@@ -1041,7 +1041,7 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 	}
 
 	if ((spriteFlags & 0x2) == 0) {
-		Format80_Decode(spriteBuffer, sprite, spriteDecodedLength);
+		LCW_Uncomp(spriteBuffer, sprite, spriteDecodedLength);
 
 		sprite = spriteBuffer;
 	}
@@ -1169,9 +1169,9 @@ void GUI_DrawSprite(Screen screenID, const uint8 *sprite, int16 posX, int16 posY
 	assert((flags & 0xFF) < 4);
 
 	GFX_Screen_SetDirty(screenID,
-	                    (g_widgetProperties[windowID].xBase << 3) + posX,
+	                    (WindowList[windowID].xBase << 3) + posX,
 	                    posY,
-	                    (g_widgetProperties[windowID].xBase << 3) + posX + pixelCountPerRow,
+	                    (WindowList[windowID].xBase << 3) + posX + pixelCountPerRow,
 	                    posY + spriteHeight);
 
 	do {
@@ -2841,9 +2841,9 @@ static void GUI_FactoryWindow_Init(void)
 
 	oi = g_factoryWindowItems[0].objectInfo;
 
-	wsa = WSA_LoadFile(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
-	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
-	WSA_Unload(wsa);
+	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
+	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
+	Close_Animation(wsa);
 
 	GUI_Mouse_Hide_Safe();
 	GUI_Screen_Copy(0, 0, 0, 0, SCREEN_WIDTH / 8, SCREEN_HEIGHT, SCREEN_1, SCREEN_0);
@@ -3515,9 +3515,9 @@ void GUI_FactoryWindow_DrawDetails(void)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	wsa = WSA_LoadFile(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
-	WSA_DisplayFrame(wsa, 0, 128, 48, SCREEN_1);
-	WSA_Unload(wsa);
+	wsa = Open_Animation(oi->wsa, s_factoryWindowWsaBuffer, sizeof(s_factoryWindowWsaBuffer), false);
+	Animate_Frame(wsa, 0, 128, 48, SCREEN_1);
+	Close_Animation(wsa);
 
 	if (g_factoryWindowConstructionYard) {
 		const StructureInfo *si;
@@ -4068,10 +4068,10 @@ void GUI_Mouse_Hide_InWidget(uint16 widgetIndex)
 	uint16 left, top;
 	uint16 width, height;
 
-	left   = g_widgetProperties[widgetIndex].xBase << 3;
-	top    = g_widgetProperties[widgetIndex].yBase;
-	width  = g_widgetProperties[widgetIndex].width << 3;
-	height = g_widgetProperties[widgetIndex].height;
+	left   = WindowList[widgetIndex].xBase << 3;
+	top    = WindowList[widgetIndex].yBase;
+	width  = WindowList[widgetIndex].width << 3;
+	height = WindowList[widgetIndex].height;
 
 	GUI_Mouse_Hide_InRegion(left, top, left + width - 1, top + height - 1);
 }
@@ -4171,7 +4171,7 @@ void GUI_Mouse_SetPosition(uint16 x, uint16 y)
  */
 void GUI_Palette_RemapScreen(uint16 left, uint16 top, uint16 width, uint16 height, Screen screenID, const uint8 *remap)
 {
-	uint8 *screen = GFX_Screen_Get_ByIndex(screenID);
+	uint8 *screen = Get_Buff(screenID);
 
 	screen += top * SCREEN_WIDTH + left;
 	for (; height > 0; height--) {
@@ -4318,7 +4318,7 @@ void GUI_HallOfFame_Show(uint16 score)
 		s_ticksPlayed = 0;
 	}
 
-	data = (HallOfFameStruct *)GFX_Screen_Get_ByIndex(SCREEN_2);
+	data = (HallOfFameStruct *)Get_Buff(SCREEN_2);
 
 	if (!File_Exists_Personal("SAVEFAME.DAT")) {
 		uint16 written;
@@ -4356,14 +4356,14 @@ void GUI_HallOfFame_Show(uint16 score)
 
 		name = data[editLine - 1].name;
 
-		memcpy(&backupProperties, &g_widgetProperties[19], sizeof(WidgetProperties));
+		memcpy(&backupProperties, &WindowList[19], sizeof(WidgetProperties));
 
-		g_widgetProperties[19].xBase = 4;
-		g_widgetProperties[19].yBase = (editLine - 1) * 11 + 90;
-		g_widgetProperties[19].width = width / 8;
-		g_widgetProperties[19].height = 11;
-		g_widgetProperties[19].fgColourBlink = 6;
-		g_widgetProperties[19].fgColourNormal = 116;
+		WindowList[19].xBase = 4;
+		WindowList[19].yBase = (editLine - 1) * 11 + 90;
+		WindowList[19].width = width / 8;
+		WindowList[19].height = 11;
+		WindowList[19].fgColourBlink = 6;
+		WindowList[19].fgColourNormal = 116;
 
 		GUI_DrawText_Wrapper(NULL, 0, 0, 0, 0, 0x22);
 
@@ -4384,7 +4384,7 @@ void GUI_HallOfFame_Show(uint16 score)
 			while (*nameEnd <= ' ' && nameEnd >= name) *nameEnd-- = '\0';
 		}
 
-		memcpy(&g_widgetProperties[19], &backupProperties, sizeof(WidgetProperties));
+		memcpy(&WindowList[19], &backupProperties, sizeof(WidgetProperties));
 
 		GUI_HallOfFame_DrawData(data, true);
 

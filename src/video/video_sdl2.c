@@ -397,7 +397,7 @@ void Video_Uninit(void)
  */
 static void Video_DrawScreen_Nearest_Neighbor(void)
 {
-	const uint8 *gfx_screen8 = GFX_Screen_Get_ByIndex(SCREEN_0);
+	const uint8 *gfx_screen8 = Get_Buff(SCREEN_0);
 	struct dirty_area * area = GFX_Screen_GetDirtyArea(SCREEN_0);
 	uint8 * pixels;
 	int pitch;
@@ -446,7 +446,7 @@ static void Video_DrawScreen_Nearest_Neighbor(void)
 
 static void Video_DrawScreen_Scale2x(void)
 {
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Buff(SCREEN_0);
 	struct dirty_area * area = GFX_Screen_GetDirtyArea(SCREEN_0);
 	unsigned top, bottom;
 	uint8 * pixels;
@@ -516,7 +516,7 @@ static void Video_DrawScreen_Hqx(void)
 	uint32 *pixels;
 	int pitch;
 
-	src = GFX_Screen_Get_ByIndex(SCREEN_0);
+	src = Get_Buff(SCREEN_0);
 	src += (s_screenOffset << 2);
 
 	if (SDL_LockTexture(s_texture, NULL, (void **)&pixels, &pitch) != 0) {
@@ -585,7 +585,7 @@ void Video_Tick(void)
 	s_video_lock = true;
 
 	if (s_showFPS) {
-		Video_ShowFPS(GFX_Screen_Get_ByIndex(SCREEN_0));
+		Video_ShowFPS(Get_Buff(SCREEN_0));
 	}
 
 	while (SDL_PollEvent(&event)) {

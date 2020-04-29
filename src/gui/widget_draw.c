@@ -38,15 +38,15 @@ void GUI_Widget_TextButton_Draw(Widget *w)
 
 	oldScreenID = GFX_Screen_SetActive(SCREEN_1);
 
-	positionX = w->offsetX + (g_widgetProperties[w->parentID].xBase << 3);
-	positionY = w->offsetY +  g_widgetProperties[w->parentID].yBase;
+	positionX = w->offsetX + (WindowList[w->parentID].xBase << 3);
+	positionY = w->offsetY +  WindowList[w->parentID].yBase;
 	width     = w->width;
 	height    = w->height;
 
-	g_widgetProperties[19].xBase  = positionX >> 3;
-	g_widgetProperties[19].yBase  = positionY;
-	g_widgetProperties[19].width  = width >> 3;
-	g_widgetProperties[19].height = height;
+	WindowList[19].xBase  = positionX >> 3;
+	WindowList[19].yBase  = positionY;
+	WindowList[19].width  = width >> 3;
+	WindowList[19].height = height;
 
 	state  = (w->state.selected) ? 0 : 2;
 	colour = (w->state.hover2) ? 231 : 232;
@@ -376,12 +376,12 @@ void GUI_Widget_Scrollbar_Draw(Widget *w)
 	height = w->height;
 
 	positionX = w->offsetX;
-	if (w->offsetX < 0) positionX += g_widgetProperties[w->parentID].width << 3;
-	positionX += g_widgetProperties[w->parentID].xBase<< 3;
+	if (w->offsetX < 0) positionX += WindowList[w->parentID].width << 3;
+	positionX += WindowList[w->parentID].xBase<< 3;
 
 	positionY = w->offsetY;
-	if (w->offsetY < 0) positionY += g_widgetProperties[w->parentID].height;
-	positionY += g_widgetProperties[w->parentID].yBase;
+	if (w->offsetY < 0) positionY += WindowList[w->parentID].height;
+	positionY += WindowList[w->parentID].yBase;
 
 	if (width > height) {
 		scrollLeft   = scrollbar->position + 1;
@@ -923,10 +923,10 @@ void GUI_Widget_DrawBorder(uint16 widgetIndex, uint16 borderType, bool pressed)
 		{0, 0}, {2, 4}, {1, 1}, {2, 1}
 	};
 
-	uint16 left   = g_widgetProperties[widgetIndex].xBase << 3;
-	uint16 top    = g_widgetProperties[widgetIndex].yBase;
-	uint16 width  = g_widgetProperties[widgetIndex].width << 3;
-	uint16 height = g_widgetProperties[widgetIndex].height;
+	uint16 left   = WindowList[widgetIndex].xBase << 3;
+	uint16 top    = WindowList[widgetIndex].yBase;
+	uint16 width  = WindowList[widgetIndex].width << 3;
+	uint16 height = WindowList[widgetIndex].height;
 
 	uint16 colourSchemaIndex = (pressed) ? 2 : 0;
 	uint16 size;

@@ -29,7 +29,7 @@ Widget *g_widgetMentatScrollDown = NULL;
 Widget *g_widgetMentatScrollbar = NULL;
 
 /** Layout and other properties of the widgets. */
-WidgetProperties g_widgetProperties[22] = {
+WidgetProperties WindowList[22] = {
 	/* x   y   w    h   p4  norm sel */
 	{ 0,   0, 40, 200,  15,  12,  0}, /*  0 */
 	{ 1,  75, 29,  70,  15,  15,  0}, /*  1 */
@@ -180,16 +180,16 @@ void GUI_Widget_Draw(Widget *w)
 
 	offsetX = w->offsetX;
 	if (w->offsetX < 0) {
-		offsetX = (g_widgetProperties[w->parentID].width << 3) + w->offsetX;
+		offsetX = (WindowList[w->parentID].width << 3) + w->offsetX;
 	}
-	positionLeft = (g_widgetProperties[w->parentID].xBase << 3) + offsetX;
+	positionLeft = (WindowList[w->parentID].xBase << 3) + offsetX;
 	positionRight = positionLeft + w->width - 1;
 
 	offsetY = w->offsetY;
 	if (w->offsetY < 0) {
-		offsetY = g_widgetProperties[w->parentID].height + w->offsetY;
+		offsetY = WindowList[w->parentID].height + w->offsetY;
 	}
-	positionTop = g_widgetProperties[w->parentID].yBase + offsetY;
+	positionTop = WindowList[w->parentID].yBase + offsetY;
 	positionBottom = positionTop + w->height - 1;
 
 	assert(drawMode < DRAW_MODE_MAX);
@@ -337,12 +337,12 @@ uint16 GUI_Widget_HandleEvents(Widget *w)
 		w->state.hover1Last = w->state.hover1;
 
 		positionX = w->offsetX;
-		if (w->offsetX < 0) positionX += g_widgetProperties[w->parentID].width << 3;
-		positionX += g_widgetProperties[w->parentID].xBase << 3;
+		if (w->offsetX < 0) positionX += WindowList[w->parentID].width << 3;
+		positionX += WindowList[w->parentID].xBase << 3;
 
 		positionY = w->offsetY;
-		if (w->offsetY < 0) positionY += g_widgetProperties[w->parentID].height;
-		positionY += g_widgetProperties[w->parentID].yBase;
+		if (w->offsetY < 0) positionY += WindowList[w->parentID].height;
+		positionY += WindowList[w->parentID].yBase;
 
 		widgetHover = false;
 		w->state.keySelected = false;
@@ -955,12 +955,12 @@ uint16 Widget_SetCurrentWidget(uint16 index)
 	uint16 oldIndex = g_curWidgetIndex;
 	g_curWidgetIndex = index;
 
-	g_curWidgetXBase          = g_widgetProperties[index].xBase;
-	g_curWidgetYBase          = g_widgetProperties[index].yBase;
-	g_curWidgetWidth          = g_widgetProperties[index].width;
-	g_curWidgetHeight         = g_widgetProperties[index].height;
-	g_curWidgetFGColourBlink  = g_widgetProperties[index].fgColourBlink;
-	g_curWidgetFGColourNormal = g_widgetProperties[index].fgColourNormal;
+	g_curWidgetXBase          = WindowList[index].xBase;
+	g_curWidgetYBase          = WindowList[index].yBase;
+	g_curWidgetWidth          = WindowList[index].width;
+	g_curWidgetHeight         = WindowList[index].height;
+	g_curWidgetFGColourBlink  = WindowList[index].fgColourBlink;
+	g_curWidgetFGColourNormal = WindowList[index].fgColourNormal;
 
 	return oldIndex;
 }

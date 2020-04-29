@@ -341,18 +341,18 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			if ((animation->flags & (HOUSEANIM_FLAGS_FADEIN2 | HOUSEANIM_FLAGS_FADEIN)) != 0) {
 				GUI_ClearScreen(SCREEN_1);
 
-				wsa = GFX_Screen_Get_ByIndex(SCREEN_2);
+				wsa = Get_Buff(SCREEN_2);
 
 				wsaSize = GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3);
 				wsaReservedDisplayFrame = false;
 			} else {
-				wsa = GFX_Screen_Get_ByIndex(SCREEN_1);
+				wsa = Get_Buff(SCREEN_1);
 
 				wsaSize = GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3);
 			}
 
 			snprintf(filenameBuffer, sizeof(filenameBuffer), "%.8s.WSA", animation->string);
-			wsa = WSA_LoadFile(filenameBuffer, wsa, wsaSize, wsaReservedDisplayFrame);
+			wsa = Open_Animation(filenameBuffer, wsa, wsaSize, wsaReservedDisplayFrame);
 		}
 
 		addFrameCount = 0;
@@ -366,7 +366,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 
 		if ((animation->flags & HOUSEANIM_FLAGS_FADEINTEXT) != 0) {
 			GameLoop_PlaySubtitle(animationStep);
-			WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+			Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 			GameLoop_PalettePart_Update(true);
 
 			memcpy(&g_palette1[215 * 3], s_palettePartCurrent, 18);
@@ -376,7 +376,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			addFrameCount++;
 		} else if ((animation->flags & (HOUSEANIM_FLAGS_FADEIN2 | HOUSEANIM_FLAGS_FADEIN)) != 0) {
 			GameLoop_PlaySubtitle(animationStep);
-			WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_1);
+			Animate_Frame(wsa, frame++, posX, posY, SCREEN_1);
 			addFrameCount++;
 
 			if ((animation->flags & (HOUSEANIM_FLAGS_FADEIN2 | HOUSEANIM_FLAGS_FADEIN)) == HOUSEANIM_FLAGS_FADEIN2) {
@@ -397,12 +397,12 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				break;
 
 			case 1:
-				frameCount = WSA_GetFrameCount(wsa);
+				frameCount = Animate_Frame_Count(wsa);
 				timeLeftForFrame = timeLeft / animation->frameCount;
 				break;
 
 			case 2:
-				frameCount = WSA_GetFrameCount(wsa) - addFrameCount;
+				frameCount = Animate_Frame_Count(wsa) - addFrameCount;
 				timeLeftForFrame = timeLeft / frameCount;
 				timeout -= timeLeftForFrame;
 				break;
@@ -423,7 +423,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			g_timerTimeout = timeLeftForFrame;
 
 			GameLoop_PlaySubtitle(animationStep);
-			WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+			Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 
 			if (mode == 1 && frame == frameCount) {
 				frame = 0;
@@ -432,7 +432,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			}
 
 			if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) {
-				WSA_Unload(wsa);
+				Close_Animation(wsa);
 				return;
 			}
 
@@ -446,7 +446,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			bool displayed;
 			do {
 				GameLoop_PlaySubtitle(animationStep);
-				displayed = WSA_DisplayFrame(wsa, frame++, posX, posY, SCREEN_0);
+				displayed = Animate_Frame(wsa, frame++, posX, posY, SCREEN_0);
 				sleepIdle();
 			} while (displayed);
 		}
@@ -469,7 +469,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 			GUI_SetPaletteAnimated(g_palette_998A, 45);
 		}
 
-		WSA_Unload(wsa);
+		Close_Animation(wsa);
 
 		animationStep++;
 		animation++;
@@ -550,9 +550,9 @@ void GameLoop_LevelEndAnimation(void)
 
 static void GameCredits_SwapScreen(uint16 top, uint16 height, Screen srcScreenID, Screen dstScreenID)
 {
-	uint16 *b = (uint16 *)GFX_Screen_Get_ByIndex(dstScreenID);	/* destination */
-	const uint16 *screen1 = (uint16 *)GFX_Screen_Get_ByIndex(srcScreenID) + top * SCREEN_WIDTH / 2;	/* source */
-	uint16 *screen2 = (uint16 *)GFX_Screen_Get_ByIndex(SCREEN_0) + top * SCREEN_WIDTH / 2;	/* secondary destination : Video RAM*/
+	uint16 *b = (uint16 *)Get_Buff(dstScreenID);	/* destination */
+	const uint16 *screen1 = (uint16 *)Get_Buff(srcScreenID) + top * SCREEN_WIDTH / 2;	/* source */
+	uint16 *screen2 = (uint16 *)Get_Buff(SCREEN_0) + top * SCREEN_WIDTH / 2;	/* secondary destination : Video RAM*/
 	uint16 count;
 
 	for (count = height * SCREEN_WIDTH / 2; count > 0; count--) {
@@ -859,7 +859,7 @@ static void GameLoop_GameCredits(void)
 
 	GameCredits_LoadPalette();
 
-	credits_buffer = (char *)GFX_Screen_Get_ByIndex(SCREEN_3) + SCREEN_WIDTH * g_curWidgetHeight;
+	credits_buffer = (char *)Get_Buff(SCREEN_3) + SCREEN_WIDTH * g_curWidgetHeight;
 	Debug("GameLoop_GameCredits() credit buffer is %d lines in SCREEN_3 buffer\n", g_curWidgetHeight);
 
 	GUI_Mouse_Hide_Safe();
@@ -953,8 +953,8 @@ static void Gameloop_Logos(void)
 	File_ReadBlockFile("WESTWOOD.PAL", g_palette_998A, 256 * 3);
 
 	frame = 0;
-	wsa = WSA_LoadFile("WESTWOOD.WSA", GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
-	WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0);
+	wsa = Open_Animation("WESTWOOD.WSA", Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1) + GFX_Screen_GetSize_ByIndex(SCREEN_2) + GFX_Screen_GetSize_ByIndex(SCREEN_3), true);
+	Animate_Frame(wsa, frame++, 0, 0, SCREEN_0);
 
 	GUI_SetPaletteAnimated(g_palette_998A, 60);
 
@@ -962,9 +962,9 @@ static void Gameloop_Logos(void)
 
 	g_timerTimeout = 360;
 
-	while (WSA_DisplayFrame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
+	while (Animate_Frame(wsa, frame++, 0, 0, SCREEN_0)) Timer_Sleep(6);
 	
-	WSA_Unload(wsa);
+	Close_Animation(wsa);
 
 	if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
 	Voice_LoadVoices(0xFFFF);

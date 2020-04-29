@@ -50,7 +50,7 @@ static Screen s_screenActiveID = SCREEN_0;
  */
 void *GFX_Screen_GetActive(void)
 {
-	return GFX_Screen_Get_ByIndex(s_screenActiveID);
+	return Get_Buff(s_screenActiveID);
 }
 #endif
 
@@ -72,7 +72,7 @@ uint16 GFX_Screen_GetSize_ByIndex(Screen screenID)
  * @param screenID The screenbuffer to get.
  * @return A pointer to the screenbuffer.
  */
-void *GFX_Screen_Get_ByIndex(Screen screenID)
+void *Get_Buff(Screen screenID)
 {
 	if (screenID == SCREEN_ACTIVE)
 		screenID = s_screenActiveID;
@@ -370,8 +370,8 @@ void GFX_Screen_Copy2(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 widt
 
 	GFX_Screen_SetDirty(screenDst, xDst, yDst, xDst + width, yDst + height);
 
-	src = GFX_Screen_Get_ByIndex(screenSrc);
-	dst = GFX_Screen_Get_ByIndex(screenDst);
+	src = Get_Buff(screenSrc);
+	dst = Get_Buff(screenDst);
 
 	src += xSrc + ySrc * SCREEN_WIDTH;
 	dst += xDst + yDst * SCREEN_WIDTH;
@@ -425,8 +425,8 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
 
 	if (width <= 0 || width > SCREEN_WIDTH) return;
 
-	src = GFX_Screen_Get_ByIndex(screenSrc);
-	dst = GFX_Screen_Get_ByIndex(screenDst);
+	src = Get_Buff(screenSrc);
+	dst = Get_Buff(screenDst);
 
 	src += xSrc + ySrc * SCREEN_WIDTH;
 	dst += xDst + yDst * SCREEN_WIDTH;
@@ -449,7 +449,7 @@ void GFX_Screen_Copy(int16 xSrc, int16 ySrc, int16 xDst, int16 yDst, int16 width
  */
 void GFX_ClearScreen(Screen screenID)
 {
-	memset(GFX_Screen_Get_ByIndex(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+	memset(Get_Buff(screenID), 0, SCREEN_WIDTH * SCREEN_HEIGHT);
 	GFX_Screen_SetDirty(screenID, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
@@ -459,7 +459,7 @@ void GFX_ClearScreen(Screen screenID)
  */
 void GFX_ClearBlock(Screen index)
 {
-	memset(GFX_Screen_Get_ByIndex(index), 0, GFX_Screen_GetSize_ByIndex(index));
+	memset(Get_Buff(index), 0, GFX_Screen_GetSize_ByIndex(index));
 	GFX_Screen_SetDirty(index, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
@@ -538,7 +538,7 @@ void GFX_CopyFromBuffer(int16 left, int16 top, uint16 width, uint16 height, uint
 	if (width  > SCREEN_WIDTH - left) width  = SCREEN_WIDTH - left;
 	if (height > SCREEN_HEIGHT - top) height = SCREEN_HEIGHT - top;
 
-	screen = GFX_Screen_Get_ByIndex(SCREEN_0);
+	screen = Get_Buff(SCREEN_0);
 	screen += top * SCREEN_WIDTH + left;
 
 	GFX_Screen_SetDirty(SCREEN_0, left, top, left + width, top + height);
@@ -574,7 +574,7 @@ void GFX_CopyToBuffer(int16 left, int16 top, uint16 width, uint16 height, uint8 
 	if (width  > SCREEN_WIDTH - left) width  = SCREEN_WIDTH - left;
 	if (height > SCREEN_HEIGHT - top) height = SCREEN_HEIGHT - top;
 
-	screen = GFX_Screen_Get_ByIndex(SCREEN_0);
+	screen = Get_Buff(SCREEN_0);
 	screen += top * SCREEN_WIDTH + left;
 
 	while (height-- != 0) {

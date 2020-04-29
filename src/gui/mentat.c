@@ -204,7 +204,7 @@ static void GUI_Mentat_LoadHelpSubjects(bool init)
 	uint16 i;
 
 	if (init) {
-		helpDataList = GFX_Screen_Get_ByIndex(SCREEN_1);
+		helpDataList = Get_Buff(SCREEN_1);
 
 		s_topHelpList = 0;
 		s_selectedHelpSubject = 0;
@@ -417,9 +417,9 @@ uint16 GUI_Mentat_Show(char *stringBuffer, const char *wsaFilename, Widget *w)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
+		Close_Animation(wsa);
 	}
 
 	GUI_DrawSprite(SCREEN_1, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
@@ -537,9 +537,9 @@ void GUI_Mentat_Display(const char *wsaFilename, uint8 houseID)
 	if (wsaFilename != NULL) {
 		void *wsa;
 
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
-		WSA_DisplayFrame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
-		WSA_Unload(wsa);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_2), GFX_Screen_GetSize_ByIndex(SCREEN_2), false);
+		Animate_Frame(wsa, 0, g_curWidgetXBase * 8, g_curWidgetYBase, SCREEN_1);
+		Close_Animation(wsa);
 	}
 
 	GUI_DrawSprite(SCREEN_1, g_sprites[397 + houseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);
@@ -845,7 +845,7 @@ void GUI_Mentat_Create_HelpScreen_Widgets(void)
 	g_widgetMentatTail = NULL;
 	ypos = 8;
 
-	w = (Widget *)GFX_Screen_Get_ByIndex(SCREEN_2);
+	w = (Widget *)Get_Buff(SCREEN_2);
 
 	memset(w, 0, 13 * sizeof(Widget));
 
@@ -937,7 +937,7 @@ static void GUI_Mentat_ShowHelp(void)
 	info.length = HTOBE32(info.length);
 
 	text = g_readBuffer;
-	compressedText = GFX_Screen_Get_ByIndex(SCREEN_1);
+	compressedText = Get_Buff(SCREEN_1);
 
 	fileID = File_Open(s_mentatFilename, FILE_MODE_READ);
 	File_Seek(fileID, offset, 0);
@@ -1089,7 +1089,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 	wsa = NULL;
 
 	if (wsaFilename != NULL) {
-		wsa = WSA_LoadFile(wsaFilename, GFX_Screen_Get_ByIndex(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
+		wsa = Open_Animation(wsaFilename, Get_Buff(SCREEN_1), GFX_Screen_GetSize_ByIndex(SCREEN_1), false);
 	}
 
 	step = 0;
@@ -1238,13 +1238,13 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 			do {
 				if (step == 0 && frame > 4) step = 1;
 
-				if (!WSA_DisplayFrame(wsa, frame++, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2)) {
+				if (!Animate_Frame(wsa, frame++, g_curWidgetXBase << 3, g_curWidgetYBase, SCREEN_2)) {
 					if (step == 0) step = 1;
 
 					if (loopAnimation) {
 						frame = 0;
 					} else {
-						WSA_Unload(wsa);
+						Close_Animation(wsa);
 						wsa = NULL;
 					}
 				}
@@ -1263,7 +1263,7 @@ uint16 GUI_Mentat_Loop(const char *wsaFilename, char *pictureDetails, char *text
 		dirty = false;
 	}
 
-	if (wsa != NULL) WSA_Unload(wsa);
+	if (wsa != NULL) Close_Animation(wsa);
 
 	GFX_Screen_SetActive(SCREEN_2);
 	GUI_DrawSprite(SCREEN_2, g_sprites[397 + g_playerHouseID * 15], g_shoulderLeft, g_shoulderTop, 0, 0);

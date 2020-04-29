@@ -352,7 +352,7 @@ static void GameLoop_DrawMenu(const char **strings)
 	uint16 top;
 	uint8 i;
 
-	props = &g_widgetProperties[21];
+	props = &WindowList[21];
 	top = g_curWidgetYBase + props->yBase;
 	left = (g_curWidgetXBase + props->xBase) << 3;
 
@@ -412,7 +412,7 @@ static uint16 GameLoop_HandleEvents(const char **strings)
 	WidgetProperties *props;
 	uint8 current;
 
-	props = &g_widgetProperties[21];
+	props = &WindowList[21];
 
 	last = props->height - 1;
 	old = props->fgColourBlink % (last + 1);
@@ -557,7 +557,7 @@ static void ReadProfileIni(const char *filename)
 	if (filename == NULL) return;
 	if (!File_Exists(filename)) return;
 
-	source = GFX_Screen_Get_ByIndex(SCREEN_1);
+	source = Get_Buff(SCREEN_1);
 
 	memset(source, 0, 32000);
 	File_ReadBlockFile(filename, source, GFX_Screen_GetSize_ByIndex(SCREEN_1));
@@ -767,13 +767,13 @@ static void GameLoop_GameIntroAnimationMenu(void)
 	if (drawMenu) {
 		uint16 i;
 
-		g_widgetProperties[21].height = 0;
+		WindowList[21].height = 0;
 
 		for (i = 0; i < 6; i++) {
 			strings[i] = NULL;
 
 			if (mainMenuStrings[index][i] == 0) {
-				if (g_widgetProperties[21].height == 0) g_widgetProperties[21].height = i;
+				if (WindowList[21].height == 0) WindowList[21].height = i;
 				continue;
 			}
 
@@ -784,18 +784,18 @@ static void GameLoop_GameIntroAnimationMenu(void)
 
 		maxWidth = 0;
 
-		for (i = 0; i < g_widgetProperties[21].height; i++) {
+		for (i = 0; i < WindowList[21].height; i++) {
 			if (Font_GetStringWidth(strings[i]) <= maxWidth) continue;
 			maxWidth = Font_GetStringWidth(strings[i]);
 		}
 
 		maxWidth += 7;
 
-		g_widgetProperties[21].width  = maxWidth >> 3;
-		g_widgetProperties[13].width  = g_widgetProperties[21].width + 2;
-		g_widgetProperties[13].xBase  = 19 - (maxWidth >> 4);
-		g_widgetProperties[13].yBase  = 160 - ((g_widgetProperties[21].height * g_fontCurrent->height) >> 1);
-		g_widgetProperties[13].height = (g_widgetProperties[21].height * g_fontCurrent->height) + 11;
+		WindowList[21].width  = maxWidth >> 3;
+		WindowList[13].width  = WindowList[21].width + 2;
+		WindowList[13].xBase  = 19 - (maxWidth >> 4);
+		WindowList[13].yBase  = 160 - ((WindowList[21].height * g_fontCurrent->height) >> 1);
+		WindowList[13].height = (WindowList[21].height * g_fontCurrent->height) + 11;
 
 		Sprites_LoadImage(String_GenerateFilename("TITLE"), SCREEN_1, NULL);
 

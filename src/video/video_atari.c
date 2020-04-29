@@ -246,7 +246,7 @@ static void Video_Atari_DrawChar(uint8 * screen, uint16 x, uint8 digit)
  */
 void Video_Tick(void)
 {
-	uint8 *data = GFX_Screen_Get_ByIndex(SCREEN_0);
+	uint8 *data = Get_Buff(SCREEN_0);
 	uint8 *screen = Logbase();
 	screen += s_center_image_offset;
 

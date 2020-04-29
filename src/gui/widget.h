@@ -198,7 +198,7 @@ extern Widget *g_widgetMentatScrollUp;
 extern Widget *g_widgetMentatScrollDown;
 extern Widget *g_widgetMentatScrollbar;
 
-extern WidgetProperties g_widgetProperties[22];
+extern WidgetProperties WindowList[22];
 extern uint16 g_curWidgetIndex;
 extern uint16 g_curWidgetXBase;
 extern uint16 g_curWidgetYBase;
